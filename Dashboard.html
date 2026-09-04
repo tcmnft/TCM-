@@ -1987,7 +1987,7 @@ input, select, textarea { font-size: 16px !important; outline: none; }
 // =================================================================================
 
 // 🌐 আপনার ব্যাকএন্ড সার্ভারের URL (server.js এর সাথে সিঙ্ক করা হয়েছে)
-const API_BASE_URL = "http://127.0.0.1:5000/api"; 
+const API_BASE_URL = "http://172.20.10.2:5000/api";
 
 // 🛡️ Fail-safe: লোডিং স্ক্রিন আটকে গেলে অটোমেটিক বন্ধ করবে
 window.addEventListener('error', function() {
@@ -2625,7 +2625,7 @@ window.onload = async () => {
     // ==========================================
     try {
         // Backend API কল করা হচ্ছে (Redis Caching-এর সুবিধা পেতে)
-        const response = await fetch(`http://127.0.0.1:5000/api/user/init-data?uid=${userUid}`);
+        const response = await fetch(`http://172.20.10.2:5000/api/user/init-data?uid=${userUid}`);
         const result = await response.json();
         
         if (result.success && result.data) {
