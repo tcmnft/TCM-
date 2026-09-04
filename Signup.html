@@ -2,7 +2,6 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <!-- 🔥 নচ ডিটেক্ট করার জন্য viewport-fit=cover যুক্ত করা হয়েছে 🔥 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>TCM NFT • Create Account</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -13,7 +12,6 @@
         *::-webkit-scrollbar { display: none !important; }
         html { background-color: var(--bg-dark-blue); height: 100%; }
         
-        /* 🔥 Body-তে ওপর এবং নিচের নচ অনুযায়ী ডাইনামিক প্যাডিং যুক্ত করা হয়েছে 🔥 */
         body { 
             font-family: 'Inter', sans-serif; 
             background: linear-gradient(135deg, var(--bg-dark-blue) 0%, var(--bg-deep-dark) 100%); 
@@ -23,7 +21,6 @@
             padding-bottom: calc(env(safe-area-inset-bottom) + 140px); 
         }
         
-        /* 🔥 Header-এ safe-area-inset-top ব্যবহার করে নচের নিচে নামানো হয়েছে 🔥 */
         .header-top { 
             position: fixed; top: 0; left: 0; width: 100%; 
             padding: 10px 20px 15px; 
@@ -76,7 +73,6 @@
         .btn-disabled { background: #0f1524; color: #334155; cursor: not-allowed; }
         .btn-active { background: linear-gradient(135deg, var(--primary), #0284c7); color: #020617; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 245, 255, 0.3); }
 
-        /* 🔥 Footer-এ safe-area-inset-bottom ব্যবহার করে সেফটি দেওয়া হয়েছে 🔥 */
         .footer-nav { 
             position: fixed; 
             bottom: calc(env(safe-area-inset-bottom) + 15px) !important; 
@@ -163,7 +159,7 @@
 
             <div id="errorBox" style="display: none; margin-bottom: 10px;"><p id="errorTxt" style="color: #ff4c4c; font-size: 0.85rem; font-weight: bold;"></p></div>
 
-            <button class="btn-register btn-disabled" id="regBtn" disabled onclick="handleRegister(event)">
+            <button class="btn-register btn-disabled" id="regBtn" disabled>
                 <span id="btnText">JOIN ECOSYSTEM</span>
             </button>
             <p style="margin-top: 25px; font-size: 0.85rem; color: var(--text-sub); font-weight: 500;">
@@ -199,31 +195,9 @@
         </div>
     </div>
 
-<script type="module">
+<script>
 // ==============================================================
-// Signup Function 1: Firebase Init
-// Source: Config.gs
-// ==============================================================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { 
-    getFirestore, doc, getDoc, collection, query, where, getDocs, writeBatch, serverTimestamp 
-} from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-const firebaseConfig = {
-    apiKey: "AIzaSyDCJjXLwFLn2Uh3SFf0R7ibDG9N0L8fUb8",
-    authDomain: "tcm-nft.firebaseapp.com",
-    projectId: "tcm-nft",
-    storageBucket: "tcm-nft.firebasestorage.app",
-    messagingSenderId: "80106405881",
-    appId: "1:80106405881:web:ebf726a933c0435e210728"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-// ==============================================================
-// Signup Function 2: State Variables & DOM Elements
-// Source: Original Signup HTML
+// State Variables & DOM Elements
 // ==============================================================
 let compressedAvatarBase64 = "";
 
@@ -244,11 +218,10 @@ const uidBox = document.getElementById('uidBox');
 const newUID = document.getElementById('newUID');
 const regTimer = document.getElementById('regTimer');
 
-// Disable button initially
 if (regBtn) regBtn.disabled = true;
 
 // ==============================================================
-// 🚀 Auto-Fill Sponsor ID from URL (NEW CODE)
+// Auto-Fill Sponsor ID from URL
 // ==============================================================
 const urlParams = new URLSearchParams(window.location.search);
 const urlSponsor = urlParams.get('sponsor');
@@ -258,26 +231,22 @@ if (urlSponsor && regSponsor) {
     regSponsor.readOnly = true; 
     regSponsor.style.opacity = "0.7"; 
     regSponsor.style.pointerEvents = "none"; 
-    
     setTimeout(() => { if(typeof validateForm === 'function') validateForm(); }, 100);
 }
 
 // ==============================================================
-// 👁️ Password Show/Hide Function
+// Password Show/Hide Function
 // ==============================================================
 window.togglePassword = () => {
     const passInput = document.getElementById('regPass');
     const eyeIcon = document.getElementById('eyeIcon');
-    
     if (passInput.type === 'password') {
         passInput.type = 'text';
-        // আইকন পরিবর্তন করে চোখ বন্ধ (slash) করে দেওয়া
         eyeIcon.classList.remove('fa-eye');
         eyeIcon.classList.add('fa-eye-slash');
-        eyeIcon.style.color = 'var(--primary)'; // বোঝানোর জন্য কালার চেঞ্জ
+        eyeIcon.style.color = 'var(--primary)';
     } else {
         passInput.type = 'password';
-        // আইকন পরিবর্তন করে আবার নরমাল চোখ করে দেওয়া
         eyeIcon.classList.remove('fa-eye-slash');
         eyeIcon.classList.add('fa-eye');
         eyeIcon.style.color = 'var(--text-sub)';
@@ -285,8 +254,7 @@ window.togglePassword = () => {
 };
 
 // ==============================================================
-// Signup Function 3: Real-Time Form Validation
-// Logic: Checks all requirements before enabling Submit button
+// Real-Time Form Validation
 // ==============================================================
 function validateForm() {
     const nameValid = regName?.value.trim().length >= 3;
@@ -307,7 +275,6 @@ function validateForm() {
         }
     }
 
-// Add input event listeners to trigger validation dynamically
 [regName, regEmail, regPass, regPhone, regCountry, regReligion].forEach(el => {
     if (el) {
         el.addEventListener('input', validateForm);
@@ -316,20 +283,16 @@ function validateForm() {
 });
 
 // ==============================================================
-// Signup Function 4: Avatar Preview & Compression
-// Logic: Live preview in mainAvatar and base64 compression
+// Avatar Preview & Compression
 // ==============================================================
 if (avatarUpload) {
     avatarUpload.addEventListener('change', (e) => {
         const file = e.target.files[0];
         if (file) {
-            // Live Preview
             if (mainAvatar) {
-            mainAvatar.src = URL.createObjectURL(file);
-            mainAvatar.classList.add("uploaded");
-              }
-            
-            // Compress Image
+                mainAvatar.src = URL.createObjectURL(file);
+                mainAvatar.classList.add("uploaded");
+            }
             const reader = new FileReader();
             reader.readAsDataURL(file);
             reader.onload = (event) => {
@@ -347,7 +310,6 @@ if (avatarUpload) {
                     } else {
                         if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
                     }
-                    
                     canvas.width = width;
                     canvas.height = height;
                     const ctx = canvas.getContext('2d');
@@ -359,174 +321,84 @@ if (avatarUpload) {
     });
 }
 
-// ==============================================================
-// Signup Function 5: Smart UID Generator
-// Logic: Extracts 6 digits from Phone, checks DB, fallbacks to random
-// ==============================================================
-async function generateSmartUID(phoneRaw) {
-    const cleanPhone = phoneRaw.replace(/\D/g, '');
-    let candidates = [];
-    
-    if (cleanPhone.length >= 6) {
-        candidates.push(cleanPhone.slice(-6)); // Last 6 digits
-        candidates.push(cleanPhone.slice(0, 6)); // First 6 digits
-        const midStart = Math.floor(cleanPhone.length / 2) - 3;
-        candidates.push(cleanPhone.slice(midStart, midStart + 6)); // Middle 6 digits
-        if (cleanPhone.length >= 7) candidates.push(cleanPhone.slice(1, 7)); // Alternative 6 digits
-    }
-
-    // Check Phone-based candidates
-    for (let cand of candidates) {
-        if (cand.length === 6) {
-            const testUID = `TCM${cand}`;
-            const snap = await getDoc(doc(db, "Users", testUID));
-            if (!snap.exists()) return testUID; // Found unique UID
-        }
-    }
-
-    // Fallback: Random Generate if Phone candidates are taken
-    let isUnique = false;
-    let fallbackUID = "";
-    while (!isUnique) {
-        const randomDigits = Math.floor(100000 + Math.random() * 900000);
-        fallbackUID = `TCM${randomDigits}`;
-        const uidSnap = await getDoc(doc(db, "Users", fallbackUID));
-        if (!uidSnap.exists()) isUnique = true;
-    }
-    return fallbackUID;
+function copyGeneratedUID() {
+    const uidText = document.getElementById('newUID').innerText;
+    navigator.clipboard.writeText(uidText);
+    const copyBtn = document.getElementById('copyUidFinalBtn');
+    copyBtn.classList.add('success');
+    copyBtn.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(() => {
+        copyBtn.classList.remove('success');
+        copyBtn.innerHTML = '<i class="far fa-copy"></i>';
+    }, 2000);
 }
 
 // ==============================================================
-// Signup Function 6: Utility - Session Token
-// Source: Auth.gs
-// ==============================================================
-function generateSessionToken() {
-    return Math.random().toString(36).substring(2) + Date.now().toString(36);
-}
-
-// ==============================================================
-// Signup Function 7: Main Registration Logic
-// Source: Auth.gs & Database Rules
+// Main Registration Logic (API Call to Backend)
 // ==============================================================
 if (regBtn) {
     regBtn.addEventListener('click', async (e) => {
-        e.preventDefault();
+        e.preventDefault(); 
 
         regBtn.disabled = true;
-        regBtn.innerText = "Processing...";
+        document.getElementById('btnText').innerText = "Processing...";
 
         try {
-            const name = regName.value.trim();
-            const email = regEmail.value.trim().toLowerCase();
-            const password = regPass.value;
-            const phone = (countryCode?.value || "") + (regPhone?.value.trim() || "");
-            const country = regCountry.value;
-            const religion = regReligion.value;
-            const sponsorInput = regSponsor?.value.trim().toUpperCase() || "";
-
-            const usersRef = collection(db, "Users");
-
-            // Duplicate Checks
-            const emailQuery = query(usersRef, where("Email", "==", email));
-            const emailSnap = await getDocs(emailQuery);
-            if (!emailSnap.empty) throw new Error("Email Already Exists");
-
-            const phoneQuery = query(usersRef, where("Phone", "==", phone));
-            const phoneSnap = await getDocs(phoneQuery);
-            if (!phoneSnap.empty) throw new Error("Phone Already Exists");
-
-            // Sponsor Chain Logic
-            let sponsor_A = "System";
-            let sponsor_B = "System";
-            let sponsor_C = "System";
-
-            if (sponsorInput && sponsorInput !== "SYSTEM") {
-                const sponsorSnap = await getDoc(doc(db, "Users", sponsorInput));
-                if (sponsorSnap.exists()) {
-                    const sData = sponsorSnap.data();
-                    sponsor_A = sponsorInput;
-                    sponsor_B = sData.Sponsor_A || "System";
-                    sponsor_C = sData.Sponsor_B || "System";
-                } else {
-                    alert("Invalid Sponsor ID! You will be registered under System.");
-                }
+            // 🔥 Timezone Detection (Crucial for Daily Reset Sync)
+            let userTimeZone = "UTC";
+            try {
+                userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            } catch (err) {
+                console.warn("Timezone detection failed, defaulting to UTC");
             }
 
-            // Generate Smart UID & Token
-            const finalUID = await generateSmartUID(regPhone?.value.trim());
-            const sessionToken = generateSessionToken();
+            const payload = {
+                name: regName.value.trim(),
+                email: regEmail.value.trim().toLowerCase(),
+                password: regPass.value,
+                phone: (countryCode?.value || "") + (regPhone?.value.trim() || ""),
+                phoneRaw: regPhone?.value.trim() || "", 
+                country: regCountry.value,
+                religion: regReligion.value,
+                sponsor: regSponsor?.value.trim().toUpperCase() || "",
+                avatar: compressedAvatarBase64,
+                timeZone: userTimeZone // 🔥 Added Timezone to Payload
+            };
 
-            // Setup Write Batch
-            const batch = writeBatch(db);
-            const userDocRef = doc(db, "Users", finalUID);
-            const walletDocRef = doc(db, "Wallets", finalUID);
-
-            // Exact User Fields Mapping
-            batch.set(userDocRef, {
-                Date: serverTimestamp(),
-                UID: finalUID,
-                Name: name,
-                Email: email,
-                Password: password,
-                Phone: phone,
-                Sponsor_A: sponsor_A,
-                Sponsor_B: sponsor_B,
-                Sponsor_C: sponsor_C,
-                Avatar: compressedAvatarBase64,
-                Wallet_BEP20: "",
-                Wallet_TRC20: "",
-                Security_Date: "",
-                "2FA_Key": "",
-                Rank: 0,
-                Status: "Active",
-                OTP: "",
-                Token: sessionToken,
-                Religion: religion,
-                Country: country
+            // পোর্ট 5000 ব্যবহার করে রিকোয়েস্ট পাঠানো হচ্ছে
+            const response = await fetch('http://127.0.0.1:5000/api/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
 
-            // Exact Wallet Fields Mapping
-            batch.set(walletDocRef, {
-                UID: finalUID,
-                Main_Balance: 0,
-                Locked_Balance: 0,
-                Debt: 0,
-                Points: 0,
-                Total_Deposit: 0,
-                Total_Withdraw: 0,
-                Total_Earn: 0,
-                Daily_Earn: 0,
-                Total_Team: 0,
-                Daily_Team: 0,
-                Total_Stake: 0,
-                Daily_Stake: 0,
-                Total_Reserve: 0,
-                Daily_Reserve: 0,
-                Total_Airdrop: 0,
-                Daily_Airdrop: 0,
-                Total_Comp: 0,
-                Daily_Comp: 0
-            });
+            const result = await response.json();
 
-            // Commit Transaction
-            await batch.commit();
+            if (!response.ok || !result.success) {
+                throw new Error(result.message || "Registration failed. Please try again.");
+            }
 
-            // Save Data to Local Storage
+            // সাকসেস হলে UID এবং Token রিসিভ করা
+            const finalUID = result.uid;
+            const sessionToken = result.token;
+
+            // Local Storage-এ সেভ করা
             localStorage.setItem("uid", finalUID);
             localStorage.setItem("token", sessionToken);
-            localStorage.setItem("name", name);
+            localStorage.setItem("name", payload.name);
             if (compressedAvatarBase64 !== "") {
                 localStorage.setItem("tcm_user_dp", compressedAvatarBase64);
             }
 
-            // Trigger Success Portal & Redirect Countdown
+            // Success Portal দেখানো
             if (newUID) newUID.innerText = finalUID;
             if (uidPortal) {
                 uidPortal.style.display = "flex";
-                uidPortal.classList.add("active");
+                setTimeout(() => uidPortal.classList.add("active"), 50);
             }
             if (uidBox) uidBox.classList.add("show");
 
+            // রিডাইরেক্ট কাউন্টডাউন
             let timeLeft = 8;
             if (regTimer) regTimer.innerText = timeLeft;
 
@@ -541,17 +413,12 @@ if (regBtn) {
             }, 1000);
 
         } catch (error) {
-            console.error("Signup Failed:", error);
-            if (error.message === "Email Already Exists") {
-                alert("This Email is already registered!");
-            } else if (error.message === "Phone Already Exists") {
-                alert("This Phone Number is already registered!");
-            } else {
-                alert("Registration failed due to a server error. Please try again.");
-            }
-            // Reset button on error
+            console.error("Signup Error:", error);
+            alert(error.message); 
+            
+            // বাটন আবার চালু করা
             regBtn.disabled = false;
-            regBtn.innerText = "JOIN ECOSYSTEM";
+            document.getElementById('btnText').innerText = "JOIN ECOSYSTEM";
         }
     });
 }
