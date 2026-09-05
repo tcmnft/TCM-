@@ -560,6 +560,12 @@ input, select, textarea { font-size: 16px !important; outline: none; }
 }
 @keyframes blinkDot { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 1; transform: scale(1.5); } }
 
+/* 🔥 Premium Chart Filters (Binance Style) */
+.chart-time-filters { display: flex; gap: 5px; background: rgba(0,0,0,0.4); padding: 4px; border-radius: 10px; width: max-content; border: 1px solid rgba(255,255,255,0.05); }
+.c-filter { background: transparent; border: none; color: var(--text-sub); font-size: 0.65rem; font-weight: 700; padding: 4px 12px; border-radius: 8px; cursor: pointer; transition: 0.3s; letter-spacing: 0.5px; }
+.c-filter.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.4); border: 1px solid rgba(0, 245, 255, 0.2); }
+.c-filter:hover:not(.active) { color: #fff; }
+
 /* MISC ANIMATIONS */
 @keyframes ghostTouchDark { 0%, 100% { transform: scale(1); text-shadow: none; color: var(--text-sub); } 5% { transform: scale(1.15); text-shadow: 0 0 12px rgba(0, 245, 255, 0.8), 0 0 6px #ffffff; color: #ffffff; } 15% { transform: scale(1); text-shadow: none; color: var(--text-sub); } }
 @keyframes ghostTouchLight { 0%, 100% { transform: scale(1); text-shadow: none; color: var(--text-sub); } 5% { transform: scale(1.15); text-shadow: 0 0 12px rgba(0, 245, 255, 0.8); color: var(--primary); } 15% { transform: scale(1); text-shadow: none; color: var(--text-sub); } }
@@ -819,15 +825,21 @@ input, select, textarea { font-size: 16px !important; outline: none; }
 }
 .a-toggle.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 4px 15px rgba(0, 245, 255, 0.1); border: 1px solid rgba(0, 245, 255, 0.2); }
 
-.portfolio-hero {
-    background: linear-gradient(135deg, rgba(0, 245, 255, 0.1), rgba(0, 0, 0, 0.4));
-    border: 1px solid rgba(0, 245, 255, 0.2); border-radius: 20px; padding: 25px 20px;
-    text-align: center; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-    position: relative; overflow: hidden;
-}
-.ph-title { font-size: 0.8rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
-.ph-value { font-size: 2.5rem; font-weight: 800; color: #fff; margin: 10px 0; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 20px rgba(0, 245, 255, 0.4); }
-.ph-badge { display: inline-block; background: rgba(16, 185, 129, 0.2); color: var(--success); padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.3); }
+/* 🚀 Upgraded Portfolio Hero (Triple-Data Layout) */
+.portfolio-hero { background: linear-gradient(135deg, rgba(15, 23, 42, 0.8), rgba(0, 0, 0, 0.95)); border: 1px solid rgba(0, 245, 255, 0.15); border-radius: 24px; padding: 25px 20px 20px; text-align: center; margin-bottom: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); position: relative; overflow: hidden; backdrop-filter: blur(10px); }
+.ph-title { font-size: 0.75rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 1.5px; font-weight: 800; }
+.ph-value { font-size: 2.6rem; font-weight: 800; color: #fff; margin: 5px 0 15px; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 0 25px rgba(0, 245, 255, 0.5); letter-spacing: -1px; }
+.ph-badge { display: inline-block; background: rgba(16, 185, 129, 0.15); color: var(--success); padding: 5px 12px; border-radius: 20px; font-size: 0.7rem; font-weight: 800; border: 1px solid rgba(16, 185, 129, 0.3); margin-bottom: 15px; }
+
+/* 🔥 New Triple-Data Bottom Row CSS */
+.ph-bottom-row { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px; margin-top: 5px; }
+.ph-stat-box { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+.ph-stat-box.left { text-align: left; border-right: 1px dashed rgba(255,255,255,0.1); padding-right: 10px; }
+.ph-stat-box.right { text-align: right; padding-left: 10px; }
+.ph-stat-title { font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 0.5px; }
+.ph-stat-val { font-size: 1.1rem; font-weight: 800; font-family: 'Space Grotesk', sans-serif; }
+.ph-stat-val.green { color: var(--success); text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+.ph-stat-val.red { color: var(--error); text-shadow: 0 0 10px rgba(244, 63, 94, 0.3); }
 
 .chart-glass-wrapper {
     background: var(--bg-card); border-radius: 20px; border: 1px solid var(--border);
@@ -1798,15 +1810,37 @@ input, select, textarea { font-size: 16px !important; outline: none; }
         <div class="portfolio-hero">
             <p class="ph-title">Total Portfolio Value</p>
             <h1 class="ph-value" id="assetTotalValue">0.00 <span style="font-size:1.4rem; color:var(--primary);">₮</span></h1>
-            <div class="ph-badge"><i class="fas fa-arrow-trend-up"></i> +12.5% This Week</div>
+            <div class="ph-badge"><i class="fas fa-arrow-trend-up"></i> +0.0% This Week</div>
+            
+            <div class="ph-bottom-row">
+                <div class="ph-stat-box left">
+                    <span class="ph-stat-title"><i class="fas fa-arrow-down" style="color:var(--success);"></i> Total Income</span>
+                    <span class="ph-stat-val green" id="assetTotalIncome">0.00 ₮</span>
+                </div>
+                <div class="ph-stat-box right">
+                    <span class="ph-stat-title"><i class="fas fa-arrow-up" style="color:var(--error);"></i> Total Withdrawn</span>
+                    <span class="ph-stat-val red" id="assetTotalWithdraw">0.00 ₮</span>
+                </div>
+            </div>
         </div>
 
         <!-- My Multi-Line Graph -->
         <div class="chart-glass-wrapper">
-            <div class="chart-header">
-                <span><i class="fas fa-chart-line" style="color:var(--primary); margin-right:5px;"></i> 7-Day Asset Flow</span>
+            <div class="chart-header" style="margin-bottom: 15px; display: flex; flex-direction: column; gap: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                    <span style="font-size: 0.95rem;"><i class="fas fa-chart-line" style="color:var(--primary); margin-right:5px;"></i> Asset Flow Analytics</span>
+                    <span style="font-size: 0.65rem; color: var(--success); font-weight: 700; background: rgba(16, 185, 129, 0.1); padding: 2px 8px; border-radius: 10px; border: 1px solid rgba(16, 185, 129, 0.3);"><i class="fas fa-circle fa-fade" style="font-size: 0.4rem; margin-right: 3px;"></i> LIVE</span>
+                </div>
+                
+                <!-- Binance Style Timeframe Filters -->
+                <div class="chart-time-filters">
+                    <button class="c-filter" onclick="window.updateChartTimeframe('1D', this)">1D</button>
+                    <button class="c-filter active" onclick="window.updateChartTimeframe('1W', this)">1W</button>
+                    <button class="c-filter" onclick="window.updateChartTimeframe('1M', this)">1M</button>
+                    <button class="c-filter" onclick="window.updateChartTimeframe('ALL', this)">ALL</button>
+                </div>
             </div>
-            <div style="position: relative; height: 220px; width: 100%;">
+            <div style="position: relative; height: 240px; width: 100%;">
                 <canvas id="myAnalyticsChart"></canvas>
             </div>
         </div>
@@ -2131,7 +2165,30 @@ window.setDefaultMonth = () => {
    const picker = document.getElementById('txMonthYear');
    if(picker) picker.value = `${d.getFullYear()}-${(d.getMonth()+1).toString().padStart(2,'0')}`;
 };
-
+window.parseSafeTimestamp = (rawDate) => {
+    if (!rawDate) return 0;
+    // Firebase Timestamp Object
+    if (typeof rawDate === 'object') {
+        if (rawDate.seconds) return rawDate.seconds * 1000;
+        if (rawDate._seconds) return rawDate._seconds * 1000;
+    }
+    // Number Timestamp
+    if (typeof rawDate === 'number') return rawDate;
+    
+    // Normal JS Date
+    let d = new Date(rawDate).getTime();
+    if (!isNaN(d)) return d;
+    
+    // Custom TCM Date Format ("DD-MM-YYYY HH:MM PM")
+    let dateString = String(rawDate);
+    let parts = dateString.split(' ')[0].split(/[-/]/);
+    if (parts.length === 3 && parts[0].length <= 2) {
+        // Convert to YYYY-MM-DD for safe parsing
+        let safeDateStr = `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}T00:00:00`;
+        return new Date(safeDateStr).getTime();
+    }
+    return 0;
+};
 // =================================================================================
 // 🎛️ MODULE 2: UI ROUTER & MODAL ENGINE
 // =================================================================================
@@ -5200,11 +5257,31 @@ window.initAssetsUI = () => {
         let mainBal = parseFloat(window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances.Main_Balance : 0);
         let lockedBal = parseFloat(window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances.Locked_Balance : 0);
         let activeNftVal = window.reservedNFT ? parseFloat(window.reservedNFT.price || 0) : 0;
-        
         let trueTotal = mainBal + lockedBal + activeNftVal;
         
         const elTotal = document.getElementById('assetTotalValue');
         if(elTotal) elTotal.innerHTML = `${window.formatMagicNumber(trueTotal)} <span style="font-size:1.4rem; color:var(--primary);">₮</span>`;
+
+        // 🔥 NEW FIX: Calculate Lifetime Income & Withdrawal directly from Database
+        let balances = window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances : {};
+        
+        // উইথড্রলটা সরাসরি ফায়ারবেস থেকে আসবে (যাতে কোনো পুরনো হিসেব বাদ না পড়ে)
+        let lifetimeWithdraw = parseFloat(balances.Total_Withdrawal || balances.Total_Withdraw || 0);
+
+        // ইনকামটা সরাসরি ডাটাবেস থেকে আসবে
+        let tE = parseFloat(balances.Total_Earn || 0);
+        let tR = parseFloat(balances.Total_Reserve || 0);
+        let tS = parseFloat(balances.Total_Stake || 0);
+        let tA = parseFloat(balances.Total_Airdrop || 0);
+        let tTeam = parseFloat(balances.Total_Team || 0);
+        
+        // টোটাল কমপ্রিহেন্সিভ ইনকাম 
+        let lifetimeIncome = tE + tR + tS + tA + tTeam;
+
+        const elInc = document.getElementById('assetTotalIncome');
+        const elWd = document.getElementById('assetTotalWithdraw');
+        if(elInc) elInc.innerText = `${window.formatMagicNumber(lifetimeIncome)} ₮`;
+        if(elWd) elWd.innerText = `${window.formatMagicNumber(lifetimeWithdraw)} ₮`;
 
         // ৩. Render Chart & Pass Total for Growth Calculation
         if(document.getElementById('assetModeMy') && document.getElementById('assetModeMy').style.display !== 'none') {
@@ -5230,8 +5307,17 @@ if (!window.tcmAssetsHooked) {
     window.showSection = window.switchTab;
 }
 
-// 📈 Chart 1: My Analytics (Uses your EXISTING window.allTransactions)
-window.renderMyAnalyticsChart = (trueTotal = null) => {
+// 📈 Chart 1: My Analytics (PREMIUM BINANCE STYLE)
+window.currentChartTimeframe = '1W';
+
+window.updateChartTimeframe = (timeframe, btn) => {
+    document.querySelectorAll('.c-filter').forEach(b => b.classList.remove('active'));
+    if(btn) btn.classList.add('active');
+    window.currentChartTimeframe = timeframe;
+    window.renderMyAnalyticsChart(null, true); 
+};
+
+window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
     try {
         if (typeof Chart === 'undefined') return;
         const canvas = document.getElementById('myAnalyticsChart');
@@ -5239,32 +5325,67 @@ window.renderMyAnalyticsChart = (trueTotal = null) => {
         const ctx = canvas.getContext('2d');
         
         let labels = [];
-        let incData = [0,0,0,0,0,0,0], depData = [0,0,0,0,0,0,0], wdData = [0,0,0,0,0,0,0];
-        let totalInc7D = 0, totalWd7D = 0; // 🔥 For Growth Calculation
+        let incData = [], depData = [], wdData = [];
+        let totalInc7D = 0, totalWd7D = 0; 
 
-        // 7-day Labels
-        for(let i=6; i>=0; i--){
-            let d = new Date(); d.setDate(d.getDate() - i);
-            labels.push(d.toLocaleDateString('en-US', {weekday:'short'}));
+        const today = new Date(); 
+        today.setHours(23, 59, 59, 999);
+        let startDate = new Date();
+
+        // Timeframe Logic (1 Day, 1 Week, 1 Month, All)
+        let points = 7;
+        if (window.currentChartTimeframe === '1D') {
+            startDate.setHours(0, 0, 0, 0);
+            points = 6; // Show data every 4 hours
+            for(let i=0; i<=points; i++) {
+                let d = new Date(startDate); d.setHours(i * 4);
+                labels.push(d.toLocaleTimeString('en-US', {hour:'numeric', hour12:true}));
+                incData.push(0); depData.push(0); wdData.push(0);
+            }
+        } else if (window.currentChartTimeframe === '1W') {
+            startDate.setDate(today.getDate() - 6); startDate.setHours(0, 0, 0, 0);
+            points = 6;
+            for(let i=points; i>=0; i--){
+                let d = new Date(); d.setDate(d.getDate() - i);
+                labels.push(d.toLocaleDateString('en-US', {weekday:'short'}));
+                incData.push(0); depData.push(0); wdData.push(0);
+            }
+        } else if (window.currentChartTimeframe === '1M') {
+            startDate.setDate(today.getDate() - 29); startDate.setHours(0, 0, 0, 0);
+            points = 5; // Show data every 5 days
+            for(let i=points; i>=0; i--){
+                let d = new Date(); d.setDate(d.getDate() - (i*5));
+                labels.push(`${d.getDate()} ${d.toLocaleString('en-US',{month:'short'})}`);
+                incData.push(0); depData.push(0); wdData.push(0);
+            }
+        } else {
+            startDate = new Date(0); // ALL
+            labels = ['Start', 'Phase 1', 'Phase 2', 'Mid', 'Recent', 'Current', 'Now'];
+            incData = [0,0,0,0,0,0,0]; depData = [0,0,0,0,0,0,0]; wdData = [0,0,0,0,0,0,0];
         }
 
-        // Processing your EXISTING transaction array from server.js
+        // Parse Data
         if (window.allTransactions && window.allTransactions.length > 0) {
-            const today = new Date(); today.setHours(23, 59, 59, 999);
-            const sevenDaysAgo = new Date(); sevenDaysAgo.setDate(today.getDate() - 6); sevenDaysAgo.setHours(0, 0, 0, 0);
-
             window.allTransactions.forEach(tx => {
                 let txDate = new Date(window.parseSafeTimestamp(tx.timestamp || tx.Date));
                 if(isNaN(txDate)) return;
                 
-                if(txDate >= sevenDaysAgo && txDate <= today) {
-                    let dayDiff = Math.floor((today - txDate) / (1000 * 60 * 60 * 24));
-                    let index = 6 - dayDiff;
+                if(txDate >= startDate && txDate <= today) {
+                    let amt = parseFloat(tx.Amount) || parseFloat(tx.Net_Amount) || 0;
+                    let type = tx.Type || '';
                     
-                    if(index >= 0 && index <= 6) {
-                        let amt = parseFloat(tx.Amount) || parseFloat(tx.Net_Amount) || 0;
-                        let type = tx.Type || '';
-                        
+                    let index = 0;
+                    if(window.currentChartTimeframe === '1D') {
+                        index = Math.floor(txDate.getHours() / 4);
+                    } else if(window.currentChartTimeframe === '1W') {
+                        index = 6 - Math.floor((today - txDate) / (1000 * 60 * 60 * 24));
+                    } else if(window.currentChartTimeframe === '1M') {
+                        index = 5 - Math.floor((today - txDate) / (1000 * 60 * 60 * 24 * 5));
+                    } else {
+                        index = 6; // All time lumps into recent for now, ideally mapped properly
+                    }
+                    
+                    if(index >= 0 && index < incData.length) {
                         if(type.includes('Deposit')) depData[index] += amt;
                         else if(type.includes('Withdraw')) { wdData[index] += amt; totalWd7D += amt; }
                         else if(!type.includes('P2P Sent')) { incData[index] += amt; totalInc7D += amt; } 
@@ -5273,55 +5394,69 @@ window.renderMyAnalyticsChart = (trueTotal = null) => {
             });
         }
 
-        // 🔥 Update Dynamic Growth Badge
-        if (trueTotal !== null) {
+        // 🔥 Dynamic Growth Badge (Only updates on initial load, not filter clicks)
+        if (!isUpdate && trueTotal !== null) {
             let badgeEl = document.querySelector('.ph-badge');
             if (badgeEl) {
                 if (trueTotal > 0) {
                     let netFlow = totalInc7D - totalWd7D;
                     let perc = ((netFlow / trueTotal) * 100).toFixed(1);
-                    
                     if (perc >= 0) {
                         badgeEl.innerHTML = `<i class="fas fa-arrow-trend-up"></i> +${perc}% This Week`;
-                        badgeEl.style.background = 'rgba(16, 185, 129, 0.2)';
-                        badgeEl.style.color = 'var(--success)';
-                        badgeEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                        badgeEl.style.background = 'rgba(16, 185, 129, 0.2)'; badgeEl.style.color = 'var(--success)'; badgeEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
                     } else {
                         badgeEl.innerHTML = `<i class="fas fa-arrow-trend-down"></i> ${perc}% This Week`;
-                        badgeEl.style.background = 'rgba(244, 63, 94, 0.2)';
-                        badgeEl.style.color = 'var(--error)';
-                        badgeEl.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+                        badgeEl.style.background = 'rgba(244, 63, 94, 0.2)'; badgeEl.style.color = 'var(--error)'; badgeEl.style.border = '1px solid rgba(244, 63, 94, 0.3)';
                     }
                 } else {
                     badgeEl.innerHTML = `<i class="fas fa-minus"></i> 0.0% This Week`;
-                    badgeEl.style.color = 'var(--text-sub)';
-                    badgeEl.style.border = '1px solid var(--border)';
-                    badgeEl.style.background = 'rgba(255,255,255,0.05)';
                 }
             }
         }
 
+        // 🎨 Premium Gradients
+        let gradInc = ctx.createLinearGradient(0, 0, 0, 240);
+        gradInc.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); gradInc.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+        let gradDep = ctx.createLinearGradient(0, 0, 0, 240);
+        gradDep.addColorStop(0, 'rgba(0, 245, 255, 0.4)'); gradDep.addColorStop(1, 'rgba(0, 245, 255, 0.0)');
+
         if (window.myChartInstance) window.myChartInstance.destroy();
+        
         window.myChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: labels,
                 datasets: [
-                    { label: 'Income ₮', data: incData, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', borderWidth: 2, tension: 0.4, fill: true, pointRadius: 3 },
-                    { label: 'Deposit ₮', data: depData, borderColor: '#00f5ff', borderWidth: 2, tension: 0.4, pointRadius: 3 },
-                    { label: 'Withdraw ₮', data: wdData, borderColor: '#f43f5e', borderWidth: 2, tension: 0.4, pointRadius: 3 }
+                    { label: 'Income', data: incData, borderColor: '#10b981', backgroundColor: gradInc, borderWidth: 3, tension: 0.4, fill: true, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#10b981' },
+                    { label: 'Deposit', data: depData, borderColor: '#00f5ff', backgroundColor: gradDep, borderWidth: 3, tension: 0.4, fill: true, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#00f5ff' },
+                    { label: 'Withdraw', data: wdData, borderColor: '#f43f5e', borderWidth: 2, tension: 0.4, borderDash: [5, 5], pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#f43f5e' }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
-                plugins: { legend: { labels: { color: '#94a3b8', font: { size: 10, family: 'Space Grotesk' } } } },
-                scales: { x: { ticks: { color: '#64748b' } }, y: { ticks: { color: '#64748b' } } }
+                plugins: { 
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                        titleFont: { family: 'Space Grotesk', size: 13 },
+                        bodyFont: { family: 'Inter', size: 12 },
+                        padding: 12,
+                        cornerRadius: 8,
+                        displayColors: true,
+                        borderColor: 'rgba(0, 245, 255, 0.3)',
+                        borderWidth: 1,
+                        callbacks: { label: function(context) { return ` ${context.dataset.label}: ${context.parsed.y} ₮`; } }
+                    }
+                },
+                scales: { 
+                    x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } } }, 
+                    y: { grid: { color: 'rgba(255,255,255,0.05)', borderDash: [5, 5] }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 }, maxTicksLimit: 5 } } 
+                }
             }
         });
     } catch(e) { console.error("My Analytics Chart Error:", e); }
 };
-
 // 📋 Network Ledger (Uses your EXISTING /api/team/network route)
 window.syncTeamLedger = async () => {
     try {
