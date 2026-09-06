@@ -530,6 +530,24 @@ input, select, textarea { font-size: 16px !important; outline: none; }
    .feed-address-box { max-width: 120px; }
 }
  
+ * {
+    -webkit-tap-highlight-color: transparent !important;
+    -webkit-touch-callout: none !important;
+    -webkit-user-select: none !important;
+    -moz-user-select: none !important;
+    -ms-user-select: none !important;
+    user-select: none !important;
+    outline: none !important;
+}
+
+input, textarea, select {
+    -webkit-touch-callout: default !important;
+    -webkit-user-select: auto !important;
+    -moz-user-select: auto !important;
+    -ms-user-select: auto !important;
+    user-select: auto !important;
+    outline: none !important;
+}
 /* ==========================================================================
    🚀 PHASE 1: NFT MATCHMAKING RADAR ANIMATIONS
    ========================================================================== */
@@ -876,6 +894,7 @@ input, select, textarea { font-size: 16px !important; outline: none; }
 .lt-perf { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; }
 .lt-perf.up { background: rgba(16, 185, 129, 0.15); color: var(--success); }
 .lt-perf.down { background: rgba(244, 63, 94, 0.15); color: var(--error); }
+
 
   </style>
 </head>
