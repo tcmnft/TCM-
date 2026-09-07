@@ -895,7 +895,23 @@ input, textarea, select {
 .lt-perf.up { background: rgba(16, 185, 129, 0.15); color: var(--success); }
 .lt-perf.down { background: rgba(244, 63, 94, 0.15); color: var(--error); }
 
+/* 🔥 Ultra-Premium Scroll-Triggered Elastic Animation */
+.tx-item-animated {
+    opacity: 0;
+    /* একদম ছোট একটি বিন্দু থেকে শুরু হবে এবং হালকা নিচে থাকবে */
+    transform: translateY(40px) scale(0.85); 
+    filter: blur(5px);
+    /* cubic-bezier(0.34, 1.56, 0.64, 1) হলো Apple-এর বিখ্যাত লিকুইড স্প্রিং বাউন্স ইফেক্ট */
+    transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1);
+    will-change: transform, opacity, filter;
+}
 
+/* স্ক্রল করে সামনে আসলেই এই ক্লাসটি যুক্ত হয়ে কার্ডটিকে প্রসারিত করবে */
+.tx-item-animated.show {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+}
   </style>
 </head>
 <body>
@@ -2446,6 +2462,7 @@ window.loadLiveWeather = async () => {
    }
 };
 setTimeout(window.loadLiveWeather, 2000);
+
 // =================================================================================
 // 🤖 MODULE 6: AUTOMATION & SMART LEVEL ENGINE (UI & ANIMATION)
 // =================================================================================
@@ -2492,7 +2509,7 @@ window.showLevelChange = (newLevel, isUpgrade = true) => {
 
 window.closeLevelModal = () => { window.closeModal('levelUpModal'); };
 
-// 🔥 Silent Background Verifier (No visual bugs)
+// 🔥 Silent Background Verifier
 window.evaluateLevelAutomation = async function(wData, currentKnownRank) {
    const uid = localStorage.getItem('uid');
    if(!uid || !wData) return;
@@ -2525,7 +2542,39 @@ window.evaluateLevelAutomation = async function(wData, currentKnownRank) {
            }
        }
    } catch (error) { console.error("Automation Sync Error:", error); }
-};window.allTransactions = [];
+};
+
+// =================================================================================
+// 📜 RECENT HISTORY ENGINE (RAM-ONLY 0-READ CACHE, SCROLL-TRIGGERED ANIMATION)
+// =================================================================================
+
+window.allTransactions = []; 
+window.txHistoryData = [];
+window.txRenderLimit = 4; // প্রতিবারে ৪টি করে লোড হবে
+window.currentRenderedCount = 0;
+window.txIntersectionObserver = null; 
+
+// 🔥 Intersection Observer Setup (স্ক্রল অনুযায়ী কার্ড ফুটবে ও গুটিয়ে যাবে)
+window.initTxObserver = () => {
+    const tb = document.getElementById('txHistoryBox');
+    if (!tb) return;
+    
+    if (window.txIntersectionObserver) window.txIntersectionObserver.disconnect();
+    
+    window.txIntersectionObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+            } else {
+                entry.target.classList.remove('show');
+            }
+        });
+    }, {
+        root: tb, 
+        rootMargin: '10px 0px', 
+        threshold: 0.15 
+    });
+};
 
 window.applyTxFilter = (type='All', btn) => {
     if(btn) { document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
@@ -2535,23 +2584,46 @@ window.applyTxFilter = (type='All', btn) => {
     const monthPicker = document.getElementById('txMonthYear');
     const selectedMonthValue = monthPicker ? monthPicker.value : '';
 
-    let data = window.allTransactions.filter(tx => {
+    // 🔥 Filter directly from RAM (Zero-Read)
+    window.txHistoryData = window.allTransactions.filter(tx => {
+        const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
+        if (!allowedTypes.includes(tx.Type)) return false;
+
         if (selectedMonthValue) {
             const [targetYear, targetMonth] = selectedMonthValue.split('-');
-            let txDateObj = new Date(tx.Date || tx.timestamp);
-            if (isNaN(txDateObj)) return false; 
+            let txDateObj;
+            
+            if (tx.timestamp && typeof tx.timestamp.toDate === 'function') {
+                txDateObj = tx.timestamp.toDate();
+            } else if (tx.timestamp && tx.timestamp.seconds) {
+                txDateObj = new Date(tx.timestamp.seconds * 1000);
+            } else if (tx.Date) {
+                let datePart = String(tx.Date).split(' ')[0];
+                let p = datePart.split(/[-/]/); 
+                if (p.length === 3 && p[0].length <= 2) {
+                    txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`); 
+                } else {
+                    txDateObj = new Date(tx.Date);
+                }
+            }
+
+            if (!txDateObj || isNaN(txDateObj)) { txDateObj = new Date(0); }
+
             let txYear = txDateObj.getFullYear().toString();
             let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
             if (txYear !== targetYear || txMonth !== targetMonth) return false;
         }
-        
-        const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
-        if (!allowedTypes.includes(tx.Type)) return false;
 
         return true;
     });
 
-    if(data.length === 0){
+    window.txRenderLimit = 4;
+    window.currentRenderedCount = 0;
+    tb.innerHTML = '';
+
+    window.initTxObserver();
+
+    if(window.txHistoryData.length === 0){
         let monthName = "this month";
         if (selectedMonthValue) {
             const [y, m] = selectedMonthValue.split('-');
@@ -2559,23 +2631,31 @@ window.applyTxFilter = (type='All', btn) => {
             monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
         }
         tb.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; animation: fadeIn 0.4s ease;">
+        <div style="text-align: center; padding: 40px 20px;">
             <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 1px dashed rgba(255,255,255,0.1);">
                 <i class="fas fa-folder-open" style="font-size: 1.6rem; color: var(--text-sub); opacity: 0.7;"></i>
             </div>
             <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 1.05rem;">No Records Found</h3>
-            <p style="color: var(--text-sub); font-size: 0.8rem; max-width: 250px; margin: 0 auto; line-height: 1.4;">There are no transactions available in your ledger for <strong style="color: var(--primary);">${monthName}</strong>.</p>
-        </div>
-        `;
+            <p style="color: var(--text-sub); font-size: 0.8rem; max-width: 250px; margin: 0 auto; line-height: 1.4;">There are no transactions available for <strong style="color: var(--primary);">${monthName}</strong>.</p>
+        </div>`;
         return;
     }
 
-    tb.innerHTML = '';
-    data.forEach(tx => {
+    window.renderTxChunk();
+};
+
+// 🔥 ২. মাইক্রো-পেজিনেশন ও স্ক্রল-ট্রিগার্ড অ্যানিমেশন
+window.renderTxChunk = () => {
+    const tb = document.getElementById('txHistoryBox');
+    if(!tb || window.currentRenderedCount >= window.txHistoryData.length) return;
+
+    let html = '';
+    const chunk = window.txHistoryData.slice(window.currentRenderedCount, window.currentRenderedCount + window.txRenderLimit);
+
+    chunk.forEach((tx) => {
         let tType = tx.Type || '';
         let isDep = tType === 'Deposit';
         let isWd = tType === 'Withdraw';
-        let isTeam = tType.includes('Team');
         let isAir = tType.includes('Airdrop');
         let isP2PSent = tType === 'P2P Sent';
         let isP2PRecv = tType === 'P2P Received';
@@ -2583,8 +2663,8 @@ window.applyTxFilter = (type='All', btn) => {
 
         const isReversedAirdrop = isAir && tx.Status === 'Reversed';
 
-        let clr = (isDep || isP2PRecv) ? 'var(--success)' : ((isWd || isP2PSent) ? 'var(--error)' : (isTeam ? '#10b981' : '#facc15'));
-        let icn = (isDep || isP2PRecv) ? 'arrow-down' : ((isWd || isP2PSent) ? 'arrow-up' : (isTeam ? 'users' : 'gift'));
+        let clr = (isDep || isP2PRecv) ? 'var(--success)' : ((isWd || isP2PSent) ? 'var(--error)' : '#facc15');
+        let icn = (isDep || isP2PRecv) ? 'arrow-down' : ((isWd || isP2PSent) ? 'arrow-up' : 'gift');
         let bgCls = (isDep || isP2PRecv) ? 'dep' : ((isWd || isP2PSent) ? 'wd' : 'air');
         
         let stClr = '#f59e0b';
@@ -2593,52 +2673,26 @@ window.applyTxFilter = (type='All', btn) => {
         else if(tx.Status === 'Reversed') stClr = 'rgba(244, 63, 94, 0.7)';
         else if(tx.Status === 'Pending') stClr = (isWd || isP2PSent) ? '#f43f5e' : '#facc15';
 
-        if (isReversedAirdrop) {
-            bgCls = 'air-reversed';
-            icn = 'ban';
-        }
+        if (isReversedAirdrop) { bgCls = 'air-reversed'; icn = 'ban'; }
+        
         let timerHtml = '';
         if ((isDep || isWd) && tx.Status === 'Pending') {
-            let startTimestamp = new Date(tx.Date).getTime();
+            let startTimestamp = tx.timestamp || tx.Date;
+            let timeVal = 0;
+            if (typeof startTimestamp === 'object' && startTimestamp.seconds) timeVal = startTimestamp.seconds * 1000;
+            else if (typeof startTimestamp === 'string') timeVal = new Date(startTimestamp).getTime();
+            else timeVal = startTimestamp;
+
             timerHtml = `
             <div style="margin-top: 4px; text-align: right;">
-                <span class="live-timer glass-timer" data-time="${startTimestamp}" style="font-size: 0.65rem; color: var(--text-sub);">
+                <span class="live-timer glass-timer" data-time="${timeVal}" style="font-size: 0.65rem; color: var(--text-sub);">
                     <i class="fas fa-clock fa-spin"></i> 00:00:00
                 </span>
             </div>`;
         }
 
-        let displayDate = window.formatTxDate(tx.Date);
+        let displayDate = window.formatTxDate ? window.formatTxDate(tx.Date || tx.timestamp) : (tx.Date || "N/A");
         let orderIdText = tx.Order_ID || tx.TXID || 'N/A';
-
-        // 🔥 TEAM BONUS CARD
-        if (isTeam && tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
-            let namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
-            let uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
-            let handInfo = tType.replace("Team Bonus ", "").replace(/[()]/g, '');
-            
-            tb.innerHTML += `
-            <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
-                <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
-                    <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
-                    <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
-                        <span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
-                        <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-                        <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${orderIdText}</span>
-                            <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText('${orderIdText}', this)" title="Copy ID"></i>
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${handInfo}</span>
-                    <div style="color:${clr}; font-size: 1rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
-                    <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>
-                </div>
-            </div>`;
-            return;
-        }
 
         let extraRemarks = '';
         let extractedName = '';
@@ -2656,9 +2710,7 @@ window.applyTxFilter = (type='All', btn) => {
                     } else {
                         extractedName = textAfterPrefix;
                     }
-                } else {
-                    extractedName = rmk;
-                }
+                } else { extractedName = rmk; }
             } else {
                 extraRemarks = `<span style="font-size:0.7rem; color:var(--text-sub); display:block; line-height: 1.3; white-space: normal; word-wrap: break-word; margin-top: 2px;">${tx.Admin_Remarks}</span>`;
             }
@@ -2668,9 +2720,9 @@ window.applyTxFilter = (type='All', btn) => {
         let displayTitle = (isP2P && extractedName) ? extractedName : tType;
         let displayTypeRight = (isP2P && extractedName) ? tType : ''; 
 
-        // 🔥 GENERAL / P2P CARD
-        tb.innerHTML += `
-        <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
+        // 🔥 Dynamic DOM injection
+        html += `
+        <div class="tx-item tx-item-animated" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
             <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
                 <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
                 <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
@@ -2692,191 +2744,236 @@ window.applyTxFilter = (type='All', btn) => {
             </div>
         </div>`;
     });
+
+    const oldIndicator = document.getElementById('txLoadMoreIndicator');
+    if (oldIndicator) oldIndicator.remove();
+
+    // DOM-এ ডেটা অ্যাড করে সেগুলোকে অবসার্ভারে যুক্ত করা
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    
+    Array.from(tempDiv.children).forEach(child => {
+        tb.appendChild(child);
+        if (window.txIntersectionObserver && child.classList.contains('tx-item-animated')) {
+            window.txIntersectionObserver.observe(child);
+        }
+    });
+
+    window.currentRenderedCount += chunk.length;
+
+    if (window.currentRenderedCount < window.txHistoryData.length) {
+        tb.insertAdjacentHTML('beforeend', `
+            <div id="txLoadMoreIndicator" style="text-align:center; padding: 15px 0; font-size: 0.75rem; color: var(--text-sub);">
+                <i class="fas fa-angle-double-down fa-fade" style="color: var(--primary);"></i> Scroll down to load more
+            </div>
+        `);
+    } else {
+        tb.insertAdjacentHTML('beforeend', `
+            <div style="text-align:center; padding: 15px 0; font-size: 0.7rem; color: var(--text-sub); border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 10px;">
+                End of transactions
+            </div>
+        `);
+    }
+};
+
+// 🔥 ৩. স্ক্রল লিসেনার
+window.attachHistoryScrollListener = () => {
+    const tb = document.getElementById('txHistoryBox');
+    if (!tb) return;
+    
+    tb.removeEventListener('scroll', window.handleHistoryScroll);
+    
+    window.handleHistoryScroll = () => {
+        if (tb.scrollTop + tb.clientHeight >= tb.scrollHeight - 20) {
+            if (window.currentRenderedCount < window.txHistoryData.length) {
+                window.renderTxChunk();
+            }
+        }
+    };
+    
+    tb.addEventListener('scroll', window.handleHistoryScroll);
+};
+
+setTimeout(window.attachHistoryScrollListener, 1000);
+
+// 🔥 ৪. Manual Invalidation
+window.invalidateRecentHistoryCache = () => {
+    if(typeof window.applyTxFilter === 'function') window.applyTxFilter();
 };
 
 // লাইভ টাইমার আপডেট লুপ
 setInterval(() => {
-   document.querySelectorAll('.live-timer').forEach(el => {
-       let startTime = parseInt(el.getAttribute('data-time'));
-       if (!startTime || isNaN(startTime)) return;
-       let diffMs = new Date().getTime() - startTime;
-       if (diffMs < 0) diffMs = 0;
-       let diffSec = Math.floor(diffMs / 1000);
-       let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
-       let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
-       let s = (diffSec % 60).toString().padStart(2, '0');
-       el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem;"></i> ${h}:${m}:${s}`;
-   });
+    document.querySelectorAll('.live-timer').forEach(el => {
+        let startTime = parseInt(el.getAttribute('data-time'));
+        if (!startTime || isNaN(startTime)) return;
+        let diffMs = new Date().getTime() - startTime;
+        if (diffMs < 0) diffMs = 0;
+        let diffSec = Math.floor(diffMs / 1000);
+        let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
+        let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
+        let s = (diffSec % 60).toString().padStart(2, '0');
+        el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem;"></i> ${h}:${m}:${s}`;
+    });
 }, 1000);
 
 // =================================================================================
 // 🚀 INITIALIZATION (HYBRID STORAGE & SWR ARCHITECTURE)
 // =================================================================================
 window.onload = async () => { 
-    window.setDefaultMonth();
+   window.setDefaultMonth();
 
-    const userUid = localStorage.getItem('uid');
-    if (!userUid) return;
+   const userUid = localStorage.getItem('uid');
+   if (!userUid) return;
 
-    // 🔥 NEXUS-1: Run daily reset logic in background (If function exists)
-    if (typeof checkAndResetDailyBalances === 'function') {
-        checkAndResetDailyBalances(window.db, userUid);
-    }
+   // 🔥 NEXUS-1: Run daily reset logic in background
+   if (typeof checkAndResetDailyBalances === 'function') {
+       checkAndResetDailyBalances(window.db, userUid);
+   }
 
-    const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
+   const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
 
-    // ==========================================
-    // 🟢 STEP 1: 1ms COLD START (Load UI instantly from LocalStorage)
-    // ==========================================
-    try {
-        const cachedStaticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-        if (cachedStaticUser.Name) {
-            safeSetText('uName', cachedStaticUser.Name);
-            safeSetText('sbName', cachedStaticUser.Name);
-            safeSetText('uUID', cachedStaticUser.UID || userUid);
-            safeSetText('sbUid', "UID: " + (cachedStaticUser.UID || userUid));
-            
-            const avatarSrc = cachedStaticUser.Avatar || `https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff`;
-            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
-            if(uAvatar) uAvatar.src = avatarSrc;
-            if(sbAvatar) sbAvatar.src = avatarSrc;
-            
-            const lvStyle = window.getLevelStyling(cachedStaticUser.Rank || 0);
-            const pill = document.getElementById('uLevelPill');
-            if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
-            
-            const levelSelect = document.getElementById('levelSelect');
-            if(levelSelect) {
-                levelSelect.value = (cachedStaticUser.Rank !== undefined && cachedStaticUser.Rank !== "") ? cachedStaticUser.Rank : 0; 
-                if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-            }
+   // ==========================================
+   // 🟢 STEP 1: 1ms COLD START (Load UI instantly from LocalStorage)
+   // ==========================================
+   try {
+       const cachedStaticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
+       if (cachedStaticUser.Name) {
+           safeSetText('uName', cachedStaticUser.Name);
+           safeSetText('sbName', cachedStaticUser.Name);
+           safeSetText('uUID', cachedStaticUser.UID || userUid);
+           safeSetText('sbUid', "UID: " + (cachedStaticUser.UID || userUid));
+           
+           const avatarSrc = cachedStaticUser.Avatar || `https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff`;
+           const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
+           if(uAvatar) uAvatar.src = avatarSrc;
+           if(sbAvatar) sbAvatar.src = avatarSrc;
+           
+           const lvStyle = window.getLevelStyling(cachedStaticUser.Rank || 0);
+           const pill = document.getElementById('uLevelPill');
+           if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
+           
+           const levelSelect = document.getElementById('levelSelect');
+           if(levelSelect) {
+               levelSelect.value = (cachedStaticUser.Rank !== undefined && cachedStaticUser.Rank !== "") ? cachedStaticUser.Rank : 0; 
+               if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
+           }
 
-            // Hide loader quickly since UI is populated (1ms perception)
-            const l = document.getElementById('loader'); 
-            if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
-        }
-    } catch(e) { console.warn("Local cache read error", e); }
+           const l = document.getElementById('loader'); 
+           if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
+       }
+   } catch(e) { console.warn("Local cache read error", e); }
 
-    // ==========================================
-    // 🟡 STEP 2: STALE-WHILE-REVALIDATE (Fetch Live API from Backend/Redis)
-    // ==========================================
-    try {
-        // Backend API কল করা হচ্ছে (Redis Caching-এর সুবিধা পেতে)
-        const response = await fetch(`https://tcm-bakend.onrender.com/api/user/init-data?uid=${userUid}`);
-        const result = await response.json();
-        
-        if (result.success && result.data) {
-            const { user, wallet } = result.data;
+   // ==========================================
+   // 🟡 STEP 2: STALE-WHILE-REVALIDATE (Fetch Live API from Backend)
+   // ==========================================
+   try {
+       const response = await fetch(`https://tcm-bakend.onrender.com/api/user/init-data?uid=${userUid}`);
+       const result = await response.json();
+       
+       if (result.success && result.data) {
+           const { user, wallet, transactions } = result.data;
 
-            // Update UI Texts
-            safeSetText('uName', user.Name || 'User');
-            safeSetText('sbName', user.Name || 'User');
-            safeSetText('uUID', userUid);
-            safeSetText('sbUid', "UID: " + userUid);
+           safeSetText('uName', user.Name || 'User');
+           safeSetText('sbName', user.Name || 'User');
+           safeSetText('uUID', userUid);
+           safeSetText('sbUid', "UID: " + userUid);
 
-            const liveAvatar = user.Avatar || `https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff`;
-            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
-            if(uAvatar) uAvatar.src = liveAvatar;
-            if(sbAvatar) sbAvatar.src = liveAvatar;
+           const liveAvatar = user.Avatar || `https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff`;
+           const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
+           if(uAvatar) uAvatar.src = liveAvatar;
+           if(sbAvatar) sbAvatar.src = liveAvatar;
 
-            const lvStyle = window.getLevelStyling(user.Rank || 0);
-            const pill = document.getElementById('uLevelPill');
-            if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
+           const lvStyle = window.getLevelStyling(user.Rank || 0);
+           const pill = document.getElementById('uLevelPill');
+           if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
 
-            const levelSelect = document.getElementById('levelSelect');
-            if(levelSelect) {
-                levelSelect.value = (user.Rank !== undefined && user.Rank !== "") ? user.Rank : 0; 
-                if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-            }
+           const levelSelect = document.getElementById('levelSelect');
+           if(levelSelect) {
+               levelSelect.value = (user.Rank !== undefined && user.Rank !== "") ? user.Rank : 0; 
+               if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
+           }
 
-            // 🔴 RULE 1: Static Data to LocalStorage
-            localStorage.setItem('tcm_static_user', JSON.stringify({
-                Name: user.Name,
-                UID: userUid,
-                Avatar: user.Avatar,
-                Rank: user.Rank,
-                counters: user.counters // Save zero-read flags locally
-            }));
-            
-            // For safe backwards compatibility of other functions
-            localStorage.setItem('tcm_userData', JSON.stringify({Rank: user.Rank || 0}));
+           localStorage.setItem('tcm_static_user', JSON.stringify({
+               Name: user.Name,
+               UID: userUid,
+               Avatar: user.Avatar,
+               Rank: user.Rank,
+               counters: user.counters 
+           }));
+           
+           localStorage.setItem('tcm_userData', JSON.stringify({Rank: user.Rank || 0}));
 
-            // 🔴 RULE 1: Financial Data to RAM ONLY (Never stored in LocalStorage)
-            window.RAM_STATE = {
-                balances: wallet,
-                security: { is2FA: user["2FA_Bound"], isWallet: user.Wallet_Bound },
-                counters: user.counters
-            };
+           window.RAM_STATE = {
+               balances: wallet,
+               security: { is2FA: user["2FA_Bound"], isWallet: user.Wallet_Bound },
+               counters: user.counters
+           };
 
-            // Security Badges UI Update
-            const b2FA = document.getElementById('badge2FA'), bWall = document.getElementById('badgeWallet');
-            window.is2FABound = window.RAM_STATE.security.is2FA;
-            window.isWalletBound = window.RAM_STATE.security.isWallet;
-            
-            if(b2FA) { b2FA.className = window.is2FABound ? "badge glow-green" : "badge glow-red"; b2FA.innerText = window.is2FABound ? "Protected" : "Unbound"; }
-            if(bWall) { bWall.className = window.isWalletBound ? "badge glow-green" : "badge glow-red"; bWall.innerText = window.isWalletBound ? "Protected" : "Unbound"; }
+           const b2FA = document.getElementById('badge2FA'), bWall = document.getElementById('badgeWallet');
+           window.is2FABound = window.RAM_STATE.security.is2FA;
+           window.isWalletBound = window.RAM_STATE.security.isWallet;
+           
+           if(b2FA) { b2FA.className = window.is2FABound ? "badge glow-green" : "badge glow-red"; b2FA.innerText = window.is2FABound ? "Protected" : "Unbound"; }
+           if(bWall) { bWall.className = window.isWalletBound ? "badge glow-green" : "badge glow-red"; bWall.innerText = window.isWalletBound ? "Protected" : "Unbound"; }
 
-            // Update UI with Live Balances
-            window.lastWalletData = window.RAM_STATE.balances; // Legacy support
-            if(typeof window.renderWalletData === 'function') {
-                window.renderWalletData(window.RAM_STATE.balances);
-            }
-            
-            // 🔴 Master Initialization Call (History & Extra syncing)
-            if (typeof window.fetchInitialDataFromAPI === 'function') {
-                window.fetchInitialDataFromAPI();
-            }
+           window.lastWalletData = window.RAM_STATE.balances; 
+           if(typeof window.renderWalletData === 'function') {
+               window.renderWalletData(window.RAM_STATE.balances);
+           }
+           
+           // 🔥 Store Transactions in RAM and Render History
+           window.allTransactions = transactions || [];
+           window.applyTxFilter();
 
-            // Remove Loader (If not removed by Step 1)
-            const l = document.getElementById('loader'); 
-            if(l && l.style.display !== 'none') { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
-        }
-    } catch (err) {
-        console.error("Init Data Fetch Failed:", err);
-        // Fallback: If network fails, remove loader so user can see cached UI
-        const l = document.getElementById('loader'); 
-        if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
-    }
+           if (typeof window.fetchInitialDataFromAPI === 'function') {
+               window.fetchInitialDataFromAPI();
+           }
+
+           const l = document.getElementById('loader'); 
+           if(l && l.style.display !== 'none') { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
+       }
+   } catch (err) {
+       console.error("Init Data Fetch Failed:", err);
+       const l = document.getElementById('loader'); 
+       if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
+   }
 };
 
 // =================================================================================
 // 🔗 MODULE 7: SECURE API CALL HANDLER (Fetch Wrapper)
 // =================================================================================
 window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
-    const controller = new AbortController();
-    // ⏳ FIX 1: 10-Second Timeout (Loader Freeze Fix)
-    const timeoutId = setTimeout(() => controller.abort(), 10000); 
-    
-    const options = {
-        method,
-        headers: { 
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Secure Token verification
-        },
-        signal: controller.signal
-    };
-    if (body) options.body = JSON.stringify(body);
-    
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-        clearTimeout(timeoutId);
-        
-        // 🚨 FIX 2: Global Interceptor for Expired Token (Zombie Login Fix)
-        if (response.status === 401 || response.status === 403) { 
-            window.logout(); 
-            return { success: false, message: "Session Expired. Please login again." }; 
-        }
-        return await response.json();
-    } catch (error) {
-        clearTimeout(timeoutId);
-        console.error(`API Error (${endpoint}):`, error);
-        
-        // ⚡ Timeout Error Handling
-        if (error.name === 'AbortError') {
-            return { success: false, message: "Connection Timeout. Server is unreachable." };
-        }
-        return { success: false, message: "Network Error! Server might be down." };
-    }
+   const controller = new AbortController();
+   const timeoutId = setTimeout(() => controller.abort(), 10000); 
+   
+   const options = {
+       method,
+       headers: { 
+           'Content-Type': 'application/json',
+           'Authorization': `Bearer ${localStorage.getItem('token')}` // Secure Token verification
+       },
+       signal: controller.signal
+   };
+   if (body) options.body = JSON.stringify(body);
+   
+   try {
+       const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+       clearTimeout(timeoutId);
+       
+       if (response.status === 401 || response.status === 403) { 
+           window.logout(); 
+           return { success: false, message: "Session Expired. Please login again." }; 
+       }
+       return await response.json();
+   } catch (error) {
+       clearTimeout(timeoutId);
+       console.error(`API Error (${endpoint}):`, error);
+       
+       if (error.name === 'AbortError') {
+           return { success: false, message: "Connection Timeout. Server is unreachable." };
+       }
+       return { success: false, message: "Network Error! Server might be down." };
+   }
 };
 // =================================================================================
 // 💎 MODULE 8: NFT ENGINE (RESERVE, SELL, PROFIT & COOLDOWN SCANNER)
@@ -4302,199 +4399,276 @@ window.closeCameraScanner = () => {
        }
    }
 };
+
 // =================================================================================
-// 👥 MODULE 12: TEAM NETWORK & TEAM BONUS FILTER ENGINE (🔥 DATE BUG FIXED)
+// 👥 MODULE 12: TEAM NETWORK & TEAM BONUS FILTER ENGINE (RESTORED & PAGINATED)
 // =================================================================================
+
+// 🔥 STATE MANAGEMENT FOR MICRO-PAGINATION
+window.teamNetworkData = { A: [], B: [], C: [] };
+window.teamNetworkLimits = { A: 5, B: 5, C: 5 };
+window.teamBonusData = [];
+window.teamBonusLimit = 5;
+
+// 🔥 RESTORED: Original Local Filtering logic with 5-item Pagination
 window.renderTeamBonusHistory = () => {
-   const bonusBox = document.getElementById('teamBonusHistoryBox');
-   const monthPicker = document.getElementById('teamBonusMonthFilter');
-   if (!bonusBox) return;
+    const bonusBox = document.getElementById('teamBonusHistoryBox');
+    const monthPicker = document.getElementById('teamBonusMonthFilter');
+    if (!bonusBox) return;
 
-   const selectedMonthValue = monthPicker ? monthPicker.value : '';
+    let selectedMonthValue = monthPicker ? monthPicker.value : '';
 
-   if (!window.allTransactions || !Array.isArray(window.allTransactions)) {
-       bonusBox.innerHTML = `<div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-sub);">No records available.</div>`;
-       return;
-   }
+    // If no data exists globally
+    if (!window.allTransactions || !Array.isArray(window.allTransactions)) {
+        bonusBox.innerHTML = `<div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-sub);">No records available.</div>`;
+        return;
+    }
 
-   let teamTx = window.allTransactions.filter(tx => {
-       if (!tx.Type || !tx.Type.includes('Team Bonus')) return false;
+    // Filter local transactions
+    window.teamBonusData = window.allTransactions.filter(tx => {
+        if (!tx.Type || !tx.Type.includes('Team Bonus')) return false;
 
-       if (selectedMonthValue) {
-           const [targetYear, targetMonth] = selectedMonthValue.split('-');
-           let txDateObj;
-           
-           if (tx.timestamp && typeof tx.timestamp.toDate === 'function') {
-               txDateObj = tx.timestamp.toDate();
-           } else if (tx.timestamp && tx.timestamp.seconds) {
-               txDateObj = new Date(tx.timestamp.seconds * 1000);
-           } else if (tx.Date) {
-               let datePart = tx.Date.split(' ')[0];
-               let p = datePart.split(/[-/]/); 
-               
-               if (p.length === 3 && p[0].length <= 2) {
-                   txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`); 
-               } else {
-                   txDateObj = new Date(tx.Date);
-               }
-           }
+        if (selectedMonthValue) {
+            const [targetYear, targetMonth] = selectedMonthValue.split('-');
+            let txDateObj;
+            
+            if (tx.timestamp && typeof tx.timestamp.toDate === 'function') {
+                txDateObj = tx.timestamp.toDate();
+            } else if (tx.timestamp && tx.timestamp.seconds) {
+                txDateObj = new Date(tx.timestamp.seconds * 1000);
+            } else if (tx.Date) {
+                let datePart = String(tx.Date).split(' ')[0];
+                let p = datePart.split(/[-/]/); 
+                if (p.length === 3 && p[0].length <= 2) {
+                    txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`); 
+                } else {
+                    txDateObj = new Date(tx.Date);
+                }
+            }
 
-           if (!txDateObj || isNaN(txDateObj)) {
-               txDateObj = new Date(0); 
-           }
+            if (!txDateObj || isNaN(txDateObj)) { txDateObj = new Date(0); }
 
-           let txYear = txDateObj.getFullYear().toString();
-           let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
-           if (txYear !== targetYear || txMonth !== targetMonth) return false;
-       }
-       return true;
-   });
+            let txYear = txDateObj.getFullYear().toString();
+            let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
+            if (txYear !== targetYear || txMonth !== targetMonth) return false;
+        }
+        return true;
+    });
 
-   if (teamTx.length === 0) {
-       let monthName = "this month";
-       if (selectedMonthValue) {
-           const [y, m] = selectedMonthValue.split('-');
-           const dateObj = new Date(y, m - 1);
-           monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-       }
+    // Check if empty after filtering
+    if (window.teamBonusData.length === 0) {
+        let monthName = "this month";
+        if (selectedMonthValue) {
+            const [y, m] = selectedMonthValue.split('-');
+            const dateObj = new Date(y, m - 1);
+            monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        }
 
-       bonusBox.innerHTML = `
-       <div style="text-align: center; padding: 25px 15px; animation: fadeIn 0.4s ease;">
-           <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 1px dashed rgba(255,255,255,0.1);">
-               <i class="fas fa-users-slash" style="font-size: 1.3rem; color: var(--text-sub); opacity: 0.7;"></i>
-           </div>
-           <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 0.95rem; font-weight: 700;">No Records Found</h3>
-           <p style="color: var(--text-sub); font-size: 0.78rem; max-width: 260px; margin: 0 auto; line-height: 1.4;">
-               There are no team bonus records available in your ledger for <strong style="color: var(--primary);">${monthName}</strong>.
-           </p>
-       </div>
-       `;
-       return;
-   }
+        bonusBox.innerHTML = `
+        <div style="text-align: center; padding: 25px 15px; animation: fadeIn 0.4s ease;">
+            <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 1px dashed rgba(255,255,255,0.1);">
+                <i class="fas fa-users-slash" style="font-size: 1.3rem; color: var(--text-sub); opacity: 0.7;"></i>
+            </div>
+            <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 0.95rem; font-weight: 700;">No Records Found</h3>
+            <p style="color: var(--text-sub); font-size: 0.78rem; max-width: 260px; margin: 0 auto; line-height: 1.4;">
+                There are no team bonus records available in your ledger for <strong style="color: var(--primary);">${monthName}</strong>.
+            </p>
+        </div>`;
+        return;
+    }
 
-   let html = '';
-   teamTx.forEach(tx => {
-       let namePart = "User";
-       let uidPart = "---";
-       if (tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
-           namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
-           uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
-       }
-       
-       let handInfo = tx.Type.replace("Team Bonus ", "").replace(/[()]/g, '');
-       let displayDate = window.formatTxDate(tx.Date || tx.timestamp);
-
-       html += `
-       <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border);">
-           <div style="display: flex; gap: 10px; flex: 1; min-width: 0;">
-               <div class="tx-icon" style="flex-shrink: 0; margin-top: 2px; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
-                   <i class="fas fa-users"></i>
-               </div>
-               <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                   <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
-                   <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
-                   <span style="font-size: 0.60rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-               </div>
-           </div>
-           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-               <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary); background: rgba(0,245,255,0.1); padding: 2px 6px; border-radius: 6px;">${handInfo}</span>
-               <div style="color:var(--success); font-size: 0.95rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
-           </div>
-       </div>`;
-   });
-   
-   html += `<div style="text-align:center; padding: 15px 0; font-size: 0.7rem; color: var(--text-sub); border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 5px;">End of list for this month</div>`;
-   bonusBox.innerHTML = html;
+    // Reset Limit and Render First 5
+    window.teamBonusLimit = 5;
+    window.renderTeamBonusChunk();
 };
 
-window.openTeamModal = async () => {
-   try {
-       window.openModal('teamModal');
-       const loader = document.getElementById('teamLoader');
-       const dataBox = document.getElementById('teamDataBox');
-       
-       if(loader) loader.style.display = 'block';
-       if(loader) loader.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--primary); font-size: 1.5rem;"></i><br><span style="font-size:0.8rem; color:var(--text-sub);">Scanning network & balances...</span>`;
-       if(dataBox) dataBox.style.display = 'none';
-       
-       const monthPicker = document.getElementById('teamBonusMonthFilter');
-       if (monthPicker && !monthPicker.value) {
-           const d = new Date();
-           monthPicker.value = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-       }
+// 🔥 RENDER CHUNK FOR TEAM BONUS (5 AT A TIME)
+window.renderTeamBonusChunk = () => {
+    const bonusBox = document.getElementById('teamBonusHistoryBox');
+    if (!bonusBox) return;
 
-       const myUid = localStorage.getItem('uid');
-       
-       // 🔥 30-Min Cache Logic (Zero Database Read)
-       let netResult = null;
-       const cachedTeam = JSON.parse(localStorage.getItem('tcm_team_cache') || '{"time":0}');
-       if (Date.now() - cachedTeam.time < 30 * 60 * 1000 && cachedTeam.data) {
-           netResult = cachedTeam.data;
-       } else {
-           netResult = await window.fetchAPI(`/team/network?uid=${myUid}`);
-           if(netResult && netResult.success) {
-               localStorage.setItem('tcm_team_cache', JSON.stringify({ time: Date.now(), data: netResult }));
-           }
-       }
+    let html = '';
+    const currentData = window.teamBonusData.slice(0, window.teamBonusLimit);
 
-       if (netResult && netResult.success) {
-           const handA = netResult.data.handA;
-           const handB = netResult.data.handB;
-           const handC = netResult.data.handC;
+    currentData.forEach(tx => {
+        let namePart = "User";
+        let uidPart = "---";
+        if (tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
+            namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
+            uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
+        }
+        
+        let handInfo = (tx.Type || "Team Bonus").replace("Team Bonus ", "").replace(/[()]/g, '');
+        let displayDate = window.formatTxDate(tx.Date || tx.timestamp);
 
-           const renderHand = (handData) => {
-               if (!handData || !handData.users || handData.users.length === 0) return `<div style="text-align:center; padding:15px; font-size:0.8rem; color:var(--text-sub);">No active members found in this hand</div>`;
-               let html = '';
-               handData.users.forEach(u => {
-                   html += `
-                   <div class="team-user-row" style="background:rgba(0,0,0,0.15); padding:10px 12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.02);">
-                       <div>
-                           <span class="team-u-name" style="font-weight:700; color:var(--text-main); display:block; margin-bottom:2px;"><i class="fas fa-user-circle" style="color:var(--text-sub); margin-right:4px;"></i>${u.name}</span>
-                           <span class="team-u-id" style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">UID: ${u.uid}</span>
-                       </div>
-                       <div style="text-align: right;">
-                           <span class="team-u-rank" style="font-size:0.6rem; padding:2px 6px; border-radius:6px; background:rgba(0, 245, 255, 0.1); color:var(--primary); font-weight:600; display:inline-block; margin-bottom:4px;">LV ${u.rank}</span>
-                           <div style="font-size: 0.8rem; color: var(--success); font-weight: 700; font-family:monospace;">${u.balance.toFixed(2)} ₮</div>
-                       </div>
-                   </div>`;
-               });
-               return html;
-           };
+        html += `
+        <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; gap: 10px; flex: 1; min-width: 0;">
+                <div class="tx-icon" style="flex-shrink: 0; margin-top: 2px; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
+                    <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
+                    <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
+                    <span style="font-size: 0.60rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
+                <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary); background: rgba(0,245,255,0.1); padding: 2px 6px; border-radius: 6px;">${handInfo}</span>
+                <div style="color:var(--success); font-size: 0.95rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
+            </div>
+        </div>`;
+    });
 
-           document.getElementById('tAMem').innerText = `${handA.count} Users`;
-           document.getElementById('tARes').innerText = `${handA.volume.toFixed(2)} ₮`;
-           document.getElementById('listABox').innerHTML = renderHand(handA);
-           
-           document.getElementById('tBMem').innerText = `${handB.count} Users`;
-           document.getElementById('tBRes').innerText = `${handB.volume.toFixed(2)} ₮`;
-           document.getElementById('listBBox').innerHTML = renderHand(handB);
-           
-           document.getElementById('tCMem').innerText = `${handC.count} Users`;
-           document.getElementById('tCRes').innerText = `${handC.volume.toFixed(2)} ₮`;
-           document.getElementById('listCBox').innerHTML = renderHand(handC);
+    if (window.teamBonusLimit < window.teamBonusData.length) {
+        const remaining = window.teamBonusData.length - window.teamBonusLimit;
+        const nextLoad = remaining >= 5 ? 5 : remaining;
+        html += `<button style="width:100%; margin-top:10px; padding:10px; border-radius:10px; border:1px dashed var(--primary); background:transparent; color:var(--primary); font-weight:700; cursor:pointer;" onclick="window.loadMoreTeamBonus()">Load More (+${nextLoad})</button>`;
+    } else {
+        html += `<div style="text-align:center; padding: 15px 0; font-size: 0.7rem; color: var(--text-sub); border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 5px;">End of list for this month</div>`;
+    }
 
-           window.renderTeamBonusHistory();
+    bonusBox.innerHTML = html;
+};
 
-           if(loader) loader.style.display = 'none';
-           if(dataBox) dataBox.style.display = 'flex';
-           document.querySelectorAll('.team-hand-box span').forEach(el => {
-               if(el.innerText === 'Total Reserve:') el.innerText = 'Total Wallet:';
-           });
-       } else {
-           if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Connection Error: ${netResult?.message || "Failed to fetch"}</div>`;
-       }
-   } catch (error) {
-       console.error("Team Modal Error:", error);
-       const loader = document.getElementById('teamLoader');
-       if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Error loading data.</div>`;
-   }
+window.loadMoreTeamBonus = () => {
+    window.teamBonusLimit += 5;
+    window.renderTeamBonusChunk();
+};
+
+// 🔥 RENDER CHUNK FOR TEAM HANDS (5 AT A TIME)
+window.renderHandChunk = (hand, boxId) => {
+    const box = document.getElementById(boxId);
+    if (!box) return;
+
+    const users = window.teamNetworkData[hand] || [];
+    const limit = window.teamNetworkLimits[hand];
+    const currentUsers = users.slice(0, limit);
+
+    if (users.length === 0) {
+        box.innerHTML = `<div style="text-align:center; padding:15px; font-size:0.8rem; color:var(--text-sub);">No active members found in this hand</div>`;
+        return;
+    }
+
+    let html = '';
+    currentUsers.forEach(u => {
+        html += `
+        <div class="team-user-row" style="background:rgba(0,0,0,0.15); padding:10px 12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.02);">
+            <div>
+                <span class="team-u-name" style="font-weight:700; color:var(--text-main); display:block; margin-bottom:2px;"><i class="fas fa-user-circle" style="color:var(--text-sub); margin-right:4px;"></i>${u.name}</span>
+                <span class="team-u-id" style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">UID: ${u.uid}</span>
+            </div>
+            <div style="text-align: right;">
+                <span class="team-u-rank" style="font-size:0.6rem; padding:2px 6px; border-radius:6px; background:rgba(0, 245, 255, 0.1); color:var(--primary); font-weight:600; display:inline-block; margin-bottom:4px;">LV ${u.rank}</span>
+                <div style="font-size: 0.8rem; color: var(--success); font-weight: 700; font-family:monospace;">${parseFloat(u.balance || 0).toFixed(2)} ₮</div>
+            </div>
+        </div>`;
+    });
+
+    if (limit < users.length) {
+        const remaining = users.length - limit;
+        const nextLoad = remaining >= 5 ? 5 : remaining;
+        html += `<button style="width:100%; margin-top:10px; padding:10px; border-radius:10px; border:1px dashed var(--primary); background:transparent; color:var(--primary); font-weight:700; cursor:pointer;" onclick="window.loadMoreTeamHand('${hand}', '${boxId}')">Load More (+${nextLoad})</button>`;
+    }
+
+    box.innerHTML = html;
+};
+
+window.loadMoreTeamHand = (hand, boxId) => {
+    window.teamNetworkLimits[hand] += 5;
+    window.renderHandChunk(hand, boxId);
+};
+
+window.openTeamModal = async (forceSync = false) => {
+    try {
+        window.openModal('teamModal');
+        const loader = document.getElementById('teamLoader');
+        const dataBox = document.getElementById('teamDataBox');
+        
+        if(loader) loader.style.display = 'block';
+        if(loader) loader.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--primary); font-size: 1.5rem;"></i><br><span style="font-size:0.8rem; color:var(--text-sub);">Scanning network & balances...</span>`;
+        if(dataBox) dataBox.style.display = 'none';
+        
+        const monthPicker = document.getElementById('teamBonusMonthFilter');
+        if (monthPicker && !monthPicker.value) {
+            const d = new Date();
+            monthPicker.value = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+        }
+
+        const myUid = localStorage.getItem('uid');
+        
+        // 🔥 EVENT-DRIVEN CACHE INVALIDATION
+        let localCacheTime = 0;
+        let cachedTeam = null;
+        try {
+            const parsedCache = JSON.parse(localStorage.getItem('tcm_team_cache'));
+            if (parsedCache && parsedCache.time) {
+                localCacheTime = parsedCache.time;
+                cachedTeam = parsedCache;
+            }
+        } catch(e) {}
+
+        if (forceSync) localCacheTime = 0; // Force bypass cache
+
+        const response = await window.fetchAPI(`/team/network?uid=${myUid}&lastCachedTime=${localCacheTime}`);
+        let netResult = null;
+
+        if (response && response.status === 'unchanged' && cachedTeam) {
+            netResult = cachedTeam.data;
+            if (forceSync) window.showToast("Data is already up to date!");
+        } else if (response && response.success) {
+            netResult = response;
+            localStorage.setItem('tcm_team_cache', JSON.stringify({ time: Date.now(), data: netResult }));
+            if (forceSync) window.showToast("Network tree synced with server!");
+        }
+
+        if (netResult && netResult.success) {
+            const handA = netResult.data.handA || { users: [], count: 0, volume: 0 };
+            const handB = netResult.data.handB || { users: [], count: 0, volume: 0 };
+            const handC = netResult.data.handC || { users: [], count: 0, volume: 0 };
+
+            // Reset pagination limits to exactly 5
+            window.teamNetworkLimits = { A: 5, B: 5, C: 5 };
+            window.teamNetworkData = {
+                A: handA.users || [],
+                B: handB.users || [],
+                C: handC.users || []
+            };
+
+            document.getElementById('tAMem').innerText = `${handA.count || window.teamNetworkData.A.length} Users`;
+            document.getElementById('tARes').innerText = `${(handA.volume || 0).toFixed(2)} ₮`;
+            window.renderHandChunk('A', 'listABox');
+            
+            document.getElementById('tBMem').innerText = `${handB.count || window.teamNetworkData.B.length} Users`;
+            document.getElementById('tBRes').innerText = `${(handB.volume || 0).toFixed(2)} ₮`;
+            window.renderHandChunk('B', 'listBBox');
+            
+            document.getElementById('tCMem').innerText = `${handC.count || window.teamNetworkData.C.length} Users`;
+            document.getElementById('tCRes').innerText = `${(handC.volume || 0).toFixed(2)} ₮`;
+            window.renderHandChunk('C', 'listCBox');
+
+            // Render history locally (no dead API calls)
+            window.renderTeamBonusHistory();
+
+            if(loader) loader.style.display = 'none';
+            if(dataBox) dataBox.style.display = 'flex';
+            document.querySelectorAll('.team-hand-box span').forEach(el => {
+                if(el.innerText === 'Total Reserve:') el.innerText = 'Total Wallet:';
+            });
+        } else {
+            if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Connection Error: ${response?.message || "Failed to fetch"}</div>`;
+        }
+    } catch (error) {
+        console.error("Team Modal Error:", error);
+        const loader = document.getElementById('teamLoader');
+        if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Error loading data.</div>`;
+    }
 };
 
 window.toggleTeamList = (hand) => {
-   const box = document.getElementById(`list${hand}Box`);
-   if(box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
+    const box = document.getElementById(`list${hand}Box`);
+    if(box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
 };
-
 // =================================================================================
 // 📸 MODULE 13: SMART AVATAR UPLOAD & MANAGEMENT ENGINE (API DRIVEN)
 // =================================================================================
@@ -5377,8 +5551,9 @@ document.addEventListener("visibilitychange", () => {
         if (typeof window.initLiveChat === 'function') window.initLiveChat();
     }
 });
+
 // =================================================================================
-// 📈 MODULE 19: ASSETS ANALYTICS & TEAM RADAR (SYNCED WITH EXISTING SERVER.JS)
+// 📈 MODULE 19: ASSETS ANALYTICS & TEAM RADAR (RESTORED COMPLETELY)
 // =================================================================================
 window.myChartInstance = null;
 window.teamChartInstance = null;
@@ -5398,7 +5573,8 @@ window.switchAssetMode = (mode) => {
         } else {
             document.getElementById('btnTeamRadar').classList.add('active');
             document.getElementById('assetModeTeam').style.display = 'block';
-            window.syncTeamLedger(); 
+            // Sync with cache (no force hit)
+            window.syncTeamLedger(false); 
         }
     } catch(e) { console.error("Asset Mode Switch Error:", e); }
 };
@@ -5455,7 +5631,7 @@ window.initAssetsUI = () => {
             }
         }
 
-        // ২. True Portfolio Value Calculation (Main + Locked + NFT)
+        // ২. True Portfolio Value Calculation
         let mainBal = parseFloat(window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances.Main_Balance : 0);
         let lockedBal = parseFloat(window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances.Locked_Balance : 0);
         let activeNftVal = window.reservedNFT ? parseFloat(window.reservedNFT.price || 0) : 0;
@@ -5464,20 +5640,16 @@ window.initAssetsUI = () => {
         const elTotal = document.getElementById('assetTotalValue');
         if(elTotal) elTotal.innerHTML = `${window.formatMagicNumber(trueTotal)} <span style="font-size:1.4rem; color:var(--primary);">₮</span>`;
 
-        // 🔥 NEW FIX: Calculate Lifetime Income & Withdrawal directly from Database
+        // ৩. Lifetime Income Calculation
         let balances = window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances : {};
-        
-        // উইথড্রলটা সরাসরি ফায়ারবেস থেকে আসবে (যাতে কোনো পুরনো হিসেব বাদ না পড়ে)
         let lifetimeWithdraw = parseFloat(balances.Total_Withdrawal || balances.Total_Withdraw || 0);
 
-        // ইনকামটা সরাসরি ডাটাবেস থেকে আসবে
         let tE = parseFloat(balances.Total_Earn || 0);
         let tR = parseFloat(balances.Total_Reserve || 0);
         let tS = parseFloat(balances.Total_Stake || 0);
         let tA = parseFloat(balances.Total_Airdrop || 0);
         let tTeam = parseFloat(balances.Total_Team || 0);
         
-        // টোটাল কমপ্রিহেন্সিভ ইনকাম 
         let lifetimeIncome = tE + tR + tS + tA + tTeam;
 
         const elInc = document.getElementById('assetTotalIncome');
@@ -5485,7 +5657,7 @@ window.initAssetsUI = () => {
         if(elInc) elInc.innerText = `${window.formatMagicNumber(lifetimeIncome)} ₮`;
         if(elWd) elWd.innerText = `${window.formatMagicNumber(lifetimeWithdraw)} ₮`;
 
-        // ৩. Render Chart & Pass Total for Growth Calculation
+        // ৪. Render Chart
         if(document.getElementById('assetModeMy') && document.getElementById('assetModeMy').style.display !== 'none') {
             window.renderMyAnalyticsChart(trueTotal); 
         }
@@ -5509,7 +5681,7 @@ if (!window.tcmAssetsHooked) {
     window.showSection = window.switchTab;
 }
 
-// 📈 Chart 1: My Analytics (PREMIUM BINANCE STYLE)
+// 📈 Chart 1: My Analytics
 window.currentChartTimeframe = '1W';
 
 window.updateChartTimeframe = (timeframe, btn) => {
@@ -5534,11 +5706,10 @@ window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
         today.setHours(23, 59, 59, 999);
         let startDate = new Date();
 
-        // Timeframe Logic (1 Day, 1 Week, 1 Month, All)
         let points = 7;
         if (window.currentChartTimeframe === '1D') {
             startDate.setHours(0, 0, 0, 0);
-            points = 6; // Show data every 4 hours
+            points = 6;
             for(let i=0; i<=points; i++) {
                 let d = new Date(startDate); d.setHours(i * 4);
                 labels.push(d.toLocaleTimeString('en-US', {hour:'numeric', hour12:true}));
@@ -5554,7 +5725,7 @@ window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
             }
         } else if (window.currentChartTimeframe === '1M') {
             startDate.setDate(today.getDate() - 29); startDate.setHours(0, 0, 0, 0);
-            points = 5; // Show data every 5 days
+            points = 5;
             for(let i=points; i>=0; i--){
                 let d = new Date(); d.setDate(d.getDate() - (i*5));
                 labels.push(`${d.getDate()} ${d.toLocaleString('en-US',{month:'short'})}`);
@@ -5584,7 +5755,7 @@ window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
                     } else if(window.currentChartTimeframe === '1M') {
                         index = 5 - Math.floor((today - txDate) / (1000 * 60 * 60 * 24 * 5));
                     } else {
-                        index = 6; // All time lumps into recent for now, ideally mapped properly
+                        index = 6;
                     }
                     
                     if(index >= 0 && index < incData.length) {
@@ -5596,7 +5767,6 @@ window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
             });
         }
 
-        // 🔥 Dynamic Growth Badge (Only updates on initial load, not filter clicks)
         if (!isUpdate && trueTotal !== null) {
             let badgeEl = document.querySelector('.ph-badge');
             if (badgeEl) {
@@ -5616,7 +5786,6 @@ window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
             }
         }
 
-        // 🎨 Premium Gradients
         let gradInc = ctx.createLinearGradient(0, 0, 0, 240);
         gradInc.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); gradInc.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
         let gradDep = ctx.createLinearGradient(0, 0, 0, 240);
@@ -5659,20 +5828,88 @@ window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
         });
     } catch(e) { console.error("My Analytics Chart Error:", e); }
 };
-// 📋 Network Ledger (Uses your EXISTING /api/team/network route)
-window.syncTeamLedger = async () => {
+
+// 📋 Network Ledger (DOM PAGINATION ADDED)
+window.teamLedgerData = [];
+window.teamLedgerLimit = 50; // 50 জন করে লোড হবে
+
+window.renderLedgerChunk = () => {
+    const tbody = document.getElementById('teamLedgerBody');
+    if (!tbody) return;
+
+    if (window.teamLedgerData.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">No active network members found</td></tr>';
+        return;
+    }
+
+    const currentUsers = window.teamLedgerData.slice(0, window.teamLedgerLimit);
+    let html = '';
+
+    currentUsers.forEach(m => {
+        let tDep = parseFloat(m.Total_Deposit || m.totalDeposit || 0);
+        let tEarn = parseFloat(m.Total_Earn || m.totalEarn || 0);
+        let tWd = parseFloat(m.Total_Withdrawal || m.Total_Withdraw || m.totalWithdraw || 0);
+        let bal = parseFloat(m.Main_Balance || m.balance || 0);
+
+        let perfHtml = '<span style="background:rgba(255,255,255,0.05); color:var(--text-sub); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(255,255,255,0.1); display:inline-block;"><i class="fas fa-circle-notch"></i> Neutral</span>';
+        
+        if (tWd > 0 && tDep > 0) {
+            let ratio = tWd / tDep;
+            if (ratio < 0.5) {
+                perfHtml = '<span style="background:rgba(16, 185, 129, 0.1); color:var(--success); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(16, 185, 129, 0.3); box-shadow:0 0 10px rgba(16, 185, 129, 0.2); display:inline-block;"><i class="fas fa-arrow-up"></i> Good</span>';
+            }
+            else if (ratio > 1.2) {
+                perfHtml = '<span style="background:rgba(244, 63, 94, 0.15); color:var(--error); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px dashed var(--error); box-shadow:0 0 15px rgba(244, 63, 94, 0.5); animation: blinkRed 1.5s infinite; display:inline-block;"><i class="fas fa-arrow-down"></i> Risky</span>';
+            }
+            else {
+                perfHtml = '<span style="background:rgba(250, 204, 21, 0.1); color:var(--warning); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(250, 204, 21, 0.3); box-shadow:0 0 10px rgba(250, 204, 21, 0.2); display:inline-block;"><i class="fas fa-minus"></i> Stable</span>';
+            }
+        } else if (tDep > 0 && tWd === 0) {
+             perfHtml = '<span style="background:rgba(192, 38, 211, 0.15); color:#e879f9; padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(192, 38, 211, 0.4); box-shadow:0 0 15px rgba(192, 38, 211, 0.3); display:inline-block;"><i class="fas fa-star"></i> Holder</span>';
+        }
+
+        html += `<tr>
+            <td>
+                <span style="font-weight:800; font-size:0.9rem;">${m.name || 'User'}</span>
+                <span class="lt-uid">ID: ${m.uid} <span style="color:var(--primary);">| LV${m.rank || 0}</span></span>
+            </td>
+            <td style="color:var(--success); font-weight:700;">${tDep.toFixed(2)} ₮</td>
+            <td style="color:var(--primary); font-weight:700;">${tEarn.toFixed(2)} ₮</td>
+            <td style="color:var(--primary); font-family:monospace; font-weight:800;">${bal.toFixed(2)} ₮</td>
+            <td style="color:var(--error); font-weight:700;">${tWd.toFixed(2)} ₮</td>
+            <td>${perfHtml}</td>
+        </tr>`;
+    });
+    
+    if (window.teamLedgerLimit < window.teamLedgerData.length) {
+        const remaining = window.teamLedgerData.length - window.teamLedgerLimit;
+        html += `<tr><td colspan="6" style="text-align:center; padding:15px; border-top: 1px dashed rgba(255,255,255,0.1);">
+            <button style="width:100%; max-width:300px; margin: 0 auto; background:transparent; color:var(--primary); border:1px dashed var(--primary); padding: 10px; border-radius: 12px; font-weight: 700; cursor: pointer;" onclick="window.loadMoreLedger()">Load More (+${remaining})</button>
+        </td></tr>`;
+    }
+    
+    tbody.innerHTML = html;
+};
+
+window.loadMoreLedger = () => {
+    window.teamLedgerLimit += 50;
+    window.renderLedgerChunk();
+};
+
+window.syncTeamLedger = async (forceSync = true) => {
     try {
         const tbody = document.getElementById('teamLedgerBody');
         if(!tbody) return;
         
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><br><span style="font-size:0.8rem; color:var(--text-sub); display:block; margin-top:10px;">Syncing with Node Server...</span></td></tr>';
+        if (forceSync) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><br><span style="font-size:0.8rem; color:var(--text-sub); display:block; margin-top:10px;">Syncing with Node Server...</span></td></tr>';
         
         const uid = localStorage.getItem('uid');
         
-        // 🔥 30-Min Cache Logic (Zero Database Read)
+        // 🔥 FIX: FORCE SYNC LOGIC (Cache Bypass)
         let result = null;
         const cachedTeam = JSON.parse(localStorage.getItem('tcm_team_cache') || '{"time":0}');
-        if (Date.now() - cachedTeam.time < 30 * 60 * 1000 && cachedTeam.data) {
+        
+        if (!forceSync && Date.now() - cachedTeam.time < 30 * 60 * 1000 && cachedTeam.data) {
             result = cachedTeam.data;
         } else {
             result = await window.fetchAPI(`/team/network?uid=${uid}`);
@@ -5682,63 +5919,18 @@ window.syncTeamLedger = async () => {
         }
         
         if (result && result.success && result.data) {
-            let allUsers = [];
+            window.teamLedgerData = [];
             let volA = 0, volB = 0, volC = 0;
 
-            if (result.data.handA) { allUsers.push(...result.data.handA.users); volA = result.data.handA.volume || 0; }
-            if (result.data.handB) { allUsers.push(...result.data.handB.users); volB = result.data.handB.volume || 0; }
-            if (result.data.handC) { allUsers.push(...result.data.handC.users); volC = result.data.handC.volume || 0; }
+            if (result.data.handA) { window.teamLedgerData.push(...(result.data.handA.users || [])); volA = result.data.handA.volume || 0; }
+            if (result.data.handB) { window.teamLedgerData.push(...(result.data.handB.users || [])); volB = result.data.handB.volume || 0; }
+            if (result.data.handC) { window.teamLedgerData.push(...(result.data.handC.users || [])); volC = result.data.handC.volume || 0; }
 
-            if(allUsers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">No active network members found</td></tr>';
-            } else {
-                let html = '';
-                allUsers.forEach(m => {
-                    // 🔥 ডেটা প্রসেসিং (Direct Firebase Keys mapping)
-                    let tDep = parseFloat(m.Total_Deposit || m.totalDeposit || 0);
-                    let tEarn = parseFloat(m.Total_Earn || m.totalEarn || 0);
-                    let tWd = parseFloat(m.Total_Withdrawal || m.Total_Withdraw || m.totalWithdraw || 0);
-                    let bal = parseFloat(m.Main_Balance || m.balance || 0);
+            // Reset Limit and Render Initial Chunk
+            window.teamLedgerLimit = 50;
+            window.renderLedgerChunk();
 
-                    // 🔥 মিনি সাইবার হেলথ ব্যাজ (Performance) লজিক
-                    let perfHtml = '<span style="background:rgba(255,255,255,0.05); color:var(--text-sub); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(255,255,255,0.1); display:inline-block;"><i class="fas fa-circle-notch"></i> Neutral</span>';
-                    
-                    if (tWd > 0 && tDep > 0) {
-                        let ratio = tWd / tDep;
-                        if (ratio < 0.5) {
-                            // 🟢 Good: Soft Green Glow
-                            perfHtml = '<span style="background:rgba(16, 185, 129, 0.1); color:var(--success); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(16, 185, 129, 0.3); box-shadow:0 0 10px rgba(16, 185, 129, 0.2); display:inline-block;"><i class="fas fa-arrow-up"></i> Good</span>';
-                        }
-                        else if (ratio > 1.2) {
-                            // 🔴 Risky: Red Pulse/Blink (সিস্টেম ড্রেইনার)
-                            perfHtml = '<span style="background:rgba(244, 63, 94, 0.15); color:var(--error); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px dashed var(--error); box-shadow:0 0 15px rgba(244, 63, 94, 0.5); animation: blinkRed 1.5s infinite; display:inline-block;"><i class="fas fa-arrow-down"></i> Risky</span>';
-                        }
-                        else {
-                            // 🟡 Stable: Yellow Glow
-                            perfHtml = '<span style="background:rgba(250, 204, 21, 0.1); color:var(--warning); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(250, 204, 21, 0.3); box-shadow:0 0 10px rgba(250, 204, 21, 0.2); display:inline-block;"><i class="fas fa-minus"></i> Stable</span>';
-                        }
-                    } else if (tDep > 0 && tWd === 0) {
-                         // 🟣 Holder: Pink/Purple Glow (স্ট্রং ইনভেস্টর)
-                         perfHtml = '<span style="background:rgba(192, 38, 211, 0.15); color:#e879f9; padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(192, 38, 211, 0.4); box-shadow:0 0 15px rgba(192, 38, 211, 0.3); display:inline-block;"><i class="fas fa-star"></i> Holder</span>';
-                    }
-
-                    html += `<tr>
-                        <td>
-                            <span style="font-weight:800; font-size:0.9rem;">${m.name || 'User'}</span>
-                            <span class="lt-uid">ID: ${m.uid} <span style="color:var(--primary);">| LV${m.rank || 0}</span></span>
-                        </td>
-                        <td style="color:var(--success); font-weight:700;">${tDep.toFixed(2)} ₮</td>
-                        <td style="color:var(--primary); font-weight:700;">${tEarn.toFixed(2)} ₮</td>
-                        <td style="color:var(--primary); font-family:monospace; font-weight:800;">${bal.toFixed(2)} ₮</td>
-                        <td style="color:var(--error); font-weight:700;">${tWd.toFixed(2)} ₮</td>
-                        <td>${perfHtml}</td>
-                    </tr>`;
-                });
-                tbody.innerHTML = html;
-                window.showToast("Network Ledger Synced!");
-            }
-
-            // 📈 Render Team Radar Chart (Volume Distribution)
+            // 📈 Render Team Radar Chart
             if (typeof Chart === 'undefined') return;
             const canvasTeam = document.getElementById('teamRadarChart');
             if(canvasTeam) {
@@ -5763,6 +5955,9 @@ window.syncTeamLedger = async () => {
                     }
                 });
             }
+            
+            if(forceSync) window.showToast("Network Ledger Synced with Server!");
+            
         } else {
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">Failed to load team data.</td></tr>';
         }
@@ -5771,7 +5966,6 @@ window.syncTeamLedger = async () => {
         document.getElementById('teamLedgerBody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">Server Connection Error.</td></tr>';
     }
 };
-
 // =================================================================================
 // 📱 MODULE 20: APP DOWNLOAD ENGINE (REAL DOWNLOAD PROGRESS & INSTALL TRIGGER)
 // =================================================================================
