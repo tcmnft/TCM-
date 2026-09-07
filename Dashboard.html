@@ -2396,7 +2396,6 @@ document.addEventListener('click', (event) => {
        if (!event.target.closest('.settings-pill')) wrapper.classList.remove('settings-active');
    }
 });
-
 // =================================================================================
 // 🌤️ MODULE 5: SMART WEATHER & LOCATION ENGINE
 // =================================================================================
@@ -2404,6 +2403,15 @@ window.loadLiveWeather = async () => {
    const tempEl = document.getElementById('wTemp');
    const locEl = document.getElementById('wLoc');
    if (!tempEl || !locEl) return;
+
+   // 🔥 30-Minute Cache Check (Zero API Drain)
+   const cachedWeather = JSON.parse(localStorage.getItem('tcm_weather') || '{"time":0}');
+   if (Date.now() - cachedWeather.time < 30 * 60 * 1000 && cachedWeather.temp) {
+       tempEl.innerHTML = cachedWeather.temp; 
+       locEl.innerHTML = cachedWeather.loc; 
+       return;
+   }
+
    try {
        const geoRes = await fetch('https://get.geojs.io/v1/ip/geo.json');
        const geoData = await geoRes.json();
@@ -2423,7 +2431,14 @@ window.loadLiveWeather = async () => {
        if ([71, 73, 75, 77, 85, 86].includes(code)) icon = '<i class="fas fa-snowflake" style="color: #bae6fd; margin-left:4px;"></i>';
        if ([95, 96, 99].includes(code)) icon = '<i class="fas fa-bolt" style="color: #fbbf24; margin-left:4px;"></i>';
        
-       tempEl.innerHTML = `${temp}°C ${icon}`;
+       let finalTemp = `${temp}°C ${icon}`;
+       let finalLoc = city.length > 11 ? `<span class="w-loc-text sliding-name" style="--slide-dist: -${(city.length-11)*5}px;">${city}</span>` : city;
+       
+       // Save to Cache
+       localStorage.setItem('tcm_weather', JSON.stringify({ time: Date.now(), temp: finalTemp, loc: finalLoc })); 
+       
+       tempEl.innerHTML = finalTemp;
+       locEl.innerHTML = finalLoc;
    } catch (e) {
        console.warn("Weather Sync Failed:", e);
        tempEl.innerHTML = `--°C <i class="fas fa-cloud" style="color: #64748b; margin-left:4px;"></i>`;
@@ -2513,45 +2528,37 @@ window.evaluateLevelAutomation = async function(wData, currentKnownRank) {
 };window.allTransactions = [];
 
 window.applyTxFilter = (type='All', btn) => {
-   if(btn) { document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
-   const tb = document.getElementById('txHistoryBox');
-   if(!tb) return;
+    if(btn) { document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
+    const tb = document.getElementById('txHistoryBox');
+    if(!tb) return;
 
-   const monthPicker = document.getElementById('txMonthYear');
-   const selectedMonthValue = monthPicker ? monthPicker.value : '';
+    const monthPicker = document.getElementById('txMonthYear');
+    const selectedMonthValue = monthPicker ? monthPicker.value : '';
 
-   let data = window.allTransactions.filter(tx => {
-       // 1. Month Filter Check
-       if (selectedMonthValue) {
-           const [targetYear, targetMonth] = selectedMonthValue.split('-');
-           let txDateObj = new Date(tx.Date || tx.timestamp);
-           if (isNaN(txDateObj)) return false; 
-           let txYear = txDateObj.getFullYear().toString();
-           let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
-           if (txYear !== targetYear || txMonth !== targetMonth) return false;
-       }
-       
-       // 🐛 2. NEW FIX: Dashboard Main History Filter
-       // এখানে যে নামগুলো দেওয়া আছে, শুধুমাত্র সেগুলোই মেইন ড্যাশবোর্ডে শো করবে
-       const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
-       
-       // যদি ট্রানজেকশনের ধরন allowedTypes এর মধ্যে না থাকে, তবে সেটি এখানে দেখাবে না (হাইড হয়ে যাবে)
-       if (!allowedTypes.includes(tx.Type)) {
-           return false;
-       }
+    let data = window.allTransactions.filter(tx => {
+        if (selectedMonthValue) {
+            const [targetYear, targetMonth] = selectedMonthValue.split('-');
+            let txDateObj = new Date(tx.Date || tx.timestamp);
+            if (isNaN(txDateObj)) return false; 
+            let txYear = txDateObj.getFullYear().toString();
+            let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
+            if (txYear !== targetYear || txMonth !== targetMonth) return false;
+        }
+        
+        const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
+        if (!allowedTypes.includes(tx.Type)) return false;
 
-       return true;
-   });
+        return true;
+    });
 
-   // ... (বাকি কোড যেমন No Records Found এবং data.forEach আপনার ফাইলে যেমন আছে তেমনই থাকবে)
-   if(data.length === 0){
-       let monthName = "this month";
-       if (selectedMonthValue) {
-           const [y, m] = selectedMonthValue.split('-');
-           const dateObj = new Date(y, m - 1);
-           monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-       }
-       tb.innerHTML = `
+    if(data.length === 0){
+        let monthName = "this month";
+        if (selectedMonthValue) {
+            const [y, m] = selectedMonthValue.split('-');
+            const dateObj = new Date(y, m - 1);
+            monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+        }
+        tb.innerHTML = `
         <div style="text-align: center; padding: 40px 20px; animation: fadeIn 0.4s ease;">
             <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 1px dashed rgba(255,255,255,0.1);">
                 <i class="fas fa-folder-open" style="font-size: 1.6rem; color: var(--text-sub); opacity: 0.7;"></i>
@@ -2559,22 +2566,22 @@ window.applyTxFilter = (type='All', btn) => {
             <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 1.05rem;">No Records Found</h3>
             <p style="color: var(--text-sub); font-size: 0.8rem; max-width: 250px; margin: 0 auto; line-height: 1.4;">There are no transactions available in your ledger for <strong style="color: var(--primary);">${monthName}</strong>.</p>
         </div>
-       `;
-       return;
-   }
+        `;
+        return;
+    }
 
-   tb.innerHTML = '';
-   data.forEach(tx => {
-       let tType = tx.Type || '';
-       let isDep = tType === 'Deposit';
-       let isWd = tType === 'Withdraw';
-       let isTeam = tType.includes('Team');
-       let isAir = tType.includes('Airdrop');
-       let isP2PSent = tType === 'P2P Sent';
-       let isP2PRecv = tType === 'P2P Received';
-       let isP2P = isP2PSent || isP2PRecv;
+    tb.innerHTML = '';
+    data.forEach(tx => {
+        let tType = tx.Type || '';
+        let isDep = tType === 'Deposit';
+        let isWd = tType === 'Withdraw';
+        let isTeam = tType.includes('Team');
+        let isAir = tType.includes('Airdrop');
+        let isP2PSent = tType === 'P2P Sent';
+        let isP2PRecv = tType === 'P2P Received';
+        let isP2P = isP2PSent || isP2PRecv;
 
-       const isReversedAirdrop = isAir && tx.Status === 'Reversed';
+        const isReversedAirdrop = isAir && tx.Status === 'Reversed';
 
         let clr = (isDep || isP2PRecv) ? 'var(--success)' : ((isWd || isP2PSent) ? 'var(--error)' : (isTeam ? '#10b981' : '#facc15'));
         let icn = (isDep || isP2PRecv) ? 'arrow-down' : ((isWd || isP2PSent) ? 'arrow-up' : (isTeam ? 'users' : 'gift'));
@@ -2586,106 +2593,105 @@ window.applyTxFilter = (type='All', btn) => {
         else if(tx.Status === 'Reversed') stClr = 'rgba(244, 63, 94, 0.7)';
         else if(tx.Status === 'Pending') stClr = (isWd || isP2PSent) ? '#f43f5e' : '#facc15';
 
-        // রিভার্সড এয়ারড্রপের জন্য স্পেশাল ম্যাট ধূসর-রেড ক্লাস
         if (isReversedAirdrop) {
             bgCls = 'air-reversed';
             icn = 'ban';
         }
-       let timerHtml = '';
-       if ((isDep || isWd) && tx.Status === 'Pending') {
-           let startTimestamp = new Date(tx.Date).getTime();
-           timerHtml = `
-           <div style="margin-top: 4px; text-align: right;">
-               <span class="live-timer glass-timer" data-time="${startTimestamp}" style="font-size: 0.65rem; color: var(--text-sub);">
-                   <i class="fas fa-clock fa-spin"></i> 00:00:00
-               </span>
-           </div>`;
-       }
+        let timerHtml = '';
+        if ((isDep || isWd) && tx.Status === 'Pending') {
+            let startTimestamp = new Date(tx.Date).getTime();
+            timerHtml = `
+            <div style="margin-top: 4px; text-align: right;">
+                <span class="live-timer glass-timer" data-time="${startTimestamp}" style="font-size: 0.65rem; color: var(--text-sub);">
+                    <i class="fas fa-clock fa-spin"></i> 00:00:00
+                </span>
+            </div>`;
+        }
 
-       let displayDate = window.formatTxDate(tx.Date);
-       let orderIdText = tx.Order_ID || tx.TXID || 'N/A';
+        let displayDate = window.formatTxDate(tx.Date);
+        let orderIdText = tx.Order_ID || tx.TXID || 'N/A';
 
-       // 🔥 TEAM BONUS CARD
-       if (isTeam && tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
-           let namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
-           let uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
-           let handInfo = tType.replace("Team Bonus ", "").replace(/[()]/g, '');
-           
-           tb.innerHTML += `
-           <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
-               <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
-                   <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
-                   <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                       <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
-                       <span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
-                       <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-                       <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; width: max-content; margin-top: 6px;">
-                           <span>${orderIdText}</span>
-                           <i class="far fa-copy" style="cursor: pointer; color: var(--success);" onclick="window.copyText('${orderIdText}', this)" title="Copy ID"></i>
-                       </div>
-                   </div>
-               </div>
-               <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                   <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${handInfo}</span>
-                   <div style="color:${clr}; font-size: 1rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
-                   <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>
-               </div>
-           </div>`;
-           return;
-       }
+        // 🔥 TEAM BONUS CARD
+        if (isTeam && tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
+            let namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
+            let uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
+            let handInfo = tType.replace("Team Bonus ", "").replace(/[()]/g, '');
+            
+            tb.innerHTML += `
+            <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
+                <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
+                    <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
+                    <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
+                        <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
+                        <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${orderIdText}</span>
+                            <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText('${orderIdText}', this)" title="Copy ID"></i>
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
+                    <span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${handInfo}</span>
+                    <div style="color:${clr}; font-size: 1rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
+                    <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>
+                </div>
+            </div>`;
+            return;
+        }
 
-       let extraRemarks = '';
-       let extractedName = '';
-       let extractedUid = '';
+        let extraRemarks = '';
+        let extractedName = '';
+        let extractedUid = '';
 
-       if (isP2P && tx.Admin_Remarks) {
-           let rmk = tx.Admin_Remarks;
-           if (rmk.includes("To: ") || rmk.includes("From: ")) {
-               let namePrefix = isP2PSent ? "To: " : "From: ";
-               if(rmk.includes(namePrefix)) {
-                   let textAfterPrefix = rmk.split(namePrefix)[1];
-                   if (textAfterPrefix.includes(" (UID: ")) {
-                       extractedName = textAfterPrefix.split(" (UID: ")[0];
-                       extractedUid = textAfterPrefix.split(" (UID: ")[1].replace(")", "");
-                   } else {
-                       extractedName = textAfterPrefix;
-                   }
-               } else {
-                   extractedName = rmk;
-               }
-           } else {
-               extraRemarks = `<span style="font-size:0.7rem; color:var(--text-sub); display:block; line-height: 1.3; white-space: normal; word-wrap: break-word; margin-top: 2px;">${tx.Admin_Remarks}</span>`;
-           }
-       }
+        if (isP2P && tx.Admin_Remarks) {
+            let rmk = tx.Admin_Remarks;
+            if (rmk.includes("To: ") || rmk.includes("From: ")) {
+                let namePrefix = isP2PSent ? "To: " : "From: ";
+                if(rmk.includes(namePrefix)) {
+                    let textAfterPrefix = rmk.split(namePrefix)[1];
+                    if (textAfterPrefix.includes(" (UID: ")) {
+                        extractedName = textAfterPrefix.split(" (UID: ")[0];
+                        extractedUid = textAfterPrefix.split(" (UID: ")[1].replace(")", "");
+                    } else {
+                        extractedName = textAfterPrefix;
+                    }
+                } else {
+                    extractedName = rmk;
+                }
+            } else {
+                extraRemarks = `<span style="font-size:0.7rem; color:var(--text-sub); display:block; line-height: 1.3; white-space: normal; word-wrap: break-word; margin-top: 2px;">${tx.Admin_Remarks}</span>`;
+            }
+        }
 
-       let amountSign = (isDep || isP2PRecv || isAir) ? '+' : (isWd || isP2PSent) ? '-' : '';
-       let displayTitle = (isP2P && extractedName) ? extractedName : tType;
-       let displayTypeRight = (isP2P && extractedName) ? tType : ''; 
+        let amountSign = (isDep || isP2PRecv || isAir) ? '+' : (isWd || isP2PSent) ? '-' : '';
+        let displayTitle = (isP2P && extractedName) ? extractedName : tType;
+        let displayTypeRight = (isP2P && extractedName) ? tType : ''; 
 
-       // 🔥 GENERAL / P2P CARD
-       tb.innerHTML += `
-       <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
-           <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
-               <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
-               <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                   <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${displayTitle}</h4>
-                   ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${extractedUid}</span>` : ''}
-                   ${extraRemarks}
-                   <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-                   <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; width: max-content; margin-top: 6px;">
-                       <span>${orderIdText}</span>
-                       <i class="far fa-copy" style="cursor: pointer; color: var(--success);" onclick="window.copyText('${orderIdText}', this)" title="Copy ID"></i>
-                   </div>
-               </div>
-           </div>
-           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-               ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${displayTypeRight}</span>` : ''}
-               <div class="${isReversedAirdrop ? 'tx-amt-reversed' : ''}" style="color:${isReversedAirdrop ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700;">${amountSign}${parseFloat(tx.Amount).toFixed(2)} ₮</div>
-               <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>
-               ${timerHtml}
-           </div>
-       </div>`;
-   });
+        // 🔥 GENERAL / P2P CARD
+        tb.innerHTML += `
+        <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
+            <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
+                <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
+                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
+                    <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${displayTitle}</h4>
+                    ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${extractedUid}</span>` : ''}
+                    ${extraRemarks}
+                    <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
+                    <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
+                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${orderIdText}</span>
+                        <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText('${orderIdText}', this)" title="Copy ID"></i>
+                    </div>
+                </div>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
+                ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${displayTypeRight}</span>` : ''}
+                <div class="${isReversedAirdrop ? 'tx-amt-reversed' : ''}" style="color:${isReversedAirdrop ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700;">${amountSign}${parseFloat(tx.Amount).toFixed(2)} ₮</div>
+                <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>
+                ${timerHtml}
+            </div>
+        </div>`;
+    });
 };
 
 // লাইভ টাইমার আপডেট লুপ
@@ -2832,34 +2838,52 @@ window.onload = async () => {
         if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
     }
 };
+
 // =================================================================================
 // 🔗 MODULE 7: SECURE API CALL HANDLER (Fetch Wrapper)
 // =================================================================================
 window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
+    const controller = new AbortController();
+    // ⏳ FIX 1: 10-Second Timeout (Loader Freeze Fix)
+    const timeoutId = setTimeout(() => controller.abort(), 10000); 
+    
     const options = {
         method,
         headers: { 
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}` // Secure Token verification
-        }
+        },
+        signal: controller.signal
     };
     if (body) options.body = JSON.stringify(body);
     
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+        clearTimeout(timeoutId);
+        
+        // 🚨 FIX 2: Global Interceptor for Expired Token (Zombie Login Fix)
+        if (response.status === 401 || response.status === 403) { 
+            window.logout(); 
+            return { success: false, message: "Session Expired. Please login again." }; 
+        }
         return await response.json();
     } catch (error) {
+        clearTimeout(timeoutId);
         console.error(`API Error (${endpoint}):`, error);
-        return { success: false, message: "Network Error! Please try again." };
+        
+        // ⚡ Timeout Error Handling
+        if (error.name === 'AbortError') {
+            return { success: false, message: "Connection Timeout. Server is unreachable." };
+        }
+        return { success: false, message: "Network Error! Server might be down." };
     }
 };
-
 // =================================================================================
 // 💎 MODULE 8: NFT ENGINE (RESERVE, SELL, PROFIT & COOLDOWN SCANNER)
 // =================================================================================
 window.LEVEL_PROFIT_RATES = {0: 0.000, 1: 0.013, 2: 0.018, 3: 0.023, 4: 0.028, 5: 0.033, 6: 0.038};
 window.reservedNFT = null;
-window.isSelling = false; // 🔥 Double sell request lock
+window.isSelling = false;
 
 window.updateAmountRange = () => {
     const s = document.getElementById('levelSelect'), d = document.getElementById('amountDisplay');
@@ -2925,7 +2949,24 @@ window.startNftReserveScan = async function() {
         `;
         document.getElementById("nftResultInfo").style.display = 'flex';
         
-        if(typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+        // 🔥 OPTIMISTIC UI: রিজার্ভ করার সাথে সাথে মেইন ব্যালেন্স থেকে কেটে লকড ভল্টে নেবে
+        let wallet = (window.RAM_STATE && window.RAM_STATE.balances) ? window.RAM_STATE.balances : window.lastWalletData;
+        if (wallet) {
+            let nftPrice = parseFloat(window.reservedNFT.price || 0);
+            
+            // মেইন ব্যালেন্স থেকে কাটবে এবং লকড ব্যালেন্সে যোগ করবে
+            wallet.Main_Balance = (parseFloat(wallet.Main_Balance) || 0) - nftPrice;
+            wallet.Locked_Balance = (parseFloat(wallet.Locked_Balance) || 0) + nftPrice;
+            
+            window.lastWalletData = wallet; // Sync Fallback
+            if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
+            if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+            if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
+        }
+
+        // 🔥 SILENT HISTORY SYNC: রিলোড ছাড়াই হিস্ট্রিতে রেকর্ড যোগ হবে
+        if (typeof window.loadTodaysHistoryFromAPI === 'function') window.loadTodaysHistoryFromAPI();
+        
     }, 1500);
 };
 
@@ -2968,7 +3009,7 @@ window.closeScanAndGoToCollection = () => {
 };
 
 window.startSellMatchmaking = async function(btn) {
-    if (window.isSelling) return; // Prevent duplicate clicks
+    if (window.isSelling) return;
     if (!window.reservedNFT) return window.showToast("No NFT to sell!", true);
     
     window.isSelling = true;
@@ -2980,23 +3021,19 @@ window.startSellMatchmaking = async function(btn) {
         sellBtn.innerHTML = '<i class="fas fa-satellite-dish fa-fade"></i> INITIALIZING RADAR...';
     }
 
-    // 🔥 1. Open Radar Modal instantly
     window.openModal("sellRadarModal");
     const radarStatus = document.getElementById("radarStatusText");
     if(radarStatus) radarStatus.innerHTML = "Connecting to Global Blockchain Node...";
 
-    // ⏳ Suspense Delay 1
     await new Promise(resolve => setTimeout(resolve, 1000));
     if(radarStatus) radarStatus.innerHTML = "<span style='color: #facc15;'>Scanning P2P Network for Buyers...</span>";
 
-    // 🔥 2. Backend API Call for Selling NFT (Running silently in background)
     const result = await window.fetchAPI('/nft/sell', 'POST', { 
         uid, 
         docId: window.reservedNFT.docId, 
         orderId: window.reservedNFT.orderId 
     });
 
-    // ⏳ Suspense Delay 2 (The intense 2.5 second searching process)
     await new Promise(resolve => setTimeout(resolve, 2500));
 
     if (!result.success) {
@@ -3014,15 +3051,14 @@ window.startSellMatchmaking = async function(btn) {
         return;
     }
 
-    // 🔥 3. Buyer Found! Show Success on Radar
     if(radarStatus) radarStatus.innerHTML = '<span style="color:var(--success); font-weight:800; font-size:1.1rem; letter-spacing:1px;">BUYER FOUND!</span>';
     
-    // Wait 1 second to let user enjoy the "BUYER FOUND" text before popping the receipt
     await new Promise(resolve => setTimeout(resolve, 1000));
     window.closeModal("sellRadarModal");
 
-    // 🔥 4. Show the Original miniPopup Receipt
+    // ব্যাকএন্ড থেকে রেসপন্স আসা ডেটা ব্যবহার করা হচ্ছে
     const { principal, net, ret } = result.data;
+
     const miniPopup = document.createElement('div');
     miniPopup.innerHTML = `
         <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 99999; animation: fadeIn 0.3s ease;">
@@ -3050,22 +3086,52 @@ window.startSellMatchmaking = async function(btn) {
     `;
     document.body.appendChild(miniPopup);
 
-    document.getElementById('miniSellCloseBtn').onclick = async () => { miniPopup.remove(); await window.finishSell(); };
-    setTimeout(async () => { if(document.body.contains(miniPopup)) { miniPopup.remove(); await window.finishSell(); } }, 4500);
+    document.getElementById('miniSellCloseBtn').onclick = async () => { miniPopup.remove(); await window.finishSell(ret, net); };
+    setTimeout(async () => { if(document.body.contains(miniPopup)) { miniPopup.remove(); await window.finishSell(ret, net); } }, 4500);
 };
 
-window.finishSell = async () => {
+window.finishSell = async (retAmount = 0, netProfit = 0) => {
     const cTab = document.getElementById('tab-collection');
     if(cTab) cTab.innerHTML = `<div class="empty-state"><i class="fas fa-layer-group"></i><p>No NFTs in your collection.</p></div>`;
+    
+    let principal = window.reservedNFT ? parseFloat(window.reservedNFT.price || 0) : 0;
+    
     window.reservedNFT = null;
     window.isSelling = false;
     window.updateNFTStats();
-    if(typeof window.fetchInitialDataFromAPI === 'function') await window.fetchInitialDataFromAPI();
+    
+    // 🔥 OPTIMISTIC UI: লকড ব্যালেন্স থেকে কেটে মেইন ব্যালেন্সে ও শুধুমাত্র রিজার্ভ ইনকামে যোগ করা হচ্ছে
+    let wallet = (window.RAM_STATE && window.RAM_STATE.balances) ? window.RAM_STATE.balances : window.lastWalletData;
+    
+    if (wallet) {
+        // ১. লকড ব্যালেন্স ক্লিয়ার (আসল টাকাটা মাইনাস হবে)
+        let currentLocked = parseFloat(wallet.Locked_Balance) || 0;
+        wallet.Locked_Balance = Math.max(0, currentLocked - principal);
+        
+        // ২. মেইন ব্যালেন্সে টোটাল রিটার্ন যোগ (আসল + নিট লাভ)
+        wallet.Main_Balance = (parseFloat(wallet.Main_Balance) || 0) + parseFloat(retAmount);
+        
+        // ৩. প্রফিট শুধুমাত্র "রিজার্ভ হিস্ট্রিতে" যোগ করা (Earnings-এ কোনো পরিবর্তন হবে না)
+        wallet.Total_Reserve = (parseFloat(wallet.Total_Reserve) || 0) + parseFloat(netProfit);
+        wallet.Daily_Reserve = (parseFloat(wallet.Daily_Reserve) || 0) + parseFloat(netProfit);
+
+        window.lastWalletData = wallet; // Sync Fallback
+        
+        // সাথে সাথে UI আপডেট
+        if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
+        if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+    }
+
+    // 🔥 CACHE INVALIDATION: টিম কমিশন রিয়েল-টাইমে দেখানোর জন্য ক্যাশ ক্লিয়ার করা হলো
+    localStorage.removeItem('tcm_team_cache');
+
+    // 🔥 SILENT HISTORY SYNC: পেইজ রিলোড ছাড়াই নতুন ট্রানজেকশন হিস্ট্রিতে আসবে
+    if (typeof window.loadTodaysHistoryFromAPI === 'function') window.loadTodaysHistoryFromAPI();
+
     if(typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
     window.switchTab('today');
     window.showToast("Funds Secured in Wallet!");
 };
-
 // 🔥 FIX: API Driven Today's History & Collection Rendering (Zero-Read & Paginated)
 window.globalNFTMarketList = [];
 
@@ -3086,20 +3152,18 @@ window.currentReservationCursor = 'first';
 window.hasMoreReservations = true;
 window.isLoadingReservations = false;
 window.renderedOrderIds = new Set();
-
 window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
     const uid = localStorage.getItem('uid');
     const todayTab = document.getElementById('tab-today');
     const collectionTab = document.getElementById('tab-collection');
     
     if(!todayTab || !collectionTab || !uid) return;
-    if(window.isLoadingReservations) return; // Prevent double click
+    if(window.isLoadingReservations) return;
     if(!isLoadMore && !window.hasMoreReservations) return;
 
     window.isLoadingReservations = true;
 
     try {
-        // 🔥 ZERO-READ FLAG CHECK (Client-Side)
         if (!isLoadMore && window.RAM_STATE && window.RAM_STATE.counters) {
             if (window.RAM_STATE.counters.activeReservations === 0 && window.RAM_STATE.counters.txCount === 0) {
                 todayTab.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>No transactions found.</p></div>`;
@@ -3119,7 +3183,6 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
             if(btn) btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
         }
 
-        // 🔥 FIX: Correct API Endpoint Match
         const result = await window.fetchAPI(`/nft/history?uid=${uid}`);
         if (!result.success) throw new Error(result.message);
 
@@ -3148,7 +3211,6 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
                 if (data.Type && data.Type.includes("Sold")) ordersTracker[oid].sell = data;
             }
 
-            // 🔥 SMART DATE PARSER FIX (Perfected: Timestamp Priority & Safe String Parsing)
             let docTime = 0;
             try {
                 let rawDate = data.timestamp || data.Date; 
@@ -3177,7 +3239,6 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
             let imgUrl = data.Image_URL || 'https://i.ibb.co/3sZxCqT/nft-placeholder.jpg';
             let nftId = data.NFT_ID || "TCM NFT";
 
-            // Only show today's items in the "today" list
             if (docTime && !isNaN(docTime) && docTime >= boundaryTime.getTime()) {
                 if (data.Type && data.Type.includes("Sold")) {
                     let gross = 0, fee = 0, net = 0;
@@ -3195,14 +3256,17 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
                     todayHtml += `
                     <div class="nft-item-card" style="border-left: 3px solid var(--success); flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 10px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div style="display: flex; gap: 12px; align-items: center;">
-                                <img src="${imgUrl}" class="nft-item-img" style="width: 45px; height: 45px; border-radius: 10px; object-fit: cover;">
-                                <div class="nft-item-info">
+                            <div style="display: flex; gap: 12px; align-items: center; min-width: 0; flex: 1;">
+                                <img src="${imgUrl}" class="nft-item-img" style="width: 45px; height: 45px; border-radius: 10px; object-fit: cover; flex-shrink: 0;">
+                                <div class="nft-item-info" style="min-width: 0; flex: 1;">
                                     <h4 style="font-size: 0.85rem; color: var(--text-main); margin: 0;">Sold: ${nftId}</h4>
-                                    <span style="font-size:0.6rem; color:var(--text-sub); font-family:monospace;">ID: ${data.Order_ID} | ${timeStr}</span>
+                                    <div style="font-size:0.6rem; color:var(--text-sub); font-family:monospace; display: flex; align-items: center; gap: 4px; width: 100%; overflow: hidden; margin-top: 2px;">
+                                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;">ID: ${data.Order_ID}</span>
+                                        <span style="flex-shrink: 0; white-space: nowrap;">| ${timeStr}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div style="text-align: right; flex-shrink: 0; margin-left: 10px;">
                                 <span class="badge glow-green" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Match Success</span>
                                 <p style="color:var(--success); font-size: 0.85rem; font-weight: 700; margin: 0;">+ ${parseFloat(data.Amount).toFixed(2)} ₮</p>
                             </div>
@@ -3218,14 +3282,17 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
                     todayHtml += `
                     <div class="nft-item-card" style="border-left: 3px solid var(--warning); flex-direction: column; align-items: stretch; gap: 8px; margin-bottom: 10px;">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                            <div style="display: flex; gap: 12px; align-items: center;">
-                                <img src="${imgUrl}" class="nft-item-img" style="width: 45px; height: 45px; border-radius: 10px; object-fit: cover;">
-                                <div class="nft-item-info">
+                            <div style="display: flex; gap: 12px; align-items: center; min-width: 0; flex: 1;">
+                                <img src="${imgUrl}" class="nft-item-img" style="width: 45px; height: 45px; border-radius: 10px; object-fit: cover; flex-shrink: 0;">
+                                <div class="nft-item-info" style="min-width: 0; flex: 1;">
                                     <h4 style="font-size: 0.85rem; color: var(--text-main); margin: 0;">Reserved: ${nftId}</h4>
-                                    <span style="font-size:0.6rem; color:var(--text-sub); font-family:monospace;">ID: ${data.Order_ID} | ${timeStr}</span>
+                                    <div style="font-size:0.6rem; color:var(--text-sub); font-family:monospace; display: flex; align-items: center; gap: 4px; width: 100%; overflow: hidden; margin-top: 2px;">
+                                        <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;">ID: ${data.Order_ID}</span>
+                                        <span style="flex-shrink: 0; white-space: nowrap;">| ${timeStr}</span>
+                                    </div>
                                 </div>
                             </div>
-                            <div style="text-align: right;">
+                            <div style="text-align: right; flex-shrink: 0; margin-left: 10px;">
                                 <span class="badge glow-locked" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Active Holding</span>
                                 <p style="color:var(--warning); font-size: 0.85rem; font-weight: 700; margin: 0;">- ${parseFloat(data.Amount).toFixed(2)} ₮</p>
                             </div>
@@ -3235,7 +3302,6 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
             }
         });
 
-        // Resolve Active NFT for Collection
         let hasActiveNFT = false;
         for (const oid in ordersTracker) {
             if (ordersTracker[oid].reserve && !ordersTracker[oid].sell) {
@@ -3263,13 +3329,15 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
             <div class="nft-item-card" id="myActiveNft" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; width: 100%;">
                 <div style="display: flex; gap: 15px; align-items: flex-start; width: 100%;">
                     <img src="${window.reservedNFT.img}" class="nft-item-img" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
-                    <div class="nft-item-info" style="flex: 1; display: flex; flex-direction: column; width: 100%;">
+                    <div class="nft-item-info" style="flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0;">
                         <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                             <h4 style="font-size: 1.05rem; margin: 0; color: var(--text-main); font-weight: 700;">${window.reservedNFT.id}</h4>
-                            <span style="background: rgba(30, 35, 45, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(192, 192, 192, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-radius: 6px; padding: 4px 8px; font-size: 0.6rem; color: #e2e8f0; font-weight: 600; letter-spacing: 0.5px;">Active Holding</span>
+                            <span style="background: rgba(30, 35, 45, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(192, 192, 192, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-radius: 6px; padding: 4px 8px; font-size: 0.6rem; color: #e2e8f0; font-weight: 600; letter-spacing: 0.5px; flex-shrink: 0;">Active Holding</span>
                         </div>
-                        <div style="font-size: 0.65rem; color: var(--text-sub); margin: 6px 0 4px 0; font-family: monospace; display: flex; justify-content: space-between; width: 100%;">
-                            <span><span style="color: var(--primary);">Lvl ${window.reservedNFT.level||1}</span> | ID: ${window.reservedNFT.orderId}</span>
+                        <div style="font-size: 0.65rem; color: var(--text-sub); margin: 6px 0 4px 0; font-family: monospace; display: flex; align-items: center; gap: 4px; width: 100%; overflow: hidden;">
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;">
+                                <span style="color: var(--primary);">Lvl ${window.reservedNFT.level||1}</span> | ID: ${window.reservedNFT.orderId}
+                            </span>
                         </div>
                         <div style="display: inline-flex; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.15); border-radius: 6px; padding: 5px 10px; margin-top: 4px; align-self: flex-start;">
                             <span style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">${window.reservedNFT.price.toFixed(2)} ₮</span>
@@ -3286,7 +3354,6 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
 
         if (typeof window.updateNFTStats === 'function') window.updateNFTStats();
 
-        // Final UI Assembly (With Load More Button)
         if (!todayHtml && !isLoadMore) {
             todayTab.innerHTML = `<div class="empty-state"><i class="fas fa-file-invoice-dollar"></i><p>No history available for today.</p></div>`;
         } else {
@@ -3302,7 +3369,6 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
         window.isLoadingReservations = false;
     }
 };
-
 // =================================================================================
 // ⏱️ RESERVE TIMER COUNTDOWN ENGINE (LOCAL 5:30 AM AUTO-RESET FIX)
 // =================================================================================
@@ -3357,57 +3423,54 @@ window.reserveTimerInterval = setInterval(window.updateReserveCountdown, 1000);
 // 🛡️ MODULE 9: HYBRID SECURITY ENGINE (API DRIVEN + GAMIFIED SHIELD)
 // =================================================================================
 window.updateSecurityShieldUI = () => {
-    let score = 0;
-    if (window.is2FABound) score += 50;
-    if (window.isWalletBound) score += 50;
+   let score = 0;
+   if (window.is2FABound) score += 50;
+   if (window.isWalletBound) score += 50;
 
-    const shield = document.getElementById('mainShield');
-    const icon = document.getElementById('shieldCenterIcon');
-    const statusText = document.getElementById('shieldStatusText');
+   const shield = document.getElementById('mainShield');
+   const icon = document.getElementById('shieldCenterIcon');
+   const statusText = document.getElementById('shieldStatusText');
 
-    if (!shield || !icon || !statusText) return;
+   if (!shield || !icon || !statusText) return;
 
-    // Reset SVG class properly
-    shield.setAttribute('class', 'shield-svg');
+   shield.setAttribute('class', 'shield-svg');
 
-    if (score === 0) {
-        shield.classList.add('shield-0');
-        icon.className = 'fas fa-unlock-alt shield-icon';
-        statusText.innerText = 'System Unsecured';
-        statusText.style.color = '#64748b'; // Gray instead of Red
-    } else if (score === 50) {
-        shield.classList.add('shield-50');
-        icon.className = 'fas fa-shield-halved shield-icon';
-        statusText.innerText = 'Partial Armor (50%)';
-        statusText.style.color = '#facc15';
-    } else if (score === 100) {
-        shield.classList.add('shield-100');
-        icon.className = 'fas fa-check shield-icon';
-        statusText.innerText = 'Maximum Cyber Armor Active';
-        statusText.style.color = '#00f5ff'; // Premium Cyber Blue
-    }
+   if (score === 0) {
+       shield.classList.add('shield-0');
+       icon.className = 'fas fa-unlock-alt shield-icon';
+       statusText.innerText = 'System Unsecured';
+       statusText.style.color = '#64748b'; 
+   } else if (score === 50) {
+       shield.classList.add('shield-50');
+       icon.className = 'fas fa-shield-halved shield-icon';
+       statusText.innerText = 'Partial Armor (50%)';
+       statusText.style.color = '#facc15';
+   } else if (score === 100) {
+       shield.classList.add('shield-100');
+       icon.className = 'fas fa-check shield-icon';
+       statusText.innerText = 'Maximum Cyber Armor Active';
+       statusText.style.color = '#00f5ff'; 
+   }
 };
 
 window.openSecurityCenter = () => {
-    window.closeAllModals();
-    setTimeout(() => {
-        const btnSet2FA = document.getElementById('btnSetup2FA');
-        const btnUnb2FA = document.getElementById('btnUnbind2FA');
-        if (window.is2FABound) {
-            if (btnSet2FA) btnSet2FA.style.display = 'none';
-            if (btnUnb2FA) btnUnb2FA.style.display = 'block';
-        } else {
-            if (btnSet2FA) btnSet2FA.style.display = 'block';
-            if (btnUnb2FA) btnUnb2FA.style.display = 'none';
-        }
-        const btnSetWall = document.getElementById('btnSetupWallet');
-        if (btnSetWall) btnSetWall.innerText = window.isWalletBound ? "Update Wallet Address" : "Bind Wallet Address";
-        
-        // 🔥 Trigger Shield UI Animation
-        window.updateSecurityShieldUI();
-
-        window.openModal('securityModal');
-    }, 100);
+   window.closeAllModals();
+   setTimeout(() => {
+       const btnSet2FA = document.getElementById('btnSetup2FA');
+       const btnUnb2FA = document.getElementById('btnUnbind2FA');
+       if (window.is2FABound) {
+           if (btnSet2FA) btnSet2FA.style.display = 'none';
+           if (btnUnb2FA) btnUnb2FA.style.display = 'block';
+       } else {
+           if (btnSet2FA) btnSet2FA.style.display = 'block';
+           if (btnUnb2FA) btnUnb2FA.style.display = 'none';
+       }
+       const btnSetWall = document.getElementById('btnSetupWallet');
+       if (btnSetWall) btnSetWall.innerText = window.isWalletBound ? "Update Wallet Address" : "Bind Wallet Address";
+       
+       window.updateSecurityShieldUI();
+       window.openModal('securityModal');
+   }, 100);
 };
 
 window.requestSystemOTP = async (btnId) => {
@@ -3449,6 +3512,7 @@ window.open2FASetup = async () => {
        window.openModal('setup2FAModal');
    } catch (e) { window.showToast(e.message, true); }
 };
+
 window.submit2FA = async () => {
    const code = document.getElementById('input2FACode').value;
    const emailOTP = document.getElementById('bind2FAEmailOTP').value.trim();
@@ -3468,8 +3532,8 @@ window.submit2FA = async () => {
 
    if (result.success) {
        window.is2FABound = true;
+       if (window.RAM_STATE) window.RAM_STATE.security.is2FA = true; // 🔥 Optimistic UI
        
-       // 🔥 FIX: বাউন্ড হওয়ার সাথে সাথে UI (Badge) আপডেট করে "Protected" করা হলো
        const b2FA = document.getElementById('badge2FA');
        if (b2FA) {
            b2FA.className = "badge glow-green";
@@ -3479,8 +3543,8 @@ window.submit2FA = async () => {
        window.showToast("Google 2FA Bound Successfully! 72H Lock Active.");
        window.closeModal('setup2FAModal');
        
-       // ব্যাকগ্রাউন্ডে নতুন ডেটা সিঙ্ক করে নেওয়া হচ্ছে
-       if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+       // 🔥 FIX: Local Time Lock (No Server Request)
+       localStorage.setItem('tcm_72h_lock', Date.now() + (72 * 60 * 60 * 1000));
        
        setTimeout(() => { window.openSecurityCenter(); }, 500);
    } else {
@@ -3523,8 +3587,8 @@ window.submitWalletBind = async () => {
    if (result.success) {
        window.isWalletBound = true;
        window.userWallets[net] = addr;
+       if (window.RAM_STATE) window.RAM_STATE.security.isWallet = true; // 🔥 Optimistic UI
 
-       // 🔥 FIX: Wallet বাউন্ড হওয়ার সাথে সাথে UI (Badge) আপডেট করে "Protected" করা হলো
        const bWall = document.getElementById('badgeWallet');
        if (bWall) {
            bWall.className = "badge glow-green";
@@ -3534,8 +3598,7 @@ window.submitWalletBind = async () => {
        window.showToast(`${net} Wallet Bound Successfully! 72H Lock Active.`);
        window.closeModal('walletBindModal');
        
-       // ব্যাকগ্রাউন্ডে নতুন ডেটা সিঙ্ক করে নেওয়া হচ্ছে
-       if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+       localStorage.setItem('tcm_72h_lock', Date.now() + (72 * 60 * 60 * 1000));
        
        setTimeout(() => { window.openSecurityCenter(); }, 500);
    } else {
@@ -3566,10 +3629,9 @@ window.submit2FAUnbind = async () => {
     });
 
     if (result.success) {
-        // 🔥 FIX: UI Update instantly
         window.is2FABound = false;
+        if (window.RAM_STATE) window.RAM_STATE.security.is2FA = false; // 🔥 Optimistic UI
         
-        // Badge Update
         const b2FA = document.getElementById('badge2FA');
         if (b2FA) {
             b2FA.className = "badge glow-red";
@@ -3579,828 +3641,858 @@ window.submit2FAUnbind = async () => {
         window.showToast("Google 2FA has been unbound!");
         window.closeModal('walletUnbindModal');
         
-        // Refresh API data in background to sync properly
-        if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
-        
         setTimeout(() => { window.openSecurityCenter(); }, 500);
     } else {
         window.showToast(result.message, true);
     }
     btn.innerHTML = 'Secure Unbind'; btn.disabled = false;
 };
+
 // =================================================================================
 // 💰 MODULE 10: FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer)
 // =================================================================================
 
 window.updateSpeedometerUI = (score) => {
-    const needle = document.getElementById('speedNeedle');
-    const scoreText = document.getElementById('healthScoreText');
-    const msgBox = document.getElementById('healthStatusMsg');
-    
-    let safeScore = Math.min(100, Math.max(0, score));
-    let offset = 125.6 - (125.6 * (safeScore / 100));
-    
-    setTimeout(() => {
-        if(needle) needle.style.strokeDashoffset = offset;
-        if(scoreText) scoreText.innerText = `${safeScore}%`;
-    }, 100);
+   const needle = document.getElementById('speedNeedle');
+   const scoreText = document.getElementById('healthScoreText');
+   const msgBox = document.getElementById('healthStatusMsg');
+   
+   let safeScore = Math.min(100, Math.max(0, score));
+   let offset = 125.6 - (125.6 * (safeScore / 100));
+   
+   setTimeout(() => {
+       if(needle) needle.style.strokeDashoffset = offset;
+       if(scoreText) scoreText.innerText = `${safeScore}%`;
+   }, 100);
 
-    if(msgBox) {
-        if (safeScore < 40) {
-            msgBox.style.background = 'rgba(244, 63, 94, 0.15)';
-            msgBox.style.color = 'var(--error)';
-            msgBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unstable: Need Deposits';
-        } else if (safeScore >= 40 && safeScore <= 49) {
-            msgBox.style.background = 'rgba(250, 204, 21, 0.15)';
-            msgBox.style.color = 'var(--warning)';
-            msgBox.innerHTML = '<i class="fas fa-bolt"></i> Emergency Quota Active';
-        } else {
-            msgBox.style.background = 'rgba(16, 185, 129, 0.15)';
-            msgBox.style.color = 'var(--success)';
-            msgBox.innerHTML = '<i class="fas fa-check-circle"></i> Healthy Ecosystem';
-        }
-    }
+   if(msgBox) {
+       if (safeScore < 40) {
+           msgBox.style.background = 'rgba(244, 63, 94, 0.15)';
+           msgBox.style.color = 'var(--error)';
+           msgBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unstable: Need Deposits';
+       } else if (safeScore >= 40 && safeScore <= 49) {
+           msgBox.style.background = 'rgba(250, 204, 21, 0.15)';
+           msgBox.style.color = 'var(--warning)';
+           msgBox.innerHTML = '<i class="fas fa-bolt"></i> Emergency Quota Active';
+       } else {
+           msgBox.style.background = 'rgba(16, 185, 129, 0.15)';
+           msgBox.style.color = 'var(--success)';
+           msgBox.innerHTML = '<i class="fas fa-check-circle"></i> Healthy Ecosystem';
+       }
+   }
 };
 
 window.applyStealthButtonLogic = (score) => {
-    const btn = document.getElementById('subBtn');
-    const amtInput = document.getElementById('txAmt');
-    if(!btn || !amtInput) return;
+   const btn = document.getElementById('subBtn');
+   const amtInput = document.getElementById('txAmt');
+   if(!btn || !amtInput) return;
 
-    btn.className = "stealth-btn"; 
+   btn.className = "stealth-btn"; 
 
-    const updateBtnState = () => {
-        let val = parseFloat(amtInput.value) || 0;
-        
-        if (window.txMode === 'Deposit') {
-            btn.className = 'stealth-btn normal';
-            btn.innerHTML = 'Submit Deposit';
-            btn.disabled = false;
-            return;
-        }
+   const updateBtnState = () => {
+       let val = parseFloat(amtInput.value) || 0;
+       
+       if (window.txMode === 'Deposit') {
+           btn.className = 'stealth-btn normal';
+           btn.innerHTML = 'Submit Deposit';
+           btn.disabled = false;
+           return;
+       }
 
-        if (score < 40) {
-            btn.className = 'stealth-btn locked';
-            btn.innerHTML = '<i class="fas fa-lock"></i> Locked (Health < 40%)';
-            btn.disabled = true;
-        } else if (score >= 40 && score <= 49) {
-            if (val === 25) {
-                btn.className = 'stealth-btn emergency-ready';
-                btn.innerHTML = '<i class="fas fa-bolt"></i> Withdraw $25 (Emergency)';
-                btn.disabled = false;
-            } else {
-                btn.className = 'stealth-btn emergency-wait';
-                btn.innerHTML = '<i class="fas fa-exclamation"></i> Enter Exactly 25';
-                btn.disabled = true;
-            }
-        } else {
-            btn.className = 'stealth-btn normal';
-            btn.innerHTML = '✅ Confirm Withdraw';
-            btn.disabled = false;
-        }
-    };
+       if (score < 40) {
+           btn.className = 'stealth-btn locked';
+           btn.innerHTML = '<i class="fas fa-lock"></i> Locked (Health < 40%)';
+           btn.disabled = true;
+       } else if (score >= 40 && score <= 49) {
+           if (val === 25) {
+               btn.className = 'stealth-btn emergency-ready';
+               btn.innerHTML = '<i class="fas fa-bolt"></i> Withdraw $25 (Emergency)';
+               btn.disabled = false;
+           } else {
+               btn.className = 'stealth-btn emergency-wait';
+               btn.innerHTML = '<i class="fas fa-exclamation"></i> Enter Exactly 25';
+               btn.disabled = true;
+           }
+       } else {
+           btn.className = 'stealth-btn normal';
+           btn.innerHTML = '✅ Confirm Withdraw';
+           btn.disabled = false;
+       }
+   };
 
-    amtInput.oninput = updateBtnState;
-    updateBtnState(); 
+   amtInput.oninput = updateBtnState;
+   updateBtnState(); 
 };
 
 window.securityTimerInterval = null;
  
 window.openTxModal = async (type) => {
-    window.txMode = type;
-    const mTitle = document.getElementById('mTitle');
-    const depArea = document.getElementById('depArea');
-    const wdDisplayArea = document.getElementById('wdDisplayArea');
-    const txHash = document.getElementById('txHash');
-    const txAmt = document.getElementById('txAmt');
-    const subBtn = document.getElementById('subBtn');
-    const depNetSelect = document.getElementById('depNetworkSelect');
-    const wd2FACode = document.getElementById('wd2FACode');
-    const mMsg = document.getElementById('maintenanceMsg');
-    
-    // New Areas
-    const healthArea = document.getElementById('healthSpeedometerArea');
-    const wdLockArea = document.getElementById('wdLockArea');
-    const wdLockTimerText = document.getElementById('wdLockTimerText');
-    
-    if (mMsg) mMsg.style.display = 'none';
-    if (subBtn) subBtn.style.display = 'block';
-    if (txAmt) txAmt.style.display = 'block';
-    if (mTitle) mTitle.innerText = type + " USDT";
-    
-    if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
-    
-    if (type === 'Withdraw') {
-        const uid = localStorage.getItem('uid');
-        const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
+   window.txMode = type;
+   const mTitle = document.getElementById('mTitle');
+   const depArea = document.getElementById('depArea');
+   const wdDisplayArea = document.getElementById('wdDisplayArea');
+   const txHash = document.getElementById('txHash');
+   const txAmt = document.getElementById('txAmt');
+   const subBtn = document.getElementById('subBtn');
+   const depNetSelect = document.getElementById('depNetworkSelect');
+   const wd2FACode = document.getElementById('wd2FACode');
+   const mMsg = document.getElementById('maintenanceMsg');
+   
+   // New Areas
+   const healthArea = document.getElementById('healthSpeedometerArea');
+   const wdLockArea = document.getElementById('wdLockArea');
+   const wdLockTimerText = document.getElementById('wdLockTimerText');
+   
+   if (mMsg) mMsg.style.display = 'none';
+   if (subBtn) subBtn.style.display = 'block';
+   if (txAmt) txAmt.style.display = 'block';
+   if (mTitle) mTitle.innerText = type + " USDT";
+   
+   if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
+   
+   if (type === 'Withdraw') {
+       const uid = localStorage.getItem('uid');
+       const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
 
-        // Show Speedometer immediately
-        if(healthArea) {
-            healthArea.style.display = 'block';
-            window.updateSpeedometerUI(healthScore);
-        }
+       if(healthArea) {
+           healthArea.style.display = 'block';
+           window.updateSpeedometerUI(healthScore);
+       }
 
-        subBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-        subBtn.disabled = true;
-        subBtn.className = "stealth-btn locked";
-        window.openModal('txModal'); 
+       subBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+       subBtn.disabled = true;
+       subBtn.className = "stealth-btn locked";
+       window.openModal('txModal'); 
 
-        const result = await window.fetchAPI('/finance/check-security-lock', 'POST', { uid });
+       // Check 72H Lock Locally (Optimization)
+       const localLock = parseInt(localStorage.getItem('tcm_72h_lock') || '0');
+       let isLocked = false;
+       let targetTime = 0;
+       
+       if (Date.now() < localLock) {
+           isLocked = true;
+           targetTime = localLock;
+       } else {
+           const result = await window.fetchAPI('/finance/check-security-lock', 'POST', { uid });
+           if (!result.success && result.isLocked) {
+               isLocked = true;
+               targetTime = result.targetTime;
+           }
+       }
 
-        if (!result.success && result.isLocked) {
-            // LOCKED STATE 
-            if (depArea) depArea.style.display = 'none';
-            if (wdDisplayArea) wdDisplayArea.style.display = 'none';
-            if (txHash) txHash.style.display = 'none';
-            if (txAmt) txAmt.style.display = 'none';
-            if (depNetSelect) depNetSelect.style.display = 'none';
-            if (wd2FACode) wd2FACode.style.display = 'none';
-            if (subBtn) subBtn.style.display = 'none';
-            
-            if (wdLockArea) wdLockArea.style.display = 'block';
-            if (mTitle) mTitle.innerText = "Security Lock Active";
-            
-            const targetTime = result.targetTime;
-            window.securityTimerInterval = setInterval(() => {
-                let currentTime = new Date().getTime();
-                let diff = targetTime - currentTime;
-                
-                if (diff <= 0) {
-                    clearInterval(window.securityTimerInterval);
-                    window.closeModal('txModal');
-                    window.showToast("Security Lock Released! You can withdraw now.");
-                    setTimeout(() => window.openTxModal('Withdraw'), 300); 
-                    return;
-                }
-                
-                let h = Math.floor(diff / (1000 * 60 * 60));
-                let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                let s = Math.floor((diff % (1000 * 60)) / 1000);
-                let pad = (num) => num.toString().padStart(2, '0');
-                
-                if (wdLockTimerText) wdLockTimerText.innerText = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
-            }, 1000);
-            
-        } else {
-            // UNLOCKED STATE
-            if (wdLockArea) wdLockArea.style.display = 'none';
-            if (depArea) depArea.style.display = 'none';
-            if (wdDisplayArea) wdDisplayArea.style.display = 'block';
-            if (txHash) txHash.style.display = 'none';
-            if (txAmt) txAmt.style.display = 'block';
-            if (depNetSelect) depNetSelect.style.display = 'none';
-            if (wd2FACode) wd2FACode.style.display = 'block';
-            if (subBtn) subBtn.style.display = 'block';
-            
-            window.updateWithdrawNetwork();
-            window.applyStealthButtonLogic(healthScore); 
-        }
+       if (isLocked) {
+           // LOCKED STATE 
+           if (depArea) depArea.style.display = 'none';
+           if (wdDisplayArea) wdDisplayArea.style.display = 'none';
+           if (txHash) txHash.style.display = 'none';
+           if (txAmt) txAmt.style.display = 'none';
+           if (depNetSelect) depNetSelect.style.display = 'none';
+           if (wd2FACode) wd2FACode.style.display = 'none';
+           if (subBtn) subBtn.style.display = 'none';
+           
+           if (wdLockArea) wdLockArea.style.display = 'block';
+           if (mTitle) mTitle.innerText = "Security Lock Active";
+           
+           window.securityTimerInterval = setInterval(() => {
+               let currentTime = new Date().getTime();
+               let diff = targetTime - currentTime;
+               
+               if (diff <= 0) {
+                   clearInterval(window.securityTimerInterval);
+                   window.closeModal('txModal');
+                   window.showToast("Security Lock Released! You can withdraw now.");
+                   setTimeout(() => window.openTxModal('Withdraw'), 300); 
+                   return;
+               }
+               
+               let h = Math.floor(diff / (1000 * 60 * 60));
+               let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+               let s = Math.floor((diff % (1000 * 60)) / 1000);
+               let pad = (num) => num.toString().padStart(2, '0');
+               
+               if (wdLockTimerText) wdLockTimerText.innerText = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+           }, 1000);
+           
+       } else {
+           // UNLOCKED STATE
+           if (wdLockArea) wdLockArea.style.display = 'none';
+           if (depArea) depArea.style.display = 'none';
+           if (wdDisplayArea) wdDisplayArea.style.display = 'block';
+           if (txHash) txHash.style.display = 'none';
+           if (txAmt) txAmt.style.display = 'block';
+           if (depNetSelect) depNetSelect.style.display = 'none';
+           if (wd2FACode) wd2FACode.style.display = 'block';
+           if (subBtn) subBtn.style.display = 'block';
+           
+           window.updateWithdrawNetwork();
+           window.applyStealthButtonLogic(healthScore); 
+       }
 
-    } else {
-        // DEPOSIT MODE
-        if (healthArea) healthArea.style.display = 'none';
-        if (wdLockArea) wdLockArea.style.display = 'none';
-        if (wdDisplayArea) wdDisplayArea.style.display = 'none';
-        if (wd2FACode) wd2FACode.style.display = 'none';
-        
-        if (depArea) depArea.style.display = 'block';
-        if (txHash) txHash.style.display = 'block';
-        if (txAmt) txAmt.style.display = 'block';
-        if (depNetSelect) depNetSelect.style.display = 'block';
-        if (subBtn) subBtn.style.display = 'block';
-        
-        window.updateDepositNetwork();
-        window.applyStealthButtonLogic(100); 
-        window.openModal('txModal');
-    }
+   } else {
+       // DEPOSIT MODE
+       if (healthArea) healthArea.style.display = 'none';
+       if (wdLockArea) wdLockArea.style.display = 'none';
+       if (wdDisplayArea) wdDisplayArea.style.display = 'none';
+       if (wd2FACode) wd2FACode.style.display = 'none';
+       
+       if (depArea) depArea.style.display = 'block';
+       if (txHash) txHash.style.display = 'block';
+       if (txAmt) txAmt.style.display = 'block';
+       if (depNetSelect) depNetSelect.style.display = 'block';
+       if (subBtn) subBtn.style.display = 'block';
+       
+       window.updateDepositNetwork();
+       window.applyStealthButtonLogic(100); 
+       window.openModal('txModal');
+   }
 };
 window.openTx = window.openTxModal;
 
 window.updateDepositNetwork = () => {
-    const net = document.getElementById('depNetworkSelect').value;
-    const qrImg = document.getElementById('qrImg');
-    const addrText = document.getElementById('walletAddrText');
-    let walletAddress = (net === 'BEP20') ? "0x9b03fff1bc3bbe26f225334d23a250b0c79ddfee" : "TLyX3XmN5s3aT7T4mF2oM42A23Xv123456";
-    if (addrText) addrText.innerText = walletAddress;
-    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${walletAddress}`;
+   const net = document.getElementById('depNetworkSelect').value;
+   const qrImg = document.getElementById('qrImg');
+   const addrText = document.getElementById('walletAddrText');
+   let walletAddress = (net === 'BEP20') ? "0x9b03fff1bc3bbe26f225334d23a250b0c79ddfee" : "TLyX3XmN5s3aT7T4mF2oM42A23Xv123456";
+   if (addrText) addrText.innerText = walletAddress;
+   if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${walletAddress}`;
 };
 
 window.updateWithdrawNetwork = () => {
-    const net = document.getElementById('wdNetwork').value;
-    const boundText = document.getElementById('boundWalletText');
-    let addr = window.userWallets ? window.userWallets[net] : "";
-    if (addr && addr.length > 5) {
-        boundText.innerText = addr;
-        boundText.style.color = "var(--text-main)";
-    } else {
-        boundText.innerText = `No ${net} Address Bound! Check Security Center.`;
-        boundText.style.color = "var(--error)";
-    }
+   const net = document.getElementById('wdNetwork').value;
+   const boundText = document.getElementById('boundWalletText');
+   let addr = window.userWallets ? window.userWallets[net] : "";
+   if (addr && addr.length > 5) {
+       boundText.innerText = addr;
+       boundText.style.color = "var(--text-main)";
+   } else {
+       boundText.innerText = `No ${net} Address Bound! Check Security Center.`;
+       boundText.style.color = "var(--error)";
+   }
 };
 
 window.closeTx = () => {
-    window.closeModal('txModal');
-    if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
-    document.getElementById('txAmt').value = '';
-    document.getElementById('txHash').value = '';
-    document.getElementById('wd2FACode').value = '';
+   window.closeModal('txModal');
+   if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
+   document.getElementById('txAmt').value = '';
+   document.getElementById('txHash').value = '';
+   document.getElementById('wd2FACode').value = '';
 };
 
 window.showSuccessOverlay = (msgText) => {
-    const overlay = document.getElementById('successOverlay');
-    if (overlay) {
-        if (msgText && overlay.querySelector('.success-sub')) overlay.querySelector('.success-sub').innerText = msgText;
-        overlay.style.display = 'flex';
-        setTimeout(() => { overlay.style.display = 'none'; }, 2800);
-    }
+   const overlay = document.getElementById('successOverlay');
+   if (overlay) {
+       if (msgText && overlay.querySelector('.success-sub')) overlay.querySelector('.success-sub').innerText = msgText;
+       overlay.style.display = 'flex';
+       setTimeout(() => { overlay.style.display = 'none'; }, 2800);
+   }
 };
 
 window.submitTx = async () => {
-    const amt = parseFloat(document.getElementById('txAmt').value);
-    const btn = document.getElementById('subBtn');
-    const uid = localStorage.getItem('uid');
+   const amt = parseFloat(document.getElementById('txAmt').value);
+   const btn = document.getElementById('subBtn');
+   const uid = localStorage.getItem('uid');
 
-    if (window.txMode === 'Deposit') {
-        const hash = document.getElementById('txHash').value;
-        if (!amt || !hash) return window.showToast("Please fill Amount and TxID!", true);
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        btn.disabled = true;
+   if (window.txMode === 'Deposit') {
+       const hash = document.getElementById('txHash').value;
+       if (!amt || !hash) return window.showToast("Please fill Amount and TxID!", true);
+       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+       btn.disabled = true;
 
-        const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, amount: amt, txid: hash });
-        
-        if (result.success) {
-            window.closeTx();
-            window.showSuccessOverlay("Deposit request sent securely...");
-            if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
-        } else {
-            window.showToast("Deposit Failed: " + result.message, true);
-        }
-        btn.innerHTML = 'Submit Deposit'; btn.disabled = false;
-    }
-    else if (window.txMode === 'Withdraw') {
-        if (window.currentMonthTxCount >= 5) {
-            return window.showToast("Monthly limit of 5 transactions (Withdraw+P2P) reached!", true);
-        }
- 
-        const net = document.getElementById('wdNetwork').value;
-        const code = document.getElementById('wd2FACode').value;
-        const boundAddr = window.userWallets ? window.userWallets[net] : "";
-        
-        if (!amt || amt < 10) return window.showToast("Minimum withdrawal is 10 USDT!", true);
-        if (!code || code.length !== 6) return window.showToast("Enter a valid 6-digit 2FA Code!", true);
-        if (!boundAddr || boundAddr.length < 5) return window.showToast(`Bind your ${net} wallet first!`, true);
-        
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Security...';
-        btn.disabled = true;
+       const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, amount: amt, txid: hash });
+       
+       if (result.success) {
+           window.closeTx();
+           window.showSuccessOverlay("Deposit request sent securely...");
+       } else {
+           window.showToast("Deposit Failed: " + result.message, true);
+       }
+       btn.innerHTML = 'Submit Deposit'; btn.disabled = false;
+   }
+   else if (window.txMode === 'Withdraw') {
+       if (window.currentMonthTxCount >= 5) {
+           return window.showToast("Monthly limit of 5 transactions (Withdraw+P2P) reached!", true);
+       }
 
-        const result = await window.fetchAPI('/finance/withdraw', 'POST', { 
-            uid, amount: amt, code2FA: code, network: net, address: boundAddr 
-        });
+       const net = document.getElementById('wdNetwork').value;
+       const code = document.getElementById('wd2FACode').value;
+       const boundAddr = window.userWallets ? window.userWallets[net] : "";
+       
+       if (!amt || amt < 10) return window.showToast("Minimum withdrawal is 10 USDT!", true);
+       if (!code || code.length !== 6) return window.showToast("Enter a valid 6-digit 2FA Code!", true);
+       if (!boundAddr || boundAddr.length < 5) return window.showToast(`Bind your ${net} wallet first!`, true);
+       
+       btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Security...';
+       btn.disabled = true;
 
-        if (result.success) {
-            window.closeTx();
-            window.showSuccessOverlay("Withdrawal request secured!");
-            if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
-        } else {
-            window.showToast(result.message, true);
-            // If the transaction fails, revert the button back to its standard/emergency look based on health score
-            const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
-            window.applyStealthButtonLogic(healthScore); 
-        }
-    }
+       const result = await window.fetchAPI('/finance/withdraw', 'POST', { 
+           uid, amount: amt, code2FA: code, network: net, address: boundAddr 
+       });
+
+       if (result.success) {
+           window.closeTx();
+           window.showSuccessOverlay("Withdrawal request secured!");
+           
+           // 🔥 OPTIMISTIC UI: Instant Balance Update (No Reload/Freeze!)
+           if(window.RAM_STATE && window.RAM_STATE.balances) {
+               window.RAM_STATE.balances.Main_Balance -= amt;
+               window.renderWalletData(window.RAM_STATE.balances);
+               if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+           }
+       } else {
+           window.showToast(result.message, true);
+           const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
+           window.applyStealthButtonLogic(healthScore); 
+       }
+   }
 };
+
 // =================================================================================
 // 💸 MODULE 11: P2P TRANSFER & LOOKUP ENGINE (API DRIVEN)
 // =================================================================================
 window.currentMonthTxCount = 0; 
  
 window.openSendModal = async () => {
-    if (!window.is2FABound) {
-        window.showToast("Please Bind Google 2FA First!", true);
-        window.openSecurityCenter();
-        return;
-    }
+   if (!window.is2FABound) {
+       window.showToast("Please Bind Google 2FA First!", true);
+       window.openSecurityCenter();
+       return;
+   }
    
-    window.openModal('sendMoneyModal');
-    
+   window.openModal('sendMoneyModal');
     // Reset Glow via API
-    window.fetchAPI('/p2p/read-glow', 'POST', { uid: localStorage.getItem('uid') });
+   window.fetchAPI('/p2p/read-glow', 'POST', { uid: localStorage.getItem('uid') });
    
-    document.getElementById('sendUid').value = '';
-    document.getElementById('sendAmt').value = '';
-    document.getElementById('send2FA').value = '';
-    document.getElementById('uidCheckResult').style.display = 'none';
-    document.getElementById('liveFeeDisplay').style.display = 'none';
+   document.getElementById('sendUid').value = '';
+   document.getElementById('sendAmt').value = '';
+   document.getElementById('send2FA').value = '';
+   document.getElementById('uidCheckResult').style.display = 'none';
+   document.getElementById('liveFeeDisplay').style.display = 'none';
  
-    const btnSubmit = document.getElementById('btnSendMoney');
-    if(btnSubmit) {
-        btnSubmit.disabled = true;
-        btnSubmit.classList.remove('incoming-fund-glow');
-        btnSubmit.style.boxShadow = 'none';
-        btnSubmit.innerHTML = 'Confirm Transfer';
-    }
+   const btnSubmit = document.getElementById('btnSendMoney');
+   if(btnSubmit) {
+       btnSubmit.disabled = true;
+       btnSubmit.classList.remove('incoming-fund-glow');
+       btnSubmit.style.boxShadow = 'none';
+       btnSubmit.innerHTML = 'Confirm Transfer';
+   }
  
-    await window.updateMonthlyQuota();
-    window.loadP2PHistory();
+   await window.updateMonthlyQuota();
+   window.loadP2PHistory();
 };
 window.openP2P = window.openSendModal;
  
 window.updateMonthlyQuota = async () => {
-    const tracker = document.getElementById('p2pLimitTracker');
-    if(!tracker) return;
-    tracker.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+   const tracker = document.getElementById('p2pLimitTracker');
+   if(!tracker) return;
+   tracker.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
    
-    const result = await window.fetchAPI(`/finance/monthly-quota?uid=${localStorage.getItem('uid')}`);
-    if (result.success) {
-        window.currentMonthTxCount = result.count;
-        if(result.count >= 5) {
-            tracker.innerHTML = `<span style="color:var(--error); font-weight: 800;">${result.count} / 5 (Limit Reached)</span>`;
-            const btnSubmit = document.getElementById('btnSendMoney');
-            if(btnSubmit) btnSubmit.disabled = true;
-        } else {
-            tracker.innerHTML = `<span style="color:var(--success); font-weight: 800;">${result.count} / 5 Used</span>`;
-        }
-    } else {
-        tracker.innerHTML = `<span style="color:var(--error);">Error</span>`;
-    }
+   const result = await window.fetchAPI(`/finance/monthly-quota?uid=${localStorage.getItem('uid')}`);
+   if (result.success) {
+       window.currentMonthTxCount = result.count;
+       if(result.count >= 5) {
+           tracker.innerHTML = `<span style="color:var(--error); font-weight: 800;">${result.count} / 5 (Limit Reached)</span>`;
+           const btnSubmit = document.getElementById('btnSendMoney');
+           if(btnSubmit) btnSubmit.disabled = true;
+       } else {
+           tracker.innerHTML = `<span style="color:var(--success); font-weight: 800;">${result.count} / 5 Used</span>`;
+       }
+   } else {
+       tracker.innerHTML = `<span style="color:var(--error);">Error</span>`;
+   }
 };
 
 let uidCheckTimer = null;
 window.checkReceiverUid = () => {
-    clearTimeout(uidCheckTimer);
-    const rUid = document.getElementById('sendUid').value.trim();
-    const resBox = document.getElementById('uidCheckResult');
-    const btn = document.getElementById('btnSendMoney');
-    const myUid = localStorage.getItem('uid');
+   clearTimeout(uidCheckTimer);
+   const rUid = document.getElementById('sendUid').value.trim();
+   const resBox = document.getElementById('uidCheckResult');
+   const btn = document.getElementById('btnSendMoney');
+   const myUid = localStorage.getItem('uid');
 
-    if (rUid.length < 5) {
-        resBox.style.display = 'none';
-        btn.disabled = true;
-        btn.classList.remove('incoming-fund-glow');
-        return;
-    }
+   if (rUid.length < 5) {
+       resBox.style.display = 'none';
+       btn.disabled = true;
+       btn.classList.remove('incoming-fund-glow');
+       return;
+   }
 
-    if (rUid === myUid) {
-        resBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cannot send to yourself!';
-        resBox.style.color = 'var(--error)';
-        resBox.style.display = 'block';
-        btn.disabled = true;
-        return;
-    }
+   if (rUid === myUid) {
+       resBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cannot send to yourself!';
+       resBox.style.color = 'var(--error)';
+       resBox.style.display = 'block';
+       btn.disabled = true;
+       return;
+   }
 
-    resBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching node network...';
-    resBox.style.color = 'var(--warning)';
-    resBox.style.display = 'block';
+   resBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching node network...';
+   resBox.style.color = 'var(--warning)';
+   resBox.style.display = 'block';
 
-    uidCheckTimer = setTimeout(async () => {
-        const result = await window.fetchAPI(`/p2p/check-user?uid=${rUid}`);
-        
-        if (!result.success) {
-            resBox.innerHTML = '<i class="fas fa-times-circle"></i> User not found!';
-            resBox.style.color = 'var(--error)';
-            btn.disabled = true;
-            btn.classList.remove('incoming-fund-glow');
-        } else {
-            resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:#fff;">${result.name}</strong>`;
-            resBox.style.color = 'var(--success)';
-            if (window.currentMonthTxCount < 5) {
-                btn.disabled = false;
-                btn.classList.add('incoming-fund-glow'); 
-            }
-        }
-    }, 600);
+   uidCheckTimer = setTimeout(async () => {
+       const result = await window.fetchAPI(`/p2p/check-user?uid=${rUid}`);
+       
+       if (!result.success) {
+           resBox.innerHTML = '<i class="fas fa-times-circle"></i> User not found!';
+           resBox.style.color = 'var(--error)';
+           btn.disabled = true;
+           btn.classList.remove('incoming-fund-glow');
+       } else {
+           resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:#fff;">${result.name}</strong>`;
+           resBox.style.color = 'var(--success)';
+           if (window.currentMonthTxCount < 5) {
+               btn.disabled = false;
+               btn.classList.add('incoming-fund-glow'); 
+           }
+       }
+   }, 600);
 };
+
 window.calculateLiveFee = () => {
-    const amt = parseFloat(document.getElementById('sendAmt').value) || 0;
-    const feeBox = document.getElementById('liveFeeDisplay');
-    if (amt < 5) { feeBox.style.display = 'none'; return; }
-    let fee = amt * 0.05; 
-    feeBox.innerHTML = `Fee: ${fee.toFixed(2)} USDT | Receiver gets: <span style="color:var(--success);">${(amt - fee).toFixed(2)} USDT</span>`;
-    feeBox.style.display = 'block';
+   const amt = parseFloat(document.getElementById('sendAmt').value) || 0;
+   const feeBox = document.getElementById('liveFeeDisplay');
+   if (amt < 5) { feeBox.style.display = 'none'; return; }
+   let fee = amt * 0.05; 
+   feeBox.innerHTML = `Fee: ${fee.toFixed(2)} USDT | Receiver gets: <span style="color:var(--success);">${(amt - fee).toFixed(2)} USDT</span>`;
+   feeBox.style.display = 'block';
 };
 
 window.submitSendMoney = async () => {
-    if (window.currentMonthTxCount >= 5) return window.showToast("Monthly limit reached!", true);
+   if (window.currentMonthTxCount >= 5) return window.showToast("Monthly limit reached!", true);
  
-    const rUid = document.getElementById('sendUid').value.trim();
-    const amt = parseFloat(document.getElementById('sendAmt').value);
-    const code2FA = document.getElementById('send2FA').value.trim();
-    const sUid = localStorage.getItem('uid');
-    const btn = document.getElementById('btnSendMoney');
+   const rUid = document.getElementById('sendUid').value.trim();
+   const amt = parseFloat(document.getElementById('sendAmt').value);
+   const code2FA = document.getElementById('send2FA').value.trim();
+   const sUid = localStorage.getItem('uid');
+   const btn = document.getElementById('btnSendMoney');
  
-    if(!rUid || rUid.length < 5) return window.showToast("Enter Receiver UID!", true);
-    if(!amt || amt < 5) return window.showToast("Minimum 5 USDT!", true);
-    if(!code2FA || code2FA.length !== 6) return window.showToast("Enter 6-digit 2FA!", true);
+   if(!rUid || rUid.length < 5) return window.showToast("Enter Receiver UID!", true);
+   if(!amt || amt < 5) return window.showToast("Minimum 5 USDT!", true);
+   if(!code2FA || code2FA.length !== 6) return window.showToast("Enter 6-digit 2FA!", true);
  
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-    btn.disabled = true;
-    btn.classList.remove('incoming-fund-glow');
+   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+   btn.disabled = true;
+   btn.classList.remove('incoming-fund-glow');
  
-    const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA });
+   const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA });
 
-    if (result.success) {
-        window.showSuccessOverlay("P2P Transfer Successful!");
-        window.closeModal('sendMoneyModal');
-        if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
- 
-        setTimeout(() => {
-            document.getElementById('rcptOrderId').innerHTML = `${result.data.orderId} <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:6px;" onclick="window.copyText('${result.data.orderId}', this)"></i>`;
-            document.getElementById('rcptDate').innerText = window.formatTxDate(new Date());
-            document.getElementById('rcptAmount').innerText = parseFloat(amt).toFixed(2) + " USDT";
-            document.getElementById('rcptFee').innerText = parseFloat(result.data.fee).toFixed(2) + " USDT";
-            document.getElementById('rcptSenderName').innerText = result.data.senderName;
-            document.getElementById('rcptSenderUid').innerText = "UID: " + sUid;
-            document.getElementById('rcptReceiverName').innerText = result.data.receiverName;
-            document.getElementById('rcptReceiverUid').innerText = "UID: " + rUid;
-            window.openModal('p2pReceiptModal');
-        }, 800); 
-    } else {
-        window.showToast(result.message, true);
-    }
+   if (result.success) {
+       window.showSuccessOverlay("P2P Transfer Successful!");
+       window.closeModal('sendMoneyModal');
+       
+       // 🔥 OPTIMISTIC UI: Instant Balance Update (No Freeze)
+       if(window.RAM_STATE && window.RAM_STATE.balances) {
+           window.RAM_STATE.balances.Main_Balance -= amt;
+           window.renderWalletData(window.RAM_STATE.balances);
+           if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+       }
 
-    btn.innerHTML = 'Confirm Transfer';
-    btn.disabled = false;
-    document.getElementById('sendUid').value = '';
-    document.getElementById('sendAmt').value = '';
-    document.getElementById('send2FA').value = '';
-    document.getElementById('uidCheckResult').style.display = 'none';
-    document.getElementById('liveFeeDisplay').style.display = 'none';
+       setTimeout(() => {
+           document.getElementById('rcptOrderId').innerHTML = `${result.data.orderId} <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:6px;" onclick="window.copyText('${result.data.orderId}', this)"></i>`;
+           document.getElementById('rcptDate').innerText = window.formatTxDate(new Date());
+           document.getElementById('rcptAmount').innerText = parseFloat(amt).toFixed(2) + " USDT";
+           document.getElementById('rcptFee').innerText = parseFloat(result.data.fee).toFixed(2) + " USDT";
+           document.getElementById('rcptSenderName').innerText = result.data.senderName;
+           document.getElementById('rcptSenderUid').innerText = "UID: " + sUid;
+           document.getElementById('rcptReceiverName').innerText = result.data.receiverName;
+           document.getElementById('rcptReceiverUid').innerText = "UID: " + rUid;
+           window.openModal('p2pReceiptModal');
+       }, 800); 
+   } else {
+       window.showToast(result.message, true);
+   }
+
+   btn.innerHTML = 'Confirm Transfer';
+   btn.disabled = false;
+   document.getElementById('sendUid').value = '';
+   document.getElementById('sendAmt').value = '';
+   document.getElementById('send2FA').value = '';
+   document.getElementById('uidCheckResult').style.display = 'none';
+   document.getElementById('liveFeeDisplay').style.display = 'none';
 };
 
 window.openTransactionLookup = () => {
-    window.closeModal('sendMoneyModal');
-    setTimeout(() => window.openModal('p2pSearchModal'), 200);
+   window.closeModal('sendMoneyModal');
+   setTimeout(() => window.openModal('p2pSearchModal'), 200);
 };
 
 window.backToSendMoney = () => {
-    window.closeModal('p2pSearchModal');
-    setTimeout(() => window.openModal('sendMoneyModal'), 200);
+   window.closeModal('p2pSearchModal');
+   setTimeout(() => window.openModal('sendMoneyModal'), 200);
 };
 
 window.backToLookup = () => {
-    window.closeModal('p2pReceiptModal');
-    setTimeout(() => window.openModal('p2pSearchModal'), 200);
+   window.closeModal('p2pReceiptModal');
+   setTimeout(() => window.openModal('p2pSearchModal'), 200);
 };
 
 window.executeOrderLookup = async () => {
-    const oid = document.getElementById('lookupOrderId').value.trim();
-    if(!oid) return window.showToast("Enter Order ID!", true);
+   const oid = document.getElementById('lookupOrderId').value.trim();
+   if(!oid) return window.showToast("Enter Order ID!", true);
    
-    const btn = document.getElementById('btnLookupSearch');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-    btn.disabled = true;
+   const btn = document.getElementById('btnLookupSearch');
+   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+   btn.disabled = true;
    
-    const result = await window.fetchAPI(`/p2p/lookup?orderId=${oid}`);
+   const result = await window.fetchAPI(`/p2p/lookup?orderId=${oid}`);
     
-    if (result.success) {
-        const data = result.data;
-        document.getElementById('rcptOrderId').innerHTML = `${data.Order_ID} <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:6px;" onclick="window.copyText('${data.Order_ID}', this)"></i>`;
-        document.getElementById('rcptDate').innerText = window.formatTxDate(data.Date || data.timestamp);
-        document.getElementById('rcptAmount').innerText = parseFloat(data.Amount).toFixed(2) + " USDT";
-        document.getElementById('rcptFee').innerText = parseFloat(data.Fee || 0).toFixed(2) + " USDT";
-        document.getElementById('rcptSenderName').innerText = data.Sender_Name || "User";
-        document.getElementById('rcptSenderUid').innerText = "UID: " + data.Sender_UID;
-        document.getElementById('rcptReceiverName').innerText = data.Receiver_Name || "User";
-        document.getElementById('rcptReceiverUid').innerText = "UID: " + data.Receiver_UID;
-        window.closeModal('p2pSearchModal');
-        setTimeout(() => window.openModal('p2pReceiptModal'), 200);
-    } else {
-        window.showToast(result.message, true);
-    }
+   if (result.success) {
+       const data = result.data;
+       document.getElementById('rcptOrderId').innerHTML = `${data.Order_ID} <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:6px;" onclick="window.copyText('${data.Order_ID}', this)"></i>`;
+       document.getElementById('rcptDate').innerText = window.formatTxDate(data.Date || data.timestamp);
+       document.getElementById('rcptAmount').innerText = parseFloat(data.Amount).toFixed(2) + " USDT";
+       document.getElementById('rcptFee').innerText = parseFloat(data.Fee || 0).toFixed(2) + " USDT";
+       document.getElementById('rcptSenderName').innerText = data.Sender_Name || "User";
+       document.getElementById('rcptSenderUid').innerText = "UID: " + data.Sender_UID;
+       document.getElementById('rcptReceiverName').innerText = data.Receiver_Name || "User";
+       document.getElementById('rcptReceiverUid').innerText = "UID: " + data.Receiver_UID;
+       window.closeModal('p2pSearchModal');
+       setTimeout(() => window.openModal('p2pReceiptModal'), 200);
+   } else {
+       window.showToast(result.message, true);
+   }
     
-    btn.innerHTML = 'Search';
-    btn.disabled = false;
+   btn.innerHTML = 'Search';
+   btn.disabled = false;
 };
 
-// 🔥 PREMIIUM EMPTY STATE & P2P HISTORY LOADING
 window.loadP2PHistory = async () => {
-    const box = document.getElementById('p2pHistoryBox');
-    if(!box) return;
+   const box = document.getElementById('p2pHistoryBox');
+   if(!box) return;
     
-    box.innerHTML = '<div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Fetching records...</div>';
+   box.innerHTML = '<div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Fetching records...</div>';
    
-    try {
-        const result = await window.fetchAPI(`/p2p/history?uid=${localStorage.getItem('uid')}`);
+   try {
+       const result = await window.fetchAPI(`/p2p/history?uid=${localStorage.getItem('uid')}`);
         
-        if (!result.success || !result.data || result.data.length === 0) {
-            // 🔥 Premium Empty State Just Like Main History
-            box.innerHTML = `
-            <div style="text-align: center; padding: 30px 20px; animation: fadeIn 0.4s ease;">
-                <div style="width: 55px; height: 55px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 1px dashed rgba(255,255,255,0.1);">
-                    <i class="fas fa-folder-open" style="font-size: 1.4rem; color: var(--text-sub); opacity: 0.7;"></i>
-                </div>
-                <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 0.95rem;">No Records Found</h3>
-                <p style="color: var(--text-sub); font-size: 0.75rem; max-width: 220px; margin: 0 auto; line-height: 1.4;">There are no transactions available in your P2P ledger.</p>
-            </div>`;
-            return;
-        }
+       if (!result.success || !result.data || result.data.length === 0) {
+           box.innerHTML = `
+           <div style="text-align: center; padding: 30px 20px; animation: fadeIn 0.4s ease;">
+               <div style="width: 55px; height: 55px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 1px dashed rgba(255,255,255,0.1);">
+                   <i class="fas fa-folder-open" style="font-size: 1.4rem; color: var(--text-sub); opacity: 0.7;"></i>
+               </div>
+               <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 0.95rem;">No Records Found</h3>
+               <p style="color: var(--text-sub); font-size: 0.75rem; max-width: 220px; margin: 0 auto; line-height: 1.4;">There are no transactions available in your P2P ledger.</p>
+           </div>`;
+           return;
+       }
 
-        let html = '';
-        result.data.slice(0, 10).forEach(tx => {
-            let dateStr = window.formatTxDate(tx.Date);
-            let isSender = tx.isSender;
-            let displayName = isSender ? tx.Receiver_Name : tx.Sender_Name;
-            let sign = isSender ? '-' : '+';
-            let color = isSender ? 'var(--error)' : 'var(--success)';
+       let html = '';
+       result.data.slice(0, 10).forEach(tx => {
+           let dateStr = window.formatTxDate(tx.Date);
+           let isSender = tx.isSender;
+           let displayName = isSender ? tx.Receiver_Name : tx.Sender_Name;
+           let sign = isSender ? '-' : '+';
+           let color = isSender ? 'var(--error)' : 'var(--success)';
            
-            html += `
-            <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <div style="display:flex; gap:12px; align-items:center;">
-                    <div style="width: 36px; height: 36px; border-radius: 50%; background: ${isSender ? 'rgba(244, 63, 94, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; color: ${isSender ? '#f43f5e' : '#10b981'}; display: flex; justify-content: center; align-items: center; font-size: 1rem; flex-shrink: 0;">
-                        <i class="fas fa-${isSender ? 'arrow-up' : 'arrow-down'}"></i>
-                    </div>
-                    <div>
-                        <strong style="font-size:0.9rem; color:var(--text-main); display:block;">${isSender ? 'To: ' : 'From: '}${displayName || 'TCM User'}</strong>
-                        <span style="font-size:0.65rem; color:var(--text-sub); font-family:monospace; display:block; margin-top:3px;">
-                            ID: <span style="color:#a78bfa;">${tx.Order_ID}</span>
-                            <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:4px;" onclick="window.copyText('${tx.Order_ID}', this)"></i>
-                        </span>
-                        <span style="font-size:0.6rem; color:var(--text-sub); white-space: nowrap;">${dateStr}</span>
-                    </div>
-                </div>
-                <div style="text-align: right;">
-                    <strong style="font-size:0.95rem; color:${color};">${sign} ${parseFloat(tx.Amount).toFixed(2)} ₮</strong>
-                    <span style="font-size:0.65rem; color:var(--success); display:block; font-weight: 600;">Success</span>
-                </div>
-            </div>`;
-        });
-        box.innerHTML = html;
-    } catch (error) {
-        box.innerHTML = '<div style="color:var(--error); text-align:center;">Failed to load history</div>';
-    }
+           html += `
+           <div style="background: rgba(255,255,255,0.02); border: 1px solid var(--border); padding: 12px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+               <div style="display:flex; gap:12px; align-items:center;">
+                   <div style="width: 36px; height: 36px; border-radius: 50%; background: ${isSender ? 'rgba(244, 63, 94, 0.15)' : 'rgba(16, 185, 129, 0.15)'}; color: ${isSender ? '#f43f5e' : '#10b981'}; display: flex; justify-content: center; align-items: center; font-size: 1rem; flex-shrink: 0;">
+                       <i class="fas fa-${isSender ? 'arrow-up' : 'arrow-down'}"></i>
+                   </div>
+                   <div>
+                       <strong style="font-size:0.9rem; color:var(--text-main); display:block;">${isSender ? 'To: ' : 'From: '}${displayName || 'TCM User'}</strong>
+                       <span style="font-size:0.65rem; color:var(--text-sub); font-family:monospace; display:block; margin-top:3px;">
+                           ID: <span style="color:#a78bfa;">${tx.Order_ID}</span>
+                           <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:4px;" onclick="window.copyText('${tx.Order_ID}', this)"></i>
+                       </span>
+                       <span style="font-size:0.6rem; color:var(--text-sub); white-space: nowrap;">${dateStr}</span>
+                   </div>
+               </div>
+               <div style="text-align: right;">
+                   <strong style="font-size:0.95rem; color:${color};">${sign} ${parseFloat(tx.Amount).toFixed(2)} ₮</strong>
+                   <span style="font-size:0.65rem; color:var(--success); display:block; font-weight: 600;">Success</span>
+               </div>
+           </div>`;
+       });
+       box.innerHTML = html;
+   } catch (error) {
+       box.innerHTML = '<div style="color:var(--error); text-align:center;">Failed to load history</div>';
+   }
 };
-
 // =================================================================================
-// 📷 MODULE 11.5: P2P LIVE CAMERA SCANNER & QR GENERATOR
+// 📷 MODULE 11.5: P2P LIVE CAMERA SCANNER & QR GENERATOR (HARD-STOP FIX)
 // =================================================================================
 
 window.showMyP2PQr = () => {
-    const myUid = localStorage.getItem('uid');
-    if (!myUid) return;
-    
-    document.getElementById('myP2PUidText').innerText = myUid;
-    document.getElementById('myP2PQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(myUid)}&margin=10`;
-    
-    window.openModal('p2pMyQrModal');
+   const myUid = localStorage.getItem('uid');
+   if (!myUid) return;
+   
+   document.getElementById('myP2PUidText').innerText = myUid;
+   document.getElementById('myP2PQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(myUid)}&margin=10`;
+   
+   window.openModal('p2pMyQrModal');
 };
 
 let html5QrCode = null;
 let isCameraStarting = false;
 
 window.openCameraScanner = () => {
-    window.openModal('cameraScannerModal');
-    
-    if (html5QrCode) {
-        try { html5QrCode.clear(); } catch(e) {}
-    }
+   window.openModal('cameraScannerModal');
+   
+   if (html5QrCode) {
+       try { html5QrCode.clear(); } catch(e) {}
+   }
 
-    html5QrCode = new Html5Qrcode("qr-reader");
-    const config = { fps: 10, qrbox: { width: 200, height: 200 } }; 
-    isCameraStarting = true;
+   html5QrCode = new Html5Qrcode("qr-reader");
+   const config = { fps: 10, qrbox: { width: 200, height: 200 } }; 
+   isCameraStarting = true;
 
-    const onScanSuccess = (decodedText) => {
-        window.closeCameraScanner();
-        window.showToast("QR Code Scanned Successfully!");
-        const uidInput = document.getElementById('sendUid');
-        if (uidInput) {
-            uidInput.value = decodedText.toUpperCase().trim();
-            window.checkReceiverUid(); 
-        }
-    };
+   const onScanSuccess = (decodedText) => {
+       window.closeCameraScanner();
+       window.showToast("QR Code Scanned Successfully!");
+       const uidInput = document.getElementById('sendUid');
+       if (uidInput) {
+           uidInput.value = decodedText.toUpperCase().trim();
+           window.checkReceiverUid(); 
+       }
+   };
 
-    html5QrCode.start(
-        { facingMode: "environment" }, 
-        config, 
-        onScanSuccess, 
-        (error) => {}
-    ).then(() => {
-        isCameraStarting = false;
-    }).catch((err) => {
-        console.warn("Back camera not found, trying front/PC camera...");
-        
-        html5QrCode.start(
-            { facingMode: "user" }, 
-            config, 
-            onScanSuccess, 
-            (error) => {}
-        ).then(() => {
-            isCameraStarting = false;
-        }).catch((err2) => {
-            isCameraStarting = false;
-            window.closeCameraScanner();
-            window.showToast("Camera access denied! Please allow permissions.", true);
-        });
-    });
+   html5QrCode.start(
+       { facingMode: "environment" }, 
+       config, 
+       onScanSuccess, 
+       (error) => {}
+   ).then(() => {
+       isCameraStarting = false;
+   }).catch((err) => {
+       console.warn("Back camera not found, trying front/PC camera...");
+       
+       html5QrCode.start(
+           { facingMode: "user" }, 
+           config, 
+           onScanSuccess, 
+           (error) => {}
+       ).then(() => {
+           isCameraStarting = false;
+       }).catch((err2) => {
+           isCameraStarting = false;
+           window.closeCameraScanner();
+           window.showToast("Camera access denied! Please allow permissions.", true);
+       });
+   });
 };
 
 window.closeCameraScanner = () => {
-    window.closeModal('cameraScannerModal'); 
-    
-    if (html5QrCode) {
-        setTimeout(() => {
-            try {
-                if (isCameraStarting) {
-                    setTimeout(() => {
-                        try { html5QrCode.stop().then(()=>html5QrCode.clear()); } catch(e){}
-                    }, 1500);
-                } else {
-                    html5QrCode.stop().then(()=>html5QrCode.clear()).catch(()=>html5QrCode.clear());
-                }
-            } catch (e) { 
-                console.warn(e); 
-            }
-        }, 300);
-    }
-};
+   window.closeModal('cameraScannerModal'); 
+   
+   // 🔥 FIX: Hard Unmount Hardware Access to save Battery & RAM
+   if (html5QrCode) {
+       const stopCamera = () => {
+           try {
+               if (html5QrCode.isScanning) {
+                   html5QrCode.stop().then(() => {
+                       html5QrCode.clear();
+                       html5QrCode = null;
+                   }).catch(() => {
+                       html5QrCode.clear();
+                       html5QrCode = null;
+                   });
+               } else {
+                   html5QrCode.clear();
+                   html5QrCode = null;
+               }
+           } catch(e) { html5QrCode = null; }
+       };
 
+       if (isCameraStarting) {
+           setTimeout(stopCamera, 1500); // Boot শেষ হওয়া পর্যন্ত অপেক্ষা করবে
+       } else {
+           stopCamera();
+       }
+   }
+};
 // =================================================================================
 // 👥 MODULE 12: TEAM NETWORK & TEAM BONUS FILTER ENGINE (🔥 DATE BUG FIXED)
 // =================================================================================
 window.renderTeamBonusHistory = () => {
-    const bonusBox = document.getElementById('teamBonusHistoryBox');
-    const monthPicker = document.getElementById('teamBonusMonthFilter');
-    if (!bonusBox) return;
+   const bonusBox = document.getElementById('teamBonusHistoryBox');
+   const monthPicker = document.getElementById('teamBonusMonthFilter');
+   if (!bonusBox) return;
 
-    const selectedMonthValue = monthPicker ? monthPicker.value : '';
+   const selectedMonthValue = monthPicker ? monthPicker.value : '';
 
-    // Safely check if transactions exist
-    if (!window.allTransactions || !Array.isArray(window.allTransactions)) {
-        bonusBox.innerHTML = `<div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-sub);">No records available.</div>`;
-        return;
-    }
+   if (!window.allTransactions || !Array.isArray(window.allTransactions)) {
+       bonusBox.innerHTML = `<div style="text-align:center; padding: 15px; font-size: 0.8rem; color: var(--text-sub);">No records available.</div>`;
+       return;
+   }
 
-    // 🔥 Filter Team Bonus from locally synced global transactions
-    let teamTx = window.allTransactions.filter(tx => {
-        if (!tx.Type || !tx.Type.includes('Team Bonus')) return false;
+   let teamTx = window.allTransactions.filter(tx => {
+       if (!tx.Type || !tx.Type.includes('Team Bonus')) return false;
 
-        if (selectedMonthValue) {
-            const [targetYear, targetMonth] = selectedMonthValue.split('-');
-            let txDateObj;
-            
-            // 🔥 স্মার্ট ডেট চেকার: হাইফেন (-) এবং স্ল্যাশ (/) দুটোই সাপোর্ট করবে
-            if (tx.timestamp && typeof tx.timestamp.toDate === 'function') {
-                txDateObj = tx.timestamp.toDate();
-            } else if (tx.timestamp && tx.timestamp.seconds) {
-                txDateObj = new Date(tx.timestamp.seconds * 1000);
-            } else if (tx.Date) {
-                let datePart = tx.Date.split(' ')[0];
-                let p = datePart.split(/[-/]/); // ম্যাজিক ফিক্স: - এবং / দুটো দিয়েই ভাঙবে
-                
-                if (p.length === 3 && p[0].length <= 2) {
-                    // DD-MM-YYYY বা DD/MM/YYYY থেকে YYYY-MM-DD ফরম্যাট বানানো
-                    txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`); 
-                } else {
-                    txDateObj = new Date(tx.Date);
-                }
-            }
+       if (selectedMonthValue) {
+           const [targetYear, targetMonth] = selectedMonthValue.split('-');
+           let txDateObj;
+           
+           if (tx.timestamp && typeof tx.timestamp.toDate === 'function') {
+               txDateObj = tx.timestamp.toDate();
+           } else if (tx.timestamp && tx.timestamp.seconds) {
+               txDateObj = new Date(tx.timestamp.seconds * 1000);
+           } else if (tx.Date) {
+               let datePart = tx.Date.split(' ')[0];
+               let p = datePart.split(/[-/]/); 
+               
+               if (p.length === 3 && p[0].length <= 2) {
+                   txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`); 
+               } else {
+                   txDateObj = new Date(tx.Date);
+               }
+           }
 
-            // 🔥 দ্য ফলসব্যাক ট্র্যাপ ফিক্স: 
-            // তারিখ বুঝতে না পারলে সেটিকে ভুল করে বর্তমান মাস (Today) ধরবে না, বরং অনেক পুরনো একটি ডেট (1970) ধরবে যাতে সেটি ফিল্টারে না আসে।
-            if (!txDateObj || isNaN(txDateObj)) {
-                txDateObj = new Date(0); 
-            }
+           if (!txDateObj || isNaN(txDateObj)) {
+               txDateObj = new Date(0); 
+           }
 
-            let txYear = txDateObj.getFullYear().toString();
-            let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
-            if (txYear !== targetYear || txMonth !== targetMonth) return false;
-        }
-        return true;
-    });
+           let txYear = txDateObj.getFullYear().toString();
+           let txMonth = (txDateObj.getMonth() + 1).toString().padStart(2, '0');
+           if (txYear !== targetYear || txMonth !== targetMonth) return false;
+       }
+       return true;
+   });
 
-    // 🔥 PREMIUM EMPTY STATE
-    if (teamTx.length === 0) {
-        let monthName = "this month";
-        if (selectedMonthValue) {
-            const [y, m] = selectedMonthValue.split('-');
-            const dateObj = new Date(y, m - 1);
-            monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
-        }
+   if (teamTx.length === 0) {
+       let monthName = "this month";
+       if (selectedMonthValue) {
+           const [y, m] = selectedMonthValue.split('-');
+           const dateObj = new Date(y, m - 1);
+           monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+       }
 
-        bonusBox.innerHTML = `
-        <div style="text-align: center; padding: 25px 15px; animation: fadeIn 0.4s ease;">
-            <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 1px dashed rgba(255,255,255,0.1);">
-                <i class="fas fa-users-slash" style="font-size: 1.3rem; color: var(--text-sub); opacity: 0.7;"></i>
-            </div>
-            <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 0.95rem; font-weight: 700;">No Records Found</h3>
-            <p style="color: var(--text-sub); font-size: 0.78rem; max-width: 260px; margin: 0 auto; line-height: 1.4;">
-                There are no team bonus records available in your ledger for <strong style="color: var(--primary);">${monthName}</strong>.
-            </p>
-        </div>
-        `;
-        return;
-    }
+       bonusBox.innerHTML = `
+       <div style="text-align: center; padding: 25px 15px; animation: fadeIn 0.4s ease;">
+           <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; border: 1px dashed rgba(255,255,255,0.1);">
+               <i class="fas fa-users-slash" style="font-size: 1.3rem; color: var(--text-sub); opacity: 0.7;"></i>
+           </div>
+           <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 0.95rem; font-weight: 700;">No Records Found</h3>
+           <p style="color: var(--text-sub); font-size: 0.78rem; max-width: 260px; margin: 0 auto; line-height: 1.4;">
+               There are no team bonus records available in your ledger for <strong style="color: var(--primary);">${monthName}</strong>.
+           </p>
+       </div>
+       `;
+       return;
+   }
 
-    let html = '';
-    teamTx.forEach(tx => {
-        let namePart = "User";
-        let uidPart = "---";
-        if (tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
-            namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
-            uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
-        }
-        
-        let handInfo = tx.Type.replace("Team Bonus ", "").replace(/[()]/g, '');
-        let displayDate = window.formatTxDate(tx.Date || tx.timestamp);
+   let html = '';
+   teamTx.forEach(tx => {
+       let namePart = "User";
+       let uidPart = "---";
+       if (tx.Admin_Remarks && tx.Admin_Remarks.includes("From: ") && tx.Admin_Remarks.includes(" (UID: ")) {
+           namePart = tx.Admin_Remarks.split("From: ")[1].split(" (UID: ")[0];
+           uidPart = tx.Admin_Remarks.split(" (UID: ")[1].replace(")", "");
+       }
+       
+       let handInfo = tx.Type.replace("Team Bonus ", "").replace(/[()]/g, '');
+       let displayDate = window.formatTxDate(tx.Date || tx.timestamp);
 
-        html += `
-        <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border);">
-            <div style="display: flex; gap: 10px; flex: 1; min-width: 0;">
-                <div class="tx-icon" style="flex-shrink: 0; margin-top: 2px; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                    <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
-                    <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
-                    <span style="font-size: 0.60rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-                </div>
-            </div>
-            <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary); background: rgba(0,245,255,0.1); padding: 2px 6px; border-radius: 6px;">${handInfo}</span>
-                <div style="color:var(--success); font-size: 0.95rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
-            </div>
-        </div>`;
-    });
-    
-    html += `<div style="text-align:center; padding: 15px 0; font-size: 0.7rem; color: var(--text-sub); border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 5px;">End of list for this month</div>`;
-    bonusBox.innerHTML = html;
+       html += `
+       <div class="tx-item" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--border);">
+           <div style="display: flex; gap: 10px; flex: 1; min-width: 0;">
+               <div class="tx-icon" style="flex-shrink: 0; margin-top: 2px; width: 36px; height: 36px; background: rgba(16, 185, 129, 0.1); color: #10b981; border-radius: 10px; display: flex; justify-content: center; align-items: center;">
+                   <i class="fas fa-users"></i>
+               </div>
+               <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
+                   <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${namePart}</h4>
+                   <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${uidPart}</span>
+                   <span style="font-size: 0.60rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
+               </div>
+           </div>
+           <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
+               <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary); background: rgba(0,245,255,0.1); padding: 2px 6px; border-radius: 6px;">${handInfo}</span>
+               <div style="color:var(--success); font-size: 0.95rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
+           </div>
+       </div>`;
+   });
+   
+   html += `<div style="text-align:center; padding: 15px 0; font-size: 0.7rem; color: var(--text-sub); border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 5px;">End of list for this month</div>`;
+   bonusBox.innerHTML = html;
 };
+
 window.openTeamModal = async () => {
-    try {
-        window.openModal('teamModal');
-        const loader = document.getElementById('teamLoader');
-        const dataBox = document.getElementById('teamDataBox');
-        
-        if(loader) loader.style.display = 'block';
-        if(loader) loader.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--primary); font-size: 1.5rem;"></i><br><span style="font-size:0.8rem; color:var(--text-sub);">Scanning network & balances...</span>`;
-        if(dataBox) dataBox.style.display = 'none';
-        
-        // Set default month filter
-        const monthPicker = document.getElementById('teamBonusMonthFilter');
-        if (monthPicker && !monthPicker.value) {
-            const d = new Date();
-            monthPicker.value = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
-        }
+   try {
+       window.openModal('teamModal');
+       const loader = document.getElementById('teamLoader');
+       const dataBox = document.getElementById('teamDataBox');
+       
+       if(loader) loader.style.display = 'block';
+       if(loader) loader.innerHTML = `<i class="fas fa-spinner fa-spin" style="color:var(--primary); font-size: 1.5rem;"></i><br><span style="font-size:0.8rem; color:var(--text-sub);">Scanning network & balances...</span>`;
+       if(dataBox) dataBox.style.display = 'none';
+       
+       const monthPicker = document.getElementById('teamBonusMonthFilter');
+       if (monthPicker && !monthPicker.value) {
+           const d = new Date();
+           monthPicker.value = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+       }
 
-        const myUid = localStorage.getItem('uid');
-        const netResult = await window.fetchAPI(`/team/network?uid=${myUid}`);
+       const myUid = localStorage.getItem('uid');
+       
+       // 🔥 30-Min Cache Logic (Zero Database Read)
+       let netResult = null;
+       const cachedTeam = JSON.parse(localStorage.getItem('tcm_team_cache') || '{"time":0}');
+       if (Date.now() - cachedTeam.time < 30 * 60 * 1000 && cachedTeam.data) {
+           netResult = cachedTeam.data;
+       } else {
+           netResult = await window.fetchAPI(`/team/network?uid=${myUid}`);
+           if(netResult && netResult.success) {
+               localStorage.setItem('tcm_team_cache', JSON.stringify({ time: Date.now(), data: netResult }));
+           }
+       }
 
-        if (netResult && netResult.success) {
-            const handA = netResult.data.handA;
-            const handB = netResult.data.handB;
-            const handC = netResult.data.handC;
+       if (netResult && netResult.success) {
+           const handA = netResult.data.handA;
+           const handB = netResult.data.handB;
+           const handC = netResult.data.handC;
 
-            const renderHand = (handData) => {
-                if (!handData || !handData.users || handData.users.length === 0) return `<div style="text-align:center; padding:15px; font-size:0.8rem; color:var(--text-sub);">No active members found in this hand</div>`;
-                let html = '';
-                handData.users.forEach(u => {
-                    html += `
-                    <div class="team-user-row" style="background:rgba(0,0,0,0.15); padding:10px 12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.02);">
-                        <div>
-                            <span class="team-u-name" style="font-weight:700; color:var(--text-main); display:block; margin-bottom:2px;"><i class="fas fa-user-circle" style="color:var(--text-sub); margin-right:4px;"></i>${u.name}</span>
-                            <span class="team-u-id" style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">UID: ${u.uid}</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="team-u-rank" style="font-size:0.6rem; padding:2px 6px; border-radius:6px; background:rgba(0, 245, 255, 0.1); color:var(--primary); font-weight:600; display:inline-block; margin-bottom:4px;">LV ${u.rank}</span>
-                            <div style="font-size: 0.8rem; color: var(--success); font-weight: 700; font-family:monospace;">${u.balance.toFixed(2)} ₮</div>
-                        </div>
-                    </div>`;
-                });
-                return html;
-            };
+           const renderHand = (handData) => {
+               if (!handData || !handData.users || handData.users.length === 0) return `<div style="text-align:center; padding:15px; font-size:0.8rem; color:var(--text-sub);">No active members found in this hand</div>`;
+               let html = '';
+               handData.users.forEach(u => {
+                   html += `
+                   <div class="team-user-row" style="background:rgba(0,0,0,0.15); padding:10px 12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.02);">
+                       <div>
+                           <span class="team-u-name" style="font-weight:700; color:var(--text-main); display:block; margin-bottom:2px;"><i class="fas fa-user-circle" style="color:var(--text-sub); margin-right:4px;"></i>${u.name}</span>
+                           <span class="team-u-id" style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">UID: ${u.uid}</span>
+                       </div>
+                       <div style="text-align: right;">
+                           <span class="team-u-rank" style="font-size:0.6rem; padding:2px 6px; border-radius:6px; background:rgba(0, 245, 255, 0.1); color:var(--primary); font-weight:600; display:inline-block; margin-bottom:4px;">LV ${u.rank}</span>
+                           <div style="font-size: 0.8rem; color: var(--success); font-weight: 700; font-family:monospace;">${u.balance.toFixed(2)} ₮</div>
+                       </div>
+                   </div>`;
+               });
+               return html;
+           };
 
-            document.getElementById('tAMem').innerText = `${handA.count} Users`;
-            document.getElementById('tARes').innerText = `${handA.volume.toFixed(2)} ₮`;
-            document.getElementById('listABox').innerHTML = renderHand(handA);
-            
-            document.getElementById('tBMem').innerText = `${handB.count} Users`;
-            document.getElementById('tBRes').innerText = `${handB.volume.toFixed(2)} ₮`;
-            document.getElementById('listBBox').innerHTML = renderHand(handB);
-            
-            document.getElementById('tCMem').innerText = `${handC.count} Users`;
-            document.getElementById('tCRes').innerText = `${handC.volume.toFixed(2)} ₮`;
-            document.getElementById('listCBox').innerHTML = renderHand(handC);
+           document.getElementById('tAMem').innerText = `${handA.count} Users`;
+           document.getElementById('tARes').innerText = `${handA.volume.toFixed(2)} ₮`;
+           document.getElementById('listABox').innerHTML = renderHand(handA);
+           
+           document.getElementById('tBMem').innerText = `${handB.count} Users`;
+           document.getElementById('tBRes').innerText = `${handB.volume.toFixed(2)} ₮`;
+           document.getElementById('listBBox').innerHTML = renderHand(handB);
+           
+           document.getElementById('tCMem').innerText = `${handC.count} Users`;
+           document.getElementById('tCRes').innerText = `${handC.volume.toFixed(2)} ₮`;
+           document.getElementById('listCBox').innerHTML = renderHand(handC);
 
-            // 🔥 Render Bonuses
-            window.renderTeamBonusHistory();
+           window.renderTeamBonusHistory();
 
-            if(loader) loader.style.display = 'none';
-            if(dataBox) dataBox.style.display = 'flex';
-            document.querySelectorAll('.team-hand-box span').forEach(el => {
-                if(el.innerText === 'Total Reserve:') el.innerText = 'Total Wallet:';
-            });
-        } else {
-            if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Connection Error: ${netResult?.message || "Failed to fetch"}</div>`;
-        }
-    } catch (error) {
-        console.error("Team Modal Error:", error);
-        const loader = document.getElementById('teamLoader');
-        if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Error loading data.</div>`;
-    }
+           if(loader) loader.style.display = 'none';
+           if(dataBox) dataBox.style.display = 'flex';
+           document.querySelectorAll('.team-hand-box span').forEach(el => {
+               if(el.innerText === 'Total Reserve:') el.innerText = 'Total Wallet:';
+           });
+       } else {
+           if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Connection Error: ${netResult?.message || "Failed to fetch"}</div>`;
+       }
+   } catch (error) {
+       console.error("Team Modal Error:", error);
+       const loader = document.getElementById('teamLoader');
+       if(loader) loader.innerHTML = `<div style="color:var(--error); font-size:0.85rem; text-align:center;">Error loading data.</div>`;
+   }
 };
 
 window.toggleTeamList = (hand) => {
-    const box = document.getElementById(`list${hand}Box`);
-    if(box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
+   const box = document.getElementById(`list${hand}Box`);
+   if(box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
 };
 
 // =================================================================================
@@ -4513,9 +4605,8 @@ function compressImage(file, maxWidth, maxHeight, quality) {
         reader.onerror = error => reject(error);
     });
 }
-
 // =================================================================================
-// 🌐 MODULE 14: GLOBAL LIVE TRANSACTION FEED (API DRIVEN)
+// 🌐 MODULE 14: GLOBAL LIVE TRANSACTION FEED (0-READ SOCKET DRIVEN)
 // =================================================================================
 window.globalLiveTransactions = [];
 window.currentLiveTxIndex = 0;
@@ -4532,28 +4623,47 @@ window.initLiveGlobalFeed = async () => {
     feedContainer.style.padding = '10px 15px';
     feedContainer.style.height = '85px';
 
-// ... Module 14-এর ওপরের কোড ঠিক থাকবে ...
-    const fetchFeedData = async () => {
+    // ১. Initial Load: (শুধু পেজ ওপেন হলে একবার ডেটা আনবে)
+    const fetchInitialFeedData = async () => {
         const result = await window.fetchAPI('/feed/global');
         if (result.success) {
             window.globalLiveTransactions = result.data;
-            if(window.globalLiveTransactions.length > 0 && !window.liveFeedInterval) {
+            if(window.globalLiveTransactions.length > 0) {
                 window.startLiveFeedCarousel();
-            } else if (window.globalLiveTransactions.length === 0) {
+            } else {
                 feedContainer.innerHTML = `<div style="padding: 0 15px; color:var(--text-sub); font-size:0.8rem; text-align:center; display: flex; align-items: center; justify-content: center; height: 100%;">No recent global transactions.</div>`;
             }
         }
     };
     
-    fetchFeedData();
+    fetchInitialFeedData();
     
-    // 🔥 FIX: API লুপটিকে একটি গ্লোবাল ভেরিয়েবলে সেভ করা হলো
-    if (window.globalFeedApiInterval) clearInterval(window.globalFeedApiInterval);
-    window.globalFeedApiInterval = setInterval(fetchFeedData, 15000); 
+    // 🔥 FIX 1: ১৫-সেকেন্ডের API লুপ চিরতরে ডিলিট করা হলো (0 Firebase Read)
+    if (window.globalFeedApiInterval) {
+        clearInterval(window.globalFeedApiInterval);
+        window.globalFeedApiInterval = null;
+    }
+
+    // ⚡ FIX 2: Smart Socket.io Listener (ট্যাব চেঞ্জ করলে ডাবল রেন্ডার হবে না)
+    if (window.socket) {
+        window.socket.off("global_transaction"); // আগের কোনো লিসেনার থাকলে তা ডিলিট করবে
+        window.socket.on("global_transaction", (tx) => {
+            if (!window.globalLiveTransactions) window.globalLiveTransactions = [];
+            window.globalLiveTransactions.unshift(tx); // নতুন ডেটা শুরুতে বসাবে
+            
+            if(window.globalLiveTransactions.length > 50) window.globalLiveTransactions.pop(); 
+            
+            if (!window.liveFeedInterval && window.globalLiveTransactions.length > 0) {
+                window.startLiveFeedCarousel();
+            }
+        });
+    }
 };
-setTimeout(window.initLiveGlobalFeed, 3500);
+
 window.startLiveFeedCarousel = () => {
     const container = document.getElementById('liveFeedContainer');
+    if(!container) return;
+    
     container.innerHTML = `<div class="feed-track-wrapper" style="width: 100%; height: 100%; position: relative; overflow: hidden;">
                                 <div id="feedTrack" class="feed-track" style="display: flex; align-items: center; width: 100%; height: 100%; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
                                 </div>
@@ -4561,7 +4671,7 @@ window.startLiveFeedCarousel = () => {
     const track = document.getElementById('feedTrack');
 
     const renderNextTx = () => {
-        if(window.globalLiveTransactions.length === 0) return;
+        if(!window.globalLiveTransactions || window.globalLiveTransactions.length === 0) return;
         if(window.currentLiveTxIndex >= window.globalLiveTransactions.length) window.currentLiveTxIndex = 0;
 
         const tx = window.globalLiveTransactions[window.currentLiveTxIndex];
@@ -4625,6 +4735,12 @@ window.startLiveFeedCarousel = () => {
         }, 400); 
     };
 
+    // 🔥 FIX 3: Prevent Duplicate Intervals (Carousel speed bug)
+    if (window.liveFeedInterval) {
+        clearInterval(window.liveFeedInterval);
+        window.liveFeedInterval = null;
+    }
+
     renderNextTx();
     window.liveFeedInterval = setInterval(renderNextTx, 3500);
 };
@@ -4639,462 +4755,460 @@ window.activePrivateName = null;
 window.activePrivateAvatar = null;
 window.pendingReqCount = 0;
 
-// 🔥 RAM Cache for Chat Messages
-window.localChatCache = {
-    global: [],
-    private: {} 
+window.localChatCache = { global: [], private: {} };
+
+// 🔥 ANTI-XSS SANITIZER (হ্যাকিং কোড ব্লক করবে)
+window.sanitizeInput = (str) => { 
+    return str.replace(/[&<>'"]/g, tag => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[tag] || tag)); 
 };
 
-// 🔌 ১. Socket.io লাইভ কানেকশন
 window.socket = typeof io !== 'undefined' ? io(API_BASE_URL.replace('/api', '')) : null;
 
 if (window.socket) {
-    window.socket.on("connect", () => {
-        const myUid = localStorage.getItem('uid');
-        if (myUid) window.socket.emit("join_my_room", myUid);
-    });
+   window.socket.on("connect", () => {
+       const myUid = localStorage.getItem('uid');
+       if (myUid) window.socket.emit("join_my_room", myUid);
+   });
 
-    window.socket.on("receive_new_message", (data) => {
-        const chatId = data.senderUid;
-        if (!window.localChatCache.private[chatId]) {
-            window.localChatCache.private[chatId] = [];
-        }
-        window.localChatCache.private[chatId].push(data);
+   window.socket.on("receive_new_message", (data) => {
+       const chatId = data.senderUid;
+       if (!window.localChatCache.private[chatId]) {
+           window.localChatCache.private[chatId] = [];
+       }
+       window.localChatCache.private[chatId].push(data);
 
-        if (window.currentChatMode === 'private' && window.activePrivateUid === data.senderUid) {
-            let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
-            let html = `<div id="msg-${data.id}" style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
-                <div class="chat-name">${data.senderName || 'User'}</div>
-                <div class="chat-bubble other-message" style="position: relative;">${data.message}</div>
-                <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-start; width: 100%;">
-                    <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
-                </div>
-            </div>`;
-            const chatContent = document.getElementById('chat-content');
-            if (chatContent) {
-                if (chatContent.innerHTML.includes('No messages yet')) chatContent.innerHTML = '';
-                chatContent.innerHTML += html;
-                chatContent.scrollTop = chatContent.scrollHeight;
-            }
-        } else {
-            window.showToast(`New message from ${data.senderName}`);
-            const friendRow = document.getElementById(`friend-row-${data.senderUid}`);
-            if (friendRow) {
-                let badge = friendRow.querySelector('.unread-badge');
-                if (badge) {
-                    badge.innerText = parseInt(badge.innerText) + 1;
-                } else {
-                    friendRow.innerHTML += `<div class="unread-badge" style="background: var(--error); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px;">1</div>`;
-                }
-                let lastMsgEl = friendRow.querySelector('.last-msg-text');
-                if(lastMsgEl) lastMsgEl.innerText = data.message;
-            }
-            const headBadge = document.getElementById('chat-head-badge');
-            if(headBadge) {
-                headBadge.innerText = parseInt(headBadge.innerText || 0) + 1;
-                headBadge.style.display = 'flex';
-            }
-        }
-    });
+       if (window.currentChatMode === 'private' && window.activePrivateUid === data.senderUid) {
+           let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+           let html = `<div id="msg-${data.id}" style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
+               <div class="chat-name">${data.senderName || 'User'}</div>
+               <div class="chat-bubble other-message" style="position: relative;">${data.message}</div>
+               <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-start; width: 100%;">
+                   <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
+               </div>
+           </div>`;
+           const chatContent = document.getElementById('chat-content');
+           if (chatContent) {
+               if (chatContent.innerHTML.includes('No messages yet')) chatContent.innerHTML = '';
+               chatContent.innerHTML += html;
+               chatContent.scrollTop = chatContent.scrollHeight;
+           }
+       } else {
+           window.showToast(`New message from ${data.senderName}`);
+           const friendRow = document.getElementById(`friend-row-${data.senderUid}`);
+           if (friendRow) {
+               let badge = friendRow.querySelector('.unread-badge');
+               if (badge) {
+                   badge.innerText = parseInt(badge.innerText) + 1;
+               } else {
+                   friendRow.innerHTML += `<div class="unread-badge" style="background: var(--error); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px;">1</div>`;
+               }
+               let lastMsgEl = friendRow.querySelector('.last-msg-text');
+               if(lastMsgEl) lastMsgEl.innerText = data.message;
+           }
+           const headBadge = document.getElementById('chat-head-badge');
+           if(headBadge) {
+               headBadge.innerText = parseInt(headBadge.innerText || 0) + 1;
+               headBadge.style.display = 'flex';
+           }
+       }
+   });
 
-    window.socket.on("new_friend_request", (data) => {
-        window.pendingReqCount++;
-        window.updateSuperBadge();
-    });
+   window.socket.on("new_friend_request", (data) => {
+       window.pendingReqCount++;
+       window.updateSuperBadge();
+   });
 }
 
-// 1. চ্যাট উইন্ডো টগল (খোলা/বন্ধ)
 window.toggleChatWindow = () => {
-    const win = document.getElementById('chat-window');
-    if (!win) return;
-    if (win.style.display === 'flex') {
-        win.style.display = 'none';
-    } else {
-        win.style.display = 'flex';
-        window.showChatList();
-        window.syncChatInitialData(); 
-    }
+   const win = document.getElementById('chat-window');
+   if (!win) return;
+   if (win.style.display === 'flex') {
+       win.style.display = 'none';
+   } else {
+       win.style.display = 'flex';
+       window.showChatList();
+       window.syncChatInitialData(); 
+   }
 };
 
 window.showChatList = () => {
-    const listView = document.getElementById('chat-list-view');
-    const activeView = document.getElementById('active-chat-view');
-    if (listView) listView.style.display = 'flex';
-    if (activeView) activeView.style.display = 'none';
-    window.currentChatMode = null;
-    window.activePrivateUid = null;
-    window.activePrivateName = null;
-    window.activePrivateAvatar = null;
+   const listView = document.getElementById('chat-list-view');
+   const activeView = document.getElementById('active-chat-view');
+   if (listView) listView.style.display = 'flex';
+   if (activeView) activeView.style.display = 'none';
+   window.currentChatMode = null;
+   window.activePrivateUid = null;
+   window.activePrivateName = null;
+   window.activePrivateAvatar = null;
 };
 
-// 3. চ্যাট রুম ওপেন (CACHE FIRST)
 window.openChatRoom = async (mode, title, avatar = '', targetUid = '') => {
-    window.currentChatMode = mode;
-    window.activePrivateUid = targetUid;
-    window.activePrivateName = title;
-    window.activePrivateAvatar = avatar;
+   window.currentChatMode = mode;
+   window.activePrivateUid = targetUid;
+   window.activePrivateName = title;
+   window.activePrivateAvatar = avatar;
 
-    const listView = document.getElementById('chat-list-view');
-    const activeView = document.getElementById('active-chat-view');
-    if (listView) listView.style.display = 'none';
-    if (activeView) activeView.style.display = 'flex';
+   const listView = document.getElementById('chat-list-view');
+   const activeView = document.getElementById('active-chat-view');
+   if (listView) listView.style.display = 'none';
+   if (activeView) activeView.style.display = 'flex';
 
-    document.getElementById('active-chat-title').innerText = title;
-    const statusBox = document.getElementById('header-permanent-status');
-    const unfriendBtn = document.getElementById('unfriend-btn');
-    const craterEl = document.getElementById('header-avatar-crater');
-    const avatarEl = document.getElementById('active-chat-avatar');
+   document.getElementById('active-chat-title').innerText = title;
+   const statusBox = document.getElementById('header-permanent-status');
+   const unfriendBtn = document.getElementById('unfriend-btn');
+   const craterEl = document.getElementById('header-avatar-crater');
+   const avatarEl = document.getElementById('active-chat-avatar');
 
-    if (mode === 'private') {
-        statusBox.style.display = 'flex';
-        document.getElementById('h-status-text').innerHTML = `<span style="color: var(--success); font-family: 'Caveat', cursive; font-size: 14px; letter-spacing: 1px;">Online</span>`;
-        avatarEl.src = avatar;
-        craterEl.style.display = 'flex';
-        unfriendBtn.style.display = 'block';
-        unfriendBtn.onclick = () => window.unfriendUser(targetUid);
-    } else {
-        statusBox.style.display = 'none';
-        craterEl.style.display = 'none';
-        unfriendBtn.style.display = 'none';
-    }
+   if (mode === 'private') {
+       statusBox.style.display = 'flex';
+       document.getElementById('h-status-text').innerHTML = `<span style="color: var(--success); font-family: 'Caveat', cursive; font-size: 14px; letter-spacing: 1px;">Online</span>`;
+       avatarEl.src = avatar;
+       craterEl.style.display = 'flex';
+       unfriendBtn.style.display = 'block';
+       unfriendBtn.onclick = () => window.unfriendUser(targetUid);
+   } else {
+       statusBox.style.display = 'none';
+       craterEl.style.display = 'none';
+       unfriendBtn.style.display = 'none';
+   }
 
-    const chatContent = document.getElementById('chat-content');
-    const myUid = localStorage.getItem('uid');
-    
-    let cachedMessages = mode === 'global' ? window.localChatCache.global : window.localChatCache.private[targetUid];
+   const chatContent = document.getElementById('chat-content');
+   const myUid = localStorage.getItem('uid');
+   
+   let cachedMessages = mode === 'global' ? window.localChatCache.global : window.localChatCache.private[targetUid];
 
-    if (cachedMessages && cachedMessages.length > 0) {
-        window.renderChatMessages(cachedMessages);
-    } else {
-        chatContent.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
-        const roomData = await window.fetchAPI(`/chat/messages?mode=${mode}&target=${targetUid}&uid=${myUid}`);
-        if (roomData.success && roomData.data) {
-            if (mode === 'global') window.localChatCache.global = roomData.data;
-            else window.localChatCache.private[targetUid] = roomData.data;
-            window.renderChatMessages(roomData.data);
-        }
-    }
+   if (cachedMessages && cachedMessages.length > 0) {
+       window.renderChatMessages(cachedMessages);
+   } else {
+       chatContent.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
+       const roomData = await window.fetchAPI(`/chat/messages?mode=${mode}&target=${targetUid}&uid=${myUid}`);
+       if (roomData.success && roomData.data) {
+           if (mode === 'global') window.localChatCache.global = roomData.data;
+           else window.localChatCache.private[targetUid] = roomData.data;
+           window.renderChatMessages(roomData.data);
+       }
+   }
 
-    const friendRow = document.getElementById(`friend-row-${targetUid}`);
-    if(friendRow) {
-        let badge = friendRow.querySelector('.unread-badge');
-        if(badge) badge.remove();
-    }
+   const friendRow = document.getElementById(`friend-row-${targetUid}`);
+   if(friendRow) {
+       let badge = friendRow.querySelector('.unread-badge');
+       if(badge) badge.remove();
+   }
 };
 
-// 4. মেসেজ রেন্ডার করা 
 window.renderChatMessages = (messages) => {
-    const chatContent = document.getElementById('chat-content');
-    if (!chatContent) return;
-    const myUid = localStorage.getItem('uid');
+   const chatContent = document.getElementById('chat-content');
+   if (!chatContent) return;
+   const myUid = localStorage.getItem('uid');
 
-    let html = '';
-    messages.forEach(msg => {
-        if (msg.deletedFor && msg.deletedFor.includes(myUid)) return;
-        let isMe = msg.senderUid === myUid;
-        let align = isMe ? 'flex-end' : 'flex-start';
-        let bubbleClass = isMe ? 'my-message' : 'other-message';
-        let nameHtml = isMe ? '' : `<div class="chat-name">${msg.senderName || 'User'}</div>`;
-        let safeTime = window.parseSafeTimestamp ? window.parseSafeTimestamp(msg.timestamp || msg.Date) : (msg.timestamp || msg.Date);
-        let timeStr = safeTime ? new Date(safeTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase() : "";
-        let deleteBtn = isMe ? `<i class="fas fa-trash-alt" style="font-size:0.7rem; color:var(--error); cursor:pointer; opacity: 0.7; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" onclick="window.deleteMessageForMe('${msg.id}')" title="Delete message"></i>` : '';
+   let html = '';
+   messages.forEach(msg => {
+       if (msg.deletedFor && msg.deletedFor.includes(myUid)) return;
+       let isMe = msg.senderUid === myUid;
+       let align = isMe ? 'flex-end' : 'flex-start';
+       let bubbleClass = isMe ? 'my-message' : 'other-message';
+       let nameHtml = isMe ? '' : `<div class="chat-name">${msg.senderName || 'User'}</div>`;
+       let safeTime = window.parseSafeTimestamp ? window.parseSafeTimestamp(msg.timestamp || msg.Date) : (msg.timestamp || msg.Date);
+       let timeStr = safeTime ? new Date(safeTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase() : "";
+       let deleteBtn = isMe ? `<i class="fas fa-trash-alt" style="font-size:0.7rem; color:var(--error); cursor:pointer; opacity: 0.7; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" onclick="window.deleteMessageForMe('${msg.id}')" title="Delete message"></i>` : '';
 
-        html += `<div id="msg-${msg.id}" style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
-            ${nameHtml}
-            <div class="chat-bubble ${bubbleClass}" style="position: relative;">
-                ${msg.message}
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: ${align}; width: 100%;">
-                <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
-                ${deleteBtn}
-            </div>
-        </div>`;
-    });
+       html += `<div id="msg-${msg.id}" style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
+           ${nameHtml}
+           <div class="chat-bubble ${bubbleClass}" style="position: relative;">
+               ${msg.message}
+           </div>
+           <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: ${align}; width: 100%;">
+               <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
+               ${deleteBtn}
+           </div>
+       </div>`;
+   });
 
-    if (!html) html = '<div style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin-top:20px;">No messages yet. Say hello! 👋</div>';
-    
-    if (chatContent.innerHTML.length !== html.length) {
-        chatContent.innerHTML = html;
-        chatContent.scrollTop = chatContent.scrollHeight;
-    }
+   if (!html) html = '<div style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin-top:20px;">No messages yet. Say hello! 👋</div>';
+   
+   if (chatContent.innerHTML.length !== html.length) {
+       chatContent.innerHTML = html;
+       chatContent.scrollTop = chatContent.scrollHeight;
+   }
 };
 
-// 5. ডিলিট মেসেজ
 window.deleteMessageForMe = async (msgId) => {
-    const myUid = localStorage.getItem('uid');
-    const msgEl = document.getElementById(`msg-${msgId}`);
-    if (msgEl) {
-        msgEl.style.opacity = '0';
-        msgEl.style.transform = 'scale(0.8) translateY(10px)';
-        setTimeout(() => msgEl.remove(), 300);
-    }
-    
-    if (window.currentChatMode === 'global') {
-        if(window.localChatCache.global) window.localChatCache.global = window.localChatCache.global.filter(m => m.id !== msgId);
-    } else {
-        if(window.localChatCache.private[window.activePrivateUid]) window.localChatCache.private[window.activePrivateUid] = window.localChatCache.private[window.activePrivateUid].filter(m => m.id !== msgId);
-    }
+   const myUid = localStorage.getItem('uid');
+   const msgEl = document.getElementById(`msg-${msgId}`);
+   if (msgEl) {
+       msgEl.style.opacity = '0';
+       msgEl.style.transform = 'scale(0.8) translateY(10px)';
+       setTimeout(() => msgEl.remove(), 300);
+   }
+   
+   if (window.currentChatMode === 'global') {
+       if(window.localChatCache.global) window.localChatCache.global = window.localChatCache.global.filter(m => m.id !== msgId);
+   } else {
+       if(window.localChatCache.private[window.activePrivateUid]) window.localChatCache.private[window.activePrivateUid] = window.localChatCache.private[window.activePrivateUid].filter(m => m.id !== msgId);
+   }
 
-    await window.fetchAPI('/chat/delete-message', 'POST', { uid: myUid, receiverUid: window.activePrivateUid, msgIds: [msgId], mode: window.currentChatMode, deleteType: 'me' });
+   await window.fetchAPI('/chat/delete-message', 'POST', { uid: myUid, receiverUid: window.activePrivateUid, msgIds: [msgId], mode: window.currentChatMode, deleteType: 'me' });
 };
 
-// 6. মেসেজ পাঠানো (Live Push & Local Save)
 window.handleSendMessageAction = async () => {
-    const input = document.getElementById('chat-input');
-    if (!input) return;
-    const message = input.value.trim();
-    if (!message) return;
+   const input = document.getElementById('chat-input');
+   if (!input) return;
+   const rawMsg = input.value.trim();
+   if (!rawMsg) return;
 
-    const myUid = localStorage.getItem('uid');
-    const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-    const senderName = staticUser.Name || 'TCM User';
-    const avatar = staticUser.Avatar || '';
+   // 🔥 ANTI-XSS SANITIZER APPLIED HERE
+   const message = window.sanitizeInput(rawMsg);
+   
+   const myUid = localStorage.getItem('uid');
+   const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
+   const senderName = staticUser.Name || 'TCM User';
+   const avatar = staticUser.Avatar || '';
 
-    input.value = '';
+   input.value = '';
 
-    const socketData = { senderUid: myUid, receiverUid: window.activePrivateUid, senderName: senderName, avatar: avatar, message: message, timestamp: new Date().toISOString(), id: 'temp-' + Date.now() };
+   const socketData = { senderUid: myUid, receiverUid: window.activePrivateUid, senderName: senderName, avatar: avatar, message: message, timestamp: new Date().toISOString(), id: 'temp-' + Date.now() };
 
-    let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
-    let html = `<div id="msg-${socketData.id}" style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:12px; width:100%;">
-        <div class="chat-bubble my-message">${message}</div>
-        <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-end; width: 100%;">
-            <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
-            <i class="fas fa-check" style="font-size:0.6rem; color:var(--text-sub);"></i>
-        </div>
-    </div>`;
-    
-    const chatContent = document.getElementById('chat-content');
-    if (chatContent) {
-        if (chatContent.innerHTML.includes('No messages yet')) chatContent.innerHTML = '';
-        chatContent.innerHTML += html;
-        chatContent.scrollTop = chatContent.scrollHeight;
-    }
+   let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+   let html = `<div id="msg-${socketData.id}" style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:12px; width:100%;">
+       <div class="chat-bubble my-message">${message}</div>
+       <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-end; width: 100%;">
+           <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
+           <i class="fas fa-check" style="font-size:0.6rem; color:var(--text-sub);"></i>
+       </div>
+   </div>`;
+   
+   const chatContent = document.getElementById('chat-content');
+   if (chatContent) {
+       if (chatContent.innerHTML.includes('No messages yet')) chatContent.innerHTML = '';
+       chatContent.innerHTML += html;
+       chatContent.scrollTop = chatContent.scrollHeight;
+   }
 
-    if(window.currentChatMode === 'private') {
-        if(!window.localChatCache.private[window.activePrivateUid]) window.localChatCache.private[window.activePrivateUid] = [];
-        window.localChatCache.private[window.activePrivateUid].push(socketData);
-        if(window.socket) window.socket.emit("send_private_message", socketData); 
-    } else {
-        window.localChatCache.global.push(socketData);
-        await window.fetchAPI('/chat/send-global', 'POST', socketData); 
-    }
+   if(window.currentChatMode === 'private') {
+       if(!window.localChatCache.private[window.activePrivateUid]) window.localChatCache.private[window.activePrivateUid] = [];
+       window.localChatCache.private[window.activePrivateUid].push(socketData);
+       if(window.socket) window.socket.emit("send_private_message", socketData); 
+   } else {
+       window.localChatCache.global.push(socketData);
+       await window.fetchAPI('/chat/send-global', 'POST', socketData); 
+   }
 };
 
-// 7. Initial Fetch (শুধু একবার চলবে)
 window.syncChatInitialData = async () => {
-    const myUid = localStorage.getItem('uid');
-    if (!myUid) return;
+   const myUid = localStorage.getItem('uid');
+   if (!myUid) return;
 
-    const [friendsResult, reqResult] = await Promise.all([
-        window.fetchAPI(`/chat/friends?uid=${myUid}`),
-        window.fetchAPI(`/chat/requests?uid=${myUid}`)
-    ]);
+   const [friendsResult, reqResult] = await Promise.all([
+       window.fetchAPI(`/chat/friends?uid=${myUid}`),
+       window.fetchAPI(`/chat/requests?uid=${myUid}`)
+   ]);
 
-    if (reqResult.success) {
-        window.pendingReqCount = reqResult.count || 0;
-        window.updateSuperBadge();
+   if (reqResult.success) {
+       window.pendingReqCount = reqResult.count || 0;
+       window.updateSuperBadge();
 
-        const pList = document.getElementById('explicit-pending-list');
-        if (pList) {
-            if (!reqResult.data || reqResult.data.length === 0) {
-                pList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin:0;">No pending requests</p>';
-            } else {
-                let html = '';
-                reqResult.data.forEach(req => {
-                    let sName = req.senderName || 'User';
-                    let sAvatar = req.senderAvatar || 'https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff';
-                    html += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                            <img src="${sAvatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-                            <div>
-                                <span style="color:var(--text-main); font-size:0.85rem; font-weight:700; display:block;">${sName}</span>
-                                <span style="color:var(--text-sub); font-size:0.65rem; font-family:monospace;">UID: ${req.senderUid}</span>
-                            </div>
-                        </div>
-                        <div style="display:flex; gap:6px;">
-                            <button onclick="window.acceptFriendReq('${req.id}')" style="background:rgba(0, 245, 255, 0.15); color:var(--primary); border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fas fa-check"></i></button>
-                            <button onclick="window.rejectFriendReq('${req.id}')" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fas fa-times"></i></button>
-                        </div>
-                    </div>`;
-                });
-                pList.innerHTML = html;
-            }
-        }
-    }
+       const pList = document.getElementById('explicit-pending-list');
+       if (pList) {
+           if (!reqResult.data || reqResult.data.length === 0) {
+               pList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin:0;">No pending requests</p>';
+           } else {
+               let html = '';
+               reqResult.data.forEach(req => {
+                   let sName = req.senderName || 'User';
+                   let sAvatar = req.senderAvatar || 'https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff';
+                   html += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">
+                       <div style="display:flex; align-items:center; gap:8px;">
+                           <img src="${sAvatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
+                           <div>
+                               <span style="color:var(--text-main); font-size:0.85rem; font-weight:700; display:block;">${sName}</span>
+                               <span style="color:var(--text-sub); font-size:0.65rem; font-family:monospace;">UID: ${req.senderUid}</span>
+                           </div>
+                       </div>
+                       <div style="display:flex; gap:6px;">
+                           <button onclick="window.acceptFriendReq('${req.id}')" style="background:rgba(0, 245, 255, 0.15); color:var(--primary); border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fas fa-check"></i></button>
+                           <button onclick="window.rejectFriendReq('${req.id}')" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fas fa-times"></i></button>
+                       </div>
+                   </div>`;
+               });
+               pList.innerHTML = html;
+           }
+       }
+   }
 
-    if (friendsResult.success) {
-        const fList = document.getElementById('friends-list-container');
-        if (fList) {
-            if (!friendsResult.data || friendsResult.data.length === 0) {
-                fList.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin-top:20px;">No friends yet. Click the <i class="fas fa-user-plus"></i> icon to add!</div>';
-            } else {
-                let html = '<h5 style="color: var(--text-sub); margin: 15px 0 10px 5px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Direct Messages</h5>';
-                friendsResult.data.forEach(f => {
-                    let av = f.avatar || 'https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff';
-                    html += `<div id="friend-row-${f.uid}" onclick="window.openChatRoom('private', '${f.name || 'User'}', '${av}', '${f.uid}')" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
-                        <img src="${av}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
-                        <div style="flex: 1; overflow: hidden;">
-                            <h4 style="font-size: 0.9rem; margin: 0; color: var(--text-main); font-weight:700;">${f.name || 'User'}</h4>
-                            <p class="last-msg-text" style="font-size: 0.75rem; color: var(--text-sub); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.lastMsg || 'Say Hello!'}</p>
-                        </div>
-                        ${f.unreadCount > 0 ? `<div class="unread-badge" style="background: var(--error); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px;">${f.unreadCount}</div>` : ''}
-                    </div>`;
-                });
-                fList.innerHTML = html;
-            }
-        }
-    }
+   if (friendsResult.success) {
+       const fList = document.getElementById('friends-list-container');
+       if (fList) {
+           if (!friendsResult.data || friendsResult.data.length === 0) {
+               fList.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin-top:20px;">No friends yet. Click the <i class="fas fa-user-plus"></i> icon to add!</div>';
+           } else {
+               let html = '<h5 style="color: var(--text-sub); margin: 15px 0 10px 5px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Direct Messages</h5>';
+               friendsResult.data.forEach(f => {
+                   let av = f.avatar || 'https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff';
+                   html += `<div id="friend-row-${f.uid}" onclick="window.openChatRoom('private', '${f.name || 'User'}', '${av}', '${f.uid}')" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+                       <img src="${av}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                       <div style="flex: 1; overflow: hidden;">
+                           <h4 style="font-size: 0.9rem; margin: 0; color: var(--text-main); font-weight:700;">${f.name || 'User'}</h4>
+                           <p class="last-msg-text" style="font-size: 0.75rem; color: var(--text-sub); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.lastMsg || 'Say Hello!'}</p>
+                       </div>
+                       ${f.unreadCount > 0 ? `<div class="unread-badge" style="background: var(--error); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px;">${f.unreadCount}</div>` : ''}
+                   </div>`;
+               });
+               fList.innerHTML = html;
+           }
+       }
+   }
 };
 
 window.togglePendingRequestsView = () => {
-    const view = document.getElementById('explicit-pending-view');
-    if (view) {
-        view.style.display = (view.style.display === 'flex' || view.style.display === 'block') ? 'none' : 'flex';
-    }
+   const view = document.getElementById('explicit-pending-view');
+   if (view) {
+       view.style.display = (view.style.display === 'flex' || view.style.display === 'block') ? 'none' : 'flex';
+   }
 };
 
 window.updateSuperBadge = () => {
-    const count = window.pendingReqCount || 0;
-    const badge1 = document.getElementById('pending-count-badge');
-    const badge2 = document.getElementById('chat-head-badge');
-    const badge3 = document.getElementById('headerBadge');
+   const count = window.pendingReqCount || 0;
+   const badge1 = document.getElementById('pending-count-badge');
+   const badge2 = document.getElementById('chat-head-badge');
+   const badge3 = document.getElementById('headerBadge');
 
-    if (badge1) {
-        badge1.innerText = count;
-        badge1.style.display = count > 0 ? 'inline-block' : 'none';
-    }
-    if (badge2) {
-        badge2.innerText = count;
-        badge2.style.display = count > 0 ? 'flex' : 'none';
-    }
-    if (badge3) {
-        badge3.innerText = count;
-        badge3.style.display = count > 0 ? 'flex' : 'none';
-    }
+   if (badge1) {
+       badge1.innerText = count;
+       badge1.style.display = count > 0 ? 'inline-block' : 'none';
+   }
+   if (badge2) {
+       badge2.innerText = count;
+       badge2.style.display = count > 0 ? 'flex' : 'none';
+   }
+   if (badge3) {
+       badge3.innerText = count;
+       badge3.style.display = count > 0 ? 'flex' : 'none';
+   }
 };
 
 window.acceptFriendReq = async (reqId) => {
-    const myUid = localStorage.getItem('uid');
-    const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-    const myName = staticUser.Name || 'TCM User';
-    const myAvatar = staticUser.Avatar || '';
+   const myUid = localStorage.getItem('uid');
+   const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
+   const myName = staticUser.Name || 'TCM User';
+   const myAvatar = staticUser.Avatar || '';
 
-    const reqResult = await window.fetchAPI(`/chat/requests?uid=${myUid}`);
-    let reqObj = null;
-    if (reqResult.success && reqResult.data) {
-        reqObj = reqResult.data.find(r => r.id === reqId);
-    }
+   const reqResult = await window.fetchAPI(`/chat/requests?uid=${myUid}`);
+   let reqObj = null;
+   if (reqResult.success && reqResult.data) {
+       reqObj = reqResult.data.find(r => r.id === reqId);
+   }
 
-    if (!reqObj) return window.showToast("Request not found", true);
+   if (!reqObj) return window.showToast("Request not found", true);
 
-    const payload = {
-        reqId, myUid, myName, myAvatar,
-        senderUid: reqObj.senderUid,
-        senderName: reqObj.senderName,
-        senderAvatar: reqObj.senderAvatar || ''
-    };
+   const payload = {
+       reqId, myUid, myName, myAvatar,
+       senderUid: reqObj.senderUid,
+       senderName: reqObj.senderName,
+       senderAvatar: reqObj.senderAvatar || ''
+   };
 
-    const result = await window.fetchAPI('/friends/accept-request', 'POST', payload);
-    if (result.success) {
-        window.showToast("Friend request accepted!");
-        window.syncChatInitialData();
-    } else {
-        window.showToast(result.message || "Failed to accept request", true);
-    }
+   const result = await window.fetchAPI('/friends/accept-request', 'POST', payload);
+   if (result.success) {
+       window.showToast("Friend request accepted!");
+       window.syncChatInitialData();
+   } else {
+       window.showToast(result.message || "Failed to accept request", true);
+   }
 };
 
 window.rejectFriendReq = async (reqId) => {
-    const result = await window.fetchAPI('/friends/reject-request', 'POST', { reqId });
-    if (result.success) {
-        window.showToast("Friend request rejected");
-        window.syncChatInitialData();
-    } else {
-        window.showToast(result.message || "Failed to reject request", true);
-    }
+   const result = await window.fetchAPI('/friends/reject-request', 'POST', { reqId });
+   if (result.success) {
+       window.showToast("Friend request rejected");
+       window.syncChatInitialData();
+   } else {
+       window.showToast(result.message || "Failed to reject request", true);
+   }
 };
 
 window.unfriendUser = async (targetUid) => {
-    if (!confirm("Are you sure you want to unfriend this user?")) return;
-    const myUid = localStorage.getItem('uid');
-    const result = await window.fetchAPI('/friends/unfriend', 'POST', { myUid, targetUid });
-    if (result.success) {
-        window.showToast("Unfriended successfully");
-        window.showChatList();
-        window.syncChatInitialData();
-    } else {
-        window.showToast(result.message || "Failed to unfriend", true);
-    }
+   if (!confirm("Are you sure you want to unfriend this user?")) return;
+   const myUid = localStorage.getItem('uid');
+   const result = await window.fetchAPI('/friends/unfriend', 'POST', { myUid, targetUid });
+   if (result.success) {
+       window.showToast("Unfriended successfully");
+       window.showChatList();
+       window.syncChatInitialData();
+   } else {
+       window.showToast(result.message || "Failed to unfriend", true);
+   }
 };
 
 window.openAddFriendModal = () => {
-    const modal = document.getElementById('addFriendModal');
-    if (modal) modal.style.display = 'flex';
-    const input = document.getElementById('search-uid-input');
-    if (input) input.value = '';
-    const list = document.getElementById('all-users-list');
-    if (list) list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;">Enter a UID (e.g. TCM123456) above to search.</div>';
+   const modal = document.getElementById('addFriendModal');
+   if (modal) modal.style.display = 'flex';
+   const input = document.getElementById('search-uid-input');
+   if (input) input.value = '';
+   const list = document.getElementById('all-users-list');
+   if (list) list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;">Enter a UID (e.g. TCM123456) above to search.</div>';
 };
 
 window.closeAddFriendModal = (event) => {
-    if (!event || event.target.id === 'addFriendModal') {
-        const modal = document.getElementById('addFriendModal');
-        if (modal) modal.style.display = 'none';
-    }
+   if (!event || event.target.id === 'addFriendModal') {
+       const modal = document.getElementById('addFriendModal');
+       if (modal) modal.style.display = 'none';
+   }
 };
 
 let userSearchDebounce = null;
 window.filterUsers = () => {
-    clearTimeout(userSearchDebounce);
-    const input = document.getElementById('search-uid-input');
-    const list = document.getElementById('all-users-list');
-    if (!input || !list) return;
-    const query = input.value.trim().toUpperCase();
+   clearTimeout(userSearchDebounce);
+   const input = document.getElementById('search-uid-input');
+   const list = document.getElementById('all-users-list');
+   if (!input || !list) return;
+   const query = input.value.trim().toUpperCase();
 
-    if (query.length < 3) {
-        list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;">Enter at least 3 characters of UID to search.</div>';
-        return;
-    }
+   if (query.length < 3) {
+       list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;">Enter at least 3 characters of UID to search.</div>';
+       return;
+   }
 
-    list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
+   list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
 
-    userSearchDebounce = setTimeout(async () => {
-        const result = await window.fetchAPI(`/p2p/check-user?uid=${query}`);
-        if (result.success && result.name) {
-            list.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:12px; border-radius:12px; border:1px solid var(--border);">
-                    <div>
-                        <strong style="color:var(--text-main); font-size:0.9rem; display:block;">${result.name}</strong>
-                        <span style="color:var(--text-sub); font-size:0.7rem; font-family:monospace;">UID: ${query}</span>
-                    </div>
-                    <button class="act-btn btn-dep" style="padding:6px 12px; font-size:0.75rem;" onclick="window.sendFriendRequest('${query}', '${result.name}')">
-                        <i class="fas fa-user-plus"></i> Add
-                    </button>
-                </div>
-            `;
-        } else {
-            list.innerHTML = `<div style="text-align:center; color:var(--error); font-size:0.8rem;"><i class="fas fa-times-circle"></i> User not found!</div>`;
-        }
-    }, 500);
+   userSearchDebounce = setTimeout(async () => {
+       const result = await window.fetchAPI(`/p2p/check-user?uid=${query}`);
+       if (result.success && result.name) {
+           list.innerHTML = `
+               <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:12px; border-radius:12px; border:1px solid var(--border);">
+                   <div>
+                       <strong style="color:var(--text-main); font-size:0.9rem; display:block;">${result.name}</strong>
+                       <span style="color:var(--text-sub); font-size:0.7rem; font-family:monospace;">UID: ${query}</span>
+                   </div>
+                   <button class="act-btn btn-dep" style="padding:6px 12px; font-size:0.75rem;" onclick="window.sendFriendRequest('${query}', '${result.name}')">
+                       <i class="fas fa-user-plus"></i> Add
+                   </button>
+               </div>
+           `;
+       } else {
+           list.innerHTML = `<div style="text-align:center; color:var(--error); font-size:0.8rem;"><i class="fas fa-times-circle"></i> User not found!</div>`;
+       }
+   }, 500);
 };
 
 window.sendFriendRequest = async (receiverUid, receiverName) => {
-    const myUid = localStorage.getItem('uid');
-    if (receiverUid === myUid) return window.showToast("Cannot add yourself!", true);
-    const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-    const senderName = staticUser.Name || 'TCM User';
-    const senderAvatar = staticUser.Avatar || '';
+   const myUid = localStorage.getItem('uid');
+   if (receiverUid === myUid) return window.showToast("Cannot add yourself!", true);
+   const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
+   const senderName = staticUser.Name || 'TCM User';
+   const senderAvatar = staticUser.Avatar || '';
 
-    const payload = { senderUid: myUid, senderName, senderAvatar, receiverUid };
-    const result = await window.fetchAPI('/friends/send-request', 'POST', payload);
-    if (result.success) {
-        window.showToast(`Friend request sent to ${receiverName || receiverUid}!`);
-        const modal = document.getElementById('addFriendModal');
-        if (modal) modal.style.display = 'none';
-    } else {
-        window.showToast(result.message || "Failed to send friend request", true);
-    }
+   const payload = { senderUid: myUid, senderName, senderAvatar, receiverUid };
+   const result = await window.fetchAPI('/friends/send-request', 'POST', payload);
+   if (result.success) {
+       window.showToast(`Friend request sent to ${receiverName || receiverUid}!`);
+       const modal = document.getElementById('addFriendModal');
+       if (modal) modal.style.display = 'none';
+   } else {
+       window.showToast(result.message || "Failed to send friend request", true);
+   }
 };
-
 // =================================================================================
 // 🚀 MODULE 16: MASTER INITIALIZATION (REAL-TIME NO-REFRESH SYNC)
 // =================================================================================
@@ -5182,14 +5296,28 @@ window.fetchInitialDataFromAPI = async () => {
                 loader.style.opacity = '0';
                 setTimeout(() => { loader.style.display = 'none'; }, 300);
             }
+        } else {
+            // 🚨 API Fail Fallback
+            const loader = document.getElementById('loader'); 
+            if(loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 300);
+            }
         }
     } catch (e) {
         console.error("Init API Error:", e);
+        // 🚨 FIX 3: Force hide loader on Network Error / Timeout
+        const loader = document.getElementById('loader'); 
+        if(loader) {
+            loader.style.opacity = '0';
+            setTimeout(() => { loader.style.display = 'none'; }, 300);
+        }
     }
 };
 
 // Initial Fetch on Load
 setTimeout(window.fetchInitialDataFromAPI, 1000);
+
 // =================================================================================
 // 🔗 MODULE 17: REFERRAL & QR CODE GENERATION ENGINE
 // =================================================================================
@@ -5540,7 +5668,18 @@ window.syncTeamLedger = async () => {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><br><span style="font-size:0.8rem; color:var(--text-sub); display:block; margin-top:10px;">Syncing with Node Server...</span></td></tr>';
         
         const uid = localStorage.getItem('uid');
-        const result = await window.fetchAPI(`/team/network?uid=${uid}`);
+        
+        // 🔥 30-Min Cache Logic (Zero Database Read)
+        let result = null;
+        const cachedTeam = JSON.parse(localStorage.getItem('tcm_team_cache') || '{"time":0}');
+        if (Date.now() - cachedTeam.time < 30 * 60 * 1000 && cachedTeam.data) {
+            result = cachedTeam.data;
+        } else {
+            result = await window.fetchAPI(`/team/network?uid=${uid}`);
+            if(result && result.success) {
+                localStorage.setItem('tcm_team_cache', JSON.stringify({ time: Date.now(), data: result }));
+            }
+        }
         
         if (result && result.success && result.data) {
             let allUsers = [];
@@ -5632,144 +5771,244 @@ window.syncTeamLedger = async () => {
         document.getElementById('teamLedgerBody').innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">Server Connection Error.</td></tr>';
     }
 };
+
+// =================================================================================
+// 📱 MODULE 20: APP DOWNLOAD ENGINE (REAL DOWNLOAD PROGRESS & INSTALL TRIGGER)
+// =================================================================================
+
+// ⚠️ এখানে তোমার আসল APK ফাইলের ডাইরেক্ট লিংকটি বসাতে হবে
+window.APK_DOWNLOAD_URL = "https://tcm-bakend.onrender.com/downloads/tcm_nft_app.apk"; // উদাহরণ
+window.downloadedApkBlob = null; // ডাউনলোড শেষে ফাইলটি মেমোরিতে ধরে রাখার জন্য
+
+window.openDownloadModal = () => {
+    window.closeAllModals();
+    
+    // মডালের স্টেট রিসেট করা হচ্ছে
+    document.getElementById('dl-state-1').style.display = 'block';
+    document.getElementById('dl-state-2').style.display = 'none';
+    document.getElementById('dl-state-3').style.display = 'none';
+    
+    document.getElementById('dl-progress-bar').style.width = '0%';
+    document.getElementById('dl-progress-text').innerText = '0%';
+    
+    window.downloadedApkBlob = null;
+    
+    setTimeout(() => { window.openModal('appDownloadModal'); }, 200);
+};
+
+window.startAppDownloadProgress = () => {
+    // 1. UI State Change
+    document.getElementById('dl-state-1').style.display = 'none';
+    document.getElementById('dl-state-2').style.display = 'block';
+    
+    const progressBar = document.getElementById('dl-progress-bar');
+    const progressText = document.getElementById('dl-progress-text');
+    
+    // 2. Real Download Request (XMLHttpRequest)
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", window.APK_DOWNLOAD_URL, true);
+    xhr.responseType = "blob"; // ফাইলটিকে মেমোরিতে Blob হিসেবে সেভ করবে
+    
+    // 3. Tracking Real Progress
+    xhr.onprogress = function(event) {
+        if (event.lengthComputable) {
+            const percentComplete = Math.floor((event.loaded / event.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            progressText.innerText = percentComplete + '%';
+            
+            // যদি সাইজ দেখাতে চাও
+            // let downloadedMB = (event.loaded / (1024 * 1024)).toFixed(1);
+            // let totalMB = (event.total / (1024 * 1024)).toFixed(1);
+            // progressText.innerText = `${percentComplete}% (${downloadedMB}MB / ${totalMB}MB)`;
+        }
+    };
+    
+    // 4. Download Complete
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            // ব্রাউজারের মেমোরিতে ফাইলটি সেভ হলো
+            window.downloadedApkBlob = xhr.response;
+            
+            // UI State Change to Install
+            setTimeout(() => {
+                document.getElementById('dl-state-2').style.display = 'none';
+                document.getElementById('dl-state-3').style.display = 'block';
+            }, 500);
+        } else {
+            window.showToast("Failed to download file from server!", true);
+            window.openDownloadModal(); // Reset
+        }
+    };
+    
+    // 5. Error Handling
+    xhr.onerror = function() {
+        window.showToast("Network error or CORS issue. Download failed!", true);
+        window.openDownloadModal(); // Reset
+    };
+    
+    xhr.send(); // ডাউনলোড শুরু!
+};
+
+window.triggerFinalInstall = () => {
+    if (!window.downloadedApkBlob) {
+        window.showToast("File not found! Please download again.", true);
+        return;
+    }
+    
+    // 1. মেমোরি থেকে একটি লোকাল URL তৈরি করা হচ্ছে
+    const objectUrl = window.URL.createObjectURL(window.downloadedApkBlob);
+    
+    // 2. একটি ফেক <a> ট্যাগ বানিয়ে ব্রাউজারকে ফাইলটি ইউজারের ফোনে সেভ করার নির্দেশ দেওয়া হচ্ছে
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = "TCM_NFT_Official_App.apk"; // ফাইলের নাম
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    // 3. মেমোরি ক্লিন করা হচ্ছে
+    setTimeout(() => { window.URL.revokeObjectURL(objectUrl); }, 1000);
+    
+    window.closeModal('appDownloadModal');
+    window.showToast("Opening Package Installer...");
+};
+
 // =========================================================
 // 💬 REAL-TIME SUPPORT CHAT ENGINE (100% Zero-Credentials Socket Gateway)
 // =========================================================
 
-// সকেটে অ্যাডমিন রিপ্লাই লিসেনার সক্রিয় করা
 if (window.socket) {
-    window.socket.on("receive_support_message", (data) => {
-        const messagesContainer = document.getElementById('userSupportMessages');
-        if (!messagesContainer) return;
+   window.socket.on("receive_support_message", (data) => {
+       const messagesContainer = document.getElementById('userSupportMessages');
+       if (!messagesContainer) return;
 
-        if (messagesContainer.innerHTML.includes('How can we help you') || messagesContainer.innerHTML.includes('No messages yet')) {
-            messagesContainer.innerHTML = '';
-        }
+       if (messagesContainer.innerHTML.includes('How can we help you') || messagesContainer.innerHTML.includes('No messages yet')) {
+           messagesContainer.innerHTML = '';
+       }
 
-        let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
-        let html = `
-            <div style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:8px;">
-                <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
-                    ${data.message}
-                </div>
-                <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
-            </div>`;
+       let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+       let html = `
+           <div style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:8px;">
+               <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
+                   ${data.message}
+               </div>
+               <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
+           </div>`;
 
-        messagesContainer.innerHTML += html;
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    });
+       messagesContainer.innerHTML += html;
+       messagesContainer.scrollTop = messagesContainer.scrollHeight;
+   });
 }
 
 async function openSupportChat() {
-    const currentUid = localStorage.getItem('uid');
-    if (!currentUid) return alert("Please login to your account first to contact support.");
+   const currentUid = localStorage.getItem('uid');
+   // 🔥 FIX: Removed native alert() and applied System's Custom Toast Notification
+   if (!currentUid) return window.showToast("Please login to your account first to contact support.", true);
 
-    const modal = document.getElementById('userSupportModal');
-    if (modal) modal.style.display = 'flex';
+   const modal = document.getElementById('userSupportModal');
+   if (modal) modal.style.display = 'flex';
 
-    const messagesContainer = document.getElementById('userSupportMessages');
-    if (messagesContainer) {
-        messagesContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.75rem; margin-top:20px;"><i class="fas fa-spinner fa-spin"></i> Loading conversation...</div>';
-    }
+   const messagesContainer = document.getElementById('userSupportMessages');
+   if (messagesContainer) {
+       messagesContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.75rem; margin-top:20px;"><i class="fas fa-spinner fa-spin"></i> Loading conversation...</div>';
+   }
 
-    // ১. সার্ভারকে জানানো যে ইউজার সাপোর্ট চ্যাটে আছেন (রিয়েলটাইম ব্রিজ অন করা)
-    if (window.socket) window.socket.emit("join_support_chat", currentUid);
+   if (window.socket) window.socket.emit("join_support_chat", currentUid);
 
-    // ২. সার্ভার API দিয়ে সুরক্ষিতভাবে পূর্ববর্তী মেসেজ লোড করা
-    try {
-        const result = await window.fetchAPI(`/support/messages?uid=${currentUid}`);
-        if (!result.success || !result.data || result.data.length === 0) {
-            messagesContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.8rem; margin-top:40px;">How can we help you today?<br><span style="font-size:0.7rem; color:#0ea5e9;">Send a message to start chatting directly with Admin.</span></div>';
-            return;
-        }
+   try {
+       const result = await window.fetchAPI(`/support/messages?uid=${currentUid}`);
+       if (!result.success || !result.data || result.data.length === 0) {
+           messagesContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.8rem; margin-top:40px;">How can we help you today?<br><span style="font-size:0.7rem; color:#0ea5e9;">Send a message to start chatting directly with Admin.</span></div>';
+           return;
+       }
 
-        let html = '';
-        result.data.forEach(m => {
-            const isMe = m.sender === 'user';
-            
-            // 🛡️ Safe Timestamp Parser: Admin SDK (_seconds) ও Client SDK (seconds) উভয়ই হ্যান্ডেল করে
-            let rawTime = m.timestamp;
-            let ms = Date.now();
-            if (rawTime) {
-                if (typeof rawTime === 'object') {
-                    if (rawTime._seconds) ms = rawTime._seconds * 1000;
-                    else if (rawTime.seconds) ms = rawTime.seconds * 1000;
-                    else if (typeof rawTime.toDate === 'function') ms = rawTime.toDate().getTime();
-                } else if (typeof rawTime === 'number') {
-                    ms = rawTime;
-                } else if (typeof rawTime === 'string') {
-                    let parsed = new Date(rawTime).getTime();
-                    if (!isNaN(parsed)) ms = parsed;
-                }
-            }
+       let html = '';
+       result.data.forEach(m => {
+           const isMe = m.sender === 'user';
+           
+           let rawTime = m.timestamp;
+           let ms = Date.now();
+           if (rawTime) {
+               if (typeof rawTime === 'object') {
+                   if (rawTime._seconds) ms = rawTime._seconds * 1000;
+                   else if (rawTime.seconds) ms = rawTime.seconds * 1000;
+                   else if (typeof rawTime.toDate === 'function') ms = rawTime.toDate().getTime();
+               } else if (typeof rawTime === 'number') {
+                   ms = rawTime;
+               } else if (typeof rawTime === 'string') {
+                   let parsed = new Date(rawTime).getTime();
+                   if (!isNaN(parsed)) ms = parsed;
+               }
+           }
 
-            let timeStr = new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+           let timeStr = new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
 
-            html += `
-                <div style="display:flex; flex-direction:column; align-items:${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:8px;">
-                    <div style="max-width:82%; padding:9px 14px; border-radius:14px; ${isMe ? 'background:#0ea5e9; color:#fff; border-bottom-right-radius:2px;' : 'background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:2px;'} font-size:0.85rem; line-height:1.4; word-break:break-word;">
-                        ${m.message}
-                    </div>
-                    <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
-                </div>`;
-        });
+           html += `
+               <div style="display:flex; flex-direction:column; align-items:${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:8px;">
+                   <div style="max-width:82%; padding:9px 14px; border-radius:14px; ${isMe ? 'background:#0ea5e9; color:#fff; border-bottom-right-radius:2px;' : 'background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:2px;'} font-size:0.85rem; line-height:1.4; word-break:break-word;">
+                       ${m.message}
+                   </div>
+                   <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
+               </div>`;
+       });
 
-        messagesContainer.innerHTML = html;
-        messagesContainer.scrollTop = messagesContainer.scrollHeight;
-    } catch(err) {
-        messagesContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:0.75rem;">Failed to load messages. Reopen window.</div>';
-    }
+       messagesContainer.innerHTML = html;
+       messagesContainer.scrollTop = messagesContainer.scrollHeight;
+   } catch(err) {
+       messagesContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:0.75rem;">Failed to load messages. Reopen window.</div>';
+   }
 }
 
 function closeSupportChat() {
-    const currentUid = localStorage.getItem('uid');
-    // চ্যাট বন্ধ হলে সার্ভারকে জানানো (বিলিং ও মেমোরি সেভ)
-    if (window.socket && currentUid) window.socket.emit("leave_support_chat", currentUid);
-    
-    const modal = document.getElementById('userSupportModal');
-    if (modal) modal.style.display = 'none';
+   const currentUid = localStorage.getItem('uid');
+   if (window.socket && currentUid) window.socket.emit("leave_support_chat", currentUid);
+   
+   const modal = document.getElementById('userSupportModal');
+   if (modal) modal.style.display = 'none';
 }
 
 function sendUserSupportMessage() {
-    const input = document.getElementById('userSupportInput');
-    if (!input) return;
-    const msg = input.value.trim();
-    const currentUid = localStorage.getItem('uid');
+   const input = document.getElementById('userSupportInput');
+   if (!input) return;
+   const rawMsg = input.value.trim();
+   const currentUid = localStorage.getItem('uid');
 
-    const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-    const userName = staticUser.Name || 'TCM User';
-    const avatar = staticUser.Avatar || '';
+   const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
+   const userName = staticUser.Name || 'TCM User';
+   const avatar = staticUser.Avatar || '';
 
-    if (!msg || !currentUid) return;
-    input.value = '';
+   if (!rawMsg || !currentUid) return;
+   
+   // 🔥 ANTI-XSS SANITIZER (Admin Dashboard is protected)
+   const msg = window.sanitizeInput ? window.sanitizeInput(rawMsg) : rawMsg.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
 
-    const messagesContainer = document.getElementById('userSupportMessages');
-    if (messagesContainer && (messagesContainer.innerHTML.includes('How can we help you') || messagesContainer.innerHTML.includes('No messages yet'))) {
-        messagesContainer.innerHTML = '';
-    }
+   input.value = '';
 
-    // ১. অপটিমিস্টিক UI: সাথে সাথে নিজের স্ক্রিনে মেসেজ দেখানো
-    let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
-    let bubbleHtml = `
-        <div style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:8px;">
-            <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:#0ea5e9; color:#fff; border-bottom-right-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
-                ${msg}
-            </div>
-            <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
-        </div>`;
-    
-    messagesContainer.innerHTML += bubbleHtml;
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+   const messagesContainer = document.getElementById('userSupportMessages');
+   if (messagesContainer && (messagesContainer.innerHTML.includes('How can we help you') || messagesContainer.innerHTML.includes('No messages yet'))) {
+       messagesContainer.innerHTML = '';
+   }
 
-    // ২. সকেটের মাধ্যমে সার্ভারে মেসেজ প্রেরণ
-    if (window.socket) {
-        window.socket.emit("send_support_message", {
-            uid: currentUid,
-            userName,
-            avatar,
-            message: msg
-        });
-    }
+   let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
+   let bubbleHtml = `
+       <div style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:8px;">
+           <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:#0ea5e9; color:#fff; border-bottom-right-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
+               ${msg}
+           </div>
+           <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
+       </div>`;
+   
+   messagesContainer.innerHTML += bubbleHtml;
+   messagesContainer.scrollTop = messagesContainer.scrollHeight;
+
+   if (window.socket) {
+       window.socket.emit("send_support_message", {
+           uid: currentUid,
+           userName,
+           avatar,
+           message: msg
+       });
+   }
 }
 </script>
 </body>
