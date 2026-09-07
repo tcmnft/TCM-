@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap');
-        :root { --primary: #00f5ff; --bg-dark-blue: #0b1120; --bg-deep-dark: #030305; --bg-card: rgba(13, 15, 28, 0.65); --text-main: #f8f9fc; --text-sub: #64748b; --border-light: rgba(255, 255, 255, 0.15); --border-dark: rgba(255, 255, 255, 0.02); --shadow-heavy: rgba(0,0,0,0.9); }
+        :root { --primary: #00f5ff; --bg-dark-blue: #0b1120; --bg-deep-dark: #030305; --bg-card: rgba(13, 15, 28, 0.65); --text-main: #f8f9fc; --text-sub: #64748b; --border-light: rgba(255, 255, 255, 0.15); --border-dark: rgba(255, 255, 255, 0.02); --shadow-heavy: rgba(0,0,0,0.9); --error: #f43f5e; --success: #10b981; }
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; -ms-overflow-style: none !important; scrollbar-width: none !important; }
         *::-webkit-scrollbar { display: none !important; }
         html { background-color: var(--bg-dark-blue); height: 100%; }
@@ -42,6 +42,15 @@
         .header-login-txt span:nth-child(1) { animation-delay: 0.0s; } .header-login-txt span:nth-child(2) { animation-delay: 0.1s; } .header-login-txt span:nth-child(3) { animation-delay: 0.2s; } .header-login-txt span:nth-child(4) { animation-delay: 0.3s; } .header-login-txt span:nth-child(5) { animation-delay: 0.4s; } .header-login-txt span:nth-child(6) { animation-delay: 0.5s; }
         @keyframes periodicWave { 0%, 15%, 100% { transform: scale(1) translateY(0); color: rgba(255,255,255,0.5); text-shadow: none; } 7.5% { transform: scale(1.4) translateY(-3px); color: #fff; text-shadow: 0 0 12px #fff, 0 0 20px var(--primary); } }
         .header-login-txt:active span { animation: none !important; transform: scale(1.3) translateY(-2px) !important; color: #fff !important; text-shadow: 0 0 15px #fff, 0 0 20px var(--primary) !important; }
+
+        /* 🔥 SIDEBAR SYSTEM 🔥 */
+        .sb-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); z-index: 2000; display: none; opacity: 0; transition: 0.3s; }
+        .sb-overlay.active { opacity: 1; }
+        .sidebar { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--bg-card); z-index: 2001; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1); padding: calc(env(safe-area-inset-top) + 25px) 25px 25px 25px; box-shadow: -10px 0 30px rgba(0,0,0,0.5); display: flex; flex-direction: column; backdrop-filter: blur(40px); border-left: 1px solid var(--border-light); }
+        .sidebar.active { right: 0; }
+        .sb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .sb-item { display: flex; align-items: center; gap: 15px; padding: 14px; border-radius: 12px; color: var(--text-main); text-decoration: none; font-weight: 600; font-size: 0.9rem; margin-bottom: 8px; transition: 0.2s; cursor: pointer; border: 1px solid transparent; }
+        .sb-item:hover { background: rgba(255,255,255,0.05); border-color: var(--border-light); color: var(--primary); transform: translateX(5px); }
 
         .login-container { position: relative; width: 100%; max-width: 440px; margin: 0 auto; padding: 0 20px; z-index: 10; }
         .form-pill { position: relative; background: var(--bg-card); backdrop-filter: blur(40px); border-radius: 40px; padding: 65px 25px 35px; border-top: 1px solid var(--border-light); border-bottom: 1px solid var(--border-dark); box-shadow: 0 25px 60px var(--shadow-heavy), inset 0 5px 20px rgba(255,255,255,0.03); text-align: center; margin-top: 60px; }
@@ -90,6 +99,21 @@
         .f-brand:active { transform: scale(1.15) translateY(-3px) !important; color: #fff !important; text-shadow: 0 0 15px #fff, 0 0 25px var(--primary) !important; }
         .divider-line { width: 1px; height: 25px; background: rgba(255,255,255,0.1); }
 
+        /* 🔥 TOAST & MODAL STYLES 🔥 */
+        #toast { visibility: hidden; min-width: 250px; background: var(--bg-card); border: 1px solid var(--primary); color: var(--text-main); text-align: center; border-radius: 14px; padding: 16px 25px; position: fixed; z-index: 30000; left: 50%; bottom: 80px; transform: translateX(-50%) translateY(20px); font-weight: 600; box-shadow: 0 10px 30px rgba(0,0,0,0.5); opacity: 0; transition: 0.5s; backdrop-filter: blur(16px); }
+        #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); }
+        #toast.error { border-color: var(--error); box-shadow: 0 10px 30px rgba(244, 63, 94, 0.2); }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); backdrop-filter: blur(5px); z-index: 10001; display: none; align-items: center; justify-content: center; padding: 20px; opacity: 0; transition: opacity 0.3s; }
+        .modal.show { opacity: 1; }
+        .modal-box { background: var(--bg-card); width: 100%; max-width: 340px; border-radius: 24px; padding: 25px; text-align: center; border: 1px solid var(--border-light); box-shadow: 0 15px 40px rgba(0,0,0,0.6); transform: scale(0.9); transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); backdrop-filter: blur(40px); }
+        .modal.show .modal-box { transform: scale(1); }
+
+        .act-btn { padding: 16px; border-radius: 18px; border: none; font-weight: 700; font-size: 0.95rem; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .act-btn:active { transform: scale(0.96); }
+        .btn-dep { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: 1px solid #38bdf8; }
+        .btn-modal-cancel { flex: 1; padding: 10px; border: 1px solid var(--border-light); background: rgba(255,255,255,0.05); color: var(--text-main); border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+
         /* 🔥 PREMIUM UID REVEAL PORTAL 🔥 */
         #uidPortal { position: fixed; inset: 0; background: rgba(5, 8, 15, 0.85); z-index: 10000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(20px); opacity: 0; transition: 0.4s ease; }
         #uidPortal.active { opacity: 1; }
@@ -104,10 +128,38 @@
         .copy-uid-btn:active { transform: scale(0.9); }
         .copy-uid-btn.success { background: var(--success); color: #000; border-color: var(--success); box-shadow: 0 0 15px rgba(16, 185, 129, 0.6); }
 
-        @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; } .f-brand { font-size: 0.75rem; } }
+        @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; margin-right: 10px; } .f-brand { font-size: 0.75rem; } }
     </style>
 </head>
 <body>
+
+    <!-- 🔥 TOAST NOTIFICATION -->
+    <div id="toast"><i class="fas fa-check-circle"></i> Action Successful!</div>
+
+    <!-- 🔥 SIDEBAR SYSTEM -->
+    <div class="sb-overlay" id="overlay" onclick="toggleSidebar(false)"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sb-header">
+            <h2 style="font-size: 1.1rem; color: var(--primary);">System Menu</h2>
+            <i class="fas fa-times" onclick="toggleSidebar(false)" style="cursor:pointer; font-size:1.2rem; color: var(--text-sub);"></i>
+        </div>
+        <div class="sb-item" onclick="toggleTheme()">
+            <i class="fas fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
+        </div>
+        <div class="sb-item" onclick="showToast('Please register or login to access Message Box!', true)">
+            <i class="far fa-envelope"></i> Message Box
+        </div>
+        <div class="sb-item" onclick="showToast('Please register or login to access Security Center!', true)">
+            <i class="fas fa-shield-alt" style="color:var(--primary);"></i> Security Center
+        </div>
+        <!-- ⚠️ আপনার আসল টেলিগ্রাম লিংকটি এখানে দিন -->
+        <a href="https://t.me/Tcm_nft" target="_blank" class="sb-item" style="text-decoration: none;">
+            <i class="fab fa-telegram" style="color:#3b82f6;"></i> Official Telegram
+        </a>
+        <div class="sb-item" onclick="window.openDownloadModal()" style="border: 1px dashed var(--success); background: rgba(16, 185, 129, 0.05); margin-top: 15px;">
+            <i class="fas fa-download" style="color:var(--success);"></i> Download App
+        </div>
+    </div>
 
     <header class="header-top">
         <div class="logo-box" onclick="window.location.href='index.html'"><i class="fas fa-cube"></i> TCM NFT</div>
@@ -118,8 +170,11 @@
                 <div class="t-item">BNB <span style="color:#10b981">$580.40</span></div>
             </div>
         </div>
-        <div class="header-login-txt" ontouchstart="" onclick="window.location.href='index.html'">
-            <span>L</span><span>O</span><span>G</span><span>I</span><span>N</span>
+        <div style="display: flex; gap: 15px; align-items: center;">
+            <div class="header-login-txt" ontouchstart="" onclick="window.location.href='index.html'">
+                <span>L</span><span>O</span><span>G</span><span>I</span><span>N</span>
+            </div>
+            <i class="fas fa-bars-staggered" style="font-size:1.2rem; cursor:pointer; color: var(--primary);" onclick="toggleSidebar(true)"></i>
         </div>
     </header>
 
@@ -171,7 +226,7 @@
     <nav class="footer-nav">
         <div class="f-brand" ontouchstart="" onclick="window.open('https://x.com', '_blank')"><i class="fab fa-x-twitter"></i> <span>X.COM</span></div>
         <div class="divider-line"></div>
-        <div class="f-brand" ontouchstart="" onclick="window.open('https://telegram.org', '_blank')"><i class="fab fa-telegram"></i> <span>TELEGRAM</span></div>
+        <div class="f-brand" ontouchstart="" onclick="window.open('https://t.me/Tcm_nft', '_blank')"><i class="fab fa-telegram"></i> <span>TELEGRAM</span></div>
         <div class="divider-line"></div>
         <div class="f-brand" ontouchstart="" onclick="window.open('https://facebook.com', '_blank')"><i class="fab fa-facebook"></i> <span>FACEBOOK</span></div>
     </nav>
@@ -195,7 +250,196 @@
         </div>
     </div>
 
+    <!-- 🔥 APP DOWNLOAD MODAL -->
+    <div class="modal" id="appDownloadModal">
+        <div class="modal-box" style="padding: 30px 20px; text-align: center;">
+            <div id="dl-state-1">
+                <div style="width: 70px; height: 70px; background: rgba(0, 245, 255, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 2px solid var(--primary); box-shadow: 0 0 15px rgba(0, 245, 255, 0.3);">
+                    <i class="fas fa-cloud-download-alt" style="font-size: 2rem; color: var(--primary);"></i>
+                </div>
+                <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">Download TCM NFT App</h2>
+                <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 25px; line-height: 1.4;">Get the official Android APK for a faster and smoother experience. Do you want to proceed?</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn-modal-cancel" onclick="closeModal('appDownloadModal')" style="flex: 1; padding: 12px;">Cancel</button>
+                    <button class="act-btn btn-dep" onclick="window.startAppDownloadProgress()" style="flex: 1; padding: 12px; margin: 0;"><i class="fas fa-download"></i> Yes, Download</button>
+                </div>
+            </div>
+
+            <div id="dl-state-2" style="display: none;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: var(--text-main); margin-bottom: 15px;">Downloading Assets...</h3>
+                <div style="width: 100%; height: 14px; background: rgba(0,0,0,0.5); border-radius: 10px; overflow: hidden; border: 1px solid var(--border-light); position: relative;">
+                    <div id="dl-progress-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); transition: width 0.2s linear; box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);"></div>
+                </div>
+                <p id="dl-progress-text" style="font-size: 1.1rem; font-weight: 800; color: var(--success); margin-top: 10px; font-family: 'Space Grotesk', sans-serif;">0%</p>
+                <p style="font-size: 0.75rem; color: var(--text-sub); margin-top: 5px;">Please do not close this window.</p>
+            </div>
+
+            <div id="dl-state-3" style="display: none;">
+                <div style="width: 70px; height: 70px; background: rgba(16, 185, 129, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 2px solid var(--success); box-shadow: 0 0 15px rgba(16, 185, 129, 0.3);">
+                    <i class="fas fa-check" style="font-size: 2.5rem; color: var(--success);"></i>
+                </div>
+                <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 10px; color: var(--text-main);">Download Complete!</h2>
+                <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 25px;">The APK package is ready. Click install to setup the app on your device.</p>
+                <button class="act-btn" style="width: 100%; background: linear-gradient(135deg, #10b981, #059669); color: #fff; font-weight: 800; padding: 14px; border: none; letter-spacing: 1px;" onclick="window.triggerFinalInstall()"><i class="fab fa-android" style="font-size: 1.2rem;"></i> INSTALL APP</button>
+            </div>
+        </div>
+    </div>
+
 <script>
+// ==============================================================
+// 🌐 GLOBAL TOAST & MODAL ENGINE
+// ==============================================================
+window.showToast = (msg, isErr = false) => {
+    const t = document.getElementById('toast');
+    if(!t) return;
+    const iconColor = isErr ? 'var(--error)' : 'var(--success)';
+    const iconClass = isErr ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
+    
+    t.innerHTML = `<i class="${iconClass}" style="color: ${iconColor}; font-size: 1.3rem;"></i>
+                   <span style="color: #ffffff; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.3px;">${msg}</span>`;
+    
+    t.style.borderLeft = `4px solid ${iconColor}`;
+    t.style.display = 'flex';
+    t.style.alignItems = 'center';
+    t.style.gap = '12px';
+    
+    t.className = 'toast show';
+    setTimeout(() => { t.className = t.className.replace('show', '').trim(); }, 3000);
+};
+
+window.openModal = id => { 
+    const m = document.getElementById(id); 
+    if(m){ m.style.display='flex'; setTimeout(()=>m.classList.add('show'), 10); } 
+};
+window.closeModal = id => { 
+    const m = document.getElementById(id); 
+    if(m){ m.classList.remove('show'); setTimeout(()=>m.style.display='none', 300); } 
+};
+
+// ==============================================================
+// 📋 SIDEBAR & THEME ENGINE
+// ==============================================================
+window.toggleSidebar = force => {
+    const s = document.getElementById('sidebar'), o = document.getElementById('overlay');
+    if(!s || !o) return;
+    if(typeof force === 'boolean'){
+        if(force){ s.classList.add('active'); o.style.display='block'; setTimeout(()=>o.classList.add('active'),10); }
+        else{ s.classList.remove('active'); o.classList.remove('active'); setTimeout(()=>o.style.display='none',300); }
+    } else {
+        s.classList.toggle('active');
+        if(s.classList.contains('active')){ o.style.display='block'; setTimeout(()=>o.classList.add('active'),10); }
+        else{ o.classList.remove('active'); setTimeout(()=>o.style.display='none',300); }
+    }
+};
+
+window.toggleTheme = () => {
+    let currentTheme = document.documentElement.getAttribute('data-theme');
+    let newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    localStorage.setItem('tcm_theme', newTheme);
+    
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    if (icon && text) {
+        icon.className = newTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        text.innerText = newTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    }
+};
+
+// Init Theme on Load
+(()=>{
+    let savedTheme = localStorage.getItem('tcm_theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    const icon = document.getElementById('themeIcon');
+    const text = document.getElementById('themeText');
+    if (icon && text) {
+        icon.className = savedTheme === 'dark' ? 'fas fa-moon' : 'fas fa-sun';
+        text.innerText = savedTheme === 'dark' ? 'Dark Mode' : 'Light Mode';
+    }
+})();
+
+// ==============================================================
+// 📱 APP DOWNLOAD ENGINE (REAL DOWNLOAD PROGRESS)
+// ==============================================================
+window.APK_DOWNLOAD_URL = "https://tcm-bakend.onrender.com/downloads/tcm_nft_app.apk"; 
+window.downloadedApkBlob = null; 
+
+window.openDownloadModal = () => {
+    window.toggleSidebar(false); // Close sidebar first
+    
+    document.getElementById('dl-state-1').style.display = 'block';
+    document.getElementById('dl-state-2').style.display = 'none';
+    document.getElementById('dl-state-3').style.display = 'none';
+    
+    document.getElementById('dl-progress-bar').style.width = '0%';
+    document.getElementById('dl-progress-text').innerText = '0%';
+    
+    window.downloadedApkBlob = null;
+    
+    setTimeout(() => { window.openModal('appDownloadModal'); }, 200);
+};
+
+window.startAppDownloadProgress = () => {
+    document.getElementById('dl-state-1').style.display = 'none';
+    document.getElementById('dl-state-2').style.display = 'block';
+    
+    const progressBar = document.getElementById('dl-progress-bar');
+    const progressText = document.getElementById('dl-progress-text');
+    
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", window.APK_DOWNLOAD_URL, true);
+    xhr.responseType = "blob"; 
+    
+    xhr.onprogress = function(event) {
+        if (event.lengthComputable) {
+            const percentComplete = Math.floor((event.loaded / event.total) * 100);
+            progressBar.style.width = percentComplete + '%';
+            progressText.innerText = percentComplete + '%';
+        }
+    };
+    
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            window.downloadedApkBlob = xhr.response;
+            setTimeout(() => {
+                document.getElementById('dl-state-2').style.display = 'none';
+                document.getElementById('dl-state-3').style.display = 'block';
+            }, 500);
+        } else {
+            window.showToast("Failed to download file from server!", true);
+            window.openDownloadModal(); 
+        }
+    };
+    
+    xhr.onerror = function() {
+        window.showToast("Network error or CORS issue. Download failed!", true);
+        window.openDownloadModal(); 
+    };
+    
+    xhr.send(); 
+};
+
+window.triggerFinalInstall = () => {
+    if (!window.downloadedApkBlob) {
+        window.showToast("File not found! Please download again.", true);
+        return;
+    }
+    
+    const objectUrl = window.URL.createObjectURL(window.downloadedApkBlob);
+    const a = document.createElement('a');
+    a.href = objectUrl;
+    a.download = "TCM_NFT_Official_App.apk"; 
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    
+    setTimeout(() => { window.URL.revokeObjectURL(objectUrl); }, 1000);
+    
+    window.closeModal('appDownloadModal');
+    window.showToast("Downloading Package Installer...");
+};
+
+
 // ==============================================================
 // State Variables & DOM Elements
 // ==============================================================
@@ -344,7 +588,6 @@ if (regBtn) {
         document.getElementById('btnText').innerText = "Processing...";
 
         try {
-            // 🔥 Timezone Detection (Crucial for Daily Reset Sync)
             let userTimeZone = "UTC";
             try {
                 userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
@@ -362,10 +605,9 @@ if (regBtn) {
                 religion: regReligion.value,
                 sponsor: regSponsor?.value.trim().toUpperCase() || "",
                 avatar: compressedAvatarBase64,
-                timeZone: userTimeZone // 🔥 Added Timezone to Payload
+                timeZone: userTimeZone 
             };
 
-            // পোর্ট 5000 ব্যবহার করে রিকোয়েস্ট পাঠানো হচ্ছে
             const response = await fetch('https://tcm-bakend.onrender.com/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -378,11 +620,9 @@ if (regBtn) {
                 throw new Error(result.message || "Registration failed. Please try again.");
             }
 
-            // সাকসেস হলে UID এবং Token রিসিভ করা
             const finalUID = result.uid;
             const sessionToken = result.token;
 
-            // Local Storage-এ সেভ করা
             localStorage.setItem("uid", finalUID);
             localStorage.setItem("token", sessionToken);
             localStorage.setItem("name", payload.name);
@@ -390,7 +630,6 @@ if (regBtn) {
                 localStorage.setItem("tcm_user_dp", compressedAvatarBase64);
             }
 
-            // Success Portal দেখানো
             if (newUID) newUID.innerText = finalUID;
             if (uidPortal) {
                 uidPortal.style.display = "flex";
@@ -398,7 +637,6 @@ if (regBtn) {
             }
             if (uidBox) uidBox.classList.add("show");
 
-            // রিডাইরেক্ট কাউন্টডাউন
             let timeLeft = 8;
             if (regTimer) regTimer.innerText = timeLeft;
 
@@ -416,7 +654,6 @@ if (regBtn) {
             console.error("Signup Error:", error);
             alert(error.message); 
             
-            // বাটন আবার চালু করা
             regBtn.disabled = false;
             document.getElementById('btnText').innerText = "JOIN ECOSYSTEM";
         }
