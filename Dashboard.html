@@ -912,6 +912,7 @@ input, textarea, select {
     transform: translateY(0) scale(1);
     filter: blur(0px);
 }
+
   </style>
 </head>
 <body>
@@ -1355,6 +1356,29 @@ input, textarea, select {
                <i class="fas fa-share-alt"></i> Share via Social Media
            </button>
        </div>
+   </div>
+
+   <!-- 📦 MODULE: NFT Orders Modal (Ultra-Premium Glassmorphism) -->
+  <div id="ordersModal" class="modal-overlay" style="display:none; z-index: 9999;">
+      <div class="modal-content" style="background: rgba(10, 15, 24, 0.85); backdrop-filter: blur(35px); -webkit-backdrop-filter: blur(35px); border: 1px solid rgba(255,255,255,0.08); box-shadow: 0 30px 60px rgba(0,0,0,0.8); width: 95%; max-width: 450px; padding: 0; overflow: hidden; border-radius: 24px; animation: popUp 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;">
+        
+        <!-- Header Section -->
+        <div style="padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.3);">
+            <h3 style="margin: 0; color: #fff; font-size: 1.15rem; font-weight: 800; letter-spacing: 0.5px;"><i class="fas fa-clipboard-list" style="color: var(--primary); margin-right: 8px;"></i> Reservation Ledger</h3>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <input type="month" id="orderMonthFilter" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fff; border-radius: 10px; padding: 6px 10px; font-size: 0.8rem; outline: none;" onchange="window.renderOrders()">
+                <div style="width: 32px; height: 32px; border-radius: 50%; background: rgba(244, 63, 94, 0.1); display: flex; justify-content: center; align-items: center; cursor: pointer; border: 1px solid rgba(244, 63, 94, 0.2); transition: 0.3s;" onclick="window.closeModal('ordersModal')">
+                    <i class="fas fa-times" style="color: #f43f5e; font-size: 1rem;"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scrollable Content Area -->
+        <div id="ordersContentBox" style="padding: 20px; max-height: 65vh; overflow-y: auto; overflow-x: hidden;">
+            <!-- Data will be dynamically injected here -->
+        </div>
+        
+      </div>
    </div>
 
    <div class="modal" id="sendMoneyModal">
@@ -2220,15 +2244,22 @@ window.formatTxDate = t => {
    return `${d}-${m}-${y} ${hrs}:${mins} ${ampm}`;
 };
  
-// 🛡️ হাইপার-স্কেল ইউনিক অর্ডার আইডি জেনারেটর (DEP, WD, P2P, AIR)
+// 🛡️ হাইপার-স্কেল ইউনিক অর্ডার আইডি জেনারেটর (Trillion-User Proof)
 window.generateOrderId = (prefix = 'TX') => {
     const now = new Date();
-    const yy = String(now.getFullYear()).slice(-2);
+    const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
     const dd = String(now.getDate()).padStart(2, '0');
-    const timeCode = Date.now().toString(36).toUpperCase();
-    const salt = Math.random().toString(36).substring(2, 6).toUpperCase();
-    return `${prefix}-${yy}${mm}${dd}-${timeCode}-${salt}`;
+    const timeHex = Date.now().toString(16).toUpperCase(); // মিলিসেকেন্ডের হেক্সাডেসিমাল
+    
+    // 🔐 ১৬ ডিজিটের শক্তিশালী ক্রিপ্টোগ্রাফিক সল্ট
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let salt = '';
+    for (let i = 0; i < 16; i++) {
+        salt += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    
+    return `${prefix}-${yyyy}${mm}${dd}-${timeHex}-${salt}`;
 };
  
 window.getLevelStyling = lv => {
@@ -2801,18 +2832,51 @@ window.invalidateRecentHistoryCache = () => {
     if(typeof window.applyTxFilter === 'function') window.applyTxFilter();
 };
 
-// লাইভ টাইমার আপডেট লুপ
-setInterval(() => {
+// =================================================================================
+// ⏱️ THE GLOBAL PENDING TIMER ENGINE (96H Withdraw Countdown & Deposit Count-Up)
+// =================================================================================
+if (window.liveTimerInterval) clearInterval(window.liveTimerInterval);
+window.liveTimerInterval = setInterval(() => {
     document.querySelectorAll('.live-timer').forEach(el => {
-        let startTime = parseInt(el.getAttribute('data-time'));
+        let startTime = parseInt(el.getAttribute('data-time') || el.getAttribute('data-timestamp'));
         if (!startTime || isNaN(startTime)) return;
-        let diffMs = new Date().getTime() - startTime;
-        if (diffMs < 0) diffMs = 0;
-        let diffSec = Math.floor(diffMs / 1000);
-        let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
-        let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
-        let s = (diffSec % 60).toString().padStart(2, '0');
-        el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem;"></i> ${h}:${m}:${s}`;
+
+        let now = new Date().getTime();
+        let elapsedMs = now - startTime;
+        if (elapsedMs < 0) elapsedMs = 0;
+
+        // 🧠 Smart Detection: HTML-এর প্যারেন্ট ট্যাগ থেকে চেক করবে এটা Withdraw নাকি Deposit
+        let isWithdraw = false;
+        let txType = el.getAttribute('data-type'); 
+        let parentContainer = el.closest('.tx-item') || el.closest('div'); // Parent div
+        
+        if ((txType && txType.includes('Withdraw')) || (parentContainer && parentContainer.innerText.includes('Withdraw'))) {
+            isWithdraw = true;
+        }
+
+        if (isWithdraw) {
+            // ⏳ উইথড্রল লজিক: ৯৬ ঘণ্টা (345,600,000 মিলি-সেকেন্ড) থেকে কাউন্ট-ডাউন হবে
+            let maxTimeMs = 96 * 60 * 60 * 1000; 
+            let remainingMs = maxTimeMs - elapsedMs;
+            if (remainingMs <= 0) remainingMs = 0;
+
+            let diffSec = Math.floor(remainingMs / 1000);
+            let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
+            let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
+            let s = (diffSec % 60).toString().padStart(2, '0');
+
+            el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--error);"></i> ${h}:${m}:${s}`;
+            if(remainingMs <= 0) el.style.color = "var(--error)"; // সময় শেষ হলে লাল হয়ে যাবে
+
+        } else {
+            // ⏱️ ডিপোজিট লজিক: ০ থেকে সামনের দিকে কাউন্ট-আপ হবে
+            let diffSec = Math.floor(elapsedMs / 1000);
+            let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
+            let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
+            let s = (diffSec % 60).toString().padStart(2, '0');
+
+            el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--warning);"></i> ${h}:${m}:${s}`;
+        }
     });
 }, 1000);
 
@@ -3026,7 +3090,7 @@ window.startNftReserveScan = async function() {
         setTimeout(() => window.closeModal("nftScanModal"), 3000);
         return;
     }
-
+    
     setTimeout(() => {
         document.getElementById("scanLine").style.display = 'none';
         document.getElementById("scanIcon").style.display = 'none';
@@ -3037,12 +3101,87 @@ window.startNftReserveScan = async function() {
         document.getElementById("foundNftImg").src = window.reservedNFT.img;
         document.getElementById("foundNftImg").style.display = 'block';
         
+        // 🔥 Ultra-Luxury Minimalist UI with Sword Blade Button
         document.getElementById("nftResultInfo").innerHTML = `
-            <i class="fas fa-check-circle" style="font-size: 3rem; color: var(--success); margin-bottom:10px;"></i>
-            <h3 style="color: white;">Reserved Successfully!</h3>
-            <h4 style="color: var(--primary); margin: 5px 0;">${window.reservedNFT.id}</h4>
-            <p style="color: var(--warning);">Value: ${parseFloat(window.reservedNFT.price).toFixed(2)} ₮</p>
-            <button class="act-btn btn-dep" style="margin-top: 15px; width: 100%;" onclick="window.closeScanAndGoToCollection()">View in Collection</button>
+            <style>
+                @keyframes ultraBlade {
+                    0% { left: -60%; opacity: 0; }
+                    5% { opacity: 1; }
+                    25% { left: 150%; opacity: 0; }
+                    100% { left: 150%; opacity: 0; }
+                }
+                .btn-luxury-blade {
+                    position: relative;
+                    overflow: hidden;
+                    background: linear-gradient(135deg, #0f172a, #1e293b);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    color: #e2e8f0;
+                    padding: 16px;
+                    border-radius: 14px;
+                    font-size: 0.9rem;
+                    font-weight: 600;
+                    letter-spacing: 2px;
+                    cursor: pointer;
+                    width: 100%;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+                    transition: all 0.3s ease;
+                    text-transform: uppercase;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                }
+                .btn-luxury-blade:hover {
+                    background: linear-gradient(135deg, #1e293b, #334155);
+                    border-color: rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+                    color: #ffffff;
+                    transform: translateY(-2px);
+                }
+                /* The Sword Blade Effect */
+                .btn-luxury-blade::after {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -60%;
+                    width: 25px;
+                    height: 100%;
+                    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+                    transform: skewX(-25deg); /* তলোয়ারের ব্লেডের মতো বাঁকানো */
+                    animation: ultraBlade 4s infinite cubic-bezier(0.19, 1, 0.22, 1);
+                }
+            </style>
+
+            <div style="background: rgba(10, 15, 24, 0.85); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); border-radius: 24px; padding: 35px 25px; width: 100%; max-width: 340px; text-align: center; animation: popUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; margin: 0 auto;">
+                
+                <!-- Minimalist Success Icon -->
+                <div style="margin: 0 auto 20px auto; width: 50px; height: 50px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);">
+                    <i class="fas fa-check" style="color: #10b981; font-size: 1.4rem;"></i>
+                </div>
+                
+                <h3 style="color: #f8fafc; margin: 0 0 25px 0; font-size: 1.25rem; font-weight: 600; letter-spacing: 0.5px;">Reservation Confirmed</h3>
+                
+                <!-- Sleek Integrated NFT Info Card -->
+                <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 25px; text-align: left;">
+                    
+                    <img src="${window.reservedNFT.img}" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; box-shadow: 0 8px 16px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05);">
+                    
+                    <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
+                        <span style="font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Secured Asset</span>
+                        <span style="font-size: 1.05rem; color: #e2e8f0; font-weight: 700; letter-spacing: 0.5px;">${window.reservedNFT.id}</span>
+                        <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
+                            <span style="font-size: 0.7rem; color: #475569; font-weight: 600;">VALUE</span>
+                            <span style="font-size: 0.95rem; color: #10b981; font-weight: 700; font-family: 'Space Grotesk', monospace;">${parseFloat(window.reservedNFT.price).toFixed(2)} ₮</span>
+                        </div>
+                    </div>
+
+                </div>
+                
+                <!-- The Blade Button -->
+                <button class="btn-luxury-blade" onclick="window.closeScanAndGoToCollection()">
+                    View Collection
+                </button>
+            </div>
         `;
         document.getElementById("nftResultInfo").style.display = 'flex';
         
@@ -3051,22 +3190,33 @@ window.startNftReserveScan = async function() {
         if (wallet) {
             let nftPrice = parseFloat(window.reservedNFT.price || 0);
             
-            // মেইন ব্যালেন্স থেকে কাটবে এবং লকড ব্যালেন্সে যোগ করবে
             wallet.Main_Balance = (parseFloat(wallet.Main_Balance) || 0) - nftPrice;
             wallet.Locked_Balance = (parseFloat(wallet.Locked_Balance) || 0) + nftPrice;
             
-            window.lastWalletData = wallet; // Sync Fallback
+            window.lastWalletData = wallet; 
             if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
             if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
             if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
         }
 
-        // 🔥 SILENT HISTORY SYNC: রিলোড ছাড়াই হিস্ট্রিতে রেকর্ড যোগ হবে
-        if (typeof window.loadTodaysHistoryFromAPI === 'function') window.loadTodaysHistoryFromAPI();
+        // 🚀 TCM-03: CRASH-PROOF HISTORY INJECTION FOR RESERVE
+        if (typeof window.forceInjectToHistory === 'function' && result.injectionData) {
+            window.forceInjectToHistory({
+                id: result.injectionData.id || ('local_res_' + Date.now()),
+                UID: uid,
+                Type: 'NFT Reserve',
+                Amount: parseFloat(window.reservedNFT.price),
+                Status: 'Active Holding',
+                Date: result.injectionData.Date || new Date().toISOString(),
+                timestamp: result.injectionData.timestamp || Date.now(),
+                Order_ID: window.reservedNFT.orderId,
+                Image_URL: window.reservedNFT.img || '',
+                NFT_ID: window.reservedNFT.id || 'TCM NFT'
+            });
+        }
         
     }, 1500);
 };
-
 window.closeScanAndGoToCollection = () => {
     window.closeModal("nftScanModal");
     if(!window.reservedNFT) return;
@@ -3183,16 +3333,42 @@ window.startSellMatchmaking = async function(btn) {
     `;
     document.body.appendChild(miniPopup);
 
-    document.getElementById('miniSellCloseBtn').onclick = async () => { miniPopup.remove(); await window.finishSell(ret, net); };
-    setTimeout(async () => { if(document.body.contains(miniPopup)) { miniPopup.remove(); await window.finishSell(ret, net); } }, 4500);
+    document.getElementById('miniSellCloseBtn').onclick = async () => { 
+        miniPopup.remove(); 
+        await window.finishSell(ret, net, result.injectionData); 
+    };
+    setTimeout(async () => { 
+        if(document.body.contains(miniPopup)) { 
+            miniPopup.remove(); 
+            await window.finishSell(ret, net, result.injectionData); 
+        } 
+    }, 4500);
 };
 
-window.finishSell = async (retAmount = 0, netProfit = 0) => {
+window.finishSell = async (retAmount = 0, netProfit = 0, injectionData = null) => {
     const cTab = document.getElementById('tab-collection');
     if(cTab) cTab.innerHTML = `<div class="empty-state"><i class="fas fa-layer-group"></i><p>No NFTs in your collection.</p></div>`;
     
     let principal = window.reservedNFT ? parseFloat(window.reservedNFT.price || 0) : 0;
     
+    // 🚀 TCM-03: CRASH-PROOF HISTORY INJECTION FOR SELL (Must be done before clearing reservedNFT)
+    if (typeof window.forceInjectToHistory === 'function') {
+        const uid = localStorage.getItem("uid");
+        window.forceInjectToHistory({
+            id: (injectionData && injectionData.id) ? injectionData.id : ('local_sell_' + Date.now()),
+            UID: uid,
+            Type: 'NFT Profit',
+            Amount: parseFloat(netProfit),
+            Status: 'Success',
+            Date: (injectionData && injectionData.Date) ? injectionData.Date : new Date().toISOString(),
+            timestamp: (injectionData && injectionData.timestamp) ? injectionData.timestamp : Date.now(),
+            Order_ID: (injectionData && injectionData.Order_ID) ? injectionData.Order_ID : (window.reservedNFT ? window.reservedNFT.orderId : "N/A"),
+            Image_URL: window.reservedNFT ? window.reservedNFT.img : '',
+            NFT_ID: window.reservedNFT ? window.reservedNFT.id : 'TCM NFT',
+            Details: `Gross: ${(netProfit/0.79).toFixed(2)} | Fee: -${((netProfit/0.79)*0.21).toFixed(2)} | Net: +${netProfit}`
+        });
+    }
+
     window.reservedNFT = null;
     window.isSelling = false;
     window.updateNFTStats();
@@ -3201,34 +3377,27 @@ window.finishSell = async (retAmount = 0, netProfit = 0) => {
     let wallet = (window.RAM_STATE && window.RAM_STATE.balances) ? window.RAM_STATE.balances : window.lastWalletData;
     
     if (wallet) {
-        // ১. লকড ব্যালেন্স ক্লিয়ার (আসল টাকাটা মাইনাস হবে)
         let currentLocked = parseFloat(wallet.Locked_Balance) || 0;
         wallet.Locked_Balance = Math.max(0, currentLocked - principal);
         
-        // ২. মেইন ব্যালেন্সে টোটাল রিটার্ন যোগ (আসল + নিট লাভ)
         wallet.Main_Balance = (parseFloat(wallet.Main_Balance) || 0) + parseFloat(retAmount);
         
-        // ৩. প্রফিট শুধুমাত্র "রিজার্ভ হিস্ট্রিতে" যোগ করা (Earnings-এ কোনো পরিবর্তন হবে না)
         wallet.Total_Reserve = (parseFloat(wallet.Total_Reserve) || 0) + parseFloat(netProfit);
         wallet.Daily_Reserve = (parseFloat(wallet.Daily_Reserve) || 0) + parseFloat(netProfit);
 
-        window.lastWalletData = wallet; // Sync Fallback
+        window.lastWalletData = wallet; 
         
-        // সাথে সাথে UI আপডেট
         if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
         if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
     }
 
-    // 🔥 CACHE INVALIDATION: টিম কমিশন রিয়েল-টাইমে দেখানোর জন্য ক্যাশ ক্লিয়ার করা হলো
     localStorage.removeItem('tcm_team_cache');
-
-    // 🔥 SILENT HISTORY SYNC: পেইজ রিলোড ছাড়াই নতুন ট্রানজেকশন হিস্ট্রিতে আসবে
-    if (typeof window.loadTodaysHistoryFromAPI === 'function') window.loadTodaysHistoryFromAPI();
 
     if(typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
     window.switchTab('today');
     window.showToast("Funds Secured in Wallet!");
 };
+
 // 🔥 FIX: API Driven Today's History & Collection Rendering (Zero-Read & Paginated)
 window.globalNFTMarketList = [];
 
@@ -3750,238 +3919,243 @@ window.submit2FAUnbind = async () => {
 // =================================================================================
 
 window.updateSpeedometerUI = (score) => {
-   const needle = document.getElementById('speedNeedle');
-   const scoreText = document.getElementById('healthScoreText');
-   const msgBox = document.getElementById('healthStatusMsg');
-   
-   let safeScore = Math.min(100, Math.max(0, score));
-   let offset = 125.6 - (125.6 * (safeScore / 100));
-   
-   setTimeout(() => {
-       if(needle) needle.style.strokeDashoffset = offset;
-       if(scoreText) scoreText.innerText = `${safeScore}%`;
-   }, 100);
+    const needle = document.getElementById('speedNeedle');
+    const scoreText = document.getElementById('healthScoreText');
+    const msgBox = document.getElementById('healthStatusMsg');
+    
+    let safeScore = Math.min(100, Math.max(0, score));
+    let offset = 125.6 - (125.6 * (safeScore / 100));
+    
+    setTimeout(() => {
+        if(needle) needle.style.strokeDashoffset = offset;
+        if(scoreText) scoreText.innerText = `${safeScore}%`;
+    }, 100);
 
-   if(msgBox) {
-       if (safeScore < 40) {
-           msgBox.style.background = 'rgba(244, 63, 94, 0.15)';
-           msgBox.style.color = 'var(--error)';
-           msgBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unstable: Need Deposits';
-       } else if (safeScore >= 40 && safeScore <= 49) {
-           msgBox.style.background = 'rgba(250, 204, 21, 0.15)';
-           msgBox.style.color = 'var(--warning)';
-           msgBox.innerHTML = '<i class="fas fa-bolt"></i> Emergency Quota Active';
-       } else {
-           msgBox.style.background = 'rgba(16, 185, 129, 0.15)';
-           msgBox.style.color = 'var(--success)';
-           msgBox.innerHTML = '<i class="fas fa-check-circle"></i> Healthy Ecosystem';
-       }
-   }
+    if(msgBox) {
+        if (safeScore < 40) {
+            msgBox.style.background = 'rgba(244, 63, 94, 0.15)';
+            msgBox.style.color = 'var(--error)';
+            msgBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unstable: Need Deposits';
+        } else if (safeScore >= 40 && safeScore <= 49) {
+            msgBox.style.background = 'rgba(250, 204, 21, 0.15)';
+            msgBox.style.color = 'var(--warning)';
+            msgBox.innerHTML = '<i class="fas fa-bolt"></i> Emergency Quota Active';
+        } else {
+            msgBox.style.background = 'rgba(16, 185, 129, 0.15)';
+            msgBox.style.color = 'var(--success)';
+            msgBox.innerHTML = '<i class="fas fa-check-circle"></i> Healthy Ecosystem';
+        }
+    }
 };
 
 window.applyStealthButtonLogic = (score) => {
-   const btn = document.getElementById('subBtn');
-   const amtInput = document.getElementById('txAmt');
-   if(!btn || !amtInput) return;
+    const btn = document.getElementById('subBtn');
+    const amtInput = document.getElementById('txAmt');
+    if(!btn || !amtInput) return;
 
-   btn.className = "stealth-btn"; 
+    btn.className = "stealth-btn"; 
 
-   const updateBtnState = () => {
-       let val = parseFloat(amtInput.value) || 0;
-       
-       if (window.txMode === 'Deposit') {
-           btn.className = 'stealth-btn normal';
-           btn.innerHTML = 'Submit Deposit';
-           btn.disabled = false;
-           return;
-       }
+    const updateBtnState = () => {
+        let val = parseFloat(amtInput.value) || 0;
+        
+        if (window.txMode === 'Deposit') {
+            btn.className = 'stealth-btn normal';
+            btn.innerHTML = 'Submit Deposit';
+            btn.disabled = false;
+            return;
+        }
 
-       if (score < 40) {
-           btn.className = 'stealth-btn locked';
-           btn.innerHTML = '<i class="fas fa-lock"></i> Locked (Health < 40%)';
-           btn.disabled = true;
-       } else if (score >= 40 && score <= 49) {
-           if (val === 25) {
-               btn.className = 'stealth-btn emergency-ready';
-               btn.innerHTML = '<i class="fas fa-bolt"></i> Withdraw $25 (Emergency)';
-               btn.disabled = false;
-           } else {
-               btn.className = 'stealth-btn emergency-wait';
-               btn.innerHTML = '<i class="fas fa-exclamation"></i> Enter Exactly 25';
-               btn.disabled = true;
-           }
-       } else {
-           btn.className = 'stealth-btn normal';
-           btn.innerHTML = '✅ Confirm Withdraw';
-           btn.disabled = false;
-       }
-   };
+        if (score < 40) {
+            btn.className = 'stealth-btn locked';
+            btn.innerHTML = '<i class="fas fa-lock"></i> Locked (Health < 40%)';
+            btn.disabled = true;
+        } else if (score >= 40 && score <= 49) {
+            if (val === 25) {
+                btn.className = 'stealth-btn emergency-ready';
+                btn.innerHTML = '<i class="fas fa-bolt"></i> Withdraw $25 (Emergency)';
+                btn.disabled = false;
+            } else {
+                btn.className = 'stealth-btn emergency-wait';
+                btn.innerHTML = '<i class="fas fa-exclamation"></i> Enter Exactly 25';
+                btn.disabled = true;
+            }
+        } else {
+            btn.className = 'stealth-btn normal';
+            btn.innerHTML = '✅ Confirm Withdraw';
+            btn.disabled = false;
+        }
+    };
 
-   amtInput.oninput = updateBtnState;
-   updateBtnState(); 
+    amtInput.oninput = updateBtnState;
+    updateBtnState(); 
 };
 
 window.securityTimerInterval = null;
  
 window.openTxModal = async (type) => {
-   window.txMode = type;
-   const mTitle = document.getElementById('mTitle');
-   const depArea = document.getElementById('depArea');
-   const wdDisplayArea = document.getElementById('wdDisplayArea');
-   const txHash = document.getElementById('txHash');
-   const txAmt = document.getElementById('txAmt');
-   const subBtn = document.getElementById('subBtn');
-   const depNetSelect = document.getElementById('depNetworkSelect');
-   const wd2FACode = document.getElementById('wd2FACode');
-   const mMsg = document.getElementById('maintenanceMsg');
-   
-   // New Areas
-   const healthArea = document.getElementById('healthSpeedometerArea');
-   const wdLockArea = document.getElementById('wdLockArea');
-   const wdLockTimerText = document.getElementById('wdLockTimerText');
-   
-   if (mMsg) mMsg.style.display = 'none';
-   if (subBtn) subBtn.style.display = 'block';
-   if (txAmt) txAmt.style.display = 'block';
-   if (mTitle) mTitle.innerText = type + " USDT";
-   
-   if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
-   
-   if (type === 'Withdraw') {
-       const uid = localStorage.getItem('uid');
-       const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
+    window.txMode = type;
+    const mTitle = document.getElementById('mTitle');
+    const depArea = document.getElementById('depArea');
+    const wdDisplayArea = document.getElementById('wdDisplayArea');
+    const txHash = document.getElementById('txHash');
+    const txAmt = document.getElementById('txAmt');
+    const subBtn = document.getElementById('subBtn');
+    const depNetSelect = document.getElementById('depNetworkSelect');
+    const wd2FACode = document.getElementById('wd2FACode');
+    const mMsg = document.getElementById('maintenanceMsg');
+    
+    const healthArea = document.getElementById('healthSpeedometerArea');
+    const wdLockArea = document.getElementById('wdLockArea');
+    const wdLockTimerText = document.getElementById('wdLockTimerText');
+    
+    if (mMsg) mMsg.style.display = 'none';
+    if (subBtn) subBtn.style.display = 'block';
+    if (txAmt) txAmt.style.display = 'block';
+    if (mTitle) mTitle.innerText = type + " USDT";
+    
+    if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
+    
+    if (type === 'Withdraw') {
+        const uid = localStorage.getItem('uid');
+        const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
 
-       if(healthArea) {
-           healthArea.style.display = 'block';
-           window.updateSpeedometerUI(healthScore);
-       }
+        if(healthArea) {
+            healthArea.style.display = 'block';
+            window.updateSpeedometerUI(healthScore);
+        }
 
-       subBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
-       subBtn.disabled = true;
-       subBtn.className = "stealth-btn locked";
-       window.openModal('txModal'); 
+        subBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+        subBtn.disabled = true;
+        subBtn.className = "stealth-btn locked";
+        window.openModal('txModal'); 
 
-       // Check 72H Lock Locally (Optimization)
-       const localLock = parseInt(localStorage.getItem('tcm_72h_lock') || '0');
-       let isLocked = false;
-       let targetTime = 0;
-       
-       if (Date.now() < localLock) {
-           isLocked = true;
-           targetTime = localLock;
-       } else {
-           const result = await window.fetchAPI('/finance/check-security-lock', 'POST', { uid });
-           if (!result.success && result.isLocked) {
-               isLocked = true;
-               targetTime = result.targetTime;
-           }
-       }
+        const localLock = parseInt(localStorage.getItem('tcm_72h_lock') || '0');
+        let isLocked = false;
+        let targetTime = 0;
+        
+        if (Date.now() < localLock) {
+            isLocked = true;
+            targetTime = localLock;
+        } else {
+            const result = await window.fetchAPI('/finance/check-security-lock', 'POST', { uid });
+            if (!result.success && result.isLocked) {
+                isLocked = true;
+                targetTime = result.targetTime;
+            }
+        }
 
-       if (isLocked) {
-           // LOCKED STATE 
-           if (depArea) depArea.style.display = 'none';
-           if (wdDisplayArea) wdDisplayArea.style.display = 'none';
-           if (txHash) txHash.style.display = 'none';
-           if (txAmt) txAmt.style.display = 'none';
-           if (depNetSelect) depNetSelect.style.display = 'none';
-           if (wd2FACode) wd2FACode.style.display = 'none';
-           if (subBtn) subBtn.style.display = 'none';
-           
-           if (wdLockArea) wdLockArea.style.display = 'block';
-           if (mTitle) mTitle.innerText = "Security Lock Active";
-           
-           window.securityTimerInterval = setInterval(() => {
-               let currentTime = new Date().getTime();
-               let diff = targetTime - currentTime;
-               
-               if (diff <= 0) {
-                   clearInterval(window.securityTimerInterval);
-                   window.closeModal('txModal');
-                   window.showToast("Security Lock Released! You can withdraw now.");
-                   setTimeout(() => window.openTxModal('Withdraw'), 300); 
-                   return;
-               }
-               
-               let h = Math.floor(diff / (1000 * 60 * 60));
-               let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-               let s = Math.floor((diff % (1000 * 60)) / 1000);
-               let pad = (num) => num.toString().padStart(2, '0');
-               
-               if (wdLockTimerText) wdLockTimerText.innerText = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
-           }, 1000);
-           
-       } else {
-           // UNLOCKED STATE
-           if (wdLockArea) wdLockArea.style.display = 'none';
-           if (depArea) depArea.style.display = 'none';
-           if (wdDisplayArea) wdDisplayArea.style.display = 'block';
-           if (txHash) txHash.style.display = 'none';
-           if (txAmt) txAmt.style.display = 'block';
-           if (depNetSelect) depNetSelect.style.display = 'none';
-           if (wd2FACode) wd2FACode.style.display = 'block';
-           if (subBtn) subBtn.style.display = 'block';
-           
-           window.updateWithdrawNetwork();
-           window.applyStealthButtonLogic(healthScore); 
-       }
+        if (isLocked) {
+            if (depArea) depArea.style.display = 'none';
+            if (wdDisplayArea) wdDisplayArea.style.display = 'none';
+            if (txHash) txHash.style.display = 'none';
+            if (txAmt) txAmt.style.display = 'none';
+            if (depNetSelect) depNetSelect.style.display = 'none';
+            if (wd2FACode) wd2FACode.style.display = 'none';
+            if (subBtn) subBtn.style.display = 'none';
+            
+            if (wdLockArea) wdLockArea.style.display = 'block';
+            if (mTitle) mTitle.innerText = "Security Lock Active";
+            
+            window.securityTimerInterval = setInterval(() => {
+                let currentTime = new Date().getTime();
+                let diff = targetTime - currentTime;
+                
+                if (diff <= 0) {
+                    clearInterval(window.securityTimerInterval);
+                    window.closeModal('txModal');
+                    window.showToast("Security Lock Released! You can withdraw now.");
+                    setTimeout(() => window.openTxModal('Withdraw'), 300); 
+                    return;
+                }
+                
+                let h = Math.floor(diff / (1000 * 60 * 60));
+                let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                let s = Math.floor((diff % (1000 * 60)) / 1000);
+                let pad = (num) => num.toString().padStart(2, '0');
+                
+                if (wdLockTimerText) wdLockTimerText.innerText = `${pad(h)}h ${pad(m)}m ${pad(s)}s`;
+            }, 1000);
+            
+        } else {
+            if (wdLockArea) wdLockArea.style.display = 'none';
+            if (depArea) depArea.style.display = 'none';
+            if (wdDisplayArea) wdDisplayArea.style.display = 'block';
+            if (txHash) txHash.style.display = 'none';
+            if (txAmt) txAmt.style.display = 'block';
+            if (depNetSelect) depNetSelect.style.display = 'none';
+            if (wd2FACode) wd2FACode.style.display = 'block';
+            if (subBtn) subBtn.style.display = 'block';
+            
+            window.updateWithdrawNetwork();
+            window.applyStealthButtonLogic(healthScore); 
+        }
 
-   } else {
-       // DEPOSIT MODE
-       if (healthArea) healthArea.style.display = 'none';
-       if (wdLockArea) wdLockArea.style.display = 'none';
-       if (wdDisplayArea) wdDisplayArea.style.display = 'none';
-       if (wd2FACode) wd2FACode.style.display = 'none';
-       
-       if (depArea) depArea.style.display = 'block';
-       if (txHash) txHash.style.display = 'block';
-       if (txAmt) txAmt.style.display = 'block';
-       if (depNetSelect) depNetSelect.style.display = 'block';
-       if (subBtn) subBtn.style.display = 'block';
-       
-       window.updateDepositNetwork();
-       window.applyStealthButtonLogic(100); 
-       window.openModal('txModal');
-   }
+    } else {
+        if (healthArea) healthArea.style.display = 'none';
+        if (wdLockArea) wdLockArea.style.display = 'none';
+        if (wdDisplayArea) wdDisplayArea.style.display = 'none';
+        if (wd2FACode) wd2FACode.style.display = 'none';
+        
+        if (depArea) depArea.style.display = 'block';
+        if (txHash) txHash.style.display = 'block';
+        if (txAmt) txAmt.style.display = 'block';
+        if (depNetSelect) depNetSelect.style.display = 'block';
+        if (subBtn) subBtn.style.display = 'block';
+        
+        window.updateDepositNetwork();
+        window.applyStealthButtonLogic(100); 
+        window.openModal('txModal');
+    }
 };
 window.openTx = window.openTxModal;
 
 window.updateDepositNetwork = () => {
-   const net = document.getElementById('depNetworkSelect').value;
-   const qrImg = document.getElementById('qrImg');
-   const addrText = document.getElementById('walletAddrText');
-   let walletAddress = (net === 'BEP20') ? "0x9b03fff1bc3bbe26f225334d23a250b0c79ddfee" : "TLyX3XmN5s3aT7T4mF2oM42A23Xv123456";
-   if (addrText) addrText.innerText = walletAddress;
-   if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${walletAddress}`;
+    const net = document.getElementById('depNetworkSelect').value;
+    const qrImg = document.getElementById('qrImg');
+    const addrText = document.getElementById('walletAddrText');
+    let walletAddress = (net === 'BEP20') ? "0x9b03fff1bc3bbe26f225334d23a250b0c79ddfee" : "TLyX3XmN5s3aT7T4mF2oM42A23Xv123456";
+    if (addrText) addrText.innerText = walletAddress;
+    if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${walletAddress}`;
 };
 
 window.updateWithdrawNetwork = () => {
-   const net = document.getElementById('wdNetwork').value;
-   const boundText = document.getElementById('boundWalletText');
-   let addr = window.userWallets ? window.userWallets[net] : "";
-   if (addr && addr.length > 5) {
-       boundText.innerText = addr;
-       boundText.style.color = "var(--text-main)";
-   } else {
-       boundText.innerText = `No ${net} Address Bound! Check Security Center.`;
-       boundText.style.color = "var(--error)";
-   }
+    const net = document.getElementById('wdNetwork').value;
+    const boundText = document.getElementById('boundWalletText');
+    let addr = window.userWallets ? window.userWallets[net] : "";
+    if (addr && addr.length > 5) {
+        boundText.innerText = addr;
+        boundText.style.color = "var(--text-main)";
+    } else {
+        boundText.innerText = `No ${net} Address Bound! Check Security Center.`;
+        boundText.style.color = "var(--error)";
+    }
 };
 
 window.closeTx = () => {
-   window.closeModal('txModal');
-   if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
-   document.getElementById('txAmt').value = '';
-   document.getElementById('txHash').value = '';
-   document.getElementById('wd2FACode').value = '';
+    window.closeModal('txModal');
+    if (window.securityTimerInterval) clearInterval(window.securityTimerInterval);
+    document.getElementById('txAmt').value = '';
+    document.getElementById('txHash').value = '';
+    document.getElementById('wd2FACode').value = '';
 };
 
 window.showSuccessOverlay = (msgText) => {
-   const overlay = document.getElementById('successOverlay');
-   if (overlay) {
-       if (msgText && overlay.querySelector('.success-sub')) overlay.querySelector('.success-sub').innerText = msgText;
-       overlay.style.display = 'flex';
-       setTimeout(() => { overlay.style.display = 'none'; }, 2800);
-   }
+    const overlay = document.getElementById('successOverlay');
+    if (overlay) {
+        if (msgText && overlay.querySelector('.success-sub')) overlay.querySelector('.success-sub').innerText = msgText;
+        overlay.style.display = 'flex';
+        setTimeout(() => { overlay.style.display = 'none'; }, 2800);
+    }
+};
+
+// 🛡️ প্রফেশনাল ট্রানজ্যাকশন আইডি জেনারেটর (Local Fallback)
+window.generateProOrderId = (prefix) => {
+    const d = new Date();
+    const datePart = d.getFullYear().toString().substr(-2) + 
+                     (d.getMonth() + 1).toString().padStart(2, '0') + 
+                     d.getDate().toString().padStart(2, '0');
+    const randomPart = Math.random().toString(36).substr(2, 8).toUpperCase();
+    return `${prefix}-${datePart}-${randomPart}`;
 };
 
 window.submitTx = async () => {
@@ -3995,20 +4169,43 @@ window.submitTx = async () => {
        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
        btn.disabled = true;
 
-       const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, amount: amt, txid: hash });
-       
-       if (result.success) {
-           window.closeTx();
-           window.showSuccessOverlay("Deposit request sent securely...");
-       } else {
-           window.showToast("Deposit Failed: " + result.message, true);
+       try {
+           const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, amount: amt, txid: hash });
+           
+           if (result.success) {
+               window.closeTx();
+               window.showSuccessOverlay("Deposit request sent securely...");
+               
+               // 🚀 Server এর পাঠানো আসল Order_ID এবং Date ব্যবহার করা হচ্ছে
+               const sData = result.data || {};
+               const newTx = {
+                   id: sData.id || 'local_dep_' + Date.now(),
+                   UID: uid,
+                   Type: 'Deposit',
+                   Amount: amt,
+                   TXID: hash,
+                   Status: 'Pending',
+                   Date: sData.Date || new Date().toISOString(),
+                   timestamp: Date.now(),
+                   Order_ID: sData.Order_ID || 'DEP-' + Date.now() // সার্ভারের আসল আইডি
+               };
+               
+               if (typeof window.allTransactions !== 'undefined') {
+                   window.allTransactions.unshift(newTx);
+                   if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+               }
+           } else {
+               window.showToast("Deposit Failed: " + result.message, true);
+           }
+       } catch (e) {
+           window.showToast("Error: " + e.message, true);
+       } finally {
+           btn.innerHTML = 'Submit Deposit'; 
+           btn.disabled = false;
        }
-       btn.innerHTML = 'Submit Deposit'; btn.disabled = false;
    }
    else if (window.txMode === 'Withdraw') {
-       if (window.currentMonthTxCount >= 5) {
-           return window.showToast("Monthly limit of 5 transactions (Withdraw+P2P) reached!", true);
-       }
+       if (window.currentMonthTxCount >= 5) return window.showToast("Monthly limit reached!", true);
 
        const net = document.getElementById('wdNetwork').value;
        const code = document.getElementById('wd2FACode').value;
@@ -4021,28 +4218,103 @@ window.submitTx = async () => {
        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying Security...';
        btn.disabled = true;
 
-       const result = await window.fetchAPI('/finance/withdraw', 'POST', { 
-           uid, amount: amt, code2FA: code, network: net, address: boundAddr 
-       });
+       try {
+           const result = await window.fetchAPI('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr });
 
-       if (result.success) {
-           window.closeTx();
-           window.showSuccessOverlay("Withdrawal request secured!");
-           
-           // 🔥 OPTIMISTIC UI: Instant Balance Update (No Reload/Freeze!)
-           if(window.RAM_STATE && window.RAM_STATE.balances) {
-               window.RAM_STATE.balances.Main_Balance -= amt;
-               window.renderWalletData(window.RAM_STATE.balances);
-               if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+           if (result.success) {
+               window.closeTx();
+               window.showSuccessOverlay("Withdrawal request secured!");
+               
+               if(window.RAM_STATE && window.RAM_STATE.balances) {
+                   window.RAM_STATE.balances.Main_Balance = Math.max(0, window.RAM_STATE.balances.Main_Balance - amt);
+                   if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+               }
+               
+               // 🚀 Server এর পাঠানো আসল Order_ID এবং Date ব্যবহার করা হচ্ছে
+               const sData = result.data || {};
+               const newTx = {
+                   id: sData.id || 'local_wd_' + Date.now(),
+                   UID: uid,
+                   Type: 'Withdraw',
+                   Amount: amt,
+                   Network: net,
+                   Status: 'Pending',
+                   Date: sData.Date || new Date().toISOString(),
+                   timestamp: Date.now(),
+                   Order_ID: sData.Order_ID || 'WD-' + Date.now() // সার্ভারের আসল আইডি
+               };
+               
+               if (typeof window.allTransactions !== 'undefined') {
+                   window.allTransactions.unshift(newTx);
+                   if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+               }
+           } else {
+               window.showToast(result.message, true);
+               const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
+               if (typeof window.applyStealthButtonLogic === 'function') window.applyStealthButtonLogic(healthScore); 
            }
-       } else {
-           window.showToast(result.message, true);
-           const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
-           window.applyStealthButtonLogic(healthScore); 
+       } catch (e) {
+           window.showToast("Error: " + e.message, true);
+       } finally {
+           btn.innerHTML = '✅ Confirm Withdraw'; 
+           btn.disabled = false;
        }
    }
 };
+// =================================================================================
+// ⏱️ THE GLOBAL PENDING TIMER ENGINE (96H Withdraw Countdown & Deposit Count-Up)
+// =================================================================================
+if (window.globalPendingClock) clearInterval(window.globalPendingClock);
 
+window.globalPendingClock = setInterval(() => {
+    const pendingElements = document.querySelectorAll('.pending-timer, .live-timer, [data-timestamp], [data-time]');
+    const now = Date.now();
+
+    pendingElements.forEach(el => {
+        let txTime = parseInt(el.getAttribute('data-timestamp') || el.getAttribute('data-time'));
+        let txType = el.getAttribute('data-type') || ''; 
+        let parentContainer = el.closest('.tx-item') || el.closest('div');
+        
+        // Parent container বা data-type থেকে Withdraw ডিটেক্ট করা
+        let isWithdraw = false;
+        if ((txType && txType.includes('Withdraw')) || (parentContainer && parentContainer.innerText.includes('Withdraw'))) {
+            isWithdraw = true;
+        }
+
+        if (txTime && !isNaN(txTime)) {
+            let elapsedMs = now - txTime;
+            if (elapsedMs < 0) elapsedMs = 0;
+
+            if (isWithdraw) {
+                // ⏳ উইথড্রল লজিক: ৯৬ ঘণ্টা থেকে কাউন্ট-ডাউন (96 * 60 * 60 * 1000 = 345600000 ms)
+                const maxTimeMs = 345600000; 
+                let remainingMs = maxTimeMs - elapsedMs;
+                
+                if (remainingMs <= 0) {
+                    el.innerHTML = `<i class="fas fa-hourglass-end" style="font-size: 0.65rem; color: var(--error);"></i> 00h:00m:00s`;
+                    el.style.color = "var(--error)";
+                    return;
+                }
+
+                let diffSec = Math.floor(remainingMs / 1000);
+                let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
+                let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
+                let s = (diffSec % 60).toString().padStart(2, '0');
+
+                el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--warning);"></i> ${h}h ${m}m ${s}s`;
+                
+            } else {
+                // ⏱️ ডিপোজিট লজিক: ০ থেকে সামনের দিকে কাউন্ট-আপ
+                let diffSec = Math.floor(elapsedMs / 1000);
+                let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
+                let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
+                let s = (diffSec % 60).toString().padStart(2, '0');
+
+                el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--success);"></i> ${h}h ${m}m ${s}s`;
+            }
+        }
+    });
+}, 1000);
 // =================================================================================
 // 💸 MODULE 11: P2P TRANSFER & LOOKUP ENGINE (API DRIVEN)
 // =================================================================================
@@ -4086,8 +4358,8 @@ window.updateMonthlyQuota = async () => {
    const result = await window.fetchAPI(`/finance/monthly-quota?uid=${localStorage.getItem('uid')}`);
    if (result.success) {
        window.currentMonthTxCount = result.count;
-       if(result.count >= 5) {
-           tracker.innerHTML = `<span style="color:var(--error); font-weight: 800;">${result.count} / 5 (Limit Reached)</span>`;
+       if(result.count >= 50) {
+           tracker.innerHTML = `<span style="color:var(--error); font-weight: 800;">${result.count} / 50 (Limit Reached)</span>`;
            const btnSubmit = document.getElementById('btnSendMoney');
            if(btnSubmit) btnSubmit.disabled = true;
        } else {
@@ -4098,63 +4370,77 @@ window.updateMonthlyQuota = async () => {
    }
 };
 
-let uidCheckTimer = null;
-window.checkReceiverUid = () => {
-   clearTimeout(uidCheckTimer);
-   const rUid = document.getElementById('sendUid').value.trim();
-   const resBox = document.getElementById('uidCheckResult');
-   const btn = document.getElementById('btnSendMoney');
-   const myUid = localStorage.getItem('uid');
+let uidCheckTimer = null; 
 
-   if (rUid.length < 5) {
-       resBox.style.display = 'none';
-       btn.disabled = true;
-       btn.classList.remove('incoming-fund-glow');
-       return;
-   }
+window.checkReceiverUid = () => { 
+    clearTimeout(uidCheckTimer); 
+    const rUid = document.getElementById('sendUid').value.trim(); 
+    const resBox = document.getElementById('uidCheckResult'); 
+    const btn = document.getElementById('btnSendMoney'); 
+    const myUid = localStorage.getItem('uid');
 
-   if (rUid === myUid) {
-       resBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cannot send to yourself!';
-       resBox.style.color = 'var(--error)';
-       resBox.style.display = 'block';
-       btn.disabled = true;
-       return;
-   }
+    if (rUid.length < 5) { 
+        resBox.style.display = 'none'; 
+        btn.disabled = true; 
+        btn.classList.remove('incoming-fund-glow'); 
+        btn.style.boxShadow = 'none';
+        return; 
+    }
 
-   resBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching node network...';
-   resBox.style.color = 'var(--warning)';
-   resBox.style.display = 'block';
+    if (rUid === myUid) { 
+        resBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Cannot send to yourself!'; 
+        resBox.style.color = 'var(--error)'; 
+        resBox.style.display = 'block'; 
+        btn.disabled = true; 
+        btn.classList.remove('incoming-fund-glow'); 
+        return; 
+    }
 
-   uidCheckTimer = setTimeout(async () => {
-       const result = await window.fetchAPI(`/p2p/check-user?uid=${rUid}`);
-       
-       if (!result.success) {
-           resBox.innerHTML = '<i class="fas fa-times-circle"></i> User not found!';
-           resBox.style.color = 'var(--error)';
-           btn.disabled = true;
-           btn.classList.remove('incoming-fund-glow');
-       } else {
-           resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:#fff;">${result.name}</strong>`;
-           resBox.style.color = 'var(--success)';
-           if (window.currentMonthTxCount < 5) {
-               btn.disabled = false;
-               btn.classList.add('incoming-fund-glow'); 
-           }
-       }
-   }, 600);
+    resBox.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching node network...'; 
+    resBox.style.color = 'var(--warning)'; 
+    resBox.style.display = 'block';
+
+    uidCheckTimer = setTimeout(async () => { 
+        try { 
+            // 🚀 সরাসরি সার্ভার API ব্যবহার করে ইউজার স্ক্যান করা হচ্ছে
+            const result = await window.fetchAPI('/p2p/check-user?uid=' + rUid, 'GET');
+
+            if (!result || !result.success) { 
+                resBox.innerHTML = '<i class="fas fa-times-circle"></i> User not found!'; 
+                resBox.style.color = 'var(--error)'; 
+                btn.disabled = true; 
+                btn.classList.remove('incoming-fund-glow'); 
+                btn.style.boxShadow = 'none';
+            } else { 
+                resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:#fff;">${result.name}</strong>`; 
+                resBox.style.color = 'var(--success)'; 
+                
+                if (window.currentMonthTxCount < 50) { 
+                    btn.disabled = false; 
+                    btn.classList.add('incoming-fund-glow'); 
+                    btn.style.boxShadow = '0 0 15px var(--success), inset 0 0 10px rgba(255,255,255,0.2)';
+                } 
+            } 
+        } catch (e) { 
+            console.error("Scanner Error: ", e);
+            resBox.innerHTML = '<i class="fas fa-times-circle"></i> Network Error'; 
+            resBox.style.color = 'var(--error)'; 
+        } 
+    }, 600); 
 };
 
-window.calculateLiveFee = () => {
-   const amt = parseFloat(document.getElementById('sendAmt').value) || 0;
-   const feeBox = document.getElementById('liveFeeDisplay');
-   if (amt < 5) { feeBox.style.display = 'none'; return; }
-   let fee = amt * 0.05; 
-   feeBox.innerHTML = `Fee: ${fee.toFixed(2)} USDT | Receiver gets: <span style="color:var(--success);">${(amt - fee).toFixed(2)} USDT</span>`;
-   feeBox.style.display = 'block';
+window.calculateLiveFee = () => { 
+    const amt = parseFloat(document.getElementById('sendAmt').value) || 0; 
+    const feeBox = document.getElementById('liveFeeDisplay'); 
+    if (amt < 5) { feeBox.style.display = 'none'; return; } 
+    let fee = amt * 0.05; 
+    feeBox.innerHTML = `Fee: ${fee.toFixed(2)} USDT | Receiver gets: <span style="color:var(--success);">${(amt - fee).toFixed(2)} USDT</span>`; 
+    feeBox.style.display = 'block'; 
 };
 
+// 🚀 TCM-02: নতুন ড্যাশবোর্ডের API কল ও ইনজেকশন 
 window.submitSendMoney = async () => {
-   if (window.currentMonthTxCount >= 5) return window.showToast("Monthly limit reached!", true);
+   if (window.currentMonthTxCount >= 50) return window.showToast("Monthly limit reached!", true);
  
    const rUid = document.getElementById('sendUid').value.trim();
    const amt = parseFloat(document.getElementById('sendAmt').value);
@@ -4169,42 +4455,60 @@ window.submitSendMoney = async () => {
    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
    btn.disabled = true;
    btn.classList.remove('incoming-fund-glow');
+   btn.style.boxShadow = 'none';
  
-   const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA });
+   try {
+       const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA });
 
-   if (result.success) {
-       window.showSuccessOverlay("P2P Transfer Successful!");
-       window.closeModal('sendMoneyModal');
-       
-       // 🔥 OPTIMISTIC UI: Instant Balance Update (No Freeze)
-       if(window.RAM_STATE && window.RAM_STATE.balances) {
-           window.RAM_STATE.balances.Main_Balance -= amt;
-           window.renderWalletData(window.RAM_STATE.balances);
-           if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+       if (result.success) {
+           window.showSuccessOverlay("P2P Transfer Successful!");
+           window.closeModal('sendMoneyModal');
+           
+           if(window.RAM_STATE && window.RAM_STATE.balances) {
+               window.RAM_STATE.balances.Main_Balance -= amt;
+               if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+               if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+           }
+
+           if (typeof window.forceInjectToHistory === 'function') {
+               window.forceInjectToHistory({
+                   id: result.data.id || ('P2P_' + Date.now()),
+                   UID: sUid,
+                   Type: 'P2P Sent',
+                   Amount: amt,
+                   Status: 'Success',
+                   Date: result.data.Date || new Date().toISOString(),
+                   timestamp: result.data.timestamp || Date.now(),
+                   Order_ID: result.data.orderId,
+                   Admin_Remarks: `To: ${result.data.receiverName} (UID: ${rUid})`
+               });
+           }
+
+           setTimeout(() => {
+               document.getElementById('rcptOrderId').innerHTML = `${result.data.orderId} <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:6px;" onclick="window.copyText('${result.data.orderId}', this)"></i>`;
+               document.getElementById('rcptDate').innerText = window.formatTxDate(new Date());
+               document.getElementById('rcptAmount').innerText = parseFloat(amt).toFixed(2) + " USDT";
+               document.getElementById('rcptFee').innerText = parseFloat(result.data.fee).toFixed(2) + " USDT";
+               document.getElementById('rcptSenderName').innerText = result.data.senderName;
+               document.getElementById('rcptSenderUid').innerText = "UID: " + sUid;
+               document.getElementById('rcptReceiverName').innerText = result.data.receiverName;
+               document.getElementById('rcptReceiverUid').innerText = "UID: " + rUid;
+               window.openModal('p2pReceiptModal');
+           }, 800); 
+       } else {
+           window.showToast(result.message, true);
        }
-
-       setTimeout(() => {
-           document.getElementById('rcptOrderId').innerHTML = `${result.data.orderId} <i class="far fa-copy" style="cursor:pointer; color:var(--success); margin-left:6px;" onclick="window.copyText('${result.data.orderId}', this)"></i>`;
-           document.getElementById('rcptDate').innerText = window.formatTxDate(new Date());
-           document.getElementById('rcptAmount').innerText = parseFloat(amt).toFixed(2) + " USDT";
-           document.getElementById('rcptFee').innerText = parseFloat(result.data.fee).toFixed(2) + " USDT";
-           document.getElementById('rcptSenderName').innerText = result.data.senderName;
-           document.getElementById('rcptSenderUid').innerText = "UID: " + sUid;
-           document.getElementById('rcptReceiverName').innerText = result.data.receiverName;
-           document.getElementById('rcptReceiverUid').innerText = "UID: " + rUid;
-           window.openModal('p2pReceiptModal');
-       }, 800); 
-   } else {
-       window.showToast(result.message, true);
+   } catch(e) {
+       window.showToast(e.message, true);
+   } finally {
+       btn.innerHTML = 'Confirm Transfer';
+       btn.disabled = false;
+       document.getElementById('sendUid').value = '';
+       document.getElementById('sendAmt').value = '';
+       document.getElementById('send2FA').value = '';
+       document.getElementById('uidCheckResult').style.display = 'none';
+       document.getElementById('liveFeeDisplay').style.display = 'none';
    }
-
-   btn.innerHTML = 'Confirm Transfer';
-   btn.disabled = false;
-   document.getElementById('sendUid').value = '';
-   document.getElementById('sendAmt').value = '';
-   document.getElementById('send2FA').value = '';
-   document.getElementById('uidCheckResult').style.display = 'none';
-   document.getElementById('liveFeeDisplay').style.display = 'none';
 };
 
 window.openTransactionLookup = () => {
@@ -4920,6 +5224,220 @@ window.startLiveFeedCarousel = () => {
 };
 
 setTimeout(window.initLiveGlobalFeed, 3500);
+
+// =================================================================================
+// 🖼️ MODULE: NFT ORDERS RENDERING ENGINE (Zero-Cost & Liquid Pagination)
+// =================================================================================
+window.ordersPaginationCache = [];
+window.ordersCurrentIndex = 0;
+
+window.openOrdersModal = async () => {
+    window.openModal('ordersModal');
+    const monthFilter = document.getElementById('orderMonthFilter');
+    if(monthFilter && !monthFilter.value) {
+        const d = new Date();
+        monthFilter.value = `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}`;
+    }
+    window.renderOrders();
+};
+
+window.renderOrders = async () => {
+    const contentBox = document.getElementById('ordersContentBox');
+    if(!contentBox) return;
+
+    // 🔥 CSS Injection for Apple-Style Liquid Bounce
+    if (!document.getElementById('ordersCssStyle')) {
+        const style = document.createElement('style');
+        style.id = 'ordersCssStyle';
+        style.innerHTML = `
+            @keyframes liquidOrderBounce {
+                0% { transform: translateY(50px) scale(0.9); opacity: 0; filter: blur(8px); }
+                60% { transform: translateY(-3px) scale(1.02); opacity: 1; filter: blur(0px); }
+                100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0px); }
+            }
+            .order-item-animated {
+                opacity: 0;
+            }
+            .order-item-animated.show {
+                animation: liquidOrderBounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            }
+            .order-top-stats {
+                display: flex; justify-content: space-between; background: rgba(0,0,0,0.35);
+                border: 1px solid rgba(255,255,255,0.06); padding: 18px 20px; border-radius: 16px; margin-bottom: 25px;
+                box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); position: relative;
+            }
+            .order-top-stats div { display: flex; flex-direction: column; align-items: flex-start; }
+            .order-top-stats span:first-child { font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;}
+            .order-top-stats span:last-child { font-size: 1.15rem; color: #fff; font-weight: 800; font-family: 'Space Grotesk', monospace; margin-top: 4px;}
+            .btn-sync {
+                position: absolute; top: -14px; right: -14px; background: linear-gradient(135deg, #3b82f6, #2563eb);
+                border: none; border-radius: 50%; width: 38px; height: 38px; color: #fff; cursor: pointer;
+                box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5); display: flex; justify-content: center; align-items: center;
+                transition: transform 0.3s ease; border: 2px solid #0f172a; font-size: 1rem;
+            }
+            .btn-sync:active { transform: rotate(180deg) scale(0.9); }
+        `;
+        document.head.appendChild(style);
+    }
+
+    contentBox.innerHTML = `
+        <div style="text-align:center; padding: 40px; font-size: 0.9rem; color: var(--primary);">
+            <i class="fas fa-satellite-dish fa-spin" style="font-size: 2.2rem; margin-bottom:15px; filter: drop-shadow(0 0 10px var(--primary));"></i><br>
+            <span style="font-weight: 700; letter-spacing: 1px;">Syncing Ledger Cache...</span>
+        </div>
+    `;
+
+    const uid = localStorage.getItem('uid');
+    const selectedMonth = document.getElementById('orderMonthFilter')?.value;
+
+    try {
+        let allOrders = [];
+        const cachedData = localStorage.getItem('tcm_nft_orders_cache');
+
+        // 🚀 STEP 1: Zero-Cost Local Caching (Database Read বন্ধ!)
+        if (cachedData) {
+            allOrders = JSON.parse(cachedData);
+        } else {
+            const result = await window.fetchAPI(`/nft/history?uid=${uid}`, 'GET');
+            if (result && result.success) {
+                allOrders = result.data;
+                localStorage.setItem('tcm_nft_orders_cache', JSON.stringify(allOrders));
+            }
+        }
+
+        // 🚀 STEP 2: Filter by Month
+        let filteredOrders = [];
+        let totalReserveVolume = 0;
+        let totalSoldVolume = 0;
+
+        allOrders.forEach(data => {
+            if (data.Type && (data.Type.includes("Reserve") || data.Type.includes("Sold"))) {
+                let matchMonth = true;
+                if(selectedMonth) {
+                    const [targetYear, targetMonth] = selectedMonth.split('-');
+                    let docDate = new Date(data.Date || data.timestamp);
+                    if (!isNaN(docDate.getTime())) {
+                        let m = (docDate.getMonth() + 1).toString().padStart(2, '0');
+                        let y = docDate.getFullYear().toString();
+                        if (m !== targetMonth || y !== targetYear) matchMonth = false;
+                    }
+                }
+                if(matchMonth) {
+                    filteredOrders.push(data);
+                    if(data.Type.includes("Reserve")) totalReserveVolume += parseFloat(data.Amount || 0);
+                    if(data.Type.includes("Sold")) totalSoldVolume += parseFloat(data.Amount || 0);
+                }
+            }
+        });
+
+        window.ordersPaginationCache = filteredOrders;
+        window.ordersCurrentIndex = 0;
+
+        // Empty State UI
+        if(filteredOrders.length === 0) {
+            contentBox.innerHTML = `
+            <div class="order-top-stats">
+                <div><span>Reserved Volume</span><span style="color:var(--warning)">0.00 ₮</span></div>
+                <button class="btn-sync" onclick="localStorage.removeItem('tcm_nft_orders_cache'); window.renderOrders();"><i class="fas fa-sync-alt"></i></button>
+                <div style="align-items: flex-end;"><span>Sold Volume</span><span style="color:var(--success)">0.00 ₮</span></div>
+            </div>
+            <div style="text-align:center; padding: 50px 20px; color: var(--text-sub); font-size: 0.95rem;">
+                <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto; border: 1px dashed rgba(255,255,255,0.1);">
+                    <i class="fas fa-box-open" style="font-size: 2rem; color: #475569;"></i>
+                </div>
+                No records found for ${selectedMonth}
+            </div>`;
+            return;
+        }
+
+        // Top Statistics UI
+        contentBox.innerHTML = `
+            <div class="order-top-stats">
+                <div><span>Reserved Volume</span><span style="color:var(--warning)">${totalReserveVolume.toFixed(2)} ₮</span></div>
+                <button class="btn-sync" onclick="localStorage.removeItem('tcm_nft_orders_cache'); window.renderOrders();"><i class="fas fa-sync-alt"></i></button>
+                <div style="align-items: flex-end;"><span>Sold Volume</span><span style="color:var(--success)">${totalSoldVolume.toFixed(2)} ₮</span></div>
+            </div>
+            <div id="ordersListContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
+            <div id="orderScrollObserver" style="height: 50px; display: flex; justify-content: center; align-items: center; margin-top: 15px;"></div>
+        `;
+
+        // Load Initial 5 items
+        window.loadNextOrdersChunk();
+
+    } catch (e) {
+        contentBox.innerHTML = `<div style="text-align:center; color:var(--error); padding: 30px;"><i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:10px;"></i><br>Cache Load Error</div>`;
+    }
+};
+
+window.loadNextOrdersChunk = () => {
+    const container = document.getElementById('ordersListContainer');
+    const observerTarget = document.getElementById('orderScrollObserver');
+    if (!container || !observerTarget) return;
+
+    // 🚀 STEP 3: Smart DOM Pagination (Slice 5 Items)
+    const chunk = window.ordersPaginationCache.slice(window.ordersCurrentIndex, window.ordersCurrentIndex + 5);
+    if (chunk.length === 0) {
+        observerTarget.innerHTML = `<span style="opacity: 0.5; background: rgba(0,0,0,0.4); padding: 5px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">End of Ledger</span>`;
+        return;
+    }
+
+    let html = '';
+    chunk.forEach((ord, index) => {
+        let isSold = ord.Type && ord.Type.includes("Sold");
+        let statusBadge = isSold ? `<span style="background:rgba(16,185,129,0.1); color:#10b981; border:1px solid rgba(16,185,129,0.25); padding: 4px 10px; border-radius: 8px; font-size:0.65rem; font-weight:800; letter-spacing: 0.5px;">SOLD</span>` : `<span style="background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.25); padding: 4px 10px; border-radius: 8px; font-size:0.65rem; font-weight:800; letter-spacing: 0.5px;">ACTIVE</span>`;
+        let amtColor = isSold ? 'var(--success)' : 'var(--warning)';
+        let sign = isSold ? '+' : '-';
+        let imgUrl = ord.Image_URL || 'https://i.ibb.co/3sZxCqT/nft-placeholder.jpg';
+        
+        let docTime = new Date(ord.Date || ord.timestamp).getTime();
+        let displayDate = window.formatTxDate ? window.formatTxDate(docTime) : new Date(docTime).toLocaleTimeString();
+        
+        html += `
+        <div class="order-item-animated" style="background: rgba(20, 25, 35, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 12px 25px rgba(0,0,0,0.4);">
+            <div style="display: flex; gap: 14px; align-items: center;">
+                <img src="${imgUrl}" style="width: 52px; height: 52px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); flex-shrink:0; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                <div style="display: flex; flex-direction: column; justify-content: center;">
+                    <h4 style="font-size: 0.95rem; color: #f8fafc; margin: 0 0 3px 0; font-weight: 800;">${ord.NFT_ID || 'TCM NFT'}</h4>
+                    <span style="font-size:0.65rem; color:#64748b; font-family:monospace; margin-bottom: 4px;">ID: ${ord.Order_ID || 'N/A'}</span>
+                    <span style="font-size:0.6rem; color:#475569; font-weight: 600;"><i class="far fa-clock" style="margin-right: 4px;"></i>${displayDate}</span>
+                </div>
+            </div>
+            <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 8px;">
+                <div style="color:${amtColor}; font-weight:800; font-size: 1.1rem; font-family: 'Space Grotesk', monospace;">${sign}${parseFloat(ord.Amount).toFixed(2)} ₮</div>
+                ${statusBadge}
+            </div>
+        </div>`;
+    });
+
+    container.insertAdjacentHTML('beforeend', html);
+    
+    // 🚀 STEP 4: Apple-Style Staggered Animation
+    const newItems = container.querySelectorAll('.order-item-animated:not(.show)');
+    newItems.forEach((item, idx) => {
+        item.style.animationDelay = `${idx * 0.08}s`;
+        setTimeout(() => item.classList.add('show'), 15);
+    });
+
+    window.ordersCurrentIndex += 5;
+
+    // 🚀 STEP 5: Intersection Observer (Infinite Scroll Sensor)
+    if (window.ordersObserver) window.ordersObserver.disconnect();
+
+    if (window.ordersCurrentIndex < window.ordersPaginationCache.length) {
+        observerTarget.innerHTML = `<i class="fas fa-circle-notch fa-spin" style="color: var(--primary); font-size: 1.4rem;"></i>`;
+        window.ordersObserver = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                window.ordersObserver.disconnect();
+                // 250ms delay for ultra-smooth liquid feel
+                setTimeout(() => window.loadNextOrdersChunk(), 250); 
+            }
+        }, { threshold: 0.1 });
+        window.ordersObserver.observe(observerTarget);
+    } else {
+        observerTarget.innerHTML = `<span style="opacity: 0.5; background: rgba(0,0,0,0.4); padding: 5px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;">End of Ledger</span>`;
+    }
+};
+
 // =================================================================================
 // 💬 MODULE 15: CHAT ENGINE (100% SOCKET + BROWSER CACHE DRIVEN)
 // =================================================================================
@@ -6204,6 +6722,7 @@ function sendUserSupportMessage() {
        });
    }
 }
+
 </script>
 </body>
 </html>
