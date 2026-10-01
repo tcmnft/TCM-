@@ -913,7 +913,49 @@ input, textarea, select {
     filter: blur(0px);
 }
 
-  </style>
+/* 🗡 Interactive Pending-to-Cancel Flip Button */
+.flip-btn-container {
+    position: relative; width: 78px; height: 22px; overflow: hidden; border-radius: 6px; cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(250, 204, 21, 0.3);
+}
+.flip-track {
+    display: flex; flex-direction: column; width: 100%; height: 200%; 
+    transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+/* 클릭 করলে বাটনটি ফ্লিপ হয়ে উপরে উঠবে */
+.flip-btn-container.flipped .flip-track { transform: translateY(-22px); }
+.flip-btn-container.flipped { border-color: #e11d48; }
+
+.flip-face {
+    width: 100%; height: 22px; display: flex; align-items: center; justify-content: center; 
+    font-size: 0.65rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.face-pending { color: #facc15; background: rgba(250, 204, 21, 0.1); position: relative; overflow: hidden; }
+.face-cancel { color: #fff; background: #f43f5e; }
+
+/* 💎 Elegant Silver Blade Shine on Pending */
+.face-pending::after {
+    content: ''; position: absolute; top: 0; left: -60%; width: 12px; height: 100%;
+    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+    transform: skewX(-25deg);
+    animation: silverBlade 3s infinite cubic-bezier(0.19, 1, 0.22, 1); animation-delay: 2s;
+}
+@keyframes silverBlade { 0% { left: -60%; opacity: 0; } 5% { opacity: 1; } 25%, 100% { left: 150%; opacity: 0; } }
+
+/* ⏱ Theme Adaptive Timer (Cyan for Deposit, Red for Withdraw) */
+.timer-cyan, .timer-red { font-family: monospace; transition: color 0.3s, text-shadow 0.3s; }
+[data-theme="dark"] .timer-cyan { color: var(--primary) !important; text-shadow: 0 0 8px rgba(0, 245, 255, 0.4); }
+[data-theme="light"] .timer-cyan { color: var(--text-main) !important; text-shadow: none; }
+[data-theme="dark"] .timer-red { color: #f43f5e !important; text-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
+[data-theme="light"] .timer-red { color: #e11d48 !important; text-shadow: none; }
+
+/* ❌ Elegant Ghosted Strikethrough */
+.tx-amt-cancelled { text-decoration: line-through; text-decoration-color: rgba(244, 63, 94, 0.5); text-decoration-thickness: 1.5px; color: #94a3b8 !important; opacity: 0.5; }
+
+/* ⏱ Gentle Pulse */
+.gentle-pulse { animation: softPulse 2s infinite alternate; }
+@keyframes softPulse { 0% { opacity: 0.5; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1.05); } }
+ </style>
 </head>
 <body>
  
@@ -1696,13 +1738,20 @@ input, textarea, select {
                            <span id="uBalance" class="number-span animate-wave">0.00</span>
                        </div>
                    </div>
-                   <div class="locked-glass">
-                       <p class="label-sm"><i class="fas fa-lock"></i> TCM Locked Vault</p>
-                       <div class="locked-val">
-                           <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="20">
-                           <span id="uLocked" class="number-span animate-wave">0.00</span>
-                       </div>
-                   </div>
+                   <div class="locked-glass" style="position: relative; display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <p class="label-sm"><i class="fas fa-lock"></i> TCM Locked Vault</p>
+                            <div class="locked-val">
+                                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="20">
+                                <span id="uLocked" class="number-span animate-wave">0.00</span>
+                            </div>
+                        </div>
+                        <!-- 💎 Glassmorphism Vault Timer -->
+                        <div id="vaultTimerBox" style="display: none; background: rgba(20, 25, 35, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 6px 20px rgba(0,0,0,0.4); border-radius: 12px; padding: 8px 14px; align-items: center; gap: 8px; transition: all 0.3s ease;">
+                            <i class="far fa-clock gentle-pulse" id="vaultTimerIcon"></i>
+                            <span id="vaultTimerText" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.5px;">00:00:00</span>
+                        </div>
+                    </div>
                    
                    <div class="income-table">
                        <div class="t-header"><span class="t-header-left"></span><span class="t-header-mid">Daily</span><span class="t-header-right">Total</span></div>
@@ -2702,25 +2751,13 @@ window.renderTxChunk = () => {
         if(tx.Status === 'Success') stClr = '#10b981';
         else if(tx.Status === 'Rejected') stClr = '#f43f5e';
         else if(tx.Status === 'Reversed') stClr = 'rgba(244, 63, 94, 0.7)';
+        // 🚀 FIX: Refunded স্ট্যাটাসের জন্য একটি সুন্দর সফট পার্পেল কালার
+        else if(tx.Status === 'Refunded' || tx.Status === 'Cancelled') stClr = '#a78bfa'; 
         else if(tx.Status === 'Pending') stClr = (isWd || isP2PSent) ? '#f43f5e' : '#facc15';
 
         if (isReversedAirdrop) { bgCls = 'air-reversed'; icn = 'ban'; }
         
-        let timerHtml = '';
-        if ((isDep || isWd) && tx.Status === 'Pending') {
-            let startTimestamp = tx.timestamp || tx.Date;
-            let timeVal = 0;
-            if (typeof startTimestamp === 'object' && startTimestamp.seconds) timeVal = startTimestamp.seconds * 1000;
-            else if (typeof startTimestamp === 'string') timeVal = new Date(startTimestamp).getTime();
-            else timeVal = startTimestamp;
-
-            timerHtml = `
-            <div style="margin-top: 4px; text-align: right;">
-                <span class="live-timer glass-timer" data-time="${timeVal}" style="font-size: 0.65rem; color: var(--text-sub);">
-                    <i class="fas fa-clock fa-spin"></i> 00:00:00
-                </span>
-            </div>`;
-        }
+        
 
         let displayDate = window.formatTxDate ? window.formatTxDate(tx.Date || tx.timestamp) : (tx.Date || "N/A");
         let orderIdText = tx.Order_ID || tx.TXID || 'N/A';
@@ -2751,6 +2788,40 @@ window.renderTxChunk = () => {
         let displayTitle = (isP2P && extractedName) ? extractedName : tType;
         let displayTypeRight = (isP2P && extractedName) ? tType : ''; 
 
+        let interactiveBadgeHtml = `<span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>`;
+        let simpleTimerHtml = '';
+        
+        if ((isDep || isWd) && tx.Status === 'Pending') {
+            let timeVal = window.parseSafeTimestamp(tx.timestamp || tx.Date);
+            
+            // 🚀 FIX: Smart Color Detection (Withdraw = Red, Deposit = Cyan)
+            let adaptiveTimerClass = isWd ? 'timer-red' : 'timer-cyan';
+
+            simpleTimerHtml = `
+            <div style="margin-top: 5px; text-align: right;">
+                <span class="live-timer pending-timer ${adaptiveTimerClass}" data-time="${timeVal}" data-type="${tx.Type}">
+                    <i class="far fa-clock gentle-pulse" style="margin-right:4px;"></i> 00h 00m 00s
+                </span>
+            </div>`;
+
+            if (isWd) {
+                let targetId = (tx.id && tx.id !== 'undefined') ? tx.id : tx.Order_ID;
+                
+                // 🚀 Smart Interactive "Flip to Cancel" Button (Click to flip, click outside to revert)
+                interactiveBadgeHtml = `
+                <div class="flip-btn-container" onclick="event.stopPropagation(); if(!this.classList.contains('flipped')){ document.querySelectorAll('.flip-btn-container').forEach(b => b.classList.remove('flipped')); this.classList.add('flipped'); } else { window.requestCancelWithdrawal('${targetId}', ${tx.Amount}); }">
+                    <div class="flip-track">
+                        <div class="flip-face face-pending">
+                            PENDING
+                        </div>
+                        <div class="flip-face face-cancel">
+                            CANCEL
+                        </div>
+                    </div>
+                </div>`;
+            }
+        }
+
         // 🔥 Dynamic DOM injection
         html += `
         <div class="tx-item tx-item-animated" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
@@ -2769,9 +2840,14 @@ window.renderTxChunk = () => {
             </div>
             <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
                 ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${displayTypeRight}</span>` : ''}
-                <div class="${isReversedAirdrop ? 'tx-amt-reversed' : ''}" style="color:${isReversedAirdrop ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700;">${amountSign}${parseFloat(tx.Amount).toFixed(2)} ₮</div>
-                <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>
-                ${timerHtml}
+                
+                <!-- 🚀 Refunded Status Ghosting Logic -->
+                <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
+                    ${amountSign}${parseFloat(tx.Amount).toFixed(2)} ₮
+                </div>
+                
+                ${interactiveBadgeHtml}
+                ${simpleTimerHtml}
             </div>
         </div>`;
     });
@@ -2931,10 +3007,10 @@ window.onload = async () => {
    // 🟡 STEP 2: STALE-WHILE-REVALIDATE (Fetch Live API from Backend)
    // ==========================================
    try {
-       const response = await fetch(`https://tcm-bakend.onrender.com/api/user/init-data?uid=${userUid}`);
-       const result = await response.json();
+       // 🔥 FIX: Using secure window.fetchAPI so the Bearer Token is passed through the Shield
+       const result = await window.fetchAPI(`/user/init-data?uid=${userUid}`, 'GET');
        
-       if (result.success && result.data) {
+       if (result && result.success && result.data) {
            const { user, wallet, transactions } = result.data;
 
            safeSetText('uName', user.Name || 'User');
@@ -3686,6 +3762,70 @@ if (window.reserveTimerInterval) clearInterval(window.reserveTimerInterval);
 window.reserveTimerInterval = setInterval(window.updateReserveCountdown, 1000);
 
 // =================================================================================
+// 🛑 USER WITHDRAWAL CANCELLATION ENGINE
+// =================================================================================
+window.closeConfirmModal = () => {
+    const modal = document.getElementById('confirmModal');
+    if(modal) modal.style.display = 'none';
+};
+
+window.requestCancelWithdrawal = (txId, amount) => {
+    const modal = document.getElementById('confirmModal');
+    const confirmBtn = document.getElementById('confirmYesBtn');
+    if(modal && confirmBtn) {
+        modal.querySelector('p').innerHTML = `Are you sure? <strong>${amount} ₮</strong> will be instantly refunded to your main wallet.`;
+        confirmBtn.onclick = () => window.executeCancelWithdraw(txId, amount);
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
+    }
+};
+
+window.executeCancelWithdraw = async (txId, amount) => {
+    const btn = document.getElementById('confirmYesBtn');
+    const uid = localStorage.getItem('uid');
+    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cancelling...';
+    btn.disabled = true;
+
+    try {
+        const result = await window.fetchAPI('/finance/cancel-withdrawal', 'POST', { uid, txId });
+        
+        if (result.success) {
+            window.showToast("Withdrawal Cancelled & Refunded!");
+            window.closeConfirmModal();
+            
+            // 🔥 OPTIMISTIC UI: রিফ্রেশ ছাড়াই 24H লকড ভল্টে ব্যালেন্স পাঠানো
+            if (window.RAM_STATE && window.RAM_STATE.balances) {
+                window.RAM_STATE.balances.Locked_Balance += parseFloat(amount);
+                window.RAM_STATE.balances.Total_Withdraw = Math.max(0, window.RAM_STATE.balances.Total_Withdraw - parseFloat(amount));
+                window.RAM_STATE.balances.Withdraw_Unlock_Time = Date.now() + (24 * 60 * 60 * 1000);
+                window.RAM_STATE.balances.Withdraw_Refund_Amount = (window.RAM_STATE.balances.Withdraw_Refund_Amount || 0) + parseFloat(amount);
+                
+                if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+                if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+                if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
+            }
+            
+            // 🔥 হিস্ট্রি টেবিলে স্ট্যাটাস আপডেট করা
+            if (window.allTransactions) {
+                const txIndex = window.allTransactions.findIndex(t => t.id === txId || t.Order_ID === txId);
+                if (txIndex !== -1) {
+                    window.allTransactions[txIndex].Status = 'Refunded'; // 🚀 Changed to Refunded
+                    if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+                }
+            }
+        } else {
+            window.showToast(result.message, true);
+        }
+    } catch (e) {
+        window.showToast("Error: " + e.message, true);
+    } finally {
+        btn.innerHTML = 'Yes, Cancel It';
+        btn.disabled = false;
+    }
+};
+
+// =================================================================================
 // 🛡️ MODULE 9: HYBRID SECURITY ENGINE (API DRIVEN + GAMIFIED SHIELD)
 // =================================================================================
 window.updateSecurityShieldUI = () => {
@@ -4261,6 +4401,65 @@ window.submitTx = async () => {
        }
    }
 };
+
+// =================================================================================
+// 💎 TCM LOCKED VAULT TIMER ENGINE (24H Countdown & NFT Count-Up)
+// =================================================================================
+if (window.vaultTimerInterval) clearInterval(window.vaultTimerInterval);
+window.vaultTimerInterval = setInterval(() => {
+    const vBox = document.getElementById('vaultTimerBox');
+    const vText = document.getElementById('vaultTimerText');
+    const vIcon = document.getElementById('vaultTimerIcon');
+    if(!vBox || !vText || !vIcon) return;
+
+    let wallet = window.RAM_STATE ? window.RAM_STATE.balances : window.lastWalletData;
+    let unlockTime = wallet ? wallet.Withdraw_Unlock_Time : null;
+    let reservedNftTime = window.reservedNFT ? window.reservedNFT.timestamp : null;
+    let now = Date.now();
+
+    if (unlockTime) {
+        let diff = unlockTime - now;
+        if (diff <= 0) {
+            // 🔄 ২৪ ঘণ্টা শেষ! অটোমেটিক পেজ সিঙ্ক করে টাকা মেইন ব্যালেন্সে আনবে
+            vBox.style.display = 'none';
+            if (window.RAM_STATE && window.RAM_STATE.balances) {
+                window.RAM_STATE.balances.Withdraw_Unlock_Time = null;
+            }
+            if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+        } else {
+            // 🔴 24H Withdrawal Countdown (Red Glow)
+            let h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+            let m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            let s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+            
+            vText.innerText = `${h}:${m}:${s}`;
+            vBox.style.display = 'flex';
+            vBox.style.borderColor = 'rgba(244, 63, 94, 0.4)';
+            vBox.style.boxShadow = '0 6px 15px rgba(244, 63, 94, 0.2)';
+            vText.style.color = '#f43f5e';
+            vIcon.style.color = '#f43f5e';
+        }
+    } 
+    else if (reservedNftTime) {
+        // 🟢 NFT Count-Up (Cyan Glow)
+        let diff = now - reservedNftTime;
+        if (diff < 0) diff = 0;
+        let h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+        let m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+        let s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        
+        vText.innerText = `${h}:${m}:${s}`;
+        vBox.style.display = 'flex';
+        vBox.style.borderColor = 'rgba(0, 245, 255, 0.4)';
+        vBox.style.boxShadow = '0 6px 15px rgba(0, 245, 255, 0.2)';
+        vText.style.color = '#00f5ff';
+        vIcon.style.color = '#00f5ff';
+    } 
+    else {
+        vBox.style.display = 'none'; // সময় শেষ হলে বা কিছু না থাকলে গায়েব
+    }
+}, 1000);
+
 // =================================================================================
 // ⏱️ THE GLOBAL PENDING TIMER ENGINE (96H Withdraw Countdown & Deposit Count-Up)
 // =================================================================================
@@ -4275,7 +4474,6 @@ window.globalPendingClock = setInterval(() => {
         let txType = el.getAttribute('data-type') || ''; 
         let parentContainer = el.closest('.tx-item') || el.closest('div');
         
-        // Parent container বা data-type থেকে Withdraw ডিটেক্ট করা
         let isWithdraw = false;
         if ((txType && txType.includes('Withdraw')) || (parentContainer && parentContainer.innerText.includes('Withdraw'))) {
             isWithdraw = true;
@@ -4286,12 +4484,11 @@ window.globalPendingClock = setInterval(() => {
             if (elapsedMs < 0) elapsedMs = 0;
 
             if (isWithdraw) {
-                // ⏳ উইথড্রল লজিক: ৯৬ ঘণ্টা থেকে কাউন্ট-ডাউন (96 * 60 * 60 * 1000 = 345600000 ms)
                 const maxTimeMs = 345600000; 
                 let remainingMs = maxTimeMs - elapsedMs;
                 
                 if (remainingMs <= 0) {
-                    el.innerHTML = `<i class="fas fa-hourglass-end" style="font-size: 0.65rem; color: var(--error);"></i> 00h:00m:00s`;
+                    el.innerHTML = `<i class="far fa-clock" style="margin-right:5px;"></i> 00h 00m 00s`;
                     el.style.color = "var(--error)";
                     return;
                 }
@@ -4301,16 +4498,17 @@ window.globalPendingClock = setInterval(() => {
                 let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
                 let s = (diffSec % 60).toString().padStart(2, '0');
 
-                el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--warning);"></i> ${h}h ${m}m ${s}s`;
+                // 🚀 FIX: Premium Gentle Pulse Clock (No Cheap Colors)
+                el.innerHTML = `<i class="far fa-clock gentle-pulse" style="margin-right:5px;"></i> ${h}h ${m}m ${s}s`;
                 
             } else {
-                // ⏱️ ডিপোজিট লজিক: ০ থেকে সামনের দিকে কাউন্ট-আপ
                 let diffSec = Math.floor(elapsedMs / 1000);
                 let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
                 let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
                 let s = (diffSec % 60).toString().padStart(2, '0');
 
-                el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--success);"></i> ${h}h ${m}m ${s}s`;
+                // 🚀 FIX: Premium Gentle Pulse Clock for Deposit
+                el.innerHTML = `<i class="far fa-clock gentle-pulse" style="margin-right:5px;"></i> ${h}h ${m}m ${s}s`;
             }
         }
     });
@@ -6722,7 +6920,12 @@ function sendUserSupportMessage() {
        });
    }
 }
-
+// 🛑 Close flipped Cancel buttons when clicking anywhere outside
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.flip-btn-container')) {
+        document.querySelectorAll('.flip-btn-container').forEach(b => b.classList.remove('flipped'));
+    }
+});
 </script>
 </body>
 </html>
