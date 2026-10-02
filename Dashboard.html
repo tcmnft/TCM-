@@ -1746,10 +1746,12 @@ input, textarea, select {
                                 <span id="uLocked" class="number-span animate-wave">0.00</span>
                             </div>
                         </div>
-                        <!-- 💎 Glassmorphism Vault Timer -->
-                        <div id="vaultTimerBox" style="display: none; background: rgba(20, 25, 35, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 6px 20px rgba(0,0,0,0.4); border-radius: 12px; padding: 8px 14px; align-items: center; gap: 8px; transition: all 0.3s ease;">
-                            <i class="far fa-clock gentle-pulse" id="vaultTimerIcon"></i>
-                            <span id="vaultTimerText" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.95rem; letter-spacing: 0.5px;">00:00:00</span>
+                        
+                        <!-- 💎 Classic Dynamic Pill Carousel -->
+                        <div id="vaultCarouselContainer" style="display: none; height: 32px; overflow: hidden; position: relative; background: rgba(20, 25, 35, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 6px 20px rgba(0,0,0,0.4); border-radius: 12px; transition: all 0.4s ease;">
+                            <div id="vaultCarouselTrack" style="display: flex; flex-direction: column; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                                <!-- Timers will be auto-injected here -->
+                            </div>
                         </div>
                     </div>
                    
@@ -3173,6 +3175,7 @@ window.startNftReserveScan = async function() {
         document.getElementById("scanText").style.display = 'none';
         
         window.reservedNFT = result.nftData;
+        window.reservedNFT.timestamp = result.injectionData.timestamp || Date.now(); // 🔥 Missing Timestamp Fix for Live Timer
         
         document.getElementById("foundNftImg").src = window.reservedNFT.img;
         document.getElementById("foundNftImg").style.display = 'block';
@@ -3655,7 +3658,8 @@ window.loadTodaysHistoryFromAPI = async (isLoadMore = false) => {
                     img: data.Image_URL || 'https://i.ibb.co/3sZxCqT/nft-placeholder.jpg',
                     orderId: data.Order_ID,
                     docId: data.docId || data.id || "",
-                    level: parseInt(data.NFT_Level || window.getSafeUserData().Rank || 1)
+                    level: parseInt(data.NFT_Level || window.getSafeUserData().Rank || 1),
+                    timestamp: window.parseSafeTimestamp(data.timestamp || data.Date) || Date.now() // 🔥 Missing Timestamp Fix for Page Reload
                 };
                 break;
             }
@@ -3794,13 +3798,23 @@ window.executeCancelWithdraw = async (txId, amount) => {
             window.showToast("Withdrawal Cancelled & Refunded!");
             window.closeConfirmModal();
             
-            // 🔥 OPTIMISTIC UI: রিফ্রেশ ছাড়াই 24H লকড ভল্টে ব্যালেন্স পাঠানো
+            // 🔥 OPTIMISTIC UI: 24H Multi-Lock Array-তে ব্যালেন্স পুশ করা (Option C)
             if (window.RAM_STATE && window.RAM_STATE.balances) {
-                window.RAM_STATE.balances.Locked_Balance += parseFloat(amount);
-                window.RAM_STATE.balances.Total_Withdraw = Math.max(0, window.RAM_STATE.balances.Total_Withdraw - parseFloat(amount));
-                window.RAM_STATE.balances.Withdraw_Unlock_Time = Date.now() + (24 * 60 * 60 * 1000);
-                window.RAM_STATE.balances.Withdraw_Refund_Amount = (window.RAM_STATE.balances.Withdraw_Refund_Amount || 0) + parseFloat(amount);
+                let parsedAmt = parseFloat(amount);
+                window.RAM_STATE.balances.Locked_Balance = (parseFloat(window.RAM_STATE.balances.Locked_Balance) || 0) + parsedAmt;
+                window.RAM_STATE.balances.Total_Withdraw = Math.max(0, (parseFloat(window.RAM_STATE.balances.Total_Withdraw) || 0) - parsedAmt);
                 
+                // Array-তে নতুন লক এন্ট্রি যুক্ত করা
+                if (!window.RAM_STATE.balances.Locked_Withdrawals) {
+                    window.RAM_STATE.balances.Locked_Withdrawals = [];
+                }
+                window.RAM_STATE.balances.Locked_Withdrawals.push({
+                    amount: parsedAmt,
+                    unlockTime: Date.now() + (24 * 60 * 60 * 1000),
+                    txId: txId
+                });
+                
+                window.lastWalletData = window.RAM_STATE.balances;
                 if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
                 if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
                 if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
@@ -4401,65 +4415,144 @@ window.submitTx = async () => {
        }
    }
 };
-
 // =================================================================================
-// 💎 TCM LOCKED VAULT TIMER ENGINE (24H Countdown & NFT Count-Up)
+// 💎 TCM LOCKED VAULT TIMER ENGINE (Premium Glassmorphism & Smart Swiping)
 // =================================================================================
 if (window.vaultTimerInterval) clearInterval(window.vaultTimerInterval);
+window.vaultCarouselIndex = 0;
+window.vaultTickCount = 0;
+
 window.vaultTimerInterval = setInterval(() => {
-    const vBox = document.getElementById('vaultTimerBox');
-    const vText = document.getElementById('vaultTimerText');
-    const vIcon = document.getElementById('vaultTimerIcon');
-    if(!vBox || !vText || !vIcon) return;
+    const container = document.getElementById('vaultCarouselContainer');
+    const track = document.getElementById('vaultCarouselTrack');
+    if(!container || !track) return;
 
     let wallet = window.RAM_STATE ? window.RAM_STATE.balances : window.lastWalletData;
-    let unlockTime = wallet ? wallet.Withdraw_Unlock_Time : null;
-    let reservedNftTime = window.reservedNFT ? window.reservedNFT.timestamp : null;
     let now = Date.now();
+    let activeItems = [];
+    
+    // 1. Check NFT (Count-Up - Premium Cyan)
+    let reservedNftTime = window.reservedNFT ? window.reservedNFT.timestamp : null;
+    if (reservedNftTime) {
+        let diff = Math.max(0, now - reservedNftTime);
+        activeItems.push({
+            id: 'tcm_nft_timer',
+            type: 'nft',
+            diff: diff,
+            iconColor: '#00f5ff', // Cyan Icon
+            timeColor: '#ffffff', // White Time
+            amtColor: '#00f5ff',  // Cyan Amount
+            bg: 'rgba(0, 245, 255, 0.05)',
+            shadow: '0 6px 15px rgba(0, 245, 255, 0.15)',
+            border: 'rgba(0, 245, 255, 0.3)',
+            amt: parseFloat(window.reservedNFT.price).toFixed(2)
+        });
+    }
 
-    if (unlockTime) {
-        let diff = unlockTime - now;
-        if (diff <= 0) {
-            // 🔄 ২৪ ঘণ্টা শেষ! অটোমেটিক পেজ সিঙ্ক করে টাকা মেইন ব্যালেন্সে আনবে
-            vBox.style.display = 'none';
-            if (window.RAM_STATE && window.RAM_STATE.balances) {
-                window.RAM_STATE.balances.Withdraw_Unlock_Time = null;
+    // 2. Check Withdrawals (Count-Down - Premium Glass Red)
+    let needsSync = false;
+    let stillLocked = [];
+    if (wallet && wallet.Locked_Withdrawals && wallet.Locked_Withdrawals.length > 0) {
+        wallet.Locked_Withdrawals.forEach((item, idx) => {
+            let diff = item.unlockTime - now;
+            if (diff <= 0) {
+                needsSync = true;
+            } else {
+                stillLocked.push(item);
+                activeItems.push({
+                    id: `tcm_wd_timer_${item.txId || idx}`,
+                    type: 'wd',
+                    diff: diff,
+                    iconColor: '#facc15', // Gold/Yellow Icon (Pending vibe)
+                    timeColor: '#ffffff', // White Time
+                    amtColor: '#10b981',  // Green Amount (Success/Money vibe)
+                    bg: 'rgba(15, 20, 30, 0.4)', // Very subtle dark glass
+                    shadow: '0 4px 15px rgba(244, 63, 94, 0.15)', // Soft elegant red glow
+                    border: 'rgba(244, 63, 94, 0.35)', // Elegant red border
+                    amt: parseFloat(item.amount).toFixed(2)
+                });
             }
-            if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
-        } else {
-            // 🔴 24H Withdrawal Countdown (Red Glow)
-            let h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-            let m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-            let s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-            
-            vText.innerText = `${h}:${m}:${s}`;
-            vBox.style.display = 'flex';
-            vBox.style.borderColor = 'rgba(244, 63, 94, 0.4)';
-            vBox.style.boxShadow = '0 6px 15px rgba(244, 63, 94, 0.2)';
-            vText.style.color = '#f43f5e';
-            vIcon.style.color = '#f43f5e';
-        }
-    } 
-    else if (reservedNftTime) {
-        // 🟢 NFT Count-Up (Cyan Glow)
-        let diff = now - reservedNftTime;
-        if (diff < 0) diff = 0;
-        let h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-        let m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-        let s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+        });
         
-        vText.innerText = `${h}:${m}:${s}`;
-        vBox.style.display = 'flex';
-        vBox.style.borderColor = 'rgba(0, 245, 255, 0.4)';
-        vBox.style.boxShadow = '0 6px 15px rgba(0, 245, 255, 0.2)';
-        vText.style.color = '#00f5ff';
-        vIcon.style.color = '#00f5ff';
-    } 
-    else {
-        vBox.style.display = 'none'; // সময় শেষ হলে বা কিছু না থাকলে গায়েব
+        if (needsSync) {
+            wallet.Locked_Withdrawals = stillLocked;
+            if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+        }
+    }
+
+    // 3. UI Updates & Structure Rebuilding
+    if (activeItems.length === 0) {
+        container.style.display = 'none';
+        track.innerHTML = '';
+        window.vaultCarouselIndex = 0;
+        return;
+    }
+
+    container.style.display = 'block';
+
+    // Check if DOM structure needs rebuilding (avoid unnecessary re-renders)
+    let currentIds = Array.from(track.children).map(c => c.id);
+    let newIds = activeItems.map(i => i.id);
+    if (currentIds.join(',') !== newIds.join(',')) {
+        let html = '';
+        activeItems.forEach(item => {
+            html += `
+            <div id="${item.id}" style="height: 32px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 0 14px; box-sizing: border-box; width: 100%; background: ${item.bg};">
+                <i class="far fa-clock gentle-pulse" style="color: ${item.iconColor}; font-size: 0.85rem;"></i>
+                <span class="v-time-text" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.85rem; color: ${item.timeColor}; letter-spacing: 0.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">00:00:00</span>
+                <span style="color: rgba(255,255,255,0.15); font-size: 0.7rem;">|</span>
+                <span style="font-weight: 800; font-size: 0.85rem; color: ${item.amtColor}; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${item.amt}</span>
+            </div>`;
+        });
+        track.innerHTML = html;
+        window.vaultCarouselIndex = 0;
+        track.style.transform = `translateY(0px)`;
+        
+        // Update container glow for the first item instantly
+        container.style.borderColor = activeItems[0].border;
+        container.style.boxShadow = activeItems[0].shadow;
+    }
+
+    // Update exact times dynamically
+    activeItems.forEach((item) => {
+        let el = document.querySelector(`#${item.id} .v-time-text`);
+        if (el) {
+            let h = Math.floor(item.diff / 3600000).toString().padStart(2, '0');
+            let m = Math.floor((item.diff % 3600000) / 60000).toString().padStart(2, '0');
+            let s = Math.floor((item.diff % 60000) / 1000).toString().padStart(2, '0');
+            el.innerText = `${h}:${m}:${s}`;
+        }
+    });
+
+    // 4. Smart Swiping Logic (8 seconds) & Single Item Stability Lock
+    if (activeItems.length > 1) {
+        window.vaultTickCount++;
+        if (window.vaultTickCount % 8 === 0) {
+            window.vaultCarouselIndex++;
+            if (window.vaultCarouselIndex >= activeItems.length) {
+                window.vaultCarouselIndex = 0;
+            }
+            track.style.transform = `translateY(-${window.vaultCarouselIndex * 32}px)`; 
+            
+            // Update container glow to match the active item sliding in
+            let activeItem = activeItems[window.vaultCarouselIndex];
+            container.style.borderColor = activeItem.border;
+            container.style.boxShadow = activeItem.shadow;
+        }
+    } else if (activeItems.length === 1) {
+        // একটাই ট্রানজ্যাকশন থাকলে ঘড়ি একদম স্থির থাকবে (Stability Lock)
+        window.vaultTickCount = 0; 
+        if (window.vaultCarouselIndex !== 0) {
+            window.vaultCarouselIndex = 0;
+            track.style.transform = `translateY(0px)`;
+        }
+        // অপ্রয়োজনীয় DOM আপডেট বন্ধ করা
+        if (container.style.borderColor !== activeItems[0].border) {
+             container.style.borderColor = activeItems[0].border;
+             container.style.boxShadow = activeItems[0].shadow;
+        }
     }
 }, 1000);
-
 // =================================================================================
 // ⏱️ THE GLOBAL PENDING TIMER ENGINE (96H Withdraw Countdown & Deposit Count-Up)
 // =================================================================================
@@ -5172,12 +5265,17 @@ window.toggleTeamList = (hand) => {
     if(box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
 };
 // =================================================================================
-// 📸 MODULE 13: SMART AVATAR UPLOAD & MANAGEMENT ENGINE (API DRIVEN)
+// 📸 MODULE 13: SMART AVATAR UPLOAD & MANAGEMENT ENGINE (API DRIVEN & WEBVIEW SAFE)
 // =================================================================================
 window.handleDpClick = () => {
     const dpSrc = document.getElementById('uAvatar').src;
-    if (dpSrc.includes('iconify') || dpSrc.includes('default') || dpSrc === '') {
-        document.getElementById('dpInput').click();
+    const dpInput = document.getElementById('dpInput');
+    
+    // Check if the current avatar is default/empty
+    let isDefault = dpSrc.includes('iconify') || dpSrc.includes('default') || dpSrc === '' || dpSrc.includes('user-bold-duotone');
+    
+    if (isDefault) {
+        if(dpInput) dpInput.click();
     } else {
         window.openModal('dpActionModal');
     }
@@ -5186,7 +5284,9 @@ window.handleDpClick = () => {
 window.uploadDP = async (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    event.target.value = '';
+    
+    // Reset value so the same file can be selected again if needed
+    setTimeout(() => { event.target.value = ''; }, 100); 
     
     if (!file.type.match('image.*')) return window.showToast("Only image files are allowed!", true);
     if (file.size > 5 * 1024 * 1024) return window.showToast("File is too large! Maximum 5MB.", true);
