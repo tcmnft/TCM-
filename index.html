@@ -134,6 +134,18 @@
         
         @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; margin-right: 10px; } .crypto-ticker { margin: 0 5px; } .form-pill { padding: 40px 20px 30px; } .m-name { font-size: 1.8rem; } }
     </style>
+<!-- 🚀 Memo 03: Permanent Login Auto-Redirect (No Flash) -->
+    <script>
+        (function() {
+            let uid = localStorage.getItem("uid");
+            let token = localStorage.getItem("token");
+            
+            // যদি ইউজারের লগইন ডেটা সেভ থাকে, তবে লগইন পেজ লোড হওয়ার আগেই ড্যাশবোর্ডে পাঠিয়ে দেবে
+            if (uid && token) {
+                window.location.replace("dashboard.html"); 
+            }
+        })();
+    </script>
 </head>
 <body>
 
