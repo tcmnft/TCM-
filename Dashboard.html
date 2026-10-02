@@ -1747,9 +1747,9 @@ input, textarea, select {
                             </div>
                         </div>
                         
-                        <!-- 💎 Classic Dynamic Pill Carousel -->
-                        <div id="vaultCarouselContainer" style="display: none; height: 32px; overflow: hidden; position: relative; background: rgba(20, 25, 35, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 6px 20px rgba(0,0,0,0.4); border-radius: 12px; transition: all 0.4s ease;">
-                            <div id="vaultCarouselTrack" style="display: flex; flex-direction: column; transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                        <!-- 💎 3D Convex Glass Widget (Smartwatch Style) -->
+                        <div id="vaultCarouselContainer" style="display: none; width: 100px; height: 56px; overflow: hidden; position: relative; background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(15, 20, 30, 0.7) 75%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 18px; border-top: 1px solid rgba(255, 255, 255, 0.3); border-left: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(0, 0, 0, 0.8); border-right: 1px solid rgba(0, 0, 0, 0.8); box-shadow: 0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                            <div id="vaultCarouselTrack" style="display: flex; flex-direction: column; width: 100%; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
                                 <!-- Timers will be auto-injected here -->
                             </div>
                         </div>
@@ -4417,7 +4417,7 @@ window.submitTx = async () => {
    }
 };
 // =================================================================================
-// 💎 TCM LOCKED VAULT TIMER ENGINE (Premium Glassmorphism & Smart Swiping)
+// 💎 TCM LOCKED VAULT TIMER ENGINE (3D Convex Glass & Vertical Dual-Line UI)
 // =================================================================================
 if (window.vaultTimerInterval) clearInterval(window.vaultTimerInterval);
 window.vaultCarouselIndex = 0;
@@ -4432,25 +4432,23 @@ window.vaultTimerInterval = setInterval(() => {
     let now = Date.now();
     let activeItems = [];
     
-    // 1. Check NFT (Count-Up - Premium Cyan)
+    // 1. Check NFT (Cyan Glow)
     let reservedNftTime = window.reservedNFT ? window.reservedNFT.timestamp : null;
     if (reservedNftTime) {
         let diff = Math.max(0, now - reservedNftTime);
         activeItems.push({
             id: 'tcm_nft_timer',
-            type: 'nft',
             diff: diff,
-            iconColor: '#00f5ff', // Cyan Icon
-            timeColor: '#ffffff', // White Time
-            amtColor: '#00f5ff',  // Cyan Amount
-            bg: 'rgba(0, 245, 255, 0.05)',
-            shadow: '0 6px 15px rgba(0, 245, 255, 0.15)',
-            border: 'rgba(0, 245, 255, 0.3)',
+            iconColor: '#00f5ff', 
+            timeColor: '#ffffff', 
+            amtColor: '#00f5ff',  
+            glow: '0 0 20px rgba(0, 245, 255, 0.25)', 
+            borderColor: 'rgba(0, 245, 255, 0.4)',
             amt: parseFloat(window.reservedNFT.price).toFixed(2)
         });
     }
 
-    // 2. Check Withdrawals (Count-Down - Premium Glass Red)
+    // 2. Check Withdrawals (Red Glow)
     let needsSync = false;
     let stillLocked = [];
     if (wallet && wallet.Locked_Withdrawals && wallet.Locked_Withdrawals.length > 0) {
@@ -4462,26 +4460,22 @@ window.vaultTimerInterval = setInterval(() => {
                 stillLocked.push(item);
                 activeItems.push({
                     id: `tcm_wd_timer_${item.txId || idx}`,
-                    type: 'wd',
                     diff: diff,
-                    iconColor: '#facc15', // Gold/Yellow Icon (Pending vibe)
-                    timeColor: '#ffffff', // White Time
-                    amtColor: '#10b981',  // Green Amount (Success/Money vibe)
-                    bg: 'rgba(15, 20, 30, 0.4)', // Very subtle dark glass
-                    shadow: '0 4px 15px rgba(244, 63, 94, 0.15)', // Soft elegant red glow
-                    border: 'rgba(244, 63, 94, 0.35)', // Elegant red border
+                    iconColor: '#facc15', 
+                    timeColor: '#ffffff', 
+                    amtColor: '#10b981',  
+                    glow: '0 0 20px rgba(244, 63, 94, 0.2)', 
+                    borderColor: 'rgba(244, 63, 94, 0.4)',
                     amt: parseFloat(item.amount).toFixed(2)
                 });
             }
         });
-        
         if (needsSync) {
             wallet.Locked_Withdrawals = stillLocked;
             if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
         }
     }
 
-    // 3. UI Updates & Structure Rebuilding
     if (activeItems.length === 0) {
         container.style.display = 'none';
         track.innerHTML = '';
@@ -4491,30 +4485,32 @@ window.vaultTimerInterval = setInterval(() => {
 
     container.style.display = 'block';
 
-    // Check if DOM structure needs rebuilding (avoid unnecessary re-renders)
+    // 3. UI Structure Rebuilding (2 Lines: Timer Top, Amount Bottom)
     let currentIds = Array.from(track.children).map(c => c.id);
     let newIds = activeItems.map(i => i.id);
+    
     if (currentIds.join(',') !== newIds.join(',')) {
         let html = '';
         activeItems.forEach(item => {
             html += `
-            <div id="${item.id}" style="height: 32px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; gap: 8px; padding: 0 14px; box-sizing: border-box; width: 100%; background: ${item.bg};">
-                <i class="far fa-clock gentle-pulse" style="color: ${item.iconColor}; font-size: 0.85rem;"></i>
-                <span class="v-time-text" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.85rem; color: ${item.timeColor}; letter-spacing: 0.5px; text-shadow: 0 2px 5px rgba(0,0,0,0.5);">00:00:00</span>
-                <span style="color: rgba(255,255,255,0.15); font-size: 0.7rem;">|</span>
-                <span style="font-weight: 800; font-size: 0.85rem; color: ${item.amtColor}; text-shadow: 0 2px 4px rgba(0,0,0,0.4);">${item.amt}</span>
+            <div id="${item.id}" style="height: 56px; width: 100%; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <i class="far fa-clock gentle-pulse" style="color: ${item.iconColor}; font-size: 0.75rem;"></i>
+                    <span class="v-time-text" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.8rem; color: ${item.timeColor}; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">00:00:00</span>
+                </div>
+                <span style="font-weight: 900; font-size: 0.9rem; color: ${item.amtColor}; text-shadow: 0 2px 5px rgba(0,0,0,0.8);">${item.amt} <span style="font-size:0.7rem;">₮</span></span>
             </div>`;
         });
         track.innerHTML = html;
         window.vaultCarouselIndex = 0;
         track.style.transform = `translateY(0px)`;
         
-        // Update container glow for the first item instantly
-        container.style.borderColor = activeItems[0].border;
-        container.style.boxShadow = activeItems[0].shadow;
+        // Initial Base 3D Shadow + Dynamic Neon Glow
+        container.style.borderColor = activeItems[0].borderColor;
+        container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${activeItems[0].glow}`;
     }
 
-    // Update exact times dynamically
+    // 4. Update exact times dynamically
     activeItems.forEach((item) => {
         let el = document.querySelector(`#${item.id} .v-time-text`);
         if (el) {
@@ -4525,7 +4521,7 @@ window.vaultTimerInterval = setInterval(() => {
         }
     });
 
-    // 4. Smart Swiping Logic (8 seconds) & Single Item Stability Lock
+    // 5. Smart Swiping Logic (8 seconds) with Dynamic Glow Updates
     if (activeItems.length > 1) {
         window.vaultTickCount++;
         if (window.vaultTickCount % 8 === 0) {
@@ -4533,24 +4529,21 @@ window.vaultTimerInterval = setInterval(() => {
             if (window.vaultCarouselIndex >= activeItems.length) {
                 window.vaultCarouselIndex = 0;
             }
-            track.style.transform = `translateY(-${window.vaultCarouselIndex * 32}px)`; 
+            track.style.transform = `translateY(-${window.vaultCarouselIndex * 56}px)`; // 56px height per item
             
-            // Update container glow to match the active item sliding in
             let activeItem = activeItems[window.vaultCarouselIndex];
-            container.style.borderColor = activeItem.border;
-            container.style.boxShadow = activeItem.shadow;
+            container.style.borderColor = activeItem.borderColor;
+            container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${activeItem.glow}`;
         }
     } else if (activeItems.length === 1) {
-        // একটাই ট্রানজ্যাকশন থাকলে ঘড়ি একদম স্থির থাকবে (Stability Lock)
         window.vaultTickCount = 0; 
         if (window.vaultCarouselIndex !== 0) {
             window.vaultCarouselIndex = 0;
             track.style.transform = `translateY(0px)`;
         }
-        // অপ্রয়োজনীয় DOM আপডেট বন্ধ করা
-        if (container.style.borderColor !== activeItems[0].border) {
-             container.style.borderColor = activeItems[0].border;
-             container.style.boxShadow = activeItems[0].shadow;
+        if (container.style.borderColor !== activeItems[0].borderColor) {
+             container.style.borderColor = activeItems[0].borderColor;
+             container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${activeItems[0].glow}`;
         }
     }
 }, 1000);
