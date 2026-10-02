@@ -1738,7 +1738,7 @@ input, textarea, select {
                            <span id="uBalance" class="number-span animate-wave">0.00</span>
                        </div>
                    </div>
-                   <div class="locked-glass" style="position: relative; display: flex; align-items: center; justify-content: space-between;">
+                  <div class="locked-glass" style="position: relative; display: flex; align-items: center; justify-content: space-between;">
                         <div style="white-space: nowrap; flex-shrink: 0;">
                             <p class="label-sm"><i class="fas fa-lock"></i> TCM Locked Vault</p>
                             <div class="locked-val">
@@ -3865,6 +3865,7 @@ window.updateSecurityShieldUI = () => {
        icon.className = 'fas fa-shield-halved shield-icon';
        statusText.innerText = 'Partial Armor (50%)';
        statusText.style.color = '#facc15';
+    
    } else if (score === 100) {
        shield.classList.add('shield-100');
        icon.className = 'fas fa-check shield-icon';
