@@ -130,6 +130,18 @@
 
         @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; margin-right: 10px; } .f-brand { font-size: 0.75rem; } }
     </style>
+<!-- 🚀 Memo 03: Permanent Login Auto-Redirect -->
+    <script>
+        (function() {
+            let uid = localStorage.getItem("uid");
+            let token = localStorage.getItem("token");
+            
+            // যদি ইউজারের লগইন ডেটা সেভ থাকে, তবে সাইনআপ পেজ লোড না করে সরাসরি ড্যাশবোর্ডে পাঠিয়ে দেবে
+            if (uid && token) {
+                window.location.replace("Dashboard.html"); 
+            }
+        })();
+    </script>
 </head>
 <body>
 
