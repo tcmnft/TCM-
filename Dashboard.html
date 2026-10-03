@@ -5328,17 +5328,18 @@ window.toggleTeamList = (hand) => {
 // 📸 MODULE 13: SMART AVATAR UPLOAD & MANAGEMENT ENGINE (API DRIVEN & WEBVIEW SAFE)
 // =================================================================================
 window.handleDpClick = () => {
-    const dpSrc = document.getElementById('uAvatar').src;
-    const dpInput = document.getElementById('dpInput');
-    
-    // Check if the current avatar is default/empty
-    let isDefault = dpSrc.includes('iconify') || dpSrc.includes('default') || dpSrc === '' || dpSrc.includes('user-bold-duotone');
-    
-    if (isDefault) {
-        if(dpInput) dpInput.click();
-    } else {
-        window.openModal('dpActionModal');
-    }
+   const dpInput = document.getElementById('dpInput');
+   
+   // 🔥 ম্যাজিক: ইমেজের লিংক না দেখে লোকাল স্টোরেজ চেক করবে
+   let hasCustomImage = localStorage.getItem('tcm_user_dp');
+   
+   // যদি ইউজারের আপলোড করা আসল ছবি থাকে এবং সেটি অনেক বড় হয় (Base64), তবেই Remove পপআপ দেখাবে
+   if (hasCustomImage && hasCustomImage.length > 500) {
+       window.openModal('dpActionModal');
+   } else {
+       // ডিফল্ট ছবি থাকলে সরাসরি গ্যালারি (File Input) ওপেন করবে
+       if(dpInput) dpInput.click();
+   }
 };
 
 window.uploadDP = async (event) => {
