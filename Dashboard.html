@@ -3051,7 +3051,9 @@ window.onload = async () => {
            safeSetText('uUID', cachedStaticUser.UID || userUid);
            safeSetText('sbUid', "UID: " + (cachedStaticUser.UID || userUid));
            
-           const avatarSrc = cachedStaticUser.Avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
+           // 🔥 FIX: tcm_user_dp কে প্রাইওরিটি দেওয়া হলো যাতে মেমোরি থেকে ছবি না হারায়
+           const savedDp = localStorage.getItem('tcm_user_dp');
+           const avatarSrc = savedDp || cachedStaticUser.Avatar || cachedStaticUser.avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
            if(uAvatar) uAvatar.src = avatarSrc;
            if(sbAvatar) sbAvatar.src = avatarSrc;
@@ -3082,33 +3084,39 @@ window.onload = async () => {
            const { user, wallet, transactions } = result.data;
 
            safeSetText('uName', user.Name || 'User');
-           safeSetText('sbName', user.Name || 'User');
-           safeSetText('uUID', userUid);
-           safeSetText('sbUid', "UID: " + userUid);
+            safeSetText('sbName', user.Name || 'User');
+            safeSetText('uUID', userUid);
+            safeSetText('sbUid', "UID: " + userUid);
 
-           const liveAvatar = user.Avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
-           const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
-           if(uAvatar) uAvatar.src = liveAvatar;
-           if(sbAvatar) sbAvatar.src = liveAvatar;
+            // 🔥 FIX: Backend Data এবং LocalStorage এর মধ্যে নিখুঁত সিঙ্কিং
+            const liveAvatar = user.Avatar || user.avatar || localStorage.getItem('tcm_user_dp') || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
+            
+            // ডেটাবেস থেকে পাওয়া ছবি মেমোরিতে হার্ড-সেভ করে রাখা হচ্ছে যাতে লগআউট/লগইনে না হারায়
+            if (liveAvatar && liveAvatar.length > 500) {
+                localStorage.setItem('tcm_user_dp', liveAvatar);
+            }
 
-           const lvStyle = window.getLevelStyling(user.Rank || 0);
-           const pill = document.getElementById('uLevelPill');
-           if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
+            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
+            if(uAvatar) uAvatar.src = liveAvatar;
+            if(sbAvatar) sbAvatar.src = liveAvatar;
 
-           const levelSelect = document.getElementById('levelSelect');
-           if(levelSelect) {
-               levelSelect.value = (user.Rank !== undefined && user.Rank !== "") ? user.Rank : 0; 
-               if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-           }
+            const lvStyle = window.getLevelStyling(user.Rank || 0);
+            const pill = document.getElementById('uLevelPill');
+            if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
 
-           localStorage.setItem('tcm_static_user', JSON.stringify({
-               Name: user.Name,
-               UID: userUid,
-               Avatar: user.Avatar,
-               Rank: user.Rank,
-               counters: user.counters 
-           }));
-           
+            const levelSelect = document.getElementById('levelSelect');
+            if(levelSelect) {
+                levelSelect.value = (user.Rank !== undefined && user.Rank !== "") ? user.Rank : 0; 
+                if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
+            }
+
+            localStorage.setItem('tcm_static_user', JSON.stringify({
+                Name: user.Name,
+                UID: userUid,
+                Avatar: liveAvatar, // 🔥 FIX: null এর বদলে আসল Base64 ডেটা সেভ করা হলো
+                Rank: user.Rank,
+                counters: user.counters 
+            }));
            localStorage.setItem('tcm_userData', JSON.stringify({Rank: user.Rank || 0}));
 
            window.RAM_STATE = {
