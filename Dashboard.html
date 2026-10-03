@@ -7020,6 +7020,61 @@ document.addEventListener('click', (e) => {
         document.querySelectorAll('.flip-btn-container').forEach(b => b.classList.remove('flipped'));
     }
 });
+
+// ==============================================================
+    // 📱 MEMO 08: SMART HARDWARE BACK BUTTON (History API Engine)
+    // ==============================================================
+    document.addEventListener("DOMContentLoaded", () => {
+        // ১. Sidebar ট্র্যাকিং
+        const originalToggleSidebar = window.toggleSidebar;
+        window.toggleSidebar = (force) => {
+            const s = document.getElementById('sidebar');
+            const willOpen = typeof force === 'boolean' ? force : !s.classList.contains('active');
+            
+            if (willOpen) {
+                // সাইডবার ওপেন হলে হিস্ট্রিতে একটি ফেক স্টেট পুশ করবে
+                window.history.pushState({ ui: 'sidebar' }, "", "#menu");
+            } else if (window.history.state && window.history.state.ui === 'sidebar') {
+                // ইউজার যদি স্ক্রিনে ট্যাপ করে সাইডবার কাটে, তবে হিস্ট্রি ক্লিন করবে
+                window.history.back(); 
+            }
+            originalToggleSidebar(force);
+        };
+
+        // ২. Modal (Popup) ট্র্যাকিং
+        const originalOpenModal = window.openModal;
+        window.openModal = (id) => {
+            // মডাল ওপেন হলে তার আইডি দিয়ে ফেক রুট বানাবে (যেমন: #depositModal)
+            window.history.pushState({ ui: 'modal', id: id }, "", `#${id}`);
+            originalOpenModal(id);
+        };
+
+        const originalCloseModal = window.closeModal;
+        window.closeModal = (id, fromBackButton = false) => {
+            // যদি ইউজার 'Cancel' বাটন দিয়ে কাটে, তবে হিস্ট্রি থেকে ফেক রুট মুছে ফেলবে
+            if (!fromBackButton && window.history.state && window.history.state.ui === 'modal' && window.history.state.id === id) {
+                window.history.back(); 
+            }
+            originalCloseModal(id);
+        };
+
+        // ৩. Hardware Back Button ইন্টারসেপ্টর (The Magic Event)
+        window.addEventListener('popstate', (event) => {
+            // ইউজার মোবাইলের ব্যাক বাটন চাপলে এই ইভেন্টটি ফায়ার হবে
+            
+            // সাইডবার চেক করে বন্ধ করবে
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar && sidebar.classList.contains('active')) {
+                originalToggleSidebar(false);
+            }
+            
+            // ওপেন থাকা মডাল চেক করে স্লাইড করে বন্ধ করবে
+            const openModals = document.querySelectorAll('.modal.show');
+            if (openModals.length > 0) {
+                openModals.forEach(modal => originalCloseModal(modal.id, true));
+            }
+        });
+    });
 </script>
 </body>
 </html>
