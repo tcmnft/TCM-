@@ -1728,7 +1728,7 @@ input, textarea, select {
                            <div class="dp-crater-wrapper">
                                <input type="file" id="dpInput" style="display:none" accept="image/png, image/jpeg, image/webp" onchange="window.uploadDP(event)">
                                <div class="dp-box" onclick="window.handleDpClick()">
-                                   <img src="https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff" id="uAvatar" alt="Profile">
+                                   <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+" id="uAvatar" alt="Profile">
                                </div>
                            </div>
                            <div id="statusDot" class="status-dot online"></div>
@@ -3051,7 +3051,7 @@ window.onload = async () => {
            safeSetText('uUID', cachedStaticUser.UID || userUid);
            safeSetText('sbUid', "UID: " + (cachedStaticUser.UID || userUid));
            
-           const avatarSrc = cachedStaticUser.Avatar || `https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff`;
+           const avatarSrc = cachedStaticUser.Avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
            if(uAvatar) uAvatar.src = avatarSrc;
            if(sbAvatar) sbAvatar.src = avatarSrc;
@@ -3086,7 +3086,7 @@ window.onload = async () => {
            safeSetText('uUID', userUid);
            safeSetText('sbUid', "UID: " + userUid);
 
-           const liveAvatar = user.Avatar || `https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff`;
+           const liveAvatar = user.Avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
            if(uAvatar) uAvatar.src = liveAvatar;
            if(sbAvatar) sbAvatar.src = liveAvatar;
@@ -5394,7 +5394,7 @@ window.removeDP = async (event) => {
     
     try {
         const uid = localStorage.getItem('uid');
-        const defaultAvatar = "https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff";
+        const defaultAvatar = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+";
         
         // Backend API Call for Avatar Remove
         const result = await window.fetchAPI('/user/remove-avatar', 'POST', { uid });
@@ -5531,7 +5531,7 @@ window.startLiveFeedCarousel = () => {
         let statusColor = status.toLowerCase() === 'success' ? 'var(--success)' : 
                           (status.toLowerCase().includes('reject') ? 'var(--error)' : 'var(--warning)');
 
-        let defaultAvatar = "https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff";
+        let defaultAvatar = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+";
 
         let html = `
             <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -6067,7 +6067,7 @@ window.syncChatInitialData = async () => {
                let html = '';
                reqResult.data.forEach(req => {
                    let sName = req.senderName || 'User';
-                   let sAvatar = req.senderAvatar || 'https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff';
+                   let sAvatar = req.senderAvatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+';
                    html += `<div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">
                        <div style="display:flex; align-items:center; gap:8px;">
                            <img src="${sAvatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
@@ -6095,7 +6095,7 @@ window.syncChatInitialData = async () => {
            } else {
                let html = '<h5 style="color: var(--text-sub); margin: 15px 0 10px 5px; font-size: 0.75rem; font-weight: 600; text-transform: uppercase;">Direct Messages</h5>';
                friendsResult.data.forEach(f => {
-                   let av = f.avatar || 'https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff';
+                   let av = f.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+';
                    html += `<div id="friend-row-${f.uid}" onclick="window.openChatRoom('private', '${f.name || 'User'}', '${av}', '${f.uid}')" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
                        <img src="${av}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                        <div style="flex: 1; overflow: hidden;">
@@ -6289,7 +6289,7 @@ window.fetchInitialDataFromAPI = async () => {
                 safeSetText('uName', u.Name || 'User');
                 safeSetText('sbName', u.Name || 'User');
                 
-                const avatarSrc = u.Avatar || "https://api.iconify.design/solar:user-bold-duotone.svg?color=%2300f5ff";
+                const avatarSrc = u.Avatar || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+";
                 const uAvatar = document.getElementById('uAvatar');
                 const sbAvatar = document.getElementById('sbAvatar');
                 if(uAvatar) uAvatar.src = avatarSrc;
