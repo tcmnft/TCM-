@@ -134,13 +134,11 @@
         
         @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; margin-right: 10px; } .crypto-ticker { margin: 0 5px; } .form-pill { padding: 40px 20px 30px; } .m-name { font-size: 1.8rem; } }
     </style>
-<!-- 🚀 Memo 03: Permanent Login Auto-Redirect (Capital D Fix) -->
+    <!-- 🚀 Memo 03: Permanent Login Auto-Redirect -->
     <script>
         (function() {
             let uid = localStorage.getItem("uid");
             let token = localStorage.getItem("token");
-            
-            // যদি ইউজারের লগইন ডেটা সেভ থাকে, তবে সরাসরি Dashboard.html (বড় হাতের D) এ পাঠিয়ে দেবে
             if (uid && token) {
                 window.location.replace("Dashboard.html"); 
             }
@@ -149,10 +147,8 @@
 </head>
 <body>
 
-    <!-- 🔥 TOAST NOTIFICATION -->
     <div id="toast"><i class="fas fa-check-circle"></i> Action Successful!</div>
 
-    <!-- 🔥 SIDEBAR SYSTEM -->
     <div class="sb-overlay" id="overlay" onclick="toggleSidebar(false)"></div>
     <div class="sidebar" id="sidebar">
         <div class="sb-header">
@@ -168,7 +164,6 @@
         <div class="sb-item" onclick="showToast('Please login to access Security Center!', true)">
             <i class="fas fa-shield-alt" style="color:var(--primary);"></i> Security Center
         </div>
-        <!-- ⚠️ আপনার আসল টেলিগ্রাম লিংকটি এখানে দিন -->
         <a href="https://t.me/Tcm_nft" target="_blank" class="sb-item" style="text-decoration: none;">
             <i class="fab fa-telegram" style="color:#3b82f6;"></i> Official Telegram
         </a>
@@ -177,7 +172,6 @@
         </div>
     </div>
 
-    <!-- 🔥 HEADER -->
     <header class="header-top">
         <div class="logo-box" onclick="window.location.href='Signup.html'"><i class="fas fa-cube"></i> TCM NFT</div>
         <div class="crypto-ticker">
@@ -195,7 +189,6 @@
         </div>
     </header>
 
-    <!-- 🔥 MAIN LOGIN FORM -->
     <div class="login-container">
         <div class="form-pill">
             <i class="fas fa-fingerprint logo-mark"></i>
@@ -204,14 +197,14 @@
             <form id="loginForm">
                 <div class="input-wrapper">
                     <i class="fas fa-user left-i"></i>
-                    <!-- 🔥 name="username" যুক্ত করা হয়েছে -->
-<input type="text" id="loginUID" name="username" placeholder="Email or UID" autocomplete="username" required>
+                    <!-- 🔥 Name Attribute Added -->
+                    <input type="text" id="loginUID" name="username" placeholder="Email or UID" autocomplete="username" required>
                 </div>
 
                 <div class="input-wrapper">
                     <i class="fas fa-lock left-i"></i>
-                    <!-- 🔥 name="password" যুক্ত করা হয়েছে -->
-<input type="password" id="loginPass" name="password" placeholder="Security Key" autocomplete="current-password" required>
+                    <!-- 🔥 Name Attribute Added -->
+                    <input type="password" id="loginPass" name="password" placeholder="Security Key" autocomplete="current-password" required>
                     <div class="eye-btn" id="togglePassBtn">
                         <i class="far fa-eye" id="eyeIcon" style="color:var(--text-sub); font-size:1.1rem;"></i>
                     </div>
@@ -222,8 +215,8 @@
                         <input type="checkbox" id="rememberMe"> Remember Me
                     </label>
                     <a href="javascript:void(0)" id="openForgotBtn" class="ghost-touch-text" onclick="document.getElementById('forgotModal').style.display='flex'; setTimeout(()=>document.getElementById('forgotModal').classList.add('show'),10);">
-    Forgot Password?
-</a>
+                        Forgot Password?
+                    </a>
                 </div>
 
                 <div id="errorBox" style="display: none; margin-bottom: 10px;">
@@ -252,7 +245,6 @@
         <span>PRIVACY</span> • <span>TERMS</span> • <span>SUPPORT</span>
     </nav>
 
-    <!-- 🔥 MAGIC PORTAL (Login Success) -->
     <div id="magicPortal">
         <div class="magic-box" id="magicBox">
             <div class="m-avatar-wrapper">
@@ -268,7 +260,6 @@
         </div>
     </div>
 
-    <!-- 🔥 FORGOT PASSWORD MODAL -->
     <div id="forgotModal">
         <div class="forgot-box">
             <h2 style="color: #fff; margin-bottom: 10px; font-family: 'Space Grotesk';"><i class="fas fa-unlock-alt" style="color:var(--primary);"></i> Reset Password</h2>
@@ -289,7 +280,6 @@
         </div>
     </div>
 
-    <!-- 🔥 APP DOWNLOAD MODAL -->
     <div class="modal" id="appDownloadModal">
         <div class="modal-box" style="padding: 30px 20px; text-align: center;">
             <div id="dl-state-1">
@@ -325,9 +315,6 @@
     </div>
     
 <script>
-// ==============================================================
-// 🌐 GLOBAL TOAST & MODAL ENGINE
-// ==============================================================
 window.showToast = (msg, isErr = false) => {
     const t = document.getElementById('toast');
     if(!t) return;
@@ -355,9 +342,6 @@ window.closeModal = id => {
     if(m){ m.classList.remove('show'); setTimeout(()=>m.style.display='none', 300); } 
 };
 
-// ==============================================================
-// 📋 SIDEBAR & THEME ENGINE
-// ==============================================================
 window.toggleSidebar = force => {
     const s = document.getElementById('sidebar'), o = document.getElementById('overlay');
     if(!s || !o) return;
@@ -385,7 +369,6 @@ window.toggleTheme = () => {
     }
 };
 
-// Init Theme on Load
 (()=>{
     let savedTheme = localStorage.getItem('tcm_theme') || 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -397,25 +380,17 @@ window.toggleTheme = () => {
     }
 })();
 
-// ==============================================================
-// 📱 APP DOWNLOAD ENGINE (REAL DOWNLOAD PROGRESS)
-// ==============================================================
-// 🔥 FIX: আপনার আসল লাইভ সার্ভার লিংক বসানো হলো (RO.apk বাদ দিয়ে)
 window.APK_DOWNLOAD_URL = "https://tcm-bakend.onrender.com/downloads/tcm_nft_app.apk"; 
 window.downloadedApkBlob = null; 
 
 window.openDownloadModal = () => {
-    window.toggleSidebar(false); // Close sidebar first
-    
+    window.toggleSidebar(false); 
     document.getElementById('dl-state-1').style.display = 'block';
     document.getElementById('dl-state-2').style.display = 'none';
     document.getElementById('dl-state-3').style.display = 'none';
-    
     document.getElementById('dl-progress-bar').style.width = '0%';
     document.getElementById('dl-progress-text').innerText = '0%';
-    
     window.downloadedApkBlob = null;
-    
     setTimeout(() => { window.openModal('appDownloadModal'); }, 200);
 };
 
@@ -468,7 +443,6 @@ window.triggerFinalInstall = () => {
     const objectUrl = window.URL.createObjectURL(window.downloadedApkBlob);
     const a = document.createElement('a');
     a.href = objectUrl;
-    // 🔥 FIX: ইউজারের ফোনে এই নামে ফাইলটি সেভ হবে
     a.download = "TCM_NFT_Official_App.apk"; 
     document.body.appendChild(a);
     a.click();
@@ -480,9 +454,6 @@ window.triggerFinalInstall = () => {
     window.showToast("Downloading Package Installer...");
 };
 
-// ==============================================================
-// DOM Mapping & Initial Setup (LOGIN LOGIC)
-// ==============================================================
 const loginForm = document.getElementById('loginForm');
 const loginUID = document.getElementById('loginUID');
 const loginPass = document.getElementById('loginPass');
@@ -516,9 +487,6 @@ if (loginBtn) {
     loginBtn.classList.add('btn-disabled');
 }
 
-// ==============================================================
-// Utilities & Validation
-// ==============================================================
 function showError(msg) {
     if (errorBox && errorTxt) {
         errorTxt.innerText = msg;
@@ -555,7 +523,6 @@ if (loginPass) {
     loginPass.addEventListener('change', validateLoginInput);
 }
 
-// Password Toggle
 if (togglePassBtn && loginPass) {
     togglePassBtn.addEventListener('click', (e) => {
         e.preventDefault();
@@ -575,7 +542,6 @@ if (togglePassBtn && loginPass) {
     });
 }
 
-// Remember Me Data
 window.addEventListener('DOMContentLoaded', () => {
     const remUID = localStorage.getItem('tcm_rem_uid');
     const remPass = localStorage.getItem('tcm_rem_pass');
@@ -588,7 +554,6 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Magic Portal Animation
 function animateProfitValue(obj, start, end, duration) {
     let startTimestamp = null;
     const step = (timestamp) => {
@@ -613,9 +578,6 @@ function animateProfitValue(obj, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// ==============================================================
-// 🚀 Main Login Core Logic (API Call to Backend)
-// ==============================================================
 let isLoggingIn = false;
 
 async function handleLoginRequest() {
@@ -635,7 +597,6 @@ async function handleLoginRequest() {
     try {
         const payload = { identifier, password, isEmail };
 
-        // ব্যাকএন্ডে API কল করা হচ্ছে
         const response = await fetch('https://tcm-bakend.onrender.com/api/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -648,7 +609,6 @@ async function handleLoginRequest() {
             throw new Error(result.message || "Login failed. Please try again.");
         }
 
-        // লোকাল স্টোরেজে ডেটা সেভ করা
         localStorage.setItem("uid", result.uid);
         localStorage.setItem("token", result.token);
         localStorage.setItem("name", result.name);
@@ -668,7 +628,6 @@ async function handleLoginRequest() {
             localStorage.removeItem("tcm_rem_pass");
         }
 
-        // Magic Portal দেখানো
         if (pAvatar && result.avatar) pAvatar.src = result.avatar;
         if (pName) pName.innerText = result.name;
         
@@ -711,9 +670,6 @@ if (loginForm) {
     });
 }
 
-// ==============================================================
-// 🚀 Forgot Password Flow (API Calls to Backend)
-// ==============================================================
 let currentResetUID = null;
 
 if (openForgotBtn) {
@@ -743,7 +699,6 @@ if (closeForgotBtn) {
     });
 }
 
-// OTP সেন্ড করা
 if (btnSendResetOTP) {
     btnSendResetOTP.addEventListener('click', async (e) => {
         e.preventDefault();
@@ -769,7 +724,7 @@ if (btnSendResetOTP) {
                 throw new Error(result.message || "Failed to send OTP.");
             }
 
-            currentResetUID = result.uid; // ব্যাকএন্ড থেকে আসা UID সংরক্ষণ করা হলো
+            currentResetUID = result.uid; 
 
             if (forgotErrorTxt) forgotErrorTxt.innerText = "OTP sent to your email!";
             if (resetOtpArea) resetOtpArea.style.display = "block";
@@ -784,7 +739,6 @@ if (btnSendResetOTP) {
     });
 }
 
-// OTP ভেরিফাই করে পাসওয়ার্ড রিসেট করা
 if (btnConfirmReset) {
     btnConfirmReset.addEventListener('click', async (e) => {
         e.preventDefault();
