@@ -1766,7 +1766,7 @@ input, textarea, select {
                    <div class="bal-hero">
                        <p class="label-sm">
                            Main Wallet Balance
-                           <i class="fas fa-sync-alt" id="walletRefreshIcon" style="cursor:pointer; margin-left:8px; display:inline-block; transition: transform 0.6s;" onclick="triggerWalletRefreshAnimation(this)"></i>
+                           <i class="fas fa-sync-alt" id="walletRefreshIcon" style="cursor:pointer; margin-left:8px; display:inline-block; transition: transform 0.6s;" onclick="triggerWalletRefreshAnimation(this, true)"></i>
                        </p>
                        <div class="val-hero">
                            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="30" style="margin-top:-2px;">
@@ -2238,24 +2238,22 @@ window.getSafeUserData = () => {
 // ==========================================
 window.balFormatIndex = parseInt(localStorage.getItem('tcm_bal_format')) || 0;
 
-window.triggerWalletRefreshAnimation = (iconElement) => {
-   iconElement.classList.remove('spin-action');
-   void iconElement.offsetWidth;
-   iconElement.classList.add('spin-action');
+window.triggerWalletRefreshAnimation = (iconElement, isUserClick = false) => {
+   if(iconElement) {
+       iconElement.classList.remove('spin-action');
+       void iconElement.offsetWidth;
+       iconElement.classList.add('spin-action');
+   }
 
-   if (typeof window.toggleBalanceFormat === 'function') {
+   // 🔥 FIX: শুধুমাত্র ইউজার নিজে ক্লিক করলেই ব্যালেন্সের স্টাইল (****) চেঞ্জ হবে
+   if (isUserClick === true && typeof window.toggleBalanceFormat === 'function') {
        window.toggleBalanceFormat();
    }
 
-   // API থেকে লেটেস্ট ডাটা আনার কল (পরে যুক্ত হবে)
    if (typeof window.fetchWalletData === 'function') {
        window.fetchWalletData(true);
    } else if (window.lastWalletData && typeof window.renderWalletData === 'function') {
        window.renderWalletData(window.lastWalletData);
-   }
-
-   if (typeof window.showToast === 'function') {
-       window.showToast("Wallet Force-Updated!");
    }
 };
 
@@ -7090,45 +7088,48 @@ document.addEventListener('click', (e) => {
 });
 
 // ==============================================================
-    // 📱 MEMO 08: SMART HARDWARE BACK BUTTON (History API Engine)
-    // ==============================================================
-    document.addEventListener("DOMContentLoaded", () => {
-        // ১. Sidebar ট্র্যাকিং
-        const originalToggleSidebar = window.toggleSidebar;
-        window.toggleSidebar = (force) => {
-            const s = document.getElementById('sidebar');
-            const willOpen = typeof force === 'boolean' ? force : !s.classList.contains('active');
-            
-            if (willOpen) {
-                // সাইডবার ওপেন হলে হিস্ট্রিতে একটি ফেক স্টেট পুশ করবে
-                window.history.pushState({ ui: 'sidebar' }, "", "#menu");
-            } else if (window.history.state && window.history.state.ui === 'sidebar') {
-                // ইউজার যদি স্ক্রিনে ট্যাপ করে সাইডবার কাটে, তবে হিস্ট্রি ক্লিন করবে
-                window.history.back(); 
-            }
-            originalToggleSidebar(force);
-        };
+// 📱 MEMO 08: SMART HARDWARE BACK BUTTON (Hash API Engine - WebView Safe)
+// ==============================================================
+document.addEventListener("DOMContentLoaded", () => {
+    // 🔥 App ওপেন হওয়ার সাথে সাথে একটি বেস (Base) হিস্ট্রি পুশ করা হলো, যাতে অ্যাপ সরাসরি ক্লোজ না হয়।
+    window.history.pushState({ base: true }, "", window.location.href);
 
-        // ২. Modal (Popup) ট্র্যাকিং
-        const originalOpenModal = window.openModal;
-        window.openModal = (id) => {
-            // মডাল ওপেন হলে তার আইডি দিয়ে ফেক রুট বানাবে (যেমন: #depositModal)
-            window.history.pushState({ ui: 'modal', id: id }, "", `#${id}`);
-            originalOpenModal(id);
-        };
+    // ১. Sidebar ট্র্যাকিং
+    const originalToggleSidebar = window.toggleSidebar;
+    window.toggleSidebar = (force) => {
+        const s = document.getElementById('sidebar');
+        const willOpen = typeof force === 'boolean' ? force : !s.classList.contains('active');
+        
+        if (willOpen) {
+            window.location.hash = 'menu';
+        } else if (window.location.hash === '#menu') {
+            window.history.back(); 
+        }
+        originalToggleSidebar(force);
+    };
 
-        const originalCloseModal = window.closeModal;
-        window.closeModal = (id, fromBackButton = false) => {
-            // যদি ইউজার 'Cancel' বাটন দিয়ে কাটে, তবে হিস্ট্রি থেকে ফেক রুট মুছে ফেলবে
-            if (!fromBackButton && window.history.state && window.history.state.ui === 'modal' && window.history.state.id === id) {
-                window.history.back(); 
-            }
+    // ২. Modal (Popup) ট্র্যাকিং
+    const originalOpenModal = window.openModal;
+    window.openModal = (id) => {
+        window.location.hash = 'modal-' + id;
+        originalOpenModal(id);
+    };
+
+    const originalCloseModal = window.closeModal;
+    window.closeModal = (id, fromBackButton = false) => {
+        if (!fromBackButton && window.location.hash === '#modal-' + id) {
+            window.history.back(); 
+        } else {
             originalCloseModal(id);
-        };
+        }
+    };
 
-        // ৩. Hardware Back Button ইন্টারসেপ্টর (The Magic Event)
-        window.addEventListener('popstate', (event) => {
-            // ইউজার মোবাইলের ব্যাক বাটন চাপলে এই ইভেন্টটি ফায়ার হবে
+    // ৩. Hardware Back Button ইন্টারসেপ্টর (Hashchange Event)
+    window.addEventListener('hashchange', () => {
+        const hash = window.location.hash;
+        
+        // যদি হ্যাশ খালি থাকে (অর্থাৎ ব্যাক বাটন প্রেস করে আগের অবস্থায় ফিরেছে)
+        if (!hash || (!hash.startsWith('#modal-') && hash !== '#menu')) {
             
             // সাইডবার চেক করে বন্ধ করবে
             const sidebar = document.getElementById('sidebar');
@@ -7136,13 +7137,12 @@ document.addEventListener('click', (e) => {
                 originalToggleSidebar(false);
             }
             
-            // ওপেন থাকা মডাল চেক করে স্লাইড করে বন্ধ করবে
-            const openModals = document.querySelectorAll('.modal.show');
-            if (openModals.length > 0) {
-                openModals.forEach(modal => originalCloseModal(modal.id, true));
-            }
-        });
+            // ওপেন থাকা সব ধরণের মডাল চেক করে স্লাইড করে বন্ধ করবে
+            const openModals = document.querySelectorAll('.modal.show, .modal-overlay[style*="display: block"], .custom-modal-overlay[style*="display: flex"]');
+            openModals.forEach(modal => originalCloseModal(modal.id, true));
+        }
     });
+});
 </script>
 </body>
 </html>
