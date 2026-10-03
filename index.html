@@ -204,12 +204,14 @@
             <form id="loginForm">
                 <div class="input-wrapper">
                     <i class="fas fa-user left-i"></i>
-                    <input type="text" id="loginUID" placeholder="Email or UID" autocomplete="username" required>
+                    <!-- 🔥 name="username" যুক্ত করা হয়েছে -->
+<input type="text" id="loginUID" name="username" placeholder="Email or UID" autocomplete="username" required>
                 </div>
 
                 <div class="input-wrapper">
                     <i class="fas fa-lock left-i"></i>
-                    <input type="password" id="loginPass" placeholder="Security Key" autocomplete="current-password" required>
+                    <!-- 🔥 name="password" যুক্ত করা হয়েছে -->
+<input type="password" id="loginPass" name="password" placeholder="Security Key" autocomplete="current-password" required>
                     <div class="eye-btn" id="togglePassBtn">
                         <i class="far fa-eye" id="eyeIcon" style="color:var(--text-sub); font-size:1.1rem;"></i>
                     </div>
