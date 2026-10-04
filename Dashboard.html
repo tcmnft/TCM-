@@ -774,65 +774,47 @@ input, textarea, select {
 }
   
 /* ==========================================================================
-   🛡️ PHASE 2: NINJA BLADE SECURITY SHIELD (CYBERPUNK EDITION)
+   🛡️ PHASE 2: NEW SHIELD STYLES (MATCHING YOUR IMAGES)
    ========================================================================== */
 .shield-wrapper {
     position: relative; width: 140px; height: 160px; margin: 0 auto 15px;
     display: flex; align-items: center; justify-content: center;
-    perspective: 1000px; /* 3D Hover Effect-এর জন্য */
+    perspective: 1000px;
 }
 .shield-svg {
-    width: 110px; height: 130px; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-    filter: drop-shadow(0 10px 15px rgba(0, 245, 255, 0.15));
+    width: 120px; height: 140px; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
     transform-style: preserve-3d;
 }
-/* 3D Glass Elevation Hover */
+
+/* Layer Visibility Logic */
+.shield-layer-0, .shield-layer-50, .shield-layer-100 { 
+    display: none; transition: opacity 0.5s ease; opacity: 0; 
+}
+.shield-0 .shield-layer-0 { display: block; opacity: 1; }
+.shield-50 .shield-layer-50 { display: block; opacity: 1; }
+.shield-100 .shield-layer-100 { display: block; opacity: 1; }
+
+/* 3D Hover & Glowing Effects */
 .shield-wrapper:hover .shield-svg {
     transform: translateY(-8px) rotateX(10deg) rotateY(10deg);
-    filter: drop-shadow(0 15px 25px rgba(0, 245, 255, 0.4));
+}
+.shield-50 { filter: drop-shadow(0 15px 25px rgba(44, 130, 223, 0.4)); }
+.shield-100 { 
+    filter: drop-shadow(0 15px 30px rgba(34, 197, 94, 0.5));
+    animation: pulseMetallicGreen 2s infinite alternate; 
 }
 
-.shield-path {
-    fill: rgba(0, 0, 0, 0.4);
-    stroke-width: 3;
-    stroke-linejoin: round; stroke-linecap: round;
-    transition: all 0.5s ease;
+@keyframes pulseMetallicGreen {
+    0% { filter: drop-shadow(0 10px 15px rgba(34, 197, 94, 0.3)); }
+    100% { filter: drop-shadow(0 20px 40px rgba(34, 197, 94, 0.7)); }
 }
 
-/* 💠 Pixel Grid Lines */
-.grid-pattern { stroke: rgba(255,255,255,0.15); stroke-width: 0.5; }
-
-/* ⚡ The Blade Shine Glint */
-.blade-glint {
-    fill: url(#glintGradient);
-    clip-path: url(#ninjaClip);
-    animation: bladeShine 4s cubic-bezier(0.25, 1, 0.5, 1) infinite;
-}
-@keyframes bladeShine {
-    0%, 60% { transform: translateX(-150%) skewX(-30deg); }
-    80%, 100% { transform: translateX(150%) skewX(-30deg); }
-}
-
-/* 🔵 Shield States (Blue, Yellow, Gray) */
-.shield-0 .shield-path { stroke: #475569; fill: rgba(255,255,255,0.02); }
-.shield-0 .shield-fill { transform: scaleY(0); }
-.shield-0 .blade-glint { display: none; } /* 0% থাকলে ব্লেড শাইন করবে না */
-
-.shield-50 .shield-path { stroke: #facc15; }
-.shield-50 .shield-fill { transform: scaleY(0.5); fill: rgba(250, 204, 21, 0.2); }
-.shield-50 .blade-glint { display: none; }
-
-.shield-100 .shield-path { stroke: #00f5ff; }
-.shield-100 .shield-fill { transform: scaleY(1); fill: rgba(0, 245, 255, 0.15); }
-
-/* Center Icon Glow */
+/* Center Icon Logic */
 .shield-icon {
     position: absolute; font-size: 2.2rem; z-index: 10;
     transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    color: #64748b;
 }
-.shield-0 ~ .shield-icon { color: #64748b; }
-.shield-50 ~ .shield-icon { color: #facc15; filter: drop-shadow(0 0 10px rgba(250, 204, 21, 0.6)); }
-.shield-100 ~ .shield-icon { color: #00f5ff; filter: drop-shadow(0 0 15px rgba(0, 245, 255, 0.8)); }
 
 /* ==========================================================================
    📊 PHASE 3: ASSETS MODULE (DUAL MODE ANALYTICS & LEDGER)
@@ -998,27 +980,140 @@ input, textarea, select {
    ========================================= */
 .atm-grid { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
 .atm-scene { perspective: 1000px; width: 100%; height: 240px; }
-.atm-card { width: 100%; height: 100%; position: relative; transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; cursor: pointer; border-radius: 16px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
+.atm-card { width: 100%; height: 100%; position: relative; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); transform-style: preserve-3d; cursor: pointer; border-radius: 16px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
 .atm-card.is-flipped { transform: rotateY(180deg); }
+
+/* 🔥 Tactical Touch/Click Animation */
+.atm-scene:active .atm-card {
+    transform: rotateZ(-2deg) rotateY(12deg) rotateX(8deg) scale(0.97) !important;
+}
+
+/* 🖤 Clean Black History Cards */
+.clean-tx-card { background: #0a0a0a; border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+.clean-tx-card .tx-id-badge { font-size: 0.65rem; color: #d4d4d8; font-family: monospace; background: #18181b; padding: 2px 6px; border-radius: 4px; border: 1px solid #27272a; margin-left: 5px; }
+.clean-tx-card .tx-amt { font-size: 1rem; font-weight: 800; font-family: 'Space Grotesk', sans-serif; color: #ffffff; text-shadow: 0 0 5px rgba(255,255,255,0.2); }
 .atm-face { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
 
 /* 🌟 Shining Effect */
 .atm-face::after { content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%; background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); animation: shine 4s infinite; pointer-events: none; }
 @keyframes shine { 0% { left: -150%; } 20% { left: 200%; } 100% { left: 200%; } }
 
-/* 🎨 Card Themes */
-.card-silver .atm-face { background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #475569 100%); color: #0f172a; border: 1px solid #cbd5e1; }
-.card-gold .atm-face { background: linear-gradient(135deg, #fef08a 0%, #eab308 50%, #a16207 100%); color: #451a03; border: 1px solid #fde047; }
-.card-platinum .atm-face { background: linear-gradient(135deg, #a5f3fc 0%, #06b6d4 50%, #312e81 100%); color: #ffffff; border: 1px solid #67e8f9; }
-.atm-face-back { transform: rotateY(180deg); background: #0f172a !important; color: #f8fafc !important; border: 1px solid #334155 !important; overflow-y: auto; scrollbar-width: none; }
+/* 🎨 Premium Geometric & Wavy Card Themes */
+.atm-face-back { transform: rotateY(180deg); background: #000000 !important; color: #f8fafc !important; border: 1px solid #27272a !important; overflow-y: auto; scrollbar-width: none; }
+
+/* Contactless NFC Icon */
+.nfc-icon { position: absolute; right: 20px; top: 20px; font-size: 1.4rem; transform: rotate(90deg); opacity: 0.5; }
+
+/* 🎨 Premium Structural Card Themes */
+.atm-face-back { transform: rotateY(180deg); background: #000000 !important; color: #f8fafc !important; border: 1px solid #27272a !important; overflow-y: auto; scrollbar-width: none; }
+.nfc-icon { position: absolute; right: 20px; top: 20px; font-size: 1.4rem; transform: rotate(90deg); opacity: 0.5; z-index: 5; }
+.atm-face-front > * { position: relative; z-index: 5; }
+
+/* ⚪ SILVER: Brushed Steel & Diagonal Cut */
+.card-silver .atm-face-front { 
+    background: 
+        linear-gradient(115deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 35%, transparent 35.5%),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 6px),
+        linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #475569 100%); 
+    color: #0f172a; border: 1px solid #cbd5e1; 
+}
+
+/* 🟡 GOLD: Inner Royal Border & Luxury Beam */
+.card-gold .atm-face-front { 
+    background: 
+        radial-gradient(ellipse at top right, rgba(255, 255, 255, 0.4) 0%, transparent 50%),
+        repeating-linear-gradient(to bottom, transparent 0, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 16px),
+        linear-gradient(135deg, #fde047 0%, #eab308 50%, #a16207 100%); 
+    color: #451a03; border: 1px solid #fde047; 
+}
+.card-gold .atm-face-front::before {
+    content: ''; position: absolute; inset: 6px; border: 1px dashed rgba(69, 26, 3, 0.25); border-radius: 12px; pointer-events: none; z-index: 1;
+}
+
+/* 💎 PLATINUM: Pink & Cyan Dual Tone Matrix */
+.card-platinum .atm-face-front { 
+    background: 
+        linear-gradient(rgba(236, 72, 153, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(236, 72, 153, 0.1) 1px, transparent 1px),
+        radial-gradient(circle at 85% 15%, rgba(236, 72, 153, 0.4) 0%, transparent 60%),
+        linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #be185d 100%); 
+    background-size: 15px 15px, 15px 15px, 100% 100%, 100% 100%;
+    color: #ffffff; border: 1px solid #4338ca; 
+}
+
+/* 🌌 BLACK DIAMOND: Carbon Shards */
+.card-diamond .atm-face-front { 
+    background: 
+        linear-gradient(115deg, transparent 25%, rgba(255,255,255,0.05) 25.5%, rgba(255,255,255,0.05) 45%, transparent 45.5%),
+        linear-gradient(250deg, transparent 35%, rgba(255,255,255,0.04) 35.5%, rgba(255,255,255,0.04) 60%, transparent 60.5%),
+        linear-gradient(135deg, #18181b 0%, #000000 100%); 
+    color: #ffffff; border: 1px solid #3f3f46; 
+}
 
 /* Card Elements */
 .atm-header { display: flex; justify-content: space-between; align-items: flex-start; }
 .atm-title { font-size: 1.4rem; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+
+/* 🔥 Premium Engraved & Glowing TX Counter */
+.engraved-tx-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 8px;
+    background: rgba(0, 0, 0, 0.15); 
+    border-top: 1px solid rgba(0, 0, 0, 0.4);
+    border-bottom: 1px solid rgba(0, 245, 255, 0.3);
+    box-shadow: inset 1px 2px 5px rgba(0, 0, 0, 0.4), 0 0 10px rgba(0, 245, 255, 0.1);
+    font-family: 'Space Grotesk', monospace;
+    font-size: 0.65rem; font-weight: 800;
+    color: var(--primary); 
+    text-transform: uppercase; letter-spacing: 1px;
+    text-shadow: 0px 0px 5px rgba(0, 245, 255, 0.4);
+    pointer-events: none;
+}
+.card-platinum .engraved-tx-badge, .card-diamond .engraved-tx-badge {
+    background: rgba(0, 0, 0, 0.4);
+    border-top: 1px solid rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid rgba(0, 245, 255, 0.4);
+    box-shadow: inset 1px 2px 8px rgba(0, 0, 0, 0.7), 0 0 12px rgba(0, 245, 255, 0.2);
+    color: var(--primary);
+}
+.engraved-tx-badge .tx-num { font-size: 0.9rem; color: #ffffff; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+
+/* 🔥 Liquid Smooth Scroll for Card Back */
+.atm-face-back {
+    transform: rotateY(180deg); background: #000000 !important; color: #f8fafc !important; 
+    border: 1px solid #27272a !important; overflow-y: auto; scrollbar-width: none;
+    scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
+}
+.atm-face-back::-webkit-scrollbar { display: none; }
 .atm-roi { font-size: 0.9rem; font-weight: bold; opacity: 0.8; }
-.atm-chip { width: 45px; height: 35px; background: linear-gradient(135deg, #d4af37, #fde047); border-radius: 6px; position: relative; overflow: hidden; }
-.atm-chip::before { content:''; position:absolute; width:100%; height:1px; background:#a16207; top:50%; }
-.atm-chip::after { content:''; position:absolute; width:1px; height:100%; background:#a16207; left:50%; }
+/* 🌟 Ultra-Realistic Engraved EMV Chip */
+.atm-chip { 
+    width: 42px; height: 32px; 
+    /* রিয়েল শাইনিং গোল্ড টেক্সচার */
+    background: linear-gradient(135deg, #eab308 0%, #fef08a 40%, #ca8a04 60%, #854d0e 100%); 
+    border-radius: 6px; position: relative; overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.6);
+    /* Inset shadow-এর কারণে মনে হবে প্লাস্টিকের ভেতরে খোদাই করে বসানো */
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.6), inset -1px -1px 3px rgba(255,255,255,0.4), 0 1px 1px rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+/* উপরের লাইন */
+.atm-chip::before { 
+    content:''; position:absolute; width: 100%; height: 1px; 
+    background: rgba(0,0,0,0.4); top: 35%; box-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+/* নিচের লাইন */
+.atm-chip::after { 
+    content:''; position:absolute; width: 100%; height: 1px; 
+    background: rgba(0,0,0,0.4); bottom: 35%; box-shadow: 0 1px 0 rgba(255,255,255,0.3);
+}
+/* মাঝের কন্টাক্ট প্যাড */
+.atm-chip-inner {
+    position: absolute; width: 14px; height: 100%;
+    border-left: 1px solid rgba(0,0,0,0.4); border-right: 1px solid rgba(0,0,0,0.4);
+    top: 0; left: 50%; transform: translateX(-50%);
+    box-shadow: inset 1px 0 0 rgba(255,255,255,0.3), inset -1px 0 0 rgba(255,255,255,0.3);
+}
 
 .atm-input-row { display: flex; gap: 10px; margin-top: 15px; }
 .atm-input-row input { flex: 1; padding: 10px; border-radius: 8px; border: none; background: rgba(255,255,255,0.2); color: inherit; font-weight: bold; outline: none; }
@@ -1070,8 +1165,25 @@ input, textarea, select {
 
 .cinema-overlay { position: fixed; inset: 0; background: rgba(5, 8, 15, 0.95); backdrop-filter: blur(25px); z-index: 100000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.4s ease; flex-direction: column; overflow: hidden; }
 .cinema-overlay.active { opacity: 1; pointer-events: auto; }
-.cinema-close { position: absolute; top: 30px; right: 30px; color: white; font-size: 2rem; cursor: pointer; opacity: 0.6; transition: 0.3s; z-index: 100002; }
-.cinema-close:hover { opacity: 1; transform: scale(1.1); color: var(--error); }
+/* 🎬 Cinema Mode Premium Close Button */
+.cinema-close-btn {
+    position: absolute; top: 30px; right: 30px;
+    width: 42px; height: 42px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 50%; display: flex; justify-content: center; align-items: center;
+    color: rgba(255, 255, 255, 0.8); font-size: 1.1rem;
+    cursor: pointer; z-index: 100002;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+.cinema-close-btn:hover, .cinema-close-btn:active {
+    background: rgba(244, 63, 94, 0.15); color: #f43f5e;
+    border-color: rgba(244, 63, 94, 0.4);
+    transform: rotate(90deg) scale(1.1);
+    box-shadow: 0 0 20px rgba(244, 63, 94, 0.4);
+}
 .cinema-card-container { perspective: 1500px; width: 90%; max-width: 360px; height: 220px; position: relative; z-index: 100001; transform: translateY(-30px); }
 .cinema-card-3d { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.1s ease-out; box-shadow: 0 30px 60px rgba(0,0,0,0.8), 0 0 40px rgba(0,245,255,0.2); border-radius: 16px; }
 
@@ -1080,7 +1192,61 @@ input, textarea, select {
 .live-profit-counter { font-family: 'Space Grotesk', monospace; font-size: 2.8rem; font-weight: 900; color: var(--success); text-shadow: 0 0 25px rgba(16,185,129,0.6); margin: 5px 0; letter-spacing: -1px; }
 .cinema-title { font-size: 0.8rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; margin-bottom: 10px; display: block; }
 
+/* ==========================================================
+   🔥 THEME-MATCHED ENGRAVED TX COUNTERS (Per Card Design)
+   ========================================================== */
+.engraved-tx-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 8px;
+    font-family: 'Space Grotesk', monospace;
+    font-size: 0.65rem; font-weight: 800;
+    text-transform: uppercase; letter-spacing: 1px;
+    pointer-events: none;
+}
 
+/* ⚪ SILVER CARD BADGE: Steel & Dark Slate */
+.card-silver .engraved-tx-badge {
+    background: rgba(15, 23, 42, 0.12);
+    border-top: 1px solid rgba(15, 23, 42, 0.3);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset 1px 2px 4px rgba(0, 0, 0, 0.2);
+    color: #334155;
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.5);
+}
+.card-silver .engraved-tx-badge .tx-num { color: #0f172a; font-size: 0.85rem; font-weight: 900; }
+
+/* 🟡 GOLD CARD BADGE: Royal Bronze & Deep Amber */
+.card-gold .engraved-tx-badge {
+    background: rgba(69, 26, 3, 0.15);
+    border-top: 1px solid rgba(69, 26, 3, 0.3);
+    border-bottom: 1px solid rgba(254, 240, 138, 0.6);
+    box-shadow: inset 1px 2px 4px rgba(69, 26, 3, 0.2);
+    color: #78350f;
+    text-shadow: 1px 1px 0px rgba(254, 240, 138, 0.6);
+}
+.card-gold .engraved-tx-badge .tx-num { color: #451a03; font-size: 0.85rem; font-weight: 900; }
+
+/* 💎 PLATINUM CARD BADGE: Cyber Pink & Electric Violet */
+.card-platinum .engraved-tx-badge {
+    background: rgba(15, 23, 42, 0.5);
+    border-top: 1px solid rgba(0, 0, 0, 0.8);
+    border-bottom: 1px solid rgba(236, 72, 153, 0.6);
+    box-shadow: inset 1px 2px 6px rgba(0, 0, 0, 0.6), 0 0 12px rgba(236, 72, 153, 0.25);
+    color: #f472b6;
+    text-shadow: 0 0 8px rgba(236, 72, 153, 0.5);
+}
+.card-platinum .engraved-tx-badge .tx-num { color: #ffffff; font-size: 0.9rem; font-weight: 900; }
+
+/* 🌌 BLACK DIAMOND CARD BADGE: Carbon Matrix & Cyan Glow */
+.card-diamond .engraved-tx-badge {
+    background: rgba(0, 0, 0, 0.6);
+    border-top: 1px solid rgba(0, 0, 0, 0.9);
+    border-bottom: 1px solid rgba(0, 245, 255, 0.5);
+    box-shadow: inset 1px 2px 8px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 245, 255, 0.2);
+    color: var(--primary);
+    text-shadow: 0 0 8px rgba(0, 245, 255, 0.6);
+}
+.card-diamond .engraved-tx-badge .tx-num { color: #ffffff; font-size: 0.9rem; font-weight: 900; }
 </style>
 </head>
 <body>
@@ -1160,37 +1326,78 @@ input, textarea, select {
         <h2 style="font-size:1.4rem; margin-bottom:5px; font-weight:700; color:var(--text-main);"><i class="fas fa-shield-alt" style="color:var(--primary);"></i> Security Center</h2>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Protect your assets with advanced cyber security.</p>
         
-        <!-- 🛡️ CYBERPUNK NINJA SHIELD -->
+        <!-- 🛡️ PREMIUM METALLIC & FLAT SHIELDS -->
         <div class="shield-wrapper" id="shieldWrapper">
-            <svg class="shield-svg shield-0" id="mainShield" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg">
+            <svg class="shield-svg shield-0" id="mainShield" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
                 <defs>
-                    <!-- Pixel Grid Lines -->
-                    <pattern id="ninjaGrid" width="8" height="8" patternUnits="userSpaceOnUse">
-                        <path d="M 8 0 L 0 0 0 8" fill="none" class="grid-pattern" />
-                    </pattern>
-                    <!-- Blade Shine Gradient -->
-                    <linearGradient id="glintGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                        <stop offset="0%" stop-color="rgba(255,255,255,0)" />
-                        <stop offset="50%" stop-color="rgba(255,255,255,0.9)" />
-                        <stop offset="100%" stop-color="rgba(255,255,255,0)" />
+                    <!-- 50% Blue Shield Gradients -->
+                    <linearGradient id="blueLeft" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#2c82df" />
+                        <stop offset="100%" stop-color="#2472d8" />
                     </linearGradient>
-                    <!-- Ninja Cut Shape (মাঝখানে V কাট) -->
-                    <clipPath id="ninjaClip">
-                        <path d="M 10 20 L 50 35 L 90 20 L 90 60 C 90 90 60 110 50 115 C 40 110 10 90 10 60 Z" />
-                    </clipPath>
+                    <linearGradient id="blueRight" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#1c5bb0" />
+                        <stop offset="100%" stop-color="#134185" />
+                    </linearGradient>
+
+                    <!-- 100% Green Metallic Shield Gradients -->
+                    <linearGradient id="silverBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#f8fafc" />
+                        <stop offset="30%" stop-color="#94a3b8" />
+                        <stop offset="70%" stop-color="#334155" />
+                        <stop offset="100%" stop-color="#0f172a" />
+                    </linearGradient>
+                    <linearGradient id="blackInnerBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#1e293b" />
+                        <stop offset="100%" stop-color="#020617" />
+                    </linearGradient>
+                    <radialGradient id="greenGlow" cx="50%" cy="75%" r="65%">
+                        <stop offset="0%" stop-color="#a3e635" /> <!-- Bright center bottom -->
+                        <stop offset="50%" stop-color="#22c55e" /> <!-- Mid green -->
+                        <stop offset="100%" stop-color="#064e3b" /> <!-- Dark green edge -->
+                    </radialGradient>
                 </defs>
-                
-                <!-- Base Shield Path -->
-                <path class="shield-path" d="M 10 20 L 50 35 L 90 20 L 90 60 C 90 90 60 110 50 115 C 40 110 10 90 10 60 Z" />
-                
-                <!-- Grid Pattern Apply -->
-                <rect x="0" y="0" width="100" height="120" fill="url(#ninjaGrid)" clip-path="url(#ninjaClip)" />
-                
-                <!-- Dynamic Liquid Fill -->
-                <rect class="shield-fill" id="shieldFillRect" x="0" y="0" width="100" height="120" clip-path="url(#ninjaClip)" style="transform-origin: bottom; transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1), fill 0.8s ease;" />
-                
-                <!-- The Blade Shine (তলোয়ারের শাইন) -->
-                <rect class="blade-glint" x="-50" y="0" width="40" height="120" />
+
+                <!-- LAYER 0: 0% Gray Shield (Unsecured) -->
+                <g class="shield-layer-0">
+                    <path d="M 10 20 L 60 5 L 110 20 L 110 70 C 110 110 70 135 60 138 C 50 135 10 110 10 70 Z" fill="#334155" />
+                    <path d="M 10 20 L 60 5 L 60 138 C 50 135 10 110 10 70 Z" fill="#475569" />
+                </g>
+
+                <!-- LAYER 50: Exact Blue Shield (Image 1) -->
+                <g class="shield-layer-50">
+                    <!-- Background base (Right Dark Blue) -->
+                    <path d="M 10 20 L 60 5 L 110 20 L 110 70 C 110 110 70 135 60 138 C 50 135 10 110 10 70 Z" fill="url(#blueRight)" />
+                    <!-- Left Half (Light Blue) -->
+                    <path d="M 10 20 L 60 5 L 60 138 C 50 135 10 110 10 70 Z" fill="url(#blueLeft)" />
+                    <!-- Inner White Outline -->
+                    <path d="M 18 27 L 60 14 L 102 27 L 102 68 C 102 102 70 123 60 127 C 50 123 18 102 18 68 Z" fill="none" stroke="#ffffff" stroke-width="3.5" opacity="0.9" />
+                </g>
+
+                <!-- LAYER 100: Exact Green Metallic Shield (Image 2) -->
+                <g class="shield-layer-100">
+                    <!-- Outer Metallic Border -->
+                    <path d="M 5 15 L 60 0 L 115 15 L 115 70 C 115 115 70 140 60 145 C 50 140 5 115 5 70 Z" fill="url(#silverBorder)" />
+                    
+                    <!-- Inner Dark Border -->
+                    <path d="M 11 20 L 60 6 L 109 20 L 109 69 C 109 110 70 132 60 136 C 50 132 11 110 11 69 Z" fill="url(#blackInnerBorder)" />
+                    
+                    <!-- Core Green Glowing Area -->
+                    <path d="M 17 25 L 60 13 L 103 25 L 103 67 C 103 104 70 124 60 128 C 50 124 17 104 17 67 Z" fill="url(#greenGlow)" />
+                    
+                    <!-- Metallic Rivets (Dots) -->
+                    <!-- Left Side -->
+                    <circle cx="12" cy="45" r="2.5" fill="#e2e8f0" stroke="#000" stroke-width="0.5" />
+                    <circle cx="15" cy="78" r="2.5" fill="#e2e8f0" stroke="#000" stroke-width="0.5" />
+                    <circle cx="33" cy="115" r="2.5" fill="#e2e8f0" stroke="#000" stroke-width="0.5" />
+                    <!-- Right Side -->
+                    <circle cx="108" cy="45" r="2.5" fill="#e2e8f0" stroke="#000" stroke-width="0.5" />
+                    <circle cx="105" cy="78" r="2.5" fill="#e2e8f0" stroke="#000" stroke-width="0.5" />
+                    <circle cx="87" cy="115" r="2.5" fill="#e2e8f0" stroke="#000" stroke-width="0.5" />
+                    
+                    <!-- Top Glossy Reflection (Creates the 3D Glass Effect) -->
+                    <path d="M 17 25 L 60 13 L 103 25 L 103 45 C 70 55 40 45 17 45 Z" fill="#ffffff" opacity="0.15" />
+                </g>
             </svg>
             <i class="fas fa-unlock-alt shield-icon" id="shieldCenterIcon"></i>
         </div>
@@ -1437,76 +1644,8 @@ input, textarea, select {
         </div>
     </div>
 
-    <!-- 🔥 CLAIM CELEBRATION POPUP -->
-    <div id="claimPopup">
-        <div class="claim-card-pop">
-            <div class="claim-icon-pop"><i class="fas fa-check"></i></div>
-            <h3 style="color:var(--text-sub); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Contract Matured</h3>
-            <div class="claim-amount-pop" id="popClaimAmt">0.00</div>
-            <div class="claim-profit-pop" id="popClaimProfit">+ 0.00 ₮ Profit</div>
-            
-            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: left; border: 1px dashed rgba(255,255,255,0.1);">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-sub); margin-bottom:8px;">
-                    <span>Previous Balance:</span>
-                    <span id="popOldBal" style="font-family:monospace; color:#fff;">0.00 ₮</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                    <span style="color:#fff;">New Balance:</span>
-                    <span id="popNewBal" style="color:var(--success); font-family:monospace;">0.00 ₮</span>
-                </div>
-            </div>
-
-            <button class="act-btn btn-dep" style="width:100%;" onclick="window.closeClaimPopup()">Awesome!</button>
-        </div>
-    </div>
-    <!-- 🔥 CLAIM CELEBRATION POPUP -->
-    <div id="claimPopup">
-        <div class="claim-card-pop">
-            <div class="claim-icon-pop"><i class="fas fa-check"></i></div>
-            <h3 style="color:var(--text-sub); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Contract Matured</h3>
-            <div class="claim-amount-pop" id="popClaimAmt">0.00</div>
-            <div class="claim-profit-pop" id="popClaimProfit">+ 0.00 ₮ Profit</div>
-            
-            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: left; border: 1px dashed rgba(255,255,255,0.1);">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-sub); margin-bottom:8px;">
-                    <span>Previous Balance:</span>
-                    <span id="popOldBal" style="font-family:monospace; color:#fff;">0.00 ₮</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                    <span style="color:#fff;">New Balance:</span>
-                    <span id="popNewBal" style="color:var(--success); font-family:monospace;">0.00 ₮</span>
-                </div>
-            </div>
-
-            <button class="act-btn btn-dep" style="width:100%;" onclick="window.closeClaimPopup()">Awesome!</button>
-        </div>
-    </div>
-
-    <!-- 🔥 CLAIM CELEBRATION POPUP -->
-    <div id="claimPopup">
-        <div class="claim-card-pop">
-            <div class="claim-icon-pop"><i class="fas fa-check"></i></div>
-            <h3 style="color:var(--text-sub); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Contract Matured</h3>
-            <div class="claim-amount-pop" id="popClaimAmt">0.00</div>
-            <div class="claim-profit-pop" id="popClaimProfit">+ 0.00 ₮ Profit</div>
-            
-            <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: left; border: 1px dashed rgba(255,255,255,0.1);">
-                <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-sub); margin-bottom:8px;">
-                    <span>Previous Balance:</span>
-                    <span id="popOldBal" style="font-family:monospace; color:#fff;">0.00 ₮</span>
-                </div>
-                <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                    <span style="color:#fff;">New Balance:</span>
-                    <span id="popNewBal" style="color:var(--success); font-family:monospace;">0.00 ₮</span>
-                </div>
-            </div>
-
-            <button class="act-btn btn-dep" style="width:100%;" onclick="window.closeClaimPopup()">Awesome!</button>
-        </div>
-    </div>
-
-    <!-- 🔥 CLAIM CELEBRATION POPUP -->
-    <div id="claimPopup">
+<!-- 🔥 CLAIM CELEBRATION POPUP -->
+    <div id="claimPopup" class="modal" style="z-index: 200000;">
         <div class="claim-card-pop">
             <div class="claim-icon-pop"><i class="fas fa-check"></i></div>
             <h3 style="color:var(--text-sub); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Contract Matured</h3>
@@ -1817,7 +1956,7 @@ input, textarea, select {
        </div>
    </div>
 
-   <div id="nftScanModal">
+   <div id="nftScanModal" class="modal">
        <div class="scan-box">
            <div class="scan-line" id="scanLine"></div>
            <i class="fas fa-fingerprint" id="scanIcon" style="font-size: 4rem; color: rgba(0, 245, 255, 0.3);"></i>
@@ -2157,21 +2296,33 @@ input, textarea, select {
                                <div><div class="atm-title" style="color:#000;">Silver Card</div><div class="atm-roi" style="color:#1e293b;">Lock: 7 Days | Daily ROI: 1.2%</div></div>
                                <div class="tier-staked-badge"><span id="tierTotal_silver">0.00</span> <span style="opacity:0.6; margin-left:3px;">₮</span></div>
                            </div>
-                           <div class="atm-input-row">
+                           
+                           <!-- 🔥 Engraved Chip & TX Count -->
+                           <div style="margin-top: 10px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;">
+                               <div class="atm-chip"><div class="atm-chip-inner"></div></div>
+                               <div class="engraved-tx-badge">TXNS <span class="tx-num" id="txCount_silver">0</span></div>
+                           </div>
+
+                           <div class="atm-input-row" style="margin-top: 5px;">
                                <input type="number" id="stakeAmt7" placeholder="Min 10 USDT" onclick="event.stopPropagation()">
                                <button onclick="event.stopPropagation(); window.executeStake(7, 1.2, 'stakeAmt7', 'cardNo_silver')">Stake</button>
                            </div>
-                           <div class="atm-bottom-row">
-                               <div class="atm-user-details">
-                                   <div class="atm-card-name uNameCardText">TCM USER</div>
-                                   <div class="atm-number" id="cardNo_silver">4592 0000 0000 0000</div>
+
+                           <div style="display: flex; flex-direction: column; align-items: stretch; margin-top: 15px; gap: 4px;">
+                               <div class="atm-number" id="cardNo_silver" style="white-space: nowrap; font-size: clamp(1rem, 5vw, 1.15rem); letter-spacing: 1px; text-align: left; width: 100%;">4592 0000 0000 0000</div>
+                               <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+                                   <div class="atm-card-name uNameCardText" style="font-size: 0.95rem; color: #0f172a; letter-spacing: 1px;">TCM USER</div>
+                                   <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                       <div style="display:flex; flex-direction:column; align-items:flex-start; line-height: 1.1;">
+                                           <span style="font-size:0.4rem; color:rgba(0,0,0,0.6); font-weight: 800; letter-spacing: 0.5px;">VALID</span>
+                                           <span style="font-size:0.4rem; color:rgba(0,0,0,0.6); font-weight: 800; letter-spacing: 0.5px;">THRU</span>
+                                       </div>
+                                       <span style="font-size:1.05rem; font-family:'Courier New', monospace; font-weight:900; color:#000; text-shadow: 1px 1px 0 rgba(255,255,255,0.4);">12/28</span>
+                                   </div>
                                </div>
-                               <div class="atm-chip"></div>
                            </div>
                        </div>
-                       <div class="atm-face atm-face-back" id="back_silver_data">
-                           <div style="text-align:center; padding-top:40px; opacity:0.5;">No Active Silver Stakes</div>
-                       </div>
+                       <div class="atm-face atm-face-back" id="back_silver_data"></div>
                    </div>
                </div>
 
@@ -2183,21 +2334,33 @@ input, textarea, select {
                                <div><div class="atm-title" style="color:#000;">Gold Card</div><div class="atm-roi" style="color:#451a03;">Lock: 15 Days | Daily ROI: 1.5%</div></div>
                                <div class="tier-staked-badge"><span id="tierTotal_gold">0.00</span> <span style="opacity:0.6; margin-left:3px;">₮</span></div>
                            </div>
-                           <div class="atm-input-row">
+                           
+                           <!-- 🔥 Engraved Chip & TX Count -->
+                           <div style="margin-top: 10px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;">
+                               <div class="atm-chip"><div class="atm-chip-inner"></div></div>
+                               <div class="engraved-tx-badge">TXNS <span class="tx-num" id="txCount_gold">0</span></div>
+                           </div>
+
+                           <div class="atm-input-row" style="margin-top: 5px;">
                                <input type="number" id="stakeAmt15" placeholder="Min 50 USDT" onclick="event.stopPropagation()">
                                <button onclick="event.stopPropagation(); window.executeStake(15, 1.5, 'stakeAmt15', 'cardNo_gold')">Stake</button>
                            </div>
-                           <div class="atm-bottom-row">
-                               <div class="atm-user-details">
-                                   <div class="atm-card-name uNameCardText">TCM USER</div>
-                                   <div class="atm-number" id="cardNo_gold">7812 0000 0000 0000</div>
+
+                           <div style="display: flex; flex-direction: column; align-items: stretch; margin-top: 15px; gap: 4px;">
+                               <div class="atm-number" id="cardNo_gold" style="white-space: nowrap; font-size: clamp(1rem, 5vw, 1.15rem); letter-spacing: 1px; text-align: left; width: 100%;">7812 0000 0000 0000</div>
+                               <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+                                   <div class="atm-card-name uNameCardText" style="font-size: 0.95rem; color: #0f172a; letter-spacing: 1px;">TCM USER</div>
+                                   <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                       <div style="display:flex; flex-direction:column; align-items:flex-start; line-height: 1.1;">
+                                           <span style="font-size:0.4rem; color:rgba(0,0,0,0.6); font-weight: 800; letter-spacing: 0.5px;">VALID</span>
+                                           <span style="font-size:0.4rem; color:rgba(0,0,0,0.6); font-weight: 800; letter-spacing: 0.5px;">THRU</span>
+                                       </div>
+                                       <span style="font-size:1.05rem; font-family:'Courier New', monospace; font-weight:900; color:#000; text-shadow: 1px 1px 0 rgba(255,255,255,0.4);">12/28</span>
+                                   </div>
                                </div>
-                               <div class="atm-chip"></div>
                            </div>
                        </div>
-                       <div class="atm-face atm-face-back" id="back_gold_data">
-                           <div style="text-align:center; padding-top:40px; opacity:0.5;">No Active Gold Stakes</div>
-                       </div>
+                       <div class="atm-face atm-face-back" id="back_gold_data"></div>
                    </div>
                </div>
 
@@ -2209,28 +2372,78 @@ input, textarea, select {
                                <div><div class="atm-title">Platinum Card</div><div class="atm-roi">Lock: 30 Days | Daily ROI: 2.0%</div></div>
                                <div class="tier-staked-badge" style="color:var(--text-main);"><span id="tierTotal_platinum">0.00</span> <span style="opacity:0.6; margin-left:3px;">₮</span></div>
                            </div>
-                           <div class="atm-input-row">
+                           
+                           <!-- 🔥 Engraved Chip & TX Count -->
+                           <div style="margin-top: 10px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;">
+                               <div class="atm-chip"><div class="atm-chip-inner"></div></div>
+                               <div class="engraved-tx-badge">TXNS <span class="tx-num" id="txCount_platinum">0</span></div>
+                           </div>
+
+                           <div class="atm-input-row" style="margin-top: 5px;">
                                <input type="number" id="stakeAmt30" placeholder="Min 100 USDT" onclick="event.stopPropagation()">
                                <button onclick="event.stopPropagation(); window.executeStake(30, 2.0, 'stakeAmt30', 'cardNo_platinum')">Stake</button>
                            </div>
-                           <div class="atm-bottom-row">
-                               <div class="atm-user-details">
-                                   <div class="atm-card-name uNameCardText">TCM USER</div>
-                                   <div class="atm-number" id="cardNo_platinum">9023 0000 0000 0000</div>
+
+                           <div style="display: flex; flex-direction: column; align-items: stretch; margin-top: 15px; gap: 4px;">
+                               <div class="atm-number" id="cardNo_platinum" style="white-space: nowrap; font-size: clamp(1rem, 5vw, 1.15rem); letter-spacing: 1px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); text-align: left; width: 100%;">9023 0000 0000 0000</div>
+                               <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+                                   <div class="atm-card-name uNameCardText" style="font-size: 0.95rem; color: #f8fafc; letter-spacing: 1px;">TCM USER</div>
+                                   <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                       <div style="display:flex; flex-direction:column; align-items:flex-start; line-height: 1.1;">
+                                           <span style="font-size:0.4rem; color:rgba(255,255,255,0.6); font-weight: 800; letter-spacing: 0.5px;">VALID</span>
+                                           <span style="font-size:0.4rem; color:rgba(255,255,255,0.6); font-weight: 800; letter-spacing: 0.5px;">THRU</span>
+                                       </div>
+                                       <span style="font-size:1.05rem; font-family:'Courier New', monospace; font-weight:900; color:#fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">12/28</span>
+                                   </div>
                                </div>
-                               <div class="atm-chip"></div>
                            </div>
                        </div>
-                       <div class="atm-face atm-face-back" id="back_platinum_data">
-                           <div style="text-align:center; padding-top:40px; opacity:0.5;">No Active Platinum Stakes</div>
+                       <div class="atm-face atm-face-back" id="back_platinum_data"></div>
+                   </div>
+               </div>
+
+               <!-- 🌌 BLACK DIAMOND CARD (NEW) -->
+               <div class="atm-scene" onclick="window.openCinemaMode('diamond', 60, 2.5, this)">
+                   <div class="atm-card card-diamond">
+                       <div class="atm-face atm-face-front">
+                           <div class="atm-header">
+                               <div><div class="atm-title">Diamond Card</div><div class="atm-roi" style="color:#a1a1aa;">Lock: 60 Days | Daily ROI: 2.5%</div></div>
+                               <div class="tier-staked-badge" style="color:var(--text-main);"><span id="tierTotal_diamond">0.00</span> <span style="opacity:0.6; margin-left:3px;">₮</span></div>
+                           </div>
+                           
+                           <!-- 🔥 Engraved Chip & TX Count -->
+                           <div style="margin-top: 10px; margin-bottom: 2px; display: flex; justify-content: space-between; align-items: center;">
+                               <div class="atm-chip"><div class="atm-chip-inner"></div></div>
+                               <div class="engraved-tx-badge">TXNS <span class="tx-num" id="txCount_diamond">0</span></div>
+                           </div>
+
+                           <div class="atm-input-row" style="margin-top: 5px;">
+                               <input type="number" id="stakeAmt60" placeholder="Min 500 USDT" onclick="event.stopPropagation()">
+                               <button onclick="event.stopPropagation(); window.executeStake(60, 2.5, 'stakeAmt60', 'cardNo_diamond')" style="background: #ffffff; color: #000000;">Stake</button>
+                           </div>
+
+                           <div style="display: flex; flex-direction: column; align-items: stretch; margin-top: 15px; gap: 4px;">
+                               <div class="atm-number" id="cardNo_diamond" style="white-space: nowrap; font-size: clamp(1rem, 5vw, 1.15rem); letter-spacing: 1px; color: #fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); text-align: left; width: 100%;">3456 0000 0000 0000</div>
+                               <div style="display: flex; justify-content: space-between; align-items: flex-end; width: 100%;">
+                                   <div class="atm-card-name uNameCardText" style="font-size: 0.95rem; color: #f8fafc; letter-spacing: 1px;">TCM USER</div>
+                                   <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+                                       <div style="display:flex; flex-direction:column; align-items:flex-start; line-height: 1.1;">
+                                           <span style="font-size:0.4rem; color:rgba(255,255,255,0.6); font-weight: 800; letter-spacing: 0.5px;">VALID</span>
+                                           <span style="font-size:0.4rem; color:rgba(255,255,255,0.6); font-weight: 800; letter-spacing: 0.5px;">THRU</span>
+                                       </div>
+                                       <span style="font-size:1.05rem; font-family:'Courier New', monospace; font-weight:900; color:#fff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);">12/28</span>
+                                   </div>
+                               </div>
+                           </div>
                        </div>
+                       <div class="atm-face atm-face-back" id="back_diamond_data"></div>
                    </div>
                </div>
            </div>
            
            <!-- Active Stakes List -->
            <h3 style="font-size: 1rem; color: var(--text-main); font-weight: 800; margin: 25px 0 10px 5px;"><i class="fas fa-list-check" style="color:var(--success); margin-right:5px;"></i> Active Contracts</h3>
-           <div id="activeStakesList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 20px;">
+           <div id="activeStakesList" style="display: flex; flex-direction: column; gap: 10px; padding-bottom: 100px;">
                <div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-box-open"></i><p>No active staking contracts.</p></div>
            </div>
        </div>
@@ -2998,7 +3211,7 @@ window.evaluateLevelAutomation = async function(wData, currentKnownRank) {
 
                const levelSelect = document.getElementById("levelSelect");
                if (levelSelect) {
-                   levelSelect.value = trueRank;
+                   levelSelect.value = trueRank > 0 ? trueRank : 1;
                    if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
                }
 
@@ -3380,7 +3593,8 @@ window.onload = async () => {
            
            const levelSelect = document.getElementById('levelSelect');
            if(levelSelect) {
-               levelSelect.value = (cachedStaticUser.Rank !== undefined && cachedStaticUser.Rank !== "") ? cachedStaticUser.Rank : 0; 
+               let sRnk = parseInt(cachedStaticUser.Rank) || 0;
+               levelSelect.value = sRnk > 0 ? sRnk : 1; 
                if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
            }
 
@@ -3422,7 +3636,8 @@ window.onload = async () => {
 
             const levelSelect = document.getElementById('levelSelect');
             if(levelSelect) {
-                levelSelect.value = (user.Rank !== undefined && user.Rank !== "") ? user.Rank : 0; 
+                let uRnk = parseInt(user.Rank) || 0;
+                levelSelect.value = uRnk > 0 ? uRnk : 1; 
                 if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
             }
 
@@ -3476,7 +3691,8 @@ window.onload = async () => {
 // =================================================================================
 window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
    const controller = new AbortController();
-   const timeoutId = setTimeout(() => controller.abort(), 10000); 
+   // রেন্ডার সার্ভারের জন্য টাইমআউট বাড়িয়ে ২৫ সেকেন্ড করা হলো
+   const timeoutId = setTimeout(() => controller.abort(), 25000); 
    
    const options = {
        method,
@@ -3537,15 +3753,17 @@ window.updateNFTStats = () => {
 
 // 🔥 FIX: 100% Bug-Free NFT Scanner Closer (No Ghost Popups)
 window.closeNftScannerModal = () => {
-    // ১. ব্যাকগ্রাউন্ডের টাইম বোমাকে (Timeout) নিষ্ক্রিয় করা হলো
     if (window.nftScanErrorTimeout) clearTimeout(window.nftScanErrorTimeout);
-    
-    // ২. ইনস্ট্যান্ট ফাস্ট ক্লোজিং (ইউজার ল্যাগিং ফিল করবে না)
     const modal = document.getElementById('nftScanModal');
-    if (modal) modal.style.opacity = '0'; 
-    setTimeout(() => window.closeModal('nftScanModal'), 50);
+    if (modal) {
+        modal.style.opacity = '0'; 
+        modal.style.pointerEvents = 'none'; // 🔥 INSTANT UNLOCK (Nav bar কাজ করবে)
+    }
+    setTimeout(() => {
+        window.closeModal('nftScanModal');
+        if (modal) modal.style.pointerEvents = 'auto'; // Reset
+    }, 50);
     
-    // ৩. মডালটি সম্পূর্ণ গায়েব হওয়ার পর সাইলেন্টলি UI রিসেট হবে
     setTimeout(() => {
         document.getElementById("scanLine").style.display = 'block';
         document.getElementById("scanIcon").className = 'fas fa-fingerprint';
@@ -4268,7 +4486,7 @@ window.executeCancelWithdraw = async (txId, amount) => {
 };
 
 // =================================================================================
-// 🛡️ MODULE 9: HYBRID SECURITY ENGINE (API DRIVEN + GAMIFIED SHIELD)
+// 🛡️ MODULE 9: HYBRID SECURITY ENGINE (IMAGE MATCHING SHIELD)
 // =================================================================================
 window.updateSecurityShieldUI = () => {
    let score = 0;
@@ -4281,24 +4499,25 @@ window.updateSecurityShieldUI = () => {
 
    if (!shield || !icon || !statusText) return;
 
-   shield.setAttribute('class', 'shield-svg');
+   // আগে সব ক্লাস রিমুভ করা হচ্ছে
+   shield.classList.remove('shield-0', 'shield-50', 'shield-100');
 
    if (score === 0) {
        shield.classList.add('shield-0');
+       icon.style.display = 'block'; // 0% এ আনলক আইকন দেখাবে
        icon.className = 'fas fa-unlock-alt shield-icon';
        statusText.innerText = 'System Unsecured';
        statusText.style.color = '#64748b'; 
    } else if (score === 50) {
        shield.classList.add('shield-50');
-       icon.className = 'fas fa-shield-halved shield-icon';
-       statusText.innerText = 'Partial Armor (50%)';
-       statusText.style.color = '#facc15';
-    
+       icon.style.display = 'none'; // আপনার ইমেজ অনুযায়ী 50% এ কোনো আইকন নেই
+       statusText.innerText = 'Protected (50%)';
+       statusText.style.color = '#2a8bf2'; // আপনার ব্লু শিল্ডের সাথে ম্যাচ করা কালার
    } else if (score === 100) {
        shield.classList.add('shield-100');
-       icon.className = 'fas fa-check shield-icon';
-       statusText.innerText = 'Maximum Cyber Armor Active';
-       statusText.style.color = '#00f5ff'; 
+       icon.style.display = 'none'; // আপনার ইমেজ অনুযায়ী 100% এও কোনো আইকন নেই, শুধুই গ্লো
+       statusText.innerText = 'Maximum Armor Active';
+       statusText.style.color = '#22c55e'; // আপনার মেটালিক গ্রিন শিল্ডের সাথে ম্যাচ করা কালার
    }
 };
 
@@ -4322,22 +4541,69 @@ window.openSecurityCenter = () => {
    }, 100);
 };
 
+// 🔥 OTP Attempts Tracker & Live Button Timer
+window.otpAttempts = {};
+
 window.requestSystemOTP = async (btnId) => {
-   const uid = localStorage.getItem('uid');
-   const btn = document.getElementById(btnId);
-   if(!btn) return;
-   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-   btn.disabled = true;
+    const uid = localStorage.getItem('uid');
+    const btn = document.getElementById(btnId);
+    if (!btn) return;
+    
+    // ইনিশিয়ালাইজেশন
+    if (!window.otpAttempts[btnId]) {
+        window.otpAttempts[btnId] = { count: 0, lockUntil: 0 };
+    }
+    
+    let state = window.otpAttempts[btnId];
+    let now = Date.now();
 
-   const result = await window.fetchAPI('/auth/send-otp', 'POST', { uid });
+    // লক চেক করা হচ্ছে
+    if (now < state.lockUntil) {
+        let timeLeft = Math.ceil((state.lockUntil - now) / 1000);
+        window.showToast(`Too many attempts! Wait ${timeLeft} seconds.`, true);
+        return;
+    }
 
-   if (!result.success) {
-       window.showToast(result.message, true);
-   } else {
-       window.showToast("OTP sent to your email!");
-   }
-   btn.innerHTML = 'Get OTP'; 
-   btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    btn.disabled = true;
+
+    const result = await window.fetchAPI('/auth/send-otp', 'POST', { uid });
+
+    if (!result.success) {
+        window.showToast(result.message, true);
+        btn.innerHTML = 'Get OTP'; 
+        btn.disabled = false;
+    } else {
+        window.showToast("OTP sent to your email!");
+        state.count += 1;
+        
+        if (state.count >= 3) {
+            // ৩ বার শেষ, এবার ৬০ সেকেন্ডের লক এবং লাইভ টাইমার
+            state.lockUntil = now + 60000;
+            state.count = 0; // রিসেট
+            
+            let timeLeft = 60;
+            btn.style.background = 'rgba(255, 255, 255, 0.1)';
+            btn.style.color = 'var(--warning)';
+            
+            let timerInterval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    btn.innerHTML = 'Get OTP';
+                    btn.style.background = ''; // ডিফল্ট স্টাইল ফেরত
+                    btn.style.color = '';
+                    btn.disabled = false;
+                } else {
+                    btn.innerHTML = `Wait ${timeLeft}s...`;
+                    timeLeft--;
+                }
+            }, 1000);
+        } else {
+            // লিমিট পার না হলে বাটন আবার আগের রূপে ফিরবে
+            btn.innerHTML = 'Get OTP'; 
+            btn.disabled = false;
+        }
+    }
 };
 
 window.requestEmailOTP = () => window.requestSystemOTP('btnGetOTP');
@@ -7454,7 +7720,6 @@ document.addEventListener('click', (e) => {
 // 📱 MEMO 08: SMART HARDWARE BACK BUTTON (Hash API Engine - WebView Safe)
 // ==============================================================
 document.addEventListener("DOMContentLoaded", () => {
-    // 🔥 App ওপেন হওয়ার সাথে সাথে একটি বেস (Base) হিস্ট্রি পুশ করা হলো, যাতে অ্যাপ সরাসরি ক্লোজ না হয়।
     window.history.pushState({ base: true }, "", window.location.href);
 
     // ১. Sidebar ট্র্যাকিং
@@ -7492,17 +7757,20 @@ document.addEventListener("DOMContentLoaded", () => {
         const hash = window.location.hash;
         
         // যদি হ্যাশ খালি থাকে (অর্থাৎ ব্যাক বাটন প্রেস করে আগের অবস্থায় ফিরেছে)
-        if (!hash || (!hash.startsWith('#modal-') && hash !== '#menu')) {
+        if (!hash || (!hash.startsWith('#modal-') && hash !== '#menu' && hash !== '#cinema')) {
             
-            // সাইডবার চেক করে বন্ধ করবে
             const sidebar = document.getElementById('sidebar');
             if (sidebar && sidebar.classList.contains('active')) {
                 originalToggleSidebar(false);
             }
             
-            // ওপেন থাকা সব ধরণের মডাল চেক করে স্লাইড করে বন্ধ করবে
             const openModals = document.querySelectorAll('.modal.show, .modal-overlay[style*="display: block"], .custom-modal-overlay[style*="display: flex"]');
             openModals.forEach(modal => originalCloseModal(modal.id, true));
+
+            // 🔥 সিনেমা মোড চেক করে বন্ধ করবে
+            if (document.getElementById('cinemaOverlay')) {
+                window.closeCinemaMode(true);
+            }
         }
     });
 });
@@ -7649,6 +7917,7 @@ setInterval(() => {
     setCardNo('cardNo_silver', '4592');
     setCardNo('cardNo_gold', '7812');
     setCardNo('cardNo_platinum', '9023');
+    setCardNo('cardNo_diamond', '3456'); // 🔥 New Diamond Card
 
     if (wallet && wallet.Active_Stakes) {
         const list = document.getElementById('activeStakesList');
@@ -7657,7 +7926,8 @@ setInterval(() => {
         }
 
         let totalPrincipal = 0, dailyEstRoi = 0;
-        let silverTotal = 0, goldTotal = 0, platinumTotal = 0;
+        let silverTotal = 0, goldTotal = 0, platinumTotal = 0, diamondTotal = 0;
+        let sCnt = 0, gCnt = 0, pCnt = 0, dCnt = 0; // 🔥 TX Trackers
 
         wallet.Active_Stakes.forEach(stk => {
             if (stk.status === 'Active') {
@@ -7665,9 +7935,10 @@ setInterval(() => {
                 totalPrincipal += amt;
                 dailyEstRoi += (amt * (parseFloat(stk.dailyRoi) / 100));
 
-                if (stk.duration == 7) silverTotal += amt;
-                else if (stk.duration == 15) goldTotal += amt;
-                else if (stk.duration == 30) platinumTotal += amt;
+                if (stk.duration == 7) { silverTotal += amt; sCnt++; }
+                else if (stk.duration == 15) { goldTotal += amt; gCnt++; }
+                else if (stk.duration == 30) { platinumTotal += amt; pCnt++; }
+                else if (stk.duration == 60) { diamondTotal += amt; dCnt++; }
             }
         });
 
@@ -7680,11 +7951,18 @@ setInterval(() => {
         const sEl = document.getElementById('tierTotal_silver'); if(sEl) sEl.innerText = silverTotal.toFixed(2);
         const gEl = document.getElementById('tierTotal_gold'); if(gEl) gEl.innerText = goldTotal.toFixed(2);
         const pEl = document.getElementById('tierTotal_platinum'); if(pEl) pEl.innerText = platinumTotal.toFixed(2);
+        const dEl = document.getElementById('tierTotal_diamond'); if(dEl) dEl.innerText = diamondTotal.toFixed(2);
+
+        // 🔥 Update Engraved TX Counts dynamically
+        const scEl = document.getElementById('txCount_silver'); if(scEl) scEl.innerText = sCnt;
+        const gcEl = document.getElementById('txCount_gold'); if(gcEl) gcEl.innerText = gCnt;
+        const pcEl = document.getElementById('txCount_platinum'); if(pcEl) pcEl.innerText = pCnt;
+        const dcEl = document.getElementById('txCount_diamond'); if(dcEl) dcEl.innerText = dCnt;
     }
 }, 1000);
 
 // =================================================================================
-// 🚀 MODULE: ACTIVE CONTRACTS & 24H LIVE COUNTDOWN TIMER (WITH CLAIM LOGIC)
+// 🚀 MODULE: ACTIVE CONTRACTS & CLEAN CARD BACK RENDERER (DIAMOND FIXED)
 // =================================================================================
 window.renderActiveStakes = () => {
     let wallet = window.RAM_STATE?.balances || window.lastWalletData;
@@ -7695,15 +7973,22 @@ window.renderActiveStakes = () => {
     let hasExpiringContract = false;
     let now = Date.now();
 
-    wallet.Active_Stakes.forEach(stk => {
+    // 🖤 Pure Black Clean Background for Back Sides
+    let silverHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#d4d4d8;"><i class="fas fa-history"></i> SILVER HISTORY</span></div>';
+    let goldHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#facc15;"><i class="fas fa-history"></i> GOLD HISTORY</span></div>';
+    let platHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#0ea5e9;"><i class="fas fa-history"></i> PLATINUM HISTORY</span></div>';
+    let diamondHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#a1a1aa;"><i class="fas fa-history"></i> DIAMOND HISTORY</span></div>';
+    
+    let sCount = 0, gCount = 0, pCount = 0, dCount = 0;
+    let sortedStakes = [...wallet.Active_Stakes].sort((a, b) => (b.startTime || 0) - (a.startTime || 0));
+
+    sortedStakes.forEach(stk => {
         if(stk.status === 'Active') {
             let diff = stk.unlockTime - now;
             let daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-            // 🔥 শুধুমাত্র ২৪ ঘণ্টার কম সময় থাকলে ড্যাশবোর্ডে শো করবে
             if (daysLeft < 1 && diff > 0) {
                 hasExpiringContract = true;
-                // 🔥 FIX: startTime না থাকলে বর্তমান সময় ধরে নেবে, যাতে ক্র্যাশ না করে
                 let startStr = new Date(stk.startTime || Date.now()).toLocaleDateString('en-US', {month:'short', day:'numeric'});
                 let endStr = new Date(stk.unlockTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
 
@@ -7719,21 +8004,16 @@ window.renderActiveStakes = () => {
                             <span class="fuc-roi">Reserved: ${startStr} - ${endStr}</span>
                         </div>
                         <div class="fuc-timer-box">
-                            <div class="fuc-timer atm-live-timer" data-id="${stk.id}" data-amt="${stk.amount}" data-roi="${stk.dailyRoi}" data-unlock="${stk.unlockTime}">
-                                --:--:--
-                            </div>
+                            <div class="fuc-timer atm-live-timer" data-unlock="${stk.unlockTime}">--:--:--</div>
                         </div>
                     </div>
                 </div>`;
-            }
-            // সময় শেষ হলে Claim বাটন দেখাবে
-            else if (diff <= 0) {
+            } else if (diff <= 0) {
                 hasExpiringContract = true;
                 let totalProfit = (parseFloat(stk.amount) * (parseFloat(stk.dailyRoi) / 100) * stk.duration).toFixed(2);
                 let claimAmt = (parseFloat(stk.amount) + parseFloat(totalProfit)).toFixed(2);
-                
                 html += `
-                <div class="final-unlock-card" style="border-color:var(--success); background: radial-gradient(circle at top right, rgba(16,185,129,0.1) 0%, rgba(15, 23, 42, 0.9) 70%);" id="card_${stk.id}">
+                <div class="final-unlock-card" style="border-color:var(--success); background: radial-gradient(circle at top right, rgba(16,185,129,0.1) 0%, rgba(15, 23, 42, 0.9) 70%);">
                     <div class="fuc-header">
                         <span class="fuc-title" style="color:var(--success);"><i class="fas fa-check-circle"></i> Contract Matured</span>
                         <span class="fuc-id">ID: ${stk.id}</span>
@@ -7744,131 +8024,139 @@ window.renderActiveStakes = () => {
                             <span class="fuc-roi" style="color:var(--success);">+ ${totalProfit} ₮ Profit</span>
                         </div>
                         <div style="width:140px;">
-                            <button class="btn-claim-glass" onclick="window.processClaim('${stk.id}', ${stk.amount}, ${totalProfit})">
-                                CLAIM ${claimAmt} ₮
-                            </button>
+                            <button class="btn-claim-glass" onclick="window.processClaim('${stk.id}', ${stk.amount}, ${totalProfit})">CLAIM ${claimAmt} ₮</button>
                         </div>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-left: 3px solid var(--success); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom:10px;">
+                    <div>
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace;">ID: ${stk.id}</span>
+                        <h4 style="font-size: 1.1rem; color: #fff; margin: 3px 0; font-weight: 800;">${parseFloat(stk.amount).toFixed(2)} ₮</h4>
+                        <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">${stk.dailyRoi}% Daily ROI</span>
+                    </div>
+                    <div style="text-align: right;">
+                        <span class="badge glow-locked" style="margin-bottom: 5px;">Locked</span>
+                        <span class="atm-live-timer" data-unlock="${stk.unlockTime}" style="display: block; font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">--:--:--</span>
                     </div>
                 </div>`;
             }
         }
+
+        // 🖤 Premium Detailed History Items for Card Back
+        let startDate = new Date(stk.startTime || Date.now());
+        let unlockDate = new Date(stk.unlockTime);
+        
+        let formatDateTime = (d) => {
+            let day = d.getDate().toString().padStart(2, '0');
+            let month = d.toLocaleString('en-US', { month: 'short' });
+            let year = d.getFullYear().toString().slice(-2);
+            let time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            return `${day}-${month}-${year} <span style="opacity:0.5;">|</span> ${time}`;
+        };
+
+        let startFmt = formatDateTime(startDate);
+        let endFmt = formatDateTime(unlockDate);
+
+        let statusBadge = stk.status === 'Active' ? `<span style="font-size:0.6rem; color:#f59e0b; font-weight:800; text-transform:uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">● ACTIVE</span>` : `<span style="font-size:0.6rem; color:#10b981; font-weight:800; text-transform:uppercase; background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">● CLAIMED</span>`;
+        
+        let itemHtml = `
+        <div class="clean-tx-card" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 8px;">
+                <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${stk.id}</span></span>
+                ${statusBadge}
+            </div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-lock" style="color:var(--warning); margin-right:4px;"></i>Locked: <span style="color:#e2e8f0; margin-left:2px;">${startFmt}</span></span>
+                    <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-unlock-alt" style="color:var(--success); margin-right:4px;"></i>Release: <span style="color:#e2e8f0; margin-left:2px;">${endFmt}</span></span>
+                </div>
+                <span class="tx-amt" style="color: var(--primary); font-size: 1.1rem;">${parseFloat(stk.amount).toFixed(2)} ₮</span>
+            </div>
+        </div>`;
+
+        if(stk.duration == 7) { silverHtml += itemHtml; sCount++; }
+        else if(stk.duration == 15) { goldHtml += itemHtml; gCount++; }
+        else if(stk.duration == 30) { platHtml += itemHtml; pCount++; }
+        else if(stk.duration == 60) { diamondHtml += itemHtml; dCount++; } // 🔥 New Diamond Logic Added Here
     });
 
     if(!hasExpiringContract) {
-        list.innerHTML = `<div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-clock"></i><p>No contracts unlocking within 24 hours.<br><span style="font-size:0.7rem; color:var(--text-sub);">Check card back for long-term stakes.</span></p></div>`;
+        list.innerHTML = `<div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-box-open"></i><p>No active staking contracts.</p></div>`;
     } else {
         list.innerHTML = html;
     }
+
+    const sBox = document.getElementById('back_silver_data');
+    const gBox = document.getElementById('back_gold_data');
+    const pBox = document.getElementById('back_platinum_data');
+    const dBox = document.getElementById('back_diamond_data'); // 🔥 New Diamond Box targeting
+
+    const emptyHtml = `<div style="text-align:center; padding-top:60px; color:#52525b;"><i class="fas fa-ghost" style="font-size:2rem; margin-bottom:10px;"></i><br>No Transactions Yet</div>`;
+    
+    if(sBox) { sBox.style.background = "#000000"; sBox.innerHTML = sCount > 0 ? silverHtml : emptyHtml; }
+    if(gBox) { gBox.style.background = "#000000"; gBox.innerHTML = gCount > 0 ? goldHtml : emptyHtml; }
+    if(pBox) { pBox.style.background = "#000000"; pBox.innerHTML = pCount > 0 ? platHtml : emptyHtml; }
+    if(dBox) { dBox.style.background = "#000000"; dBox.innerHTML = dCount > 0 ? diamondHtml : emptyHtml; } // 🔥 Injecting Diamond History
 };
 
-setInterval(() => {
-    document.querySelectorAll('.atm-live-timer').forEach(el => {
-        let unlockTime = parseInt(el.getAttribute('data-unlock'));
-        let now = Date.now();
-        let diff = unlockTime - now;
-
-        if (diff <= 0) {
-            // টাইমার শেষ হলে Claim বাটনে কনভার্ট করার জন্য একবার রেন্ডার কল করবে
-            el.classList.remove('atm-live-timer');
-            window.renderActiveStakes();
-        } else {
-            let h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)).toString().padStart(2, '0');
-            let m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)).toString().padStart(2, '0');
-            let s = Math.floor((diff % (1000 * 60)) / 1000).toString().padStart(2, '0');
-            el.innerHTML = `${h}:${m}:${s}`;
-        }
-    });
-}, 1000);
-
-// 🔥 CLAIM LOGIC & ANIMATION ENGINE
-window.processClaim = async (stakeId, principalAmt, profitAmt) => {
-    const totalClaimAmt = parseFloat(principalAmt) + parseFloat(profitAmt);
-    let wallet = window.RAM_STATE?.balances || window.lastWalletData;
-    if (!wallet) return;
-
-    // 1. Remove from DOM instantly for smooth UX
-    const cardEl = document.getElementById('card_' + stakeId);
-    if(cardEl) {
-        cardEl.style.transform = 'scale(0.8)';
-        cardEl.style.opacity = '0';
-        setTimeout(() => cardEl.remove(), 300);
-    }
-
-    // 2. Set Popup Data
-    let oldBal = parseFloat(wallet.Main_Balance || 0);
-    let newBal = oldBal + totalClaimAmt;
-    
-    document.getElementById('popOldBal').innerText = oldBal.toFixed(2) + ' ₮';
-    document.getElementById('popNewBal').innerText = newBal.toFixed(2) + ' ₮';
-    document.getElementById('popClaimProfit').innerText = '+ ' + parseFloat(profitAmt).toFixed(2) + ' ₮ Profit';
-    
-    const popup = document.getElementById('claimPopup');
-    popup.style.display = 'flex';
-    setTimeout(() => popup.classList.add('show'), 10);
-
-    // 3. Count-Up Animation
-    const amtEl = document.getElementById('popClaimAmt');
-    let startVal = 0;
-    let duration = 1500; 
-    let startTime = null;
-
-    const animateNum = (timestamp) => {
-        if (!startTime) startTime = timestamp;
-        let progress = timestamp - startTime;
-        let percentage = Math.min(progress / duration, 1);
-        // Ease-out calculation
-        let easeOut = 1 - Math.pow(1 - percentage, 3);
-        let currentVal = startVal + (totalClaimAmt * easeOut);
-        
-        amtEl.innerText = currentVal.toFixed(2) + ' ₮';
-
-        if (progress < duration) {
-            requestAnimationFrame(animateNum);
-        } else {
-            amtEl.innerText = totalClaimAmt.toFixed(2) + ' ₮';
-            
-            // 4. Update RAM & Dashboard UI (স্ট্যাকিং টেবিল আপডেট করা হচ্ছে)
-            wallet.Main_Balance = newBal;
-            wallet.Total_Stake = (parseFloat(wallet.Total_Stake) || 0) + parseFloat(profitAmt);
-            wallet.Daily_Stake = (parseFloat(wallet.Daily_Stake) || 0) + parseFloat(profitAmt);
-            
-            wallet.Total_Comp = (parseFloat(wallet.Total_Comp) || 0) + parseFloat(profitAmt);
-            wallet.Daily_Comp = (parseFloat(wallet.Daily_Comp) || 0) + parseFloat(profitAmt);
-
-            if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
-            if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
-            
-            // Mark as completed in array
-            let stkIndex = wallet.Active_Stakes.findIndex(s => s.id === stakeId);
-            if(stkIndex !== -1) wallet.Active_Stakes[stkIndex].status = 'Completed';
-            
-            window.renderActiveStakes();
-        }
-    };
-    requestAnimationFrame(animateNum);
-
-    // 5. Backend Sync (Server Call)
+// =================================================================================
+// 💰 MODULE: PROCESS CLAIM (MATURED STAKES)
+// =================================================================================
+window.processClaim = async (stakeId, amount, profit) => {
     const uid = localStorage.getItem('uid');
+    const loader = document.getElementById('loader');
+    if (loader) { loader.style.display = 'flex'; loader.style.opacity = '1'; loader.querySelector('p').innerText = 'Claiming Profit...'; }
+    
     try {
-        await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
-    } catch(e) { console.error("Claim Sync Error", e); }
+        const res = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
+        if (res.success) {
+            const popup = document.getElementById('claimPopup');
+            if (popup) {
+                const oldBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0);
+                const newBal = oldBal + parseFloat(amount) + parseFloat(profit);
+                
+                const elAmt = document.getElementById('popClaimAmt');
+                const elProf = document.getElementById('popClaimProfit');
+                const elOld = document.getElementById('popOldBal');
+                const elNew = document.getElementById('popNewBal');
+                
+                if(elAmt) elAmt.innerText = (parseFloat(amount) + parseFloat(profit)).toFixed(2);
+                if(elProf) elProf.innerText = '+ ' + parseFloat(profit).toFixed(2) + ' ₮ Profit';
+                if(elOld) elOld.innerText = oldBal.toFixed(2) + ' ₮';
+                if(elNew) elNew.innerText = newBal.toFixed(2) + ' ₮';
+                
+                popup.style.display = 'flex';
+                setTimeout(() => popup.classList.add('show'), 10);
+            }
+            if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+        } else {
+            window.showToast(res.message, true);
+        }
+    } catch(e) {
+        window.showToast('Error claiming', true);
+    } finally {
+        if (loader) { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none',300); }
+    }
 };
 
 window.closeClaimPopup = () => {
     const popup = document.getElementById('claimPopup');
-    if (popup) {
-        popup.classList.remove('show');
-        setTimeout(() => popup.style.display = 'none', 400);
-    }
+    if (popup) { popup.classList.remove('show'); setTimeout(() => popup.style.display = 'none', 400); }
+    window.switchTab('assets');
 };
 
 // =================================================================================
-// 🎬 MODULE: FULL-SCREEN CINEMA MODE & 3D GYROSCOPE ENGINE
+// 🎬 MODULE: CINEMA MODE (DYNAMIC HEIGHT, BACK BUTTON & 3-SECOND SUSPENSE FLIP)
 // =================================================================================
 window.cinemaProfitInterval = null;
 
 window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
-    // 1. Create Cinema Overlay if it doesn't exist
+    // 🔥 Push Hash to URL for Hardware Back Button
+    window.location.hash = 'cinema';
+
     let overlay = document.getElementById('cinemaOverlay');
     if (!overlay) {
         overlay = document.createElement('div');
@@ -7877,20 +8165,31 @@ window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
         document.body.appendChild(overlay);
     }
 
-    // 2. Clone the Front Face of the Card
-    const cardFront = cardElement.querySelector('.atm-face-front').cloneNode(true);
-    
-    // Cleanup clone (Remove inputs & buttons for cinematic view)
-    const inputRow = cardFront.querySelector('.atm-input-row');
+    // Clone the FULL card (Front + Back) so it can flip
+    const fullCard = cardElement.querySelector('.atm-card').cloneNode(true);
+    fullCard.id = "cinema3DCardInner";
+    fullCard.classList.remove('is-flipped'); 
+
+    const inputRow = fullCard.querySelector('.atm-input-row');
     if(inputRow) inputRow.style.display = 'none';
 
-    // 3. Build Cinema Structure
+    // 🔥 Dynamic Height Calculation (Max 5 items before scrolling)
+    let wallet = window.RAM_STATE?.balances || window.lastWalletData;
+    let targetStakes = wallet?.Active_Stakes?.filter(s => s.duration == days) || [];
+    let txCount = targetStakes.length;
+    
+    // Base height for 1-2 transactions = 230px. 
+    // Each extra transaction adds 85px, max limit 470px.
+    let dynamicHeight = 230; 
+    if (txCount > 2) {
+        dynamicHeight = Math.min(470, 230 + ((txCount - 2) * 85)); 
+    }
+
     overlay.innerHTML = `
-        <i class="fas fa-times cinema-close" onclick="window.closeCinemaMode()"></i>
-        <div class="cinema-card-container">
-            <div class="cinema-card-3d card-${tierTheme}" id="cinema3DCard">
-                ${cardFront.outerHTML}
-            </div>
+        <div class="cinema-close-btn" onclick="window.closeCinemaMode()"><i class="fas fa-times"></i></div>
+        <!-- 🔥 Applying Dynamic Height Here -->
+        <div class="cinema-card-container" id="cinemaCardWrapper" style="cursor: pointer; height: ${dynamicHeight}px; transition: height 0.4s ease;">
+            ${fullCard.outerHTML}
         </div>
         <div class="cinema-details">
             <span class="cinema-title"><i class="fas fa-chart-line" style="color:var(--success); margin-right:5px;"></i> Live Generated Profit</span>
@@ -7899,54 +8198,52 @@ window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
                 <span>Total Principal: <strong id="cinemaPrincipal" style="color:white;">0.00 ₮</strong></span>
                 <span>Speed: <strong style="color:var(--primary);">${roi}% / Day</strong></span>
             </div>
+            <p style="font-size:0.6rem; color:var(--text-sub); margin-top:15px; text-transform:uppercase; letter-spacing:1px; animation: pulseText 1.5s infinite;"><i class="fas fa-hand-pointer"></i> Tap Card to Flip</p>
         </div>
     `;
 
-    // 4. Animate In
     overlay.style.display = 'flex';
     setTimeout(() => { overlay.classList.add('active'); }, 10);
 
-    // 5. 3D Gyroscope & Mouse Movement Effect
-    const card3D = document.getElementById('cinema3DCard');
-    const handleMove = (e) => {
-        let xAxis, yAxis;
-        if (e.type === 'deviceorientation' && e.gamma !== null) {
-            xAxis = e.gamma / 2; // Tilt Left/Right
-            yAxis = (e.beta - 45) / 2; // Tilt Forward/Back
-        } else if (e.type === 'mousemove') {
-            xAxis = (window.innerWidth / 2 - e.pageX) / 20;
-            yAxis = (window.innerHeight / 2 - e.pageY) / 20;
-        }
-        if (card3D) card3D.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
-    };
-    window.addEventListener('mousemove', handleMove);
-    window.addEventListener('deviceorientation', handleMove);
-
-    // 6. Real-Time Profit Calculation Engine (Updates every 50ms for smooth running numbers)
-    let wallet = window.RAM_STATE?.balances || window.lastWalletData;
-    let targetStakes = wallet?.Active_Stakes?.filter(s => s.status === 'Active' && s.duration == days) || [];
+    const cinemaWrapper = document.getElementById('cinemaCardWrapper');
+    const cinemaCardInner = document.getElementById('cinema3DCardInner');
+    cinemaCardInner.style.transition = "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
     
+    let isFlipping = false;
+
+    cinemaWrapper.onclick = () => {
+        if (isFlipping) return; 
+        
+        if (cinemaCardInner.classList.contains('is-flipped')) {
+            cinemaCardInner.classList.remove('is-flipped'); 
+        } else {
+            isFlipping = true;
+            cinemaCardInner.style.transform = "rotateZ(-3deg) rotateY(18deg) rotateX(10deg) scale(0.92)";
+            
+            setTimeout(() => {
+                cinemaCardInner.style.transform = ""; 
+                cinemaCardInner.classList.add('is-flipped');
+                isFlipping = false;
+            }, 3000);
+        }
+    };
+
     let totalPrincipal = 0;
     targetStakes.forEach(s => totalPrincipal += parseFloat(s.amount));
     document.getElementById('cinemaPrincipal').innerText = totalPrincipal.toFixed(2) + ' ₮';
 
     if (window.cinemaProfitInterval) clearInterval(window.cinemaProfitInterval);
-    
     if (totalPrincipal > 0) {
         window.cinemaProfitInterval = setInterval(() => {
             let currentLiveProfit = 0;
             let now = Date.now();
-            
             targetStakes.forEach(stk => {
                 let amt = parseFloat(stk.amount);
                 let dailyProfit = amt * (parseFloat(stk.dailyRoi) / 100);
                 let profitPerMs = dailyProfit / (24 * 60 * 60 * 1000);
-                
-                // 🔥 FIX: startTime না থাকলে NaN আসবে না
                 let elapsedMs = now - (stk.startTime || Date.now());
                 if (elapsedMs > 0) currentLiveProfit += (elapsedMs * profitPerMs);
             });
-
             const profitEl = document.getElementById('cinemaLiveProfit');
             if (profitEl) profitEl.innerText = currentLiveProfit.toFixed(8) + ' ₮';
         }, 50);
@@ -7954,17 +8251,21 @@ window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
         document.getElementById('cinemaLiveProfit').innerText = "0.00000000 ₮";
     }
 
-    // Assign dynamic user name to cards
     const uName = (JSON.parse(localStorage.getItem('tcm_static_user') || '{}').Name || "TCM USER").toUpperCase();
     document.querySelectorAll('.uNameCardText').forEach(el => el.innerText = uName);
 };
 
-window.closeCinemaMode = () => {
-    const overlay = document.getElementById('cinemaOverlay');
-    if (overlay) {
-        overlay.classList.remove('active');
-        if (window.cinemaProfitInterval) clearInterval(window.cinemaProfitInterval);
-        setTimeout(() => { overlay.style.display = 'none'; overlay.remove(); }, 500);
+// 🔥 Handles both Button Click and Hardware Back Press
+window.closeCinemaMode = (fromBackButton = false) => {
+    if (!fromBackButton && window.location.hash === '#cinema') {
+        window.history.back(); // This triggers hashchange listener which then calls closeCinemaMode(true)
+    } else {
+        const overlay = document.getElementById('cinemaOverlay');
+        if (overlay) {
+            overlay.classList.remove('active');
+            if (window.cinemaProfitInterval) clearInterval(window.cinemaProfitInterval);
+            setTimeout(() => { overlay.style.display = 'none'; overlay.remove(); }, 500);
+        }
     }
 };
 
