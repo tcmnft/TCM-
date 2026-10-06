@@ -216,7 +216,8 @@
         .u-data h3 { font-size: 1.15rem; font-weight: 700; margin-bottom: 3px; }
         .uid { font-size: 0.75rem; color: var(--text-sub); font-family: monospace; display: flex; align-items: center; gap: 6px; }
 
-        .w-temp { font-size: 0.85rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; justify-content: flex-end; gap: 5px; width: 100%; }
+        .w-temp { font-size: 0.85rem; font-weight: 700; color: #0284c7; display: flex; align-items: center; justify-content: flex-end; gap: 5px; width: 100%; }
+        [data-theme="dark"] .w-temp { color: var(--primary); }
         .w-loc { width: 100%; font-size: 0.6rem; color: var(--text-sub); text-transform: uppercase; letter-spacing: 0.5px; text-align: right; overflow: hidden; white-space: nowrap; }
         .w-loc-text { display: inline-block; white-space: nowrap; }
 
@@ -263,6 +264,71 @@
         .act-btn:active { transform: scale(0.96); }
         .btn-dep { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: 1px solid #38bdf8; }
         .btn-wd { background: linear-gradient(135deg, #f43f5e, #e11d48); border: 1px solid #fb7185; }
+
+        /* 🔥 Dashboard P2P Receive Pulse (Strong Pink Glow for Light Mode) */
+        .dash-receive-pulse { 
+            background: rgba(236, 72, 153, 0.15) !important; 
+            color: #ec4899 !important; 
+            border-color: rgba(236, 72, 153, 0.6) !important; 
+            animation: innerPulsePink 1.2s infinite alternate !important; 
+        }
+        @keyframes innerPulsePink { 
+            0% { box-shadow: inset 0 0 8px rgba(236, 72, 153, 0.4), 0 0 10px rgba(236, 72, 153, 0.2); transform: scale(1); } 
+            100% { box-shadow: inset 0 0 25px rgba(236, 72, 153, 0.9), 0 0 20px rgba(236, 72, 153, 0.5); transform: scale(1.1); } 
+        }
+        
+        /* 🔥 Dark Mode P2P Pulse (Super Bright White Glow + Black Icon) */
+        [data-theme="dark"] .dash-receive-pulse {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #000000 !important; /* Icon turns solid black */
+            border-color: #ffffff !important;
+            animation: innerPulseWhiteDark 1.2s infinite alternate !important;
+        }
+        @keyframes innerPulseWhiteDark {
+            0% { box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5), 0 0 15px rgba(255, 255, 255, 0.4); transform: scale(1); }
+            100% { box-shadow: inset 0 0 35px rgba(255, 255, 255, 1), 0 0 40px rgba(255, 255, 255, 0.8); transform: scale(1.12); }
+        }
+
+        /* 🔥 P2P Confirm Button Inner Glow */
+        .p2p-btn-valid { 
+            background: linear-gradient(135deg, #10b981, #059669) !important; 
+            color: #fff !important; 
+            border: 1px solid #34d399 !important; 
+            border-radius: 14px !important; 
+            animation: p2pInnerGlow 1.5s infinite alternate !important; 
+        }
+        @keyframes p2pInnerGlow {
+            0% { box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1), 0 8px 20px rgba(16, 185, 129, 0.3); }
+            100% { box-shadow: inset 0 0 25px rgba(255, 255, 255, 0.6), 0 8px 20px rgba(16, 185, 129, 0.5); }
+        }
+
+        /* 🔥 Telegram Floating Animation (Smooth Bounce & Scale Up) */
+        .tg-float { animation: floatIconTg 2.5s ease-in-out infinite !important; color: #0ea5e9 !important; display: inline-block; }
+        @keyframes floatIconTg { 
+            0%, 100% { transform: translateY(0) scale(1); text-shadow: 0 2px 5px rgba(14, 165, 233, 0.2); } 
+            50% { transform: translateY(-8px) scale(1.2); text-shadow: 0 12px 20px rgba(14, 165, 233, 0.7); } 
+        }
+
+        /* 🔥 Premium Dual-Theme NFT Sell Button */
+        .btn-sell-nft {
+            width: 100%; padding: 14px; margin-top: 6px; border-radius: 12px;
+            font-size: 0.9rem; font-weight: 800; letter-spacing: 1px; cursor: pointer;
+            display: flex; justify-content: center; align-items: center; gap: 8px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #0ea5e9, #2563eb);
+            color: #ffffff; border: none; text-transform: uppercase;
+            box-shadow: 0 8px 20px rgba(14, 165, 233, 0.35), inset 0 2px 4px rgba(255, 255, 255, 0.3);
+        }
+        .btn-sell-nft:active { transform: scale(0.96); }
+        .btn-sell-nft i { color: #bae6fd; }
+        
+        [data-theme="dark"] .btn-sell-nft {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #f8fafc;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        [data-theme="dark"] .btn-sell-nft i { color: #38bdf8; }
 
         .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;}
 
@@ -470,8 +536,10 @@
         .v-btn { width: 100%; height: 75px; background: linear-gradient(135deg, #0ea5e9, #0284c7); color: white; border: none; border-top: 1px solid #38bdf8; font-family: 'Inter', sans-serif; font-size: 1.15rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .v-btn:active { background: #0284c7; }
 
-        .nft-item-card { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 16px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .nft-item-card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.05); }
+        .nft-item-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 12px; display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; transition: 0.3s; box-shadow: 0 4px 15px var(--shadow); }
+        .nft-item-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px var(--shadow); }
+        [data-theme="dark"] .nft-item-card { background: rgba(255,255,255,0.03); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        [data-theme="dark"] .nft-item-card:hover { background: rgba(255,255,255,0.06); }
         .nft-item-img { width: 55px; height: 55px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(0, 245, 255, 0.2); }
         .nft-item-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
         .nft-item-info h4 { font-size: 0.85rem; margin: 0; color: var(--text-main); font-weight: 700; }
@@ -757,7 +825,7 @@
         .face-pending::after { content: ''; position: absolute; top: 0; left: -60%; width: 12px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); animation: silverBlade 3s infinite cubic-bezier(0.19, 1, 0.22, 1); animation-delay: 2s; }
         @keyframes silverBlade { 0% { left: -60%; opacity: 0; } 5% { opacity: 1; } 25%, 100% { left: 150%; opacity: 0; } }
 
-        .timer-cyan, .timer-red { font-family: monospace; transition: color 0.3s, text-shadow 0.3s; }
+        .timer-cyan, .timer-red { font-family: monospace; transition: color 0.3s, text-shadow 0.3s; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
         [data-theme="dark"] .timer-cyan { color: var(--primary) !important; text-shadow: 0 0 8px rgba(0, 245, 255, 0.4); }
         [data-theme="light"] .timer-cyan { color: var(--text-main) !important; text-shadow: none; }
         [data-theme="dark"] .timer-red { color: #f43f5e !important; text-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
@@ -1085,6 +1153,97 @@
     </div>
 </div>
 
+<div id="accountDeleteModal" class="modal">
+    <div class="modal-box" style="text-align: left; border-color: var(--error);">
+        <h2 style="font-size:1.3rem; margin-bottom:10px; font-weight:700;"><i class="fas fa-trash-alt" style="color:var(--error);"></i> Delete Account</h2>
+        <p style="font-size:0.8rem; color:var(--error); font-weight:700; margin-bottom:15px;"><i class="fas fa-exclamation-triangle"></i> Account will be permanently deleted after 24 hours.</p>
+
+        <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Email OTP Verification</label>
+        <div style="display:flex; gap:10px; margin-top: 5px; margin-bottom: 12px;">
+            <input type="number" id="deleteEmailOTP" placeholder="6-Digit OTP" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); outline: none;">
+            <button id="btnGetDeleteOTP" class="act-btn btn-dep" style="padding:0 15px; border-radius:12px; font-size:0.8rem; white-space:nowrap;" onclick="window.requestSystemOTP('btnGetDeleteOTP')">Get OTP</button>
+        </div>
+
+        <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Google Authenticator</label>
+        <input type="number" id="delete2FACode" placeholder="Enter 2FA Code" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; color: var(--text-main); outline: none; margin-top: 5px; font-family: monospace; font-weight: 700; letter-spacing: 2px;">
+
+        <button class="act-btn btn-wd" style="width:100%; padding: 12px;" id="btnConfirmDelete" onclick="window.submitDeleteAccount()">Initiate Deletion</button>
+        <p onclick="closeModal('accountDeleteModal')" style="margin-top:15px; font-size:0.8rem; color:var(--text-sub); cursor:pointer; text-align: center;">Cancel</p>
+    </div>
+</div>
+
+<div id="cancelDeleteModal" class="modal">
+    <div class="modal-box" style="text-align: left; border-color: var(--success);">
+        <h2 style="font-size:1.3rem; margin-bottom:10px; font-weight:700;"><i class="fas fa-shield-alt" style="color:var(--success);"></i> Abort Deletion</h2>
+        <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:15px;">Verify your identity to cancel the deletion request.</p>
+
+        <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Email OTP Verification</label>
+        <div style="display:flex; gap:10px; margin-top: 5px; margin-bottom: 12px;">
+            <input type="number" id="cancelDelEmailOTP" placeholder="6-Digit OTP" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); outline: none;">
+            <button id="btnGetCancelDelOTP" class="act-btn btn-dep" style="padding:0 15px; border-radius:12px; font-size:0.8rem; white-space:nowrap;" onclick="window.requestSystemOTP('btnGetCancelDelOTP')">Get OTP</button>
+        </div>
+
+        <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Google Authenticator</label>
+        <input type="number" id="cancelDel2FACode" placeholder="Enter 2FA Code" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; color: var(--text-main); outline: none; margin-top: 5px; font-family: monospace; font-weight: 700; letter-spacing: 2px;">
+
+        <button class="act-btn btn-dep" style="width:100%; padding: 12px;" id="btnConfirmCancelDelete" onclick="window.submitCancelDelete()">Restore Account</button>
+        <p onclick="closeModal('cancelDeleteModal')" style="margin-top:15px; font-size:0.8rem; color:var(--text-sub); cursor:pointer; text-align: center;">Close</p>
+    </div>
+</div>
+
+<!-- === ACCOUNT SETTINGS MODAL === -->
+<div id="accountSettingsModal" class="modal">
+    <div class="modal-box" style="text-align: left; padding: 25px 20px; border-color: var(--primary);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
+            <h2 style="font-size:1.2rem; font-weight:800; margin:0; display:flex; align-items:center; gap:8px;">
+                <div style="width:32px; height:32px; border-radius:8px; background:rgba(0, 245, 255, 0.1); display:flex; justify-content:center; align-items:center;"><i class="fas fa-user-shield" style="color:var(--primary); font-size:1rem;"></i></div> 
+                Account Information
+            </h2>
+            <div style="width:32px; height:32px; border-radius:50%; background:var(--bg-main); display:flex; justify-content:center; align-items:center; cursor:pointer; border:1px solid var(--border); transition:0.3s;" onclick="closeModal('accountSettingsModal')">
+                <i class="fas fa-times" style="color:var(--text-sub); font-size:1rem;"></i>
+            </div>
+        </div>
+
+        <div id="normalProfileBack" style="width: 100%; display: flex; flex-direction: column; gap: 10px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
+                <span style="color:var(--text-sub); font-size:0.85rem; font-weight:600;"><i class="fas fa-envelope" style="margin-right:6px; opacity:0.7;"></i> Email</span>
+                <span id="bEmail" style="color:var(--text-main); font-size:0.85rem; font-weight:800;">Loading...</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
+                <span style="color:var(--text-sub); font-size:0.85rem; font-weight:600;"><i class="fas fa-phone-alt" style="margin-right:6px; opacity:0.7;"></i> Phone</span>
+                <span id="bPhone" style="color:var(--text-main); font-size:0.85rem; font-weight:800; font-family:monospace;">Loading...</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
+                <span style="color:var(--text-sub); font-size:0.85rem; font-weight:600;"><i class="fas fa-globe" style="margin-right:6px; opacity:0.7;"></i> Country</span>
+                <span id="bCountry" style="color:var(--text-main); font-size:0.85rem; font-weight:800;">Loading...</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
+                <span style="color:var(--text-sub); font-size:0.85rem; font-weight:600;"><i class="fas fa-key" style="margin-right:6px; opacity:0.7;"></i> Password</span>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <input type="password" id="bPass" value="********" readonly style="background:transparent; border:none; color:var(--text-main); font-size:1rem; width:90px; outline:none; text-align:right; font-weight:800; font-family:monospace;">
+                    <i class="fas fa-eye" onclick="window.togglePassView(this)" style="cursor:pointer; color:var(--primary); background:rgba(0,245,255,0.1); padding:8px; border-radius:8px;"></i>
+                </div>
+            </div>
+            
+            <button style="width: 100%; margin-top: 15px; padding: 14px; font-size: 0.95rem; font-weight:800; letter-spacing:0.5px; background:linear-gradient(135deg, #ef4444, #b91c1c); color:#ffffff; border:1px solid #f87171; border-radius:12px; cursor:pointer; box-shadow:0 8px 25px rgba(239,68,68,0.4); transition:transform 0.2s;" onclick="window.openDeleteModal()">
+                <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Delete Account
+            </button>
+        </div>
+
+        <div id="pendingDeleteBack" style="display: none; text-align: center; width: 100%; flex-direction: column; align-items: center; justify-content: center; gap: 8px; padding: 20px 0;">
+            <div style="width:75px; height:75px; border-radius:50%; background:rgba(239, 68, 68, 0.1); display:flex; justify-content:center; align-items:center; margin-bottom:5px; border:1px dashed rgba(239,68,68,0.4);">
+                <i class="fas fa-user-times" style="color: #ef4444; font-size: 2.5rem; animation: pulseRed 2s infinite;"></i>
+            </div>
+            <h4 style="color: #ef4444; margin: 0; font-size: 1.25rem; font-weight:800;">Deletion Pending</h4>
+            <p style="font-size:0.8rem; color:var(--text-sub); margin:5px 0;">Your account will be permanently deleted in:</p>
+            <div class="timer-red" id="accDeleteTimer" style="font-size: 1.8rem; font-weight: 800; font-family: 'Space Grotesk', monospace; text-shadow: 0 0 15px rgba(239, 68, 68, 0.5); color:#ef4444; margin: 10px 0;">--:--:--</div>
+            <button style="width: 100%; padding: 14px; font-size: 0.95rem; font-weight:800; background: var(--bg-main); color: var(--text-main); border: 2px solid var(--border); border-radius:12px; margin-top: 10px; cursor:pointer;" onclick="window.openCancelDeleteModal()">
+                <i class="fas fa-ban" style="margin-right:6px;"></i> Abort Deletion Request
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- === TEAM NETWORK MODAL === -->
 <div id="teamModal" class="modal">
     <div class="modal-box" style="max-width: 400px; padding: 20px;">
@@ -1362,7 +1521,8 @@
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button style="background: rgba(0, 245, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onclick="window.showMyP2PQr()"><i class="fas fa-qrcode"></i> My QR</button>
                 <button style="background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6; padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onclick="openTransactionLookup()">History</button>
-                <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem; margin-left:5px;" onclick="closeModal('sendMoneyModal')"></i>
+                <!-- 🔥 FIX: Direct Close to prevent Double-Click -->
+                <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem; margin-left:5px;" onclick="document.getElementById('sendMoneyModal').style.display='none'; document.getElementById('sendMoneyModal').classList.remove('show');"></i>
             </div>
         </div>
 
@@ -1387,11 +1547,6 @@
             <input type="number" id="send2FA" placeholder="6-Digit Code" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); outline: none; margin-top: 5px; font-weight: 700; letter-spacing: 2px;">
 
             <button class="act-btn" style="width:100%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 1px solid #a78bfa; margin-top: 15px; padding: 12px;" id="btnSendMoney" onclick="submitSendMoney()">Confirm Transfer</button>
-
-            <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-top: 20px; margin-bottom: 10px; border-top: 1px solid var(--border); padding-top: 15px;"><i class="fas fa-history" style="color:var(--primary);"></i> Recent Send History</h4>
-            <div id="p2pHistoryBox" style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; max-height: 330px; overflow-y: auto; scrollbar-width: none;">
-                <div style="text-align:center; padding: 10px; font-size: 0.8rem; color: var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
-            </div>
         </div>
     </div>
 </div>
@@ -1403,7 +1558,8 @@
                 <i class="fas fa-arrow-left" style="cursor:pointer; color:var(--text-sub); font-size:1.1rem; transition: 0.2s;" onclick="backToSendMoney()"></i>
                 <h2 style="font-size:1.2rem; font-weight:700; margin:0;"><i class="fas fa-search" style="color:#8b5cf6;"></i> Transaction Lookup</h2>
             </div>
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeModal('p2pSearchModal')"></i>
+            <!-- 🔥 FIX: Direct Close to prevent Double-Click -->
+            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="document.getElementById('p2pSearchModal').style.display='none'; document.getElementById('p2pSearchModal').classList.remove('show'); window.openModal('sendMoneyModal');"></i>
         </div>
 
         <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Enter Order ID</label>
@@ -1416,6 +1572,12 @@
             <i class="fas fa-info-circle" style="color: #8b5cf6; margin-top: 2px;"></i>
             <span style="font-size: 0.7rem; color: #a78bfa; line-height: 1.4;">The same Order ID is shared with both sender and receiver.</span>
         </div>
+
+        <!-- 🔥 P2P History Moved Here -->
+        <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--text-main); margin-top: 20px; margin-bottom: 10px; border-top: 1px solid var(--border); padding-top: 15px;"><i class="fas fa-history" style="color:var(--primary);"></i> Recent P2P History</h4>
+        <div id="p2pHistoryBox" style="display: flex; flex-direction: column; gap: 8px; padding-bottom: 10px; max-height: 250px; overflow-y: auto; scrollbar-width: none;">
+            <div style="text-align:center; padding: 10px; font-size: 0.8rem; color: var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading...</div>
+        </div>
     </div>
 </div>
 
@@ -1426,7 +1588,8 @@
                 <i class="fas fa-arrow-left" style="cursor:pointer; color:var(--text-sub); font-size:1.1rem; transition: 0.2s;" onclick="backToLookup()"></i>
                 <h2 style="font-size:1.1rem; font-weight:700; margin:0;"><i class="fas fa-file-invoice" style="color:#8b5cf6;"></i> Transaction Details</h2>
             </div>
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeModal('p2pReceiptModal')"></i>
+            <!-- 🔥 FIX: Direct Close to prevent Double-Click -->
+            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="document.getElementById('p2pReceiptModal').style.display='none'; document.getElementById('p2pReceiptModal').classList.remove('show'); window.openModal('sendMoneyModal');"></i>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -1491,7 +1654,7 @@
     <div class="modal-box" style="padding: 30px 20px; text-align: center;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="font-size:1.2rem; font-weight:700; color:var(--text-main);"><i class="fas fa-qrcode" style="color:var(--primary);"></i> Receive via P2P</h2>
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeModal('p2pMyQrModal')"></i>
+            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="document.getElementById('p2pMyQrModal').style.display='none'; document.getElementById('p2pMyQrModal').classList.remove('show');"></i>
         </div>
         <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 20px;">Show this QR code to the sender to instantly receive USDT.</p>
 
@@ -1614,7 +1777,7 @@
     <div id="view-my" class="app-view active">
         <div class="dashboard-grid">
             <div style="display: flex; flex-direction: column; gap: 15px;">
-                <div class="profile-card">
+            <div class="profile-card">
                     <div style="position: relative; display: inline-block;">
                         <div class="dp-crater-wrapper">
                             <input type="file" id="dpInput" style="display:none" accept="image/png, image/jpeg, image/webp" onchange="window.uploadDP(event)">
@@ -1734,8 +1897,8 @@
                             <i class="fas fa-cog" id="settingsIcon"></i>
                             <span class="settings-label">Settings</span>
                             <div id="settingsHorizontalMenu">
-                                <div class="horiz-item item-1" onclick="event.stopPropagation(); showToast('Collection coming soon!')">
-                                    <div class="horiz-inner"><i class="fas fa-layer-group"></i> Collect</div>
+                                <div class="horiz-item item-1" onclick="event.stopPropagation(); window.openAccountSettingsModal()">
+                                    <div class="horiz-inner"><i class="fas fa-user-shield"></i> Account Info</div>
                                 </div>
                                 <div class="horiz-item item-2" onclick="event.stopPropagation(); showToast('Mint coming soon!')">
                                     <div class="horiz-inner"><i class="fas fa-hammer"></i> Mint</div>
@@ -3538,24 +3701,26 @@
          cTab.innerHTML = `
          <div class="nft-item-card" id="myActiveNft" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; width: 100%;">
              <div style="display: flex; gap: 15px; align-items: flex-start; width: 100%;">
-                 <img src="${window.reservedNFT.img}" class="nft-item-img" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
-                 <div class="nft-item-info" style="flex: 1; display: flex; flex-direction: column; width: 100%;">
+                 <img src="${window.reservedNFT.img}" class="nft-item-img" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border);">
+                 <div class="nft-item-info" style="flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0;">
                      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                          <h4 style="font-size: 1.05rem; margin: 0; color: var(--text-main); font-weight: 700;">${window.reservedNFT.id}</h4>
-                         <span style="background: rgba(30, 35, 45, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(192, 192, 192, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-radius: 6px; padding: 4px 8px; font-size: 0.6rem; color: #e2e8f0; font-weight: 600; letter-spacing: 0.5px;">Active Holding</span>
+                         <span style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 6px; padding: 4px 8px; font-size: 0.6rem; color: #0ea5e9; font-weight: 800; letter-spacing: 0.5px; flex-shrink: 0;">Active Holding</span>
                      </div>
-                     <div style="font-size: 0.65rem; color: var(--text-sub); margin: 6px 0 4px 0; font-family: monospace; display: flex; justify-content: space-between; width: 100%;">
-                         <span><span style="color: var(--primary);">Lvl ${window.reservedNFT.level||1}</span> | ID: ${window.reservedNFT.orderId}</span>
+                     <div style="font-size: 0.65rem; color: var(--text-sub); margin: 6px 0 4px 0; font-family: monospace; display: flex; align-items: center; gap: 4px; width: 100%; overflow: hidden;">
+                         <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;">
+                             <span style="color: var(--primary);">Lvl ${window.reservedNFT.level||1}</span> | ID: ${window.reservedNFT.orderId}
+                         </span>
                      </div>
-                     <div style="display: inline-flex; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.15); border-radius: 6px; padding: 5px 10px; margin-top: 4px; align-self: flex-start;">
+                     <div style="display: inline-flex; align-items: center; background: var(--bg-main); border: 1px dashed var(--border); border-radius: 6px; padding: 5px 10px; margin-top: 4px; align-self: flex-start;">
                          <span style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">${window.reservedNFT.price.toFixed(2)} ₮</span>
-                         <span style="color: rgba(255,255,255,0.2); margin: 0 6px;">|</span>
+                         <span style="color: var(--border); margin: 0 6px;">|</span>
                          <span style="font-size: 0.8rem; color: var(--success); font-weight: 700;">Est. +${estNet} ₮</span>
                      </div>
                  </div>
              </div>
-             <button onclick="window.startSellMatchmaking(this)" style="width: 100%; padding: 14px; margin-top: 6px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.02); box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1); color: #ffffff; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;">
-                 <i class="fas fa-bolt" style="color: #cbd5e1;"></i> SELL & CLAIM PROFIT
+             <button class="btn-sell-nft" onclick="window.startSellMatchmaking(this)">
+                 <i class="fas fa-bolt"></i> SELL & CLAIM PROFIT
              </button>
          </div>`;
      }
@@ -3904,26 +4069,26 @@
              collectionTab.innerHTML = `
              <div class="nft-item-card" id="myActiveNft" style="display: flex; flex-direction: column; gap: 12px; padding: 16px; width: 100%;">
                  <div style="display: flex; gap: 15px; align-items: flex-start; width: 100%;">
-                     <img src="${window.reservedNFT.img}" class="nft-item-img" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1);">
+                     <img src="${window.reservedNFT.img}" class="nft-item-img" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border);">
                      <div class="nft-item-info" style="flex: 1; display: flex; flex-direction: column; width: 100%; min-width: 0;">
                          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                              <h4 style="font-size: 1.05rem; margin: 0; color: var(--text-main); font-weight: 700;">${window.reservedNFT.id}</h4>
-                             <span style="background: rgba(30, 35, 45, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(192, 192, 192, 0.4); box-shadow: 0 4px 10px rgba(0,0,0,0.5); border-radius: 6px; padding: 4px 8px; font-size: 0.6rem; color: #e2e8f0; font-weight: 600; letter-spacing: 0.5px; flex-shrink: 0;">Active Holding</span>
+                             <span style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.3); border-radius: 6px; padding: 4px 8px; font-size: 0.6rem; color: #0ea5e9; font-weight: 800; letter-spacing: 0.5px; flex-shrink: 0;">Active Holding</span>
                          </div>
                          <div style="font-size: 0.65rem; color: var(--text-sub); margin: 6px 0 4px 0; font-family: monospace; display: flex; align-items: center; gap: 4px; width: 100%; overflow: hidden;">
                              <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; min-width: 0;">
                                  <span style="color: var(--primary);">Lvl ${window.reservedNFT.level||1}</span> | ID: ${window.reservedNFT.orderId}
                              </span>
                          </div>
-                         <div style="display: inline-flex; align-items: center; background: rgba(0,0,0,0.25); border: 1px dashed rgba(255,255,255,0.15); border-radius: 6px; padding: 5px 10px; margin-top: 4px; align-self: flex-start;">
+                         <div style="display: inline-flex; align-items: center; background: var(--bg-main); border: 1px dashed var(--border); border-radius: 6px; padding: 5px 10px; margin-top: 4px; align-self: flex-start;">
                              <span style="font-size: 0.85rem; color: var(--text-main); font-weight: 700;">${window.reservedNFT.price.toFixed(2)} ₮</span>
-                             <span style="color: rgba(255,255,255,0.2); margin: 0 6px;">|</span>
+                             <span style="color: var(--border); margin: 0 6px;">|</span>
                              <span style="font-size: 0.8rem; color: var(--success); font-weight: 700;">Est. +${estNet} ₮</span>
                          </div>
                      </div>
                  </div>
-                 <button onclick="window.startSellMatchmaking(this)" style="width: 100%; padding: 14px; margin-top: 6px; border-radius: 10px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(255, 255, 255, 0.02); box-shadow: 0 8px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.1); color: #ffffff; font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 8px;">
-                     <i class="fas fa-bolt" style="color: #cbd5e1;"></i> SELL & CLAIM PROFIT
+                 <button class="btn-sell-nft" onclick="window.startSellMatchmaking(this)">
+                     <i class="fas fa-bolt"></i> SELL & CLAIM PROFIT
                  </button>
              </div>`;
          }
@@ -4705,6 +4870,7 @@
  if (window.vaultTimerInterval) clearInterval(window.vaultTimerInterval);
  window.vaultCarouselIndex = 0;
  window.vaultTickCount = 0;
+ window.lastVaultTheme = document.documentElement.getAttribute('data-theme') === 'dark';
 
  window.vaultTimerInterval = setInterval(() => {
      const container = document.getElementById('vaultCarouselContainer');
@@ -4714,24 +4880,28 @@
      let wallet = window.RAM_STATE ? window.RAM_STATE.balances : window.lastWalletData;
      let now = Date.now();
      let activeItems = [];
+     let isDarkMode = document.documentElement.getAttribute('data-theme') === 'dark';
 
-     // 1. Check NFT (Cyan Glow)
-     let reservedNftTime = window.reservedNFT ? window.reservedNFT.timestamp : null;
-     if (reservedNftTime) {
-         let diff = Math.max(0, now - reservedNftTime);
+     if (window.lastVaultTheme !== isDarkMode) {
+         window.lastVaultTheme = isDarkMode;
+         track.innerHTML = ''; 
+     }
+
+     if (window.reservedNFT && window.reservedNFT.timestamp) {
+         let diff = Math.max(0, now - window.reservedNFT.timestamp);
          activeItems.push({
              id: 'tcm_nft_timer',
              diff: diff,
-             iconColor: '#00f5ff',
-             timeColor: '#ffffff',
-             amtColor: '#00f5ff',
-             glow: '0 0 20px rgba(0, 245, 255, 0.25)',
-             borderColor: 'rgba(0, 245, 255, 0.4)',
+             iconColor: isDarkMode ? '#00f5ff' : '#fca5a5',
+             timeColor: isDarkMode ? '#ffffff' : '#fee2e2',
+             amtColor: isDarkMode ? '#00f5ff' : '#f87171',
+             glow: isDarkMode ? '0 0 20px rgba(0, 245, 255, 0.25)' : '0 10px 25px rgba(185, 28, 28, 0.4)',
+             borderColor: isDarkMode ? 'rgba(0, 245, 255, 0.4)' : 'rgba(239, 68, 68, 0.5)',
+             textShadow: isDarkMode ? '0 2px 4px rgba(0,0,0,0.8)' : '0 1px 3px rgba(0,0,0,0.5)',
              amt: parseFloat(window.reservedNFT.price).toFixed(2)
          });
      }
 
-     // 2. Check Withdrawals (Red Glow)
      let needsSync = false;
      let stillLocked = [];
      if (wallet && wallet.Locked_Withdrawals && wallet.Locked_Withdrawals.length > 0) {
@@ -4744,11 +4914,12 @@
                  activeItems.push({
                      id: `tcm_wd_timer_${item.txId || idx}`,
                      diff: diff,
-                     iconColor: '#facc15',
-                     timeColor: '#ffffff',
-                     amtColor: '#10b981',
-                     glow: '0 0 20px rgba(244, 63, 94, 0.2)',
-                     borderColor: 'rgba(244, 63, 94, 0.4)',
+                     iconColor: isDarkMode ? '#facc15' : '#fca5a5',
+                     timeColor: isDarkMode ? '#ffffff' : '#fee2e2',
+                     amtColor: isDarkMode ? '#10b981' : '#f87171',
+                     glow: isDarkMode ? '0 0 20px rgba(244, 63, 94, 0.2)' : '0 10px 25px rgba(185, 28, 28, 0.4)',
+                     borderColor: isDarkMode ? 'rgba(244, 63, 94, 0.4)' : 'rgba(239, 68, 68, 0.5)',
+                     textShadow: isDarkMode ? '0 2px 4px rgba(0,0,0,0.8)' : '0 1px 3px rgba(0,0,0,0.5)',
                      amt: parseFloat(item.amount).toFixed(2)
                  });
              }
@@ -4768,7 +4939,17 @@
 
      container.style.display = 'block';
 
-     // 3. UI Structure Rebuilding (2 Lines: Timer Top, Amount Bottom)
+     const updateContainerTheme = (item) => {
+         container.style.borderColor = item.borderColor;
+         if (isDarkMode) {
+             container.style.background = 'radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(15, 20, 30, 0.7) 75%)';
+             container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${item.glow}`;
+         } else {
+             container.style.background = 'radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.15) 0%, rgba(69, 10, 10, 0.85) 75%)';
+             container.style.boxShadow = `0 15px 30px rgba(153, 27, 27, 0.3), inset 3px 3px 10px rgba(255, 255, 255, 0.25), inset -4px -4px 15px rgba(69, 10, 10, 0.8), ${item.glow}`;
+         }
+     };
+
      let currentIds = Array.from(track.children).map(c => c.id);
      let newIds = activeItems.map(i => i.id);
 
@@ -4779,21 +4960,19 @@
              <div id="${item.id}" style="height: 56px; width: 100%; flex-shrink: 0; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;">
                  <div style="display: flex; align-items: center; gap: 5px;">
                      <i class="far fa-clock gentle-pulse" style="color: ${item.iconColor}; font-size: 0.75rem;"></i>
-                     <span class="v-time-text" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.8rem; color: ${item.timeColor}; letter-spacing: 0.5px; text-shadow: 0 2px 4px rgba(0,0,0,0.8);">00:00:00</span>
+                     <span class="v-time-text" style="font-family: 'Space Grotesk', monospace; font-weight: 800; font-size: 0.8rem; color: ${item.timeColor}; letter-spacing: 0.5px; text-shadow: ${item.textShadow};">00:00:00</span>
                  </div>
-                 <span style="font-weight: 900; font-size: 0.9rem; color: ${item.amtColor}; text-shadow: 0 2px 5px rgba(0,0,0,0.8);">${item.amt} <span style="font-size:0.7rem;">₮</span></span>
+                 <span style="font-weight: 900; font-size: 0.9rem; color: ${item.amtColor}; text-shadow: ${item.textShadow};">${item.amt} <span style="font-size:0.7rem;">₮</span></span>
              </div>`;
          });
          track.innerHTML = html;
          window.vaultCarouselIndex = 0;
          track.style.transform = `translateY(0px)`;
-
-         // Initial Base 3D Shadow + Dynamic Neon Glow
-         container.style.borderColor = activeItems[0].borderColor;
-         container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${activeItems[0].glow}`;
+         updateContainerTheme(activeItems[0]);
+     } else {
+         updateContainerTheme(activeItems[window.vaultCarouselIndex]);
      }
 
-     // 4. Update exact times dynamically
      activeItems.forEach((item) => {
          let el = document.querySelector(`#${item.id} .v-time-text`);
          if (el) {
@@ -4804,29 +4983,19 @@
          }
      });
 
-     // 5. Smart Swiping Logic (8 seconds) with Dynamic Glow Updates
      if (activeItems.length > 1) {
          window.vaultTickCount++;
          if (window.vaultTickCount % 8 === 0) {
              window.vaultCarouselIndex++;
-             if (window.vaultCarouselIndex >= activeItems.length) {
-                 window.vaultCarouselIndex = 0;
-             }
-             track.style.transform = `translateY(-${window.vaultCarouselIndex * 56}px)`; // 56px height per item
-
-             let activeItem = activeItems[window.vaultCarouselIndex];
-             container.style.borderColor = activeItem.borderColor;
-             container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${activeItem.glow}`;
+             if (window.vaultCarouselIndex >= activeItems.length) window.vaultCarouselIndex = 0;
+             track.style.transform = `translateY(-${window.vaultCarouselIndex * 56}px)`;
+             updateContainerTheme(activeItems[window.vaultCarouselIndex]);
          }
      } else if (activeItems.length === 1) {
          window.vaultTickCount = 0;
          if (window.vaultCarouselIndex !== 0) {
              window.vaultCarouselIndex = 0;
              track.style.transform = `translateY(0px)`;
-         }
-         if (container.style.borderColor !== activeItems[0].borderColor) {
-              container.style.borderColor = activeItems[0].borderColor;
-              container.style.boxShadow = `0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6), ${activeItems[0].glow}`;
          }
      }
  }, 1000);
@@ -4905,13 +5074,16 @@
         const btnSubmit = document.getElementById('btnSendMoney');
         if(btnSubmit) {
             btnSubmit.disabled = true;
-            btnSubmit.classList.remove('incoming-fund-glow');
-            btnSubmit.style.boxShadow = 'none';
+            btnSubmit.className = 'act-btn';
+            btnSubmit.style.cssText = "width:100%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 1px solid #a78bfa; margin-top: 15px; padding: 12px; border-radius: 14px;";
             btnSubmit.innerHTML = 'Confirm Transfer';
         }
 
+        // 🔥 Remove Notification Pulse when user opens P2P menu
+        const dashIcon = document.getElementById('dashSendIcon');
+        if (dashIcon) dashIcon.classList.remove('dash-receive-pulse');
+
         await window.updateMonthlyQuota();
-        window.loadP2PHistory();
     };
     window.openP2P = window.openSendModal;
 
@@ -4973,16 +5145,18 @@
                     resBox.innerHTML = '<i class="fas fa-times-circle"></i> User not found!';
                     resBox.style.color = 'var(--error)';
                     btn.disabled = true;
-                    btn.classList.remove('incoming-fund-glow');
-                    btn.style.boxShadow = 'none';
+                    btn.className = 'act-btn'; // Reset Button
+                    btn.style.cssText = "width:100%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 1px solid #a78bfa; margin-top: 15px; padding: 12px; border-radius: 14px;";
                 } else {
-                    resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:#fff;">${result.name}</strong>`;
+                    // 🔥 FIX: color:var(--text-main) ensures visibility in BOTH Light and Dark themes
+                    resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:var(--text-main);">${result.name}</strong>`;
                     resBox.style.color = 'var(--success)';
 
                     if (window.currentMonthTxCount < 50) {
                         btn.disabled = false;
-                        btn.classList.add('incoming-fund-glow');
-                        btn.style.boxShadow = '0 0 15px var(--success), inset 0 0 10px rgba(255,255,255,0.2)';
+                        // 🔥 FIX: Clean glow class with strict border-radius applied
+                        btn.className = 'act-btn p2p-btn-valid';
+                        btn.style.cssText = "width:100%; margin-top: 15px; padding: 12px;";
                     }
                 }
             } catch (e) {
@@ -5066,6 +5240,8 @@
         } finally {
             btn.innerHTML = 'Confirm Transfer';
             btn.disabled = false;
+            btn.className = 'act-btn';
+            btn.style.cssText = "width:100%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 1px solid #a78bfa; margin-top: 15px; padding: 12px; border-radius: 14px;";
             document.getElementById('sendUid').value = '';
             document.getElementById('sendAmt').value = '';
             document.getElementById('send2FA').value = '';
@@ -5074,19 +5250,26 @@
         }
     };
 
+    // 🔥 FIX: Direct Inline Close to Prevent Double-Clicks in P2P Modals
     window.openTransactionLookup = () => {
-        window.closeModal('sendMoneyModal');
-        setTimeout(() => window.openModal('p2pSearchModal'), 200);
+        const smModal = document.getElementById('sendMoneyModal');
+        if(smModal) { smModal.classList.remove('show'); smModal.style.display = 'none'; }
+        window.openModal('p2pSearchModal');
+        
+        // P2P History এখন Lookup Modal ওপেন হওয়ার সাথে সাথে লোড হবে
+        window.loadP2PHistory();
     };
 
     window.backToSendMoney = () => {
-        window.closeModal('p2pSearchModal');
-        setTimeout(() => window.openModal('sendMoneyModal'), 200);
+        const psModal = document.getElementById('p2pSearchModal');
+        if(psModal) { psModal.classList.remove('show'); psModal.style.display = 'none'; }
+        window.openModal('sendMoneyModal');
     };
 
     window.backToLookup = () => {
-        window.closeModal('p2pReceiptModal');
-        setTimeout(() => window.openModal('p2pSearchModal'), 200);
+        const prModal = document.getElementById('p2pReceiptModal');
+        if(prModal) { prModal.classList.remove('show'); prModal.style.display = 'none'; }
+        window.openModal('p2pSearchModal');
     };
 
     window.executeOrderLookup = async () => {
@@ -5235,33 +5418,37 @@
         });
     };
 
+    // 🔥 FIX: One-Click Camera Unmount & Modal Close
     window.closeCameraScanner = () => {
-        window.closeModal('cameraScannerModal');
-
-        /* Hard Unmount Hardware Access to save Battery & RAM */
+        // ১. আগে হার্ডওয়্যারের কাজ বন্ধ করা হলো (Hardware Cleanup)
         if (html5QrCode) {
-            const stopCamera = () => {
+            const forceStopTracks = () => {
                 try {
-                    if (html5QrCode.isScanning) {
-                        html5QrCode.stop().then(() => {
-                            html5QrCode.clear();
-                            html5QrCode = null;
-                        }).catch(() => {
-                            html5QrCode.clear();
-                            html5QrCode = null;
-                        });
-                    } else {
-                        html5QrCode.clear();
-                        html5QrCode = null;
+                    if (window.localStream) { window.localStream.getTracks().forEach(track => track.stop()); }
+                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                        navigator.mediaDevices.getUserMedia({video: true}).then(s => s.getTracks().forEach(t => t.stop())).catch(e=>e);
                     }
-                } catch(e) { html5QrCode = null; }
+                } catch(e) {}
             };
 
-            if (isCameraStarting) {
-                setTimeout(stopCamera, 1500);
-            } else {
-                stopCamera();
-            }
+            const stopCamera = () => {
+                try {
+                    if (html5QrCode.getState && html5QrCode.getState() === 2) {
+                        html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; forceStopTracks(); }).catch(() => { html5QrCode.clear(); html5QrCode = null; forceStopTracks(); });
+                    } else {
+                        html5QrCode.clear(); html5QrCode = null; forceStopTracks();
+                    }
+                } catch(e) { html5QrCode = null; forceStopTracks(); }
+            };
+
+            if (isCameraStarting) { setTimeout(stopCamera, 2000); } else { stopCamera(); }
+        }
+
+        // ২. মডাল এবং ব্যাকগ্রাউন্ড ওভারলে ইনস্ট্যান্ট গায়েব করা হলো (UI Cleanup)
+        const scanModal = document.getElementById('cameraScannerModal');
+        if (scanModal) {
+            scanModal.classList.remove('show');
+            scanModal.style.display = 'none'; 
         }
     };
 
@@ -5595,6 +5782,10 @@
                 const sbAvatar = document.getElementById('sbAvatar');
                 if (sbAvatar) sbAvatar.src = defaultAvatar;
                 window.showToast("Profile Picture Removed!");
+                
+                // 🔥 FIX: মডাল ডিরেক্ট গায়েব করার হার্ডকোডেড কমান্ড
+                const actionModal = document.getElementById('dpActionModal');
+                if (actionModal) actionModal.style.display = 'none';
             } else {
                 throw new Error(result.message);
             }
@@ -5602,7 +5793,7 @@
             window.showToast("Failed to remove avatar", true);
         } finally {
             if (loader) loader.style.display = 'none';
-            window.closeModal('dpActionModal');
+            window.closeModal('dpActionModal'); // ফলব্যাক
         }
     };
 
@@ -5822,12 +6013,25 @@
                 }
                 .order-item-animated { opacity: 0; }
                 .order-item-animated.show { animation: liquidOrderBounce 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-                .order-top-stats { display: flex; justify-content: space-between; background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); padding: 18px 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); position: relative; }
+                
+                .order-top-stats { display: flex; justify-content: space-between; background: var(--bg-main); border: 1px solid var(--border); padding: 18px 20px; border-radius: 16px; margin-bottom: 25px; box-shadow: inset 0 2px 10px var(--shadow); position: relative; }
+                [data-theme="dark"] .order-top-stats { background: rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.06); box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); }
+                
                 .order-top-stats div { display: flex; flex-direction: column; align-items: flex-start; }
-                .order-top-stats span:first-child { font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 700; letter-spacing: 1px;}
-                .order-top-stats span:last-child { font-size: 1.15rem; color: #fff; font-weight: 800; font-family: 'Space Grotesk', monospace; margin-top: 4px;}
-                .btn-sync { position: absolute; top: -14px; right: -14px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 50%; width: 38px; height: 38px; color: #fff; cursor: pointer; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5); display: flex; justify-content: center; align-items: center; transition: transform 0.3s ease; border: 2px solid #0f172a; font-size: 1rem; }
+                .order-top-stats span:first-child { font-size: 0.65rem; color: var(--text-sub); text-transform: uppercase; font-weight: 700; letter-spacing: 1px;}
+                .order-top-stats span:last-child { font-size: 1.15rem; color: var(--text-main); font-weight: 800; font-family: 'Space Grotesk', monospace; margin-top: 4px;}
+                
+                .order-vol-warning { color: #d97706 !important; }
+                [data-theme="dark"] .order-vol-warning { color: var(--warning) !important; }
+                
+                .order-vol-success { color: #059669 !important; }
+                [data-theme="dark"] .order-vol-success { color: var(--success) !important; }
+
+                .btn-sync { position: absolute; top: -14px; right: -14px; background: linear-gradient(135deg, #3b82f6, #2563eb); border: none; border-radius: 50%; width: 38px; height: 38px; color: #fff; cursor: pointer; box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5); display: flex; justify-content: center; align-items: center; transition: transform 0.3s ease; border: 2px solid var(--bg-card); font-size: 1rem; }
                 .btn-sync:active { transform: rotate(180deg) scale(0.9); }
+                
+                .order-card-box { background: var(--bg-main); border: 1px solid var(--border); border-radius: 18px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 8px 20px var(--shadow); }
+                [data-theme="dark"] .order-card-box { background: rgba(20, 25, 35, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 12px 25px rgba(0,0,0,0.4); }
             `;
             document.head.appendChild(style);
         }
@@ -5886,13 +6090,13 @@
             if(filteredOrders.length === 0) {
                 contentBox.innerHTML = `
                 <div class="order-top-stats">
-                    <div><span>Reserved Volume</span><span style="color:var(--warning)">0.00 ₮</span></div>
+                    <div><span>Reserved Volume</span><span class="order-vol-warning">0.00 ₮</span></div>
                     <button class="btn-sync" onclick="localStorage.removeItem('tcm_nft_orders_cache'); window.renderOrders();"><i class="fas fa-sync-alt"></i></button>
-                    <div style="align-items: flex-end;"><span>Sold Volume</span><span style="color:var(--success)">0.00 ₮</span></div>
+                    <div style="align-items: flex-end;"><span>Sold Volume</span><span class="order-vol-success">0.00 ₮</span></div>
                 </div>
                 <div style="text-align:center; padding: 50px 20px; color: var(--text-sub); font-size: 0.95rem;">
-                    <div style="width: 80px; height: 80px; background: rgba(255,255,255,0.03); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto; border: 1px dashed rgba(255,255,255,0.1);">
-                        <i class="fas fa-box-open" style="font-size: 2rem; color: #475569;"></i>
+                    <div style="width: 80px; height: 80px; background: var(--bg-main); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto; border: 1px dashed var(--border);">
+                        <i class="fas fa-box-open" style="font-size: 2rem; color: var(--text-sub);"></i>
                     </div>
                     No records found for ${selectedMonth}
                 </div>`;
@@ -5901,9 +6105,9 @@
 
             contentBox.innerHTML = `
                 <div class="order-top-stats">
-                    <div><span>Reserved Volume</span><span style="color:var(--warning)">${totalReserveVolume.toFixed(2)} ₮</span></div>
+                    <div><span>Reserved Volume</span><span class="order-vol-warning">${totalReserveVolume.toFixed(2)} ₮</span></div>
                     <button class="btn-sync" onclick="localStorage.removeItem('tcm_nft_orders_cache'); window.renderOrders();"><i class="fas fa-sync-alt"></i></button>
-                    <div style="align-items: flex-end;"><span>Sold Volume</span><span style="color:var(--success)">${totalSoldVolume.toFixed(2)} ₮</span></div>
+                    <div style="align-items: flex-end;"><span>Sold Volume</span><span class="order-vol-success">${totalSoldVolume.toFixed(2)} ₮</span></div>
                 </div>
                 <div id="ordersListContainer" style="display: flex; flex-direction: column; gap: 14px;"></div>
                 <div id="orderScrollObserver" style="height: 50px; display: flex; justify-content: center; align-items: center; margin-top: 15px;"></div>
@@ -5939,13 +6143,13 @@
             let displayDate = window.formatTxDate ? window.formatTxDate(docTime) : new Date(docTime).toLocaleTimeString();
 
             html += `
-            <div class="order-item-animated" style="background: rgba(20, 25, 35, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 16px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 12px 25px rgba(0,0,0,0.4);">
+            <div class="order-item-animated order-card-box">
                 <div style="display: flex; gap: 14px; align-items: center;">
-                    <img src="${imgUrl}" style="width: 52px; height: 52px; border-radius: 12px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); flex-shrink:0; box-shadow: 0 5px 15px rgba(0,0,0,0.5);">
+                    <img src="${imgUrl}" style="width: 52px; height: 52px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); flex-shrink:0; box-shadow: 0 4px 10px var(--shadow);">
                     <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <h4 style="font-size: 0.95rem; color: #f8fafc; margin: 0 0 3px 0; font-weight: 800;">${ord.NFT_ID || 'TCM NFT'}</h4>
-                        <span style="font-size:0.65rem; color:#64748b; font-family:monospace; margin-bottom: 4px;">ID: ${ord.Order_ID || 'N/A'}</span>
-                        <span style="font-size:0.6rem; color:#475569; font-weight: 600;"><i class="far fa-clock" style="margin-right: 4px;"></i>${displayDate}</span>
+                        <h4 style="font-size: 0.95rem; color: var(--text-main); margin: 0 0 3px 0; font-weight: 800;">${ord.NFT_ID || 'TCM NFT'}</h4>
+                        <span style="font-size:0.65rem; color: var(--text-sub); font-family:monospace; margin-bottom: 4px; font-weight:600;">ID: <span style="color:var(--text-main);">${ord.Order_ID || 'N/A'}</span></span>
+                        <span style="font-size:0.6rem; color: var(--text-sub); font-weight: 600;"><i class="far fa-clock" style="margin-right: 4px;"></i>${displayDate}</span>
                     </div>
                 </div>
                 <div style="text-align: right; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; gap: 8px;">
@@ -6623,6 +6827,13 @@
                     window.is2FABound = !!u["2FA_Key"];
                     window.isWalletBound = !!(u.Wallet_BEP20 || u.Wallet_TRC20);
                     window.userWallets = { BEP20: u.Wallet_BEP20 || "", TRC20: u.Wallet_TRC20 || "" };
+
+                    // 🔥 NEW: Dashboard Send Icon Pulse Notification
+                    const dashIcon = document.getElementById('dashSendIcon');
+                    if (dashIcon) {
+                        if (u.hasUnreadP2P) dashIcon.classList.add('dash-receive-pulse');
+                        else dashIcon.classList.remove('dash-receive-pulse');
+                    }
 
                     const b2FA = document.getElementById('badge2FA');
                     const bWall = document.getElementById('badgeWallet');
@@ -7612,6 +7823,224 @@
            if (typeof window.initLiveChat === 'function') window.initLiveChat();
        }
    });
+
+   window.accountDeleteTime = null;
+    window.accDeleteInterval = null;
+
+    window.openAccountSettingsModal = () => {
+        window.openModal('accountSettingsModal');
+        window.loadAccountSettingsData();
+    };
+
+    window.togglePassView = (icon) => {
+        const input = document.getElementById('bPass');
+        if (input.type === 'password') {
+            input.type = 'text';
+            input.value = input.getAttribute('data-actual-pass') || 'Data not found';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            input.value = '********';
+            icon.className = 'fas fa-eye';
+        }
+    };
+
+    window.loadAccountSettingsData = () => {
+        // 🔥 সুপার-অ্যাগ্রেসিভ ডেটা ফাইন্ডার
+        const u = (window.RAM_STATE && window.RAM_STATE.user) || window.userData || window.lastUserData || window.user || {};
+        
+        const emailStr = u.Email || u.email || localStorage.getItem('email') || 'Data not found';
+        const phoneStr = u.Phone || u.phone || localStorage.getItem('phone') || 'Data not found';
+        const countryStr = u.Country || u.country || localStorage.getItem('country') || 'Data not found';
+        const passStr = u.Password || u.password || localStorage.getItem('password') || '********';
+
+        const elEmail = document.getElementById('bEmail');
+        const elPhone = document.getElementById('bPhone');
+        const elCountry = document.getElementById('bCountry');
+        const elPass = document.getElementById('bPass');
+
+        if (elEmail) elEmail.innerText = emailStr;
+        if (elPhone) elPhone.innerText = phoneStr;
+        if (elCountry) elCountry.innerText = countryStr;
+        if (elPass) {
+            elPass.setAttribute('data-actual-pass', passStr);
+            elPass.type = 'password'; 
+            elPass.value = '********';
+            if(elPass.nextElementSibling) elPass.nextElementSibling.className = 'fas fa-eye';
+        }
+        
+        const deleteTime = u.Delete_At || window.accountDeleteTime;
+        if (deleteTime && deleteTime > Date.now()) {
+            document.getElementById('normalProfileBack').style.display = 'none';
+            document.getElementById('pendingDeleteBack').style.display = 'flex';
+            window.startDeleteTimer(deleteTime);
+        } else {
+            document.getElementById('normalProfileBack').style.display = 'flex';
+            document.getElementById('pendingDeleteBack').style.display = 'none';
+        }
+    };
+
+    // 🔥 GPU Clash & Double-Click Fix (Duplicate Removed)
+    window.openDeleteModal = () => { 
+        const accModal = document.getElementById('accountSettingsModal');
+        if(accModal) { accModal.style.transition = 'none'; window.closeModal('accountSettingsModal'); }
+        setTimeout(() => { 
+            if(accModal) { accModal.style.display = ''; accModal.style.transition = ''; }
+            window.openModal('accountDeleteModal'); 
+        }, 150); 
+    };
+    
+    window.openCancelDeleteModal = () => { 
+        const accModal = document.getElementById('accountSettingsModal');
+        if(accModal) { accModal.style.transition = 'none'; window.closeModal('accountSettingsModal'); }
+        setTimeout(() => { 
+            if(accModal) { accModal.style.display = ''; accModal.style.transition = ''; }
+            window.openModal('cancelDeleteModal'); 
+        }, 150);
+    };
+
+    window.startProfileFlip = () => {
+        const bar = document.getElementById('flipLoaderBar');
+        if (bar) {
+            bar.style.opacity = '1';
+            bar.style.transition = 'width 3s linear';
+            bar.style.width = '100%';
+        }
+        window.flipTimeout = setTimeout(() => {
+            document.getElementById('profileFlipInner').classList.add('is-flipped');
+            if(bar) { bar.style.opacity = '0'; bar.style.width = '0%'; bar.style.transition = 'none'; }
+            window.loadBackProfileData();
+        }, 3000);
+    };
+
+    window.cancelProfileFlip = (e) => {
+        if(e) e.stopPropagation();
+        clearTimeout(window.flipTimeout);
+        const inner = document.getElementById('profileFlipInner');
+        if (inner) inner.classList.remove('is-flipped');
+        const bar = document.getElementById('flipLoaderBar');
+        if(bar) { bar.style.opacity = '0'; bar.style.width = '0%'; bar.style.transition = 'none'; }
+        if(window.accDeleteInterval) clearInterval(window.accDeleteInterval);
+    };
+
+    window.togglePassView = (icon) => {
+        const input = document.getElementById('bPass');
+        if (input.type === 'password') {
+            input.type = 'text';
+            input.value = input.getAttribute('data-actual-pass') || 'N/A';
+            icon.className = 'fas fa-eye-slash';
+        } else {
+            input.type = 'password';
+            input.value = '********';
+            icon.className = 'fas fa-eye';
+        }
+    };
+
+    window.loadBackProfileData = () => {
+        // 🔥 ফায়ারবেস থেকে আসা আসল ডাটা অবজেক্ট ধরা হচ্ছে
+        let u = {};
+        if (window.RAM_STATE && window.RAM_STATE.user) {
+            u = window.RAM_STATE.user;
+        } else if (window.lastUserData) {
+            u = window.lastUserData;
+        }
+        
+        console.log("Profile Back Data Loaded:", u); // কনসোলে চেক করার জন্য
+        
+        // ফায়ারবেসের হুবহু কলামের নাম অনুযায়ী ডেটা বসানো
+        const emailStr = u.Email || 'Data not found';
+        const phoneStr = u.Phone || 'Data not found';
+        const countryStr = u.Country || 'Data not found';
+        const passStr = u.Password || '********';
+
+        const elEmail = document.getElementById('bEmail');
+        const elPhone = document.getElementById('bPhone');
+        const elCountry = document.getElementById('bCountry');
+        const elPass = document.getElementById('bPass');
+
+        if (elEmail) elEmail.innerText = emailStr;
+        if (elPhone) elPhone.innerText = phoneStr;
+        if (elCountry) elCountry.innerText = countryStr;
+        if (elPass) elPass.setAttribute('data-actual-pass', passStr);
+        
+        const deleteTime = u.Delete_At || window.accountDeleteTime;
+        if (deleteTime && deleteTime > Date.now()) {
+            document.getElementById('normalProfileBack').style.display = 'none';
+            document.getElementById('pendingDeleteBack').style.display = 'flex';
+            window.startDeleteTimer(deleteTime);
+        } else {
+            document.getElementById('normalProfileBack').style.display = 'flex';
+            document.getElementById('pendingDeleteBack').style.display = 'none';
+        }
+    };
+
+    window.startDeleteTimer = (targetTime) => {
+        if (window.accDeleteInterval) clearInterval(window.accDeleteInterval);
+        window.accDeleteInterval = setInterval(() => {
+            let diff = targetTime - Date.now();
+            if (diff <= 0) {
+                clearInterval(window.accDeleteInterval);
+                document.getElementById('accDeleteTimer').innerText = '00:00:00';
+                window.logout();
+                return;
+            }
+            let h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+            let m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            let s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+            document.getElementById('accDeleteTimer').innerText = `${h}:${m}:${s}`;
+        }, 1000);
+    };
+
+    window.submitDeleteAccount = async () => {
+        const otp = document.getElementById('deleteEmailOTP').value.trim();
+        const code2FA = document.getElementById('delete2FACode').value.trim();
+        if (!otp || otp.length !== 6) return window.showToast("Enter 6-digit Email OTP!", true);
+        if (!code2FA || code2FA.length !== 6) return window.showToast("Enter 2FA Code!", true);
+
+        const btn = document.getElementById('btnConfirmDelete');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+
+        try {
+            const result = await window.fetchAPI('/user/request-delete', 'POST', { uid: localStorage.getItem('uid'), otp, code2FA });
+            if (result.success) {
+                window.accountDeleteTime = result.deleteTime;
+                if (window.RAM_STATE && window.RAM_STATE.user) window.RAM_STATE.user.Delete_At = result.deleteTime;
+                window.showToast("Account Deletion Initiated! 24H Timer Started.");
+                window.closeModal('accountDeleteModal');
+                window.loadBackProfileData();
+            } else {
+                window.showToast(result.message, true);
+            }
+        } catch(e) { window.showToast("Error processing request.", true); }
+        btn.innerHTML = 'Initiate Deletion'; btn.disabled = false;
+    };
+
+    window.submitCancelDelete = async () => {
+        const otp = document.getElementById('cancelDelEmailOTP').value.trim();
+        const code2FA = document.getElementById('cancelDel2FACode').value.trim();
+        if (!otp || otp.length !== 6) return window.showToast("Enter 6-digit Email OTP!", true);
+        if (!code2FA || code2FA.length !== 6) return window.showToast("Enter 2FA Code!", true);
+
+        const btn = document.getElementById('btnConfirmCancelDelete');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restoring...';
+        btn.disabled = true;
+
+        try {
+            const result = await window.fetchAPI('/user/cancel-delete', 'POST', { uid: localStorage.getItem('uid'), otp, code2FA });
+            if (result.success) {
+                window.accountDeleteTime = null;
+                if (window.RAM_STATE && window.RAM_STATE.user) delete window.RAM_STATE.user.Delete_At;
+                window.showToast("Deletion Aborted. Account Restored!");
+                window.closeModal('cancelDeleteModal');
+                if(window.accDeleteInterval) clearInterval(window.accDeleteInterval);
+                window.loadBackProfileData();
+            } else {
+                window.showToast(result.message, true);
+            }
+        } catch(e) { window.showToast("Error processing request.", true); }
+        btn.innerHTML = 'Restore Account'; btn.disabled = false;
+    };
 </script>
 </body>
 </html>
