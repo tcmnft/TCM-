@@ -536,7 +536,7 @@ window.togglePassword = () => {
         }
         
         btn.disabled = true;
-        btn.innerText = "Sending...";
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
         btn.style.opacity = "0.7";
         
         try {
@@ -556,13 +556,14 @@ window.togglePassword = () => {
             
             // ⏳ 60 Seconds Smart Countdown
             let timeLeft = 60;
+            btn.innerHTML = `Resend in ${timeLeft}s...`;
             const timer = setInterval(() => {
                 timeLeft--;
-                btn.innerText = `Wait ${timeLeft}s`;
+                btn.innerHTML = `Resend in ${timeLeft}s...`;
                 if (timeLeft <= 0) {
                     clearInterval(timer);
                     btn.disabled = false;
-                    btn.innerText = "Send OTP";
+                    btn.innerHTML = "Resend OTP";
                     btn.style.opacity = "1";
                 }
             }, 1000);
@@ -570,7 +571,7 @@ window.togglePassword = () => {
         } catch (error) {
             window.showToast(error.message, true);
             btn.disabled = false;
-            btn.innerText = "Send OTP";
+            btn.innerHTML = "Send OTP";
             btn.style.opacity = "1";
         }
     };

@@ -830,7 +830,8 @@
         .face-pending::after { content: ''; position: absolute; top: 0; left: -60%; width: 12px; height: 100%; background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%); transform: skewX(-25deg); animation: silverBlade 3s infinite cubic-bezier(0.19, 1, 0.22, 1); animation-delay: 2s; }
         @keyframes silverBlade { 0% { left: -60%; opacity: 0; } 5% { opacity: 1; } 25%, 100% { left: 150%; opacity: 0; } }
 
-        .timer-cyan, .timer-red { font-family: monospace; transition: color 0.3s, text-shadow 0.3s; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; }
+        .timer-cyan, .timer-red { font-family: monospace; transition: color 0.3s, text-shadow 0.3s; font-variant-numeric: tabular-nums; letter-spacing: 0.5px; white-space: nowrap; }
+        .tx-order-id-box { font-variant-numeric: tabular-nums; font-family: monospace; white-space: nowrap; }
         [data-theme="dark"] .timer-cyan { color: var(--primary) !important; text-shadow: 0 0 8px rgba(0, 245, 255, 0.4); }
         [data-theme="light"] .timer-cyan { color: var(--text-main) !important; text-shadow: none; }
         [data-theme="dark"] .timer-red { color: #f43f5e !important; text-shadow: 0 0 8px rgba(244, 63, 94, 0.4); }
@@ -3315,6 +3316,7 @@
 
     /* === MODULE 19: GLOBAL PENDING TIMER ENGINE === */
     if (window.liveTimerInterval) clearInterval(window.liveTimerInterval);
+    if (window.recentHistoryInterval) clearInterval(window.recentHistoryInterval);
 
     window.liveTimerInterval = setInterval(() => {
         document.querySelectorAll('.live-timer').forEach(el => {
@@ -7772,10 +7774,11 @@
         let hasExpiringContract = false;
         let now = Date.now();
 
-        let silverHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#d4d4d8;"><i class="fas fa-history"></i> SILVER HISTORY</span></div><div style="overflow-y: auto; max-height: 180px; padding-right: 4px;" class="scroll-hide-bar">';
-        let goldHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#facc15;"><i class="fas fa-history"></i> GOLD HISTORY</span></div><div style="overflow-y: auto; max-height: 180px; padding-right: 4px;" class="scroll-hide-bar">';
-        let platHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#0ea5e9;"><i class="fas fa-history"></i> PLATINUM HISTORY</span></div><div style="overflow-y: auto; max-height: 180px; padding-right: 4px;" class="scroll-hide-bar">';
-        let diamondHtml = '<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#a1a1aa;"><i class="fas fa-history"></i> DIAMOND HISTORY</span></div><div style="overflow-y: auto; max-height: 180px; padding-right: 4px;" class="scroll-hide-bar">';
+        let scrollStyle = 'overflow-y: auto; max-height: 180px; padding-right: 4px; touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; pointer-events: auto;';
+        let silverHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#d4d4d8;"><i class="fas fa-history"></i> SILVER HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+        let goldHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#facc15;"><i class="fas fa-history"></i> GOLD HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+        let platHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#0ea5e9;"><i class="fas fa-history"></i> PLATINUM HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+        let diamondHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#a1a1aa;"><i class="fas fa-history"></i> DIAMOND HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
 
         let sCount = 0, gCount = 0, pCount = 0, dCount = 0;
         let sortedStakes = [...wallet.Active_Stakes].sort((a, b) => (b.startTime || 0) - (a.startTime || 0));
@@ -7856,12 +7859,13 @@
             let startFmt = formatDateTime(startDate);
             let endFmt = formatDateTime(unlockDate);
 
+            let displayTx = stk.txId || stk.id || stk.orderId || stk.Order_ID || (stk.timestamp ? ('TX-' + String(stk.timestamp).slice(-8)) : 'TX-ACTIVE');
             let statusBadge = stk.status === 'Active' ? `<span style="font-size:0.6rem; color:#f59e0b; font-weight:800; text-transform:uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">● ACTIVE</span>` : `<span style="font-size:0.6rem; color:#10b981; font-weight:800; text-transform:uppercase; background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">● CLAIMED</span>`;
 
             let itemHtml = `
             <div class="clean-tx-card" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 14px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 8px;">
-                    <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${stk.id}</span></span>
+                    <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${displayTx}</span></span>
                     ${statusBadge}
                 </div>
 
