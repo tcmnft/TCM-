@@ -382,6 +382,11 @@
         .btn-close-3d:active { transform: translateY(4px); border-bottom: 0px solid rgba(0, 0, 0, 0.5); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); color: var(--text-main); background: rgba(255, 255, 255, 0.1); }
 
         /* === MODULE 6: MODALS, POPUPS & TOASTS === */
+        /* 🔥 UNIVERSAL MAGNETIC GLASS CLOSE BUTTON */
+        .univ-close-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background: rgba(148, 163, 184, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--text-sub); font-size: 1rem; cursor: pointer; z-index: 50; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
+        .univ-close-btn:hover { background: rgba(244, 63, 94, 0.12); color: var(--error); border-color: rgba(244, 63, 94, 0.3); transform: translateY(-3px) scale(1.08); box-shadow: 0 10px 25px rgba(244, 63, 94, 0.25), inset 0 2px 5px rgba(255, 255, 255, 0.15); }
+        .univ-close-btn:active { background: rgba(244, 63, 94, 0.2); transform: translateY(2px) scale(0.92); box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4), inset 0 4px 10px rgba(0, 0, 0, 0.3); border-color: rgba(244, 63, 94, 0.5); transition: all 0.1s ease; }
+
         #loader { position: fixed; inset: 0; background: var(--bg-main); z-index: var(--z-max); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.4s ease; }
         .spinner { width: 45px; height: 45px; border: 4px solid var(--border); border-top: 4px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
@@ -1005,8 +1010,11 @@
 
 <!-- === SECURITY & AUTHENTICATION MODALS === -->
 <div id="securityModal" class="modal">
-    <div class="modal-box" style="border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
-        <h2 style="font-size:1.4rem; margin-bottom:5px; font-weight:700; color:var(--text-main);"><i class="fas fa-shield-alt" style="color:var(--primary);"></i> Security Center</h2>
+    <div class="modal-box" style="position: relative; border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
+        <div class="univ-close-btn" onclick="window.closeModal('securityModal')"><i class="fas fa-times"></i></div>
+        <div style="padding-right: 40px;">
+            <h2 style="font-size:1.4rem; margin-bottom:5px; font-weight:700; color:var(--text-main);"><i class="fas fa-shield-alt" style="color:var(--primary);"></i> Security Center</h2>
+        </div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:20px;">Protect your assets with advanced cyber security.</p>
 
         <div class="shield-wrapper" id="shieldWrapper">
@@ -1246,9 +1254,13 @@
 
 <!-- === TEAM NETWORK MODAL === -->
 <div id="teamModal" class="modal">
-    <div class="modal-box" style="max-width: 400px; padding: 20px;">
-        <h2 style="font-size:1.3rem; margin-bottom:10px; font-weight:700;"><i class="fas fa-network-wired" style="color:var(--primary);"></i> Network Tree</h2>
-        <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:15px;">Click on any Hand to view User details</p>
+    <div class="modal-box" style="max-width: 400px; padding: 20px; position: relative;">
+        <div class="univ-close-btn" onclick="window.closeModal('teamModal')"><i class="fas fa-times"></i></div>
+
+        <div style="padding-right: 40px; text-align: left;">
+            <h2 style="font-size:1.3rem; margin-bottom:5px; font-weight:700;"><i class="fas fa-network-wired" style="color:var(--primary);"></i> Network Tree</h2>
+            <p style="font-size:0.8rem; color:var(--text-sub); margin-bottom:20px;">Click on any Hand to view User details</p>
+        </div>
 
         <div id="teamLoader" style="display:none; margin-bottom:20px;">
             <i class="fas fa-spinner fa-spin" style="color:var(--primary); font-size: 1.5rem;"></i><br><span style="font-size:0.8rem; color:var(--text-sub);">Scanning blockchain...</span>
@@ -1305,8 +1317,9 @@
 
 <!-- === FINANCE & TRANSACTION MODAL === -->
 <div id="txModal" class="modal">
-    <div class="modal-box" style="padding: 20px; max-height: 90vh; overflow-y: auto; scrollbar-width: none;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <div class="modal-box" style="position: relative; padding: 20px; max-height: 90vh; overflow-y: auto; scrollbar-width: none;">
+        <div class="univ-close-btn" onclick="window.closeTx()"><i class="fas fa-times"></i></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-right: 40px;">
             <h2 id="mTitle" style="font-size:1.3rem; font-weight:700; margin:0;">Deposit USDT</h2>
             <select id="depNetworkSelect" style="padding: 6px 10px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 8px; color: var(--primary); font-size: 0.75rem; font-weight: 700; outline: none; display: none;" onchange="window.updateDepositNetwork()">
                 <option value="BEP20">BEP-20</option>
@@ -1411,10 +1424,10 @@
 
 <!-- === SYSTEM ORDERS & RESERVATION === -->
 <div id="ordersModal" class="modal">
-    <div class="modal-box" style="max-width: 450px; padding: 20px; max-height: 85vh; display: flex; flex-direction: column;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <div class="modal-box" style="position: relative; max-width: 450px; padding: 20px; max-height: 85vh; display: flex; flex-direction: column;">
+        <div class="univ-close-btn" onclick="window.closeModal('ordersModal')"><i class="fas fa-times"></i></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-right: 40px;">
             <h2 style="font-size:1.2rem; font-weight:700;"><i class="fas fa-clipboard-list" style="color:var(--primary);"></i> NFT Orders</h2>
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeModal('ordersModal')"></i>
         </div>
         <div style="display: flex; justify-content: space-between; align-items: center; background: var(--bg-main); padding: 10px 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--border);">
             <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-sub);">Select Month:</span>
@@ -1479,10 +1492,10 @@
 </div>
 
 <div id="referralModal" class="modal">
-    <div class="modal-box" style="padding: 25px 20px; text-align: center;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="modal-box" style="position: relative; padding: 25px 20px; text-align: center;">
+        <div class="univ-close-btn" onclick="window.closeModal('referralModal')"><i class="fas fa-times"></i></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-right: 40px;">
             <h2 style="font-size:1.3rem; font-weight:700;"><i class="fas fa-share-nodes" style="color:var(--primary);"></i> Referral Hub</h2>
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeModal('referralModal')"></i>
         </div>
 
         <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 15px;">Share your QR code or link to build your team and earn rewards!</p>
@@ -1515,14 +1528,13 @@
 
 <!-- === P2P TRANSFER SYSTEM === -->
 <div id="sendMoneyModal" class="modal">
-    <div class="modal-box" style="padding: 20px; max-height: 90vh; display: flex; flex-direction: column;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+    <div class="modal-box" style="position: relative; padding: 20px; max-height: 90vh; display: flex; flex-direction: column;">
+        <div class="univ-close-btn" onclick="window.closeModal('sendMoneyModal')"><i class="fas fa-times"></i></div>
+        <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 15px; padding-right: 40px; gap: 10px;">
             <h2 style="font-size:1.3rem; font-weight:700;"><i class="fas fa-paper-plane" style="color:#8b5cf6;"></i> Send USDT</h2>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button style="background: rgba(0, 245, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onclick="window.showMyP2PQr()"><i class="fas fa-qrcode"></i> My QR</button>
                 <button style="background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6; padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onclick="openTransactionLookup()">History</button>
-                <!-- 🔥 FIX: Direct Close to prevent Double-Click -->
-                <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem; margin-left:5px;" onclick="document.getElementById('sendMoneyModal').style.display='none'; document.getElementById('sendMoneyModal').classList.remove('show');"></i>
             </div>
         </div>
 
@@ -1552,14 +1564,14 @@
 </div>
 
 <div id="p2pSearchModal" class="modal">
-    <div class="modal-box" style="padding: 25px 20px; text-align: left;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="modal-box" style="position: relative; padding: 25px 20px; text-align: left;">
+        <!-- 🔥 FIX: Clean closeModal call for Hardware Router Sync -->
+        <div class="univ-close-btn" onclick="window.closeModal('p2pSearchModal')"><i class="fas fa-times"></i></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-right: 40px;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <i class="fas fa-arrow-left" style="cursor:pointer; color:var(--text-sub); font-size:1.1rem; transition: 0.2s;" onclick="backToSendMoney()"></i>
                 <h2 style="font-size:1.2rem; font-weight:700; margin:0;"><i class="fas fa-search" style="color:#8b5cf6;"></i> Transaction Lookup</h2>
             </div>
-            <!-- 🔥 FIX: Direct Close to prevent Double-Click -->
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="document.getElementById('p2pSearchModal').style.display='none'; document.getElementById('p2pSearchModal').classList.remove('show'); window.openModal('sendMoneyModal');"></i>
         </div>
 
         <label style="font-size: 0.8rem; color: var(--text-sub); font-weight: 600;">Enter Order ID</label>
@@ -1582,14 +1594,14 @@
 </div>
 
 <div id="p2pReceiptModal" class="modal">
-    <div class="modal-box" style="padding: 20px; text-align: left; background: var(--bg-card);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="modal-box" style="position: relative; padding: 20px; text-align: left; background: var(--bg-card);">
+        <!-- 🔥 FIX: Clean closeModal call and Universal Button -->
+        <div class="univ-close-btn" onclick="window.closeModal('p2pReceiptModal')"><i class="fas fa-times"></i></div>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-right: 40px;">
             <div style="display: flex; align-items: center; gap: 12px;">
                 <i class="fas fa-arrow-left" style="cursor:pointer; color:var(--text-sub); font-size:1.1rem; transition: 0.2s;" onclick="backToLookup()"></i>
                 <h2 style="font-size:1.1rem; font-weight:700; margin:0;"><i class="fas fa-file-invoice" style="color:#8b5cf6;"></i> Transaction Details</h2>
             </div>
-            <!-- 🔥 FIX: Direct Close to prevent Double-Click -->
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="document.getElementById('p2pReceiptModal').style.display='none'; document.getElementById('p2pReceiptModal').classList.remove('show'); window.openModal('sendMoneyModal');"></i>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -2650,6 +2662,11 @@
 
  /* === MODULE 14: UI ROUTER & MODAL ENGINE === */
     window.switchTab = function(targetId, btnElement) {
+        // 🔥 FIX: পেজ সুইচ করার সময় যেকোনো ফ্যান্টম মডাল হ্যাশ বা হিস্ট্রি সাইলেন্টলি রিমুভ করা হলো
+        if (window.location.hash && window.location.hash.startsWith('#modal-')) {
+            window.history.replaceState(null, null, window.location.pathname);
+        }
+
         document.querySelectorAll('.tab-content, .tab-pane, .page-section, .dashboard-page, .section, .app-view').forEach(p => {
             p.style.display = 'none';
             p.classList.remove('active');
@@ -5250,26 +5267,37 @@
         }
     };
 
-    // 🔥 FIX: Direct Inline Close to Prevent Double-Clicks in P2P Modals
+    // 🔥 FIX: Replace State Routing to Prevent Double-Clicks in P2P Transitions
     window.openTransactionLookup = () => {
         const smModal = document.getElementById('sendMoneyModal');
-        if(smModal) { smModal.classList.remove('show'); smModal.style.display = 'none'; }
-        window.openModal('p2pSearchModal');
-
-        // P2P History এখন Lookup Modal ওপেন হওয়ার সাথে সাথে লোড হবে
+        if(smModal) { smModal.classList.remove('show'); setTimeout(() => smModal.style.display = 'none', 300); }
+        
+        const psModal = document.getElementById('p2pSearchModal');
+        if(psModal) { psModal.style.display = 'flex'; setTimeout(() => psModal.classList.add('show'), 10); }
+        
+        // ব্রাউজারের হিস্ট্রি স্ট্যাক জ্যাম না করে সরাসরি রিপ্লেস করা হচ্ছে
+        window.history.replaceState(null, null, '#modal-p2pSearchModal');
         window.loadP2PHistory();
     };
 
     window.backToSendMoney = () => {
         const psModal = document.getElementById('p2pSearchModal');
-        if(psModal) { psModal.classList.remove('show'); psModal.style.display = 'none'; }
-        window.openModal('sendMoneyModal');
+        if(psModal) { psModal.classList.remove('show'); setTimeout(() => psModal.style.display = 'none', 300); }
+        
+        const smModal = document.getElementById('sendMoneyModal');
+        if(smModal) { smModal.style.display = 'flex'; setTimeout(() => smModal.classList.add('show'), 10); }
+        
+        window.history.replaceState(null, null, '#modal-sendMoneyModal');
     };
 
     window.backToLookup = () => {
         const prModal = document.getElementById('p2pReceiptModal');
-        if(prModal) { prModal.classList.remove('show'); prModal.style.display = 'none'; }
-        window.openModal('p2pSearchModal');
+        if(prModal) { prModal.classList.remove('show'); setTimeout(() => prModal.style.display = 'none', 300); }
+        
+        const psModal = document.getElementById('p2pSearchModal');
+        if(psModal) { psModal.style.display = 'flex'; setTimeout(() => psModal.classList.add('show'), 10); }
+        
+        window.history.replaceState(null, null, '#modal-p2pSearchModal');
     };
 
     window.executeOrderLookup = async () => {
@@ -5597,7 +5625,10 @@
             <div class="team-user-row" style="background:rgba(0,0,0,0.15); padding:10px 12px; border-radius:10px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; border: 1px solid rgba(255,255,255,0.02);">
                 <div>
                     <span class="team-u-name" style="font-weight:700; color:var(--text-main); display:block; margin-bottom:2px;"><i class="fas fa-user-circle" style="color:var(--text-sub); margin-right:4px;"></i>${u.name}</span>
-                    <span class="team-u-id" style="font-size:0.65rem; color:var(--text-sub); font-family:monospace;">UID: ${u.uid}</span>
+                    <span class="team-u-id" style="font-size:0.65rem; color:var(--text-sub); font-family:monospace; display: flex; align-items: center; gap: 6px;">
+                        UID: <span id="teamUid_${u.uid}">${u.uid}</span>
+                        <i class="far fa-copy copy-trigger" style="cursor:pointer; color:var(--primary); font-size:0.75rem; transition:0.2s;" onclick="window.copyText('${u.uid}', this)" title="Copy UID"></i>
+                    </span>
                 </div>
                 <div style="text-align: right;">
                     <span class="team-u-rank" style="font-size:0.6rem; padding:2px 6px; border-radius:6px; background:rgba(0, 245, 255, 0.1); color:var(--primary); font-weight:600; display:inline-block; margin-bottom:4px;">LV ${u.rank}</span>
@@ -7104,6 +7135,22 @@
             const elWd = document.getElementById('assetTotalWithdraw');
             if(elInc) elInc.innerText = `${window.formatMagicNumber(lifetimeIncome)} ₮`;
             if(elWd) elWd.innerText = `${window.formatMagicNumber(lifetimeWithdraw)} ₮`;
+
+            // 🔥 FIX: ড্যাশবোর্ড লোড হওয়ার সাথে সাথেই ব্যাকগ্রাউন্ডে This Week পার্সেন্টেজ ক্যালকুলেট হয়ে যাবে
+            if (trueTotal > 0) {
+                let netFlow = (tE + tS + tA + tTeam) - lifetimeWithdraw; // Approximate 7D net for cold start
+                let perc = ((netFlow / trueTotal) * 100).toFixed(1);
+                let badgeEl = document.querySelector('.ph-badge');
+                if (badgeEl) {
+                    if (perc >= 0) {
+                        badgeEl.innerHTML = `<i class="fas fa-arrow-trend-up"></i> +${perc}% This Week`;
+                        badgeEl.style.background = 'rgba(16, 185, 129, 0.2)'; badgeEl.style.color = 'var(--success)'; badgeEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+                    } else {
+                        badgeEl.innerHTML = `<i class="fas fa-arrow-trend-down"></i> ${perc}% This Week`;
+                        badgeEl.style.background = 'rgba(244, 63, 94, 0.2)'; badgeEl.style.color = 'var(--error)'; badgeEl.style.border = '1px solid rgba(244, 63, 94, 0.3)';
+                    }
+                }
+            }
 
             if(document.getElementById('assetModeMy') && document.getElementById('assetModeMy').style.display !== 'none') {
                 window.renderMyAnalyticsChart(trueTotal);
