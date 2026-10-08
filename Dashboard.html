@@ -2689,15 +2689,23 @@
         }
     };
 
+    // 🔥 FIX: Strict ID Isolation Timer to prevent UI overlap glitches
     setInterval(() => {
         document.querySelectorAll('.atm-live-timer').forEach(el => {
             let unlockTime = parseInt(el.getAttribute('data-unlock'));
+            let stkId = el.getAttribute('data-id');
+            let amt = el.getAttribute('data-amt');
+            
+            if (!unlockTime || !stkId) return;
+
             let remaining = unlockTime - Date.now();
+            
             if (remaining <= 0) {
-                let stkId = el.getAttribute('data-id');
-                let amt = el.getAttribute('data-amt');
                 let parent = document.getElementById('claim_box_' + stkId);
-                if(parent) parent.innerHTML = `<button class="btn-claim-glass" style="padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;" onclick="window.executeClaimStake('${stkId}', ${amt})">Claim</button>`;
+                // শুধু নির্দিষ্ট আইডির parent থাকলেই বাটন রেন্ডার হবে
+                if(parent && !parent.querySelector('button')) {
+                    parent.innerHTML = `<button class="btn-claim-glass" style="padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;" onclick="window.executeClaimStake('${stkId}', ${amt})">Claim</button>`;
+                }
             } else {
                 let h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
                 let m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
@@ -2716,13 +2724,24 @@
             const result = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
             if (result.success) {
                 if (window.RAM_STATE && window.RAM_STATE.balances) {
-                    window.RAM_STATE.balances.Main_Balance = (parseFloat(window.RAM_STATE.balances.Main_Balance) || 0) + parseFloat(principalAmt);
+                    // 🔥 Main Balance অপরিবর্তিত থাকবে, Locked Balance এবং Withdrawal Array আপডেট হবে
                     if (result.updatedBalances) {
-                        window.RAM_STATE.balances.Total_Stake = result.updatedBalances.Total_Stake;
-                        window.RAM_STATE.balances.Daily_Stake = result.updatedBalances.Daily_Stake;
+                        window.RAM_STATE.balances.Locked_Balance = result.updatedBalances.Locked_Balance;
+                        window.RAM_STATE.balances.Locked_Withdrawals = result.updatedBalances.Locked_Withdrawals;
                     }
                     window.lastWalletData = window.RAM_STATE.balances;
                     if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+                    
+                    // 🚀 ZERO-READ FIX: শুধুমাত্র Locked Vault UI আপডেট করা হচ্ছে (ফায়ারবেস রিড ছাড়াই)
+                    const lockedUI = document.getElementById('uLocked');
+                    if(lockedUI && typeof window.formatMagicNumber === 'function') {
+                        lockedUI.innerText = window.formatMagicNumber(window.RAM_STATE.balances.Locked_Balance);
+                    }
+                    // Awesome পপআপ বন্ধ হওয়ার পর Vault Carousel রিস্টার্ট করার লজিক
+                    window.setTimeout(() => {
+                         if (typeof window.vaultCarouselIndex !== 'undefined') window.vaultCarouselIndex = 0;
+                    }, 100);
+
                     if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
                 }
 
@@ -2740,16 +2759,28 @@
                 const popNewBal = document.getElementById('popNewBal');
 
                 if(popAmt) popAmt.innerText = parseFloat(principalAmt).toFixed(2) + " ₮";
-                if(popProfit) popProfit.style.display = 'none';
-
-                let newBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || principalAmt);
-                let oldBal = newBal - parseFloat(principalAmt);
                 
-                if(popOldBal) popOldBal.innerText = oldBal.toFixed(2) + " ₮";
-                if(popNewBal) popNewBal.innerText = newBal.toFixed(2) + " ₮";
+                // 🔥 ভুয়া প্রফিট মুছে Locked Vault মেসেজ দেওয়া হলো
+                if(popProfit) {
+                    popProfit.innerHTML = '<i class="fas fa-lock" style="color:var(--warning);"></i> 30 Mins Cooling Lock';
+                    popProfit.style.color = "var(--warning)";
+                    popProfit.style.display = 'block';
+                }
+
+                let currentMainBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0);
+                
+                if(popOldBal) {
+                    popOldBal.previousElementSibling.innerText = "Current Main Balance:";
+                    popOldBal.innerText = currentMainBal.toFixed(2) + " ₮";
+                }
+                if(popNewBal) {
+                    popNewBal.previousElementSibling.innerText = "TCM Locked Vault:";
+                    popNewBal.innerText = "+ " + parseFloat(principalAmt).toFixed(2) + " ₮";
+                    popNewBal.style.color = "var(--warning)";
+                }
 
                 window.openModal('claimPopup');
-                window.showToast("Staking Principal Successfully Claimed!");
+                window.showToast("Security Clearance: Sent to Locked Vault");
             } else {
                 window.showToast(result.message, true);
                 if(btn) { btn.innerHTML = 'Claim'; btn.disabled = false; }
