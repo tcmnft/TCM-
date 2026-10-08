@@ -3055,10 +3055,26 @@
 
     /* === MODULE 18: RECENT HISTORY RENDER ENGINE === */
     window.allTransactions = [];
+    window.TX_CACHE = [];
+    window.hasMoreTxInDB = true;
+    window.isFetchingMoreTx = false;
     window.txHistoryData = [];
     window.txRenderLimit = 4;
     window.currentRenderedCount = 0;
     window.txIntersectionObserver = null;
+
+    window.forceInjectToHistory = (newTx) => {
+        if (!window.allTransactions) window.allTransactions = [];
+        window.allTransactions.unshift(newTx);
+        window.TX_CACHE = window.allTransactions;
+        localStorage.setItem("USER_TX_VAULT_" + localStorage.getItem('uid'), JSON.stringify(window.TX_CACHE));
+        
+        let uid = localStorage.getItem('uid');
+        let currentCount = parseInt(localStorage.getItem('tcm_tx_count_' + uid) || '0');
+        localStorage.setItem('tcm_tx_count_' + uid, currentCount + 1);
+
+        if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+    };
 
     window.initTxObserver = () => {
         const tb = document.getElementById('txHistoryBox');
@@ -3298,10 +3314,64 @@
         const tb = document.getElementById('txHistoryBox');
         if (!tb) return;
         tb.removeEventListener('scroll', window.handleHistoryScroll);
-        window.handleHistoryScroll = () => {
+        window.handleHistoryScroll = async () => {
             if (tb.scrollTop + tb.clientHeight >= tb.scrollHeight - 20) {
                 if (window.currentRenderedCount < window.txHistoryData.length) {
                     window.renderTxChunk();
+                } else if (window.hasMoreTxInDB && !window.isFetchingMoreTx) {
+                    window.isFetchingMoreTx = true;
+                    const ind = document.getElementById('txLoadMoreIndicator');
+                    if (ind) ind.innerHTML = `<i class="fas fa-spinner fa-spin" style="color: var(--primary);"></i> Syncing older records...`;
+                    
+                    try {
+                        let lastTx = window.allTransactions[window.allTransactions.length - 1];
+                        let lastTs = lastTx ? (lastTx.timestamp || lastTx.Date) : Date.now();
+                        if (typeof lastTs !== 'number') lastTs = window.parseSafeTimestamp(lastTs);
+                        
+                        const uid = localStorage.getItem('uid');
+                        const res = await window.fetchAPI(`/finance/transactions/more?uid=${uid}&lastTimestamp=${lastTs}`);
+                        
+                        if (res.success && res.data && res.data.length > 0) {
+                            window.allTransactions = [...window.allTransactions, ...res.data];
+                            window.TX_CACHE = window.allTransactions;
+                            localStorage.setItem("USER_TX_VAULT_" + uid, JSON.stringify(window.TX_CACHE));
+                            if (res.data.length < 20) window.hasMoreTxInDB = false;
+                            
+                            const selectedMonthValue = document.getElementById('txMonthYear') ? document.getElementById('txMonthYear').value : '';
+                            const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
+                            
+                            let newFiltered = res.data.filter(tx => {
+                                if (!allowedTypes.includes(tx.Type)) return false;
+                                if (selectedMonthValue) {
+                                    const [targetYear, targetMonth] = selectedMonthValue.split('-');
+                                    let txDateObj;
+                                    if (tx.timestamp && typeof tx.timestamp.toDate === 'function') txDateObj = tx.timestamp.toDate();
+                                    else if (tx.timestamp && tx.timestamp.seconds) txDateObj = new Date(tx.timestamp.seconds * 1000);
+                                    else if (tx.Date) {
+                                        let p = String(tx.Date).split(' ')[0].split(/[-/]/);
+                                        if (p.length === 3 && p[0].length <= 2) txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`);
+                                        else txDateObj = new Date(tx.Date);
+                                    }
+                                    if (!txDateObj || isNaN(txDateObj)) txDateObj = new Date(0);
+                                    if (txDateObj.getFullYear().toString() !== targetYear || (txDateObj.getMonth() + 1).toString().padStart(2, '0') !== targetMonth) return false;
+                                }
+                                return true;
+                            });
+                            
+                            window.txHistoryData = [...window.txHistoryData, ...newFiltered];
+                            if (ind) ind.remove();
+                            window.renderTxChunk();
+                        } else {
+                            window.hasMoreTxInDB = false;
+                            if (ind) ind.remove();
+                            window.renderTxChunk();
+                        }
+                    } catch (e) {
+                        console.error("Failed to load more txs", e);
+                        if (ind) ind.innerHTML = `Error syncing records`;
+                    } finally {
+                        window.isFetchingMoreTx = false;
+                    }
                 }
             }
         };
@@ -3402,6 +3472,18 @@
                 let sRnk = parseInt(cachedStaticUser.Rank) || 0;
                 levelSelect.value = sRnk > 0 ? sRnk : 1;
                 if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
+            }
+
+            const currentUserId = localStorage.getItem('uid');
+            if (currentUserId) {
+                const cachedTxs = localStorage.getItem("USER_TX_VAULT_" + currentUserId);
+                if (cachedTxs) {
+                    window.TX_CACHE = JSON.parse(cachedTxs);
+                    window.allTransactions = window.TX_CACHE;
+                    window.hasMoreTxInDB = window.allTransactions.length >= 20;
+                    window.isFetchingMoreTx = false;
+                    if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+                }
             }
 
             const l = document.getElementById('loader');
@@ -4990,9 +5072,8 @@
                     Order_ID: sData.Order_ID || 'DEP-' + Date.now() // সার্ভারের আসল আইডি
                 };
 
-                if (typeof window.allTransactions !== 'undefined') {
-                    window.allTransactions.unshift(newTx);
-                    if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+                if (typeof window.forceInjectToHistory === 'function') {
+                    window.forceInjectToHistory(newTx);
                 }
             } else {
                 window.showToast("Deposit Failed: " + result.message, true);
@@ -5044,9 +5125,8 @@
                     Order_ID: sData.Order_ID || 'WD-' + Date.now() // সার্ভারের আসল আইডি
                 };
 
-                if (typeof window.allTransactions !== 'undefined') {
-                    window.allTransactions.unshift(newTx);
-                    if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+                if (typeof window.forceInjectToHistory === 'function') {
+                    window.forceInjectToHistory(newTx);
                 }
             } else {
                 window.showToast(result.message, true);
@@ -7059,7 +7139,20 @@
                     if(bWall) { bWall.className = window.isWalletBound ? "badge glow-green" : "badge glow-red"; bWall.innerText = window.isWalletBound ? "Protected" : "Unbound"; }
                 }
 
-                window.allTransactions = result.data.transactions || [];
+                let cachedTxCount = parseInt(localStorage.getItem('tcm_tx_count_' + uid) || '0');
+                let newTxCount = (u && u.counters) ? parseInt(u.counters.txCount || 0) : 0;
+                localStorage.setItem('tcm_tx_count_' + uid, newTxCount);
+
+                if (newTxCount === cachedTxCount && window.TX_CACHE && window.TX_CACHE.length > 0) {
+                    window.allTransactions = window.TX_CACHE;
+                } else {
+                    window.TX_CACHE = result.data.transactions || [];
+                    localStorage.setItem("USER_TX_VAULT_" + uid, JSON.stringify(window.TX_CACHE));
+                    window.allTransactions = window.TX_CACHE;
+                }
+                
+                window.hasMoreTxInDB = window.allTransactions.length >= 20;
+                window.isFetchingMoreTx = false;
                 window.applyTxFilter();
                 if (typeof window.loadTodaysHistoryFromAPI === 'function') window.loadTodaysHistoryFromAPI();
 
@@ -7793,19 +7886,18 @@
                         status: 'Active'
                     });
 
-                    // 🔥 FIX: Push to transaction history for instant UI update
-                    if (typeof window.allTransactions !== 'undefined') {
-                        window.allTransactions.unshift({
+                    // 🔥 FIX: Push to transaction history for instant UI update using forceInjectToHistory
+                    if (typeof window.forceInjectToHistory === 'function') {
+                        window.forceInjectToHistory({
                             id: finalStakeId,
                             UID: uid,
-                            Type: 'Stake',
+                            Type: 'Stake Lock',
                             Amount: amount,
                             Status: 'Success',
                             Date: new Date().toISOString(),
                             timestamp: Date.now(),
                             Order_ID: finalStakeId
                         });
-                        if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
                     }
 
                     if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
@@ -8071,7 +8163,29 @@
                     popup.style.display = 'flex';
                     setTimeout(() => popup.classList.add('show'), 10);
                 }
-                if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+                if (window.RAM_STATE && window.RAM_STATE.balances) {
+                    window.RAM_STATE.balances.Main_Balance = parseFloat(window.RAM_STATE.balances.Main_Balance || 0) + parseFloat(amount);
+                    if (window.RAM_STATE.balances.Active_Stakes) {
+                        window.RAM_STATE.balances.Active_Stakes = window.RAM_STATE.balances.Active_Stakes.map(stk => stk.id === stakeId ? {...stk, status: 'Completed'} : stk);
+                    }
+                    window.lastWalletData = window.RAM_STATE.balances;
+                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+                    if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
+                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+                }
+                if (typeof window.forceInjectToHistory === 'function') {
+                    window.forceInjectToHistory({
+                        id: 'claim_' + Date.now(),
+                        UID: uid,
+                        Type: 'Stake Unlocked',
+                        Amount: parseFloat(amount),
+                        Status: 'Success',
+                        Date: new Date().toISOString(),
+                        timestamp: Date.now(),
+                        Order_ID: stakeId,
+                        Details: 'Staking Principal Returned to Main Balance'
+                    });
+                }
             } else {
                 window.showToast(res.message, true);
             }
