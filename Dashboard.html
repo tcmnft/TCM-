@@ -23,10 +23,10 @@
            --accent: #c026d3;
            --success: #10b981;
            --error: #f43f5e;
-           --warning: #facc15;
+           --warning: #b45309; /* 🔥 লাইট মোডে গাঢ় অ্যাম্বার গোল্ড (পরিষ্কার দৃশ্যমান) */
 
            /* Theme specific (Light Default) */
-           --bg-main: #eff4f8; /* 🔥 ব্যাকগ্রাউন্ডটি হালকা গ্রে-ব্লু করা হলো যাতে সাদা শ্যাডো ফুটে ওঠে */
+           --bg-main: #eff4f8;
            --bg-card: #ffffff;
            --text-main: #1e293b;
            --text-sub: #64748b;
@@ -45,6 +45,7 @@
         }
 
         [data-theme="dark"] {
+           --warning: #facc15; /* 🔥 ডার্ক মোডে উজ্জ্বল নিয়ন ইয়েলো */
            --bg-main: #070714;
            --bg-card: #121225;
            --text-main: #f8f9fc;
@@ -362,7 +363,8 @@
         .glow-blue { background: rgba(0, 245, 255, 0.1); color: #00bcd4; box-shadow: 0 0 10px rgba(0, 245, 255, 0.4); }
         .glow-green { background: rgba(16, 185, 129, 0.1); color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.4); }
         .glow-black { background: #000000; color: #ffffff; box-shadow: 0 0 12px rgba(255, 255, 255, 0.4); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .glow-locked { background: rgba(245, 158, 11, 0.1); color: #f59e0b; box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .glow-locked { background: rgba(180, 83, 9, 0.1); color: var(--warning); box-shadow: 0 0 8px rgba(180, 83, 9, 0.2); border: 1px solid rgba(180, 83, 9, 0.3); font-weight: 800; }
+        [data-theme="dark"] .glow-locked { background: rgba(245, 158, 11, 0.1); color: #facc15; box-shadow: 0 0 12px rgba(245, 158, 11, 0.4); border: 1px solid rgba(245, 158, 11, 0.2); }
         .glow-released { background: rgba(192, 38, 211, 0.1); color: #c026d3; box-shadow: 0 0 12px rgba(192, 38, 211, 0.4); border: 1px solid rgba(192, 38, 211, 0.2); }
 
         .copy-trigger { cursor: pointer; transition: 0.3s; color: var(--text-sub); }
@@ -2505,44 +2507,6 @@
        }
     };
 
-    // 🔥 FIX 2: Restored the Instant 1ms UI Loader (যেটি ভুল করে মুছে গিয়েছিল)
-    window.onload = async () => {
-        if (typeof window.setDefaultMonth === 'function') window.setDefaultMonth();
-
-        const userUid = localStorage.getItem('uid');
-        if (!userUid) return;
-
-        const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
-
-        try {
-            const cachedStaticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-            if (cachedStaticUser.Name) {
-                safeSetText('uName', cachedStaticUser.Name);
-                safeSetText('sbName', cachedStaticUser.Name);
-                safeSetText('uUID', cachedStaticUser.UID || userUid);
-                safeSetText('sbUid', "UID: " + (cachedStaticUser.UID || userUid));
-
-                const avatarSrc = localStorage.getItem('tcm_user_dp') || cachedStaticUser.Avatar || cachedStaticUser.avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
-                const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
-                if(uAvatar) uAvatar.src = avatarSrc;
-                if(sbAvatar) sbAvatar.src = avatarSrc;
-
-                if (typeof window.getLevelStyling === 'function') {
-                    const lvStyle = window.getLevelStyling(cachedStaticUser.Rank || 0);
-                    const pill = document.getElementById('uLevelPill');
-                    if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
-                }
-
-                const levelSelect = document.getElementById('levelSelect');
-                if(levelSelect) {
-                    let sRnk = parseInt(cachedStaticUser.Rank) || 0;
-                    levelSelect.value = sRnk > 0 ? sRnk : 1;
-                    if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-                }
-            }
-        } catch(e) { console.warn("Local cache error", e); }
-    };
-
     /* === MODULE 13: SMART BALANCE & FORMATTING ENGINE === */
     window.balFormatIndex = parseInt(localStorage.getItem('tcm_bal_format')) || 0;
 
@@ -3495,8 +3459,9 @@
     // 🟡 STEP 2: STALE-WHILE-REVALIDATE (Fetch Live API from Backend)
     // ==========================================
     try {
-        // 🔥 FIX: Using secure window.fetchAPI so the Bearer Token is passed through the Shield
-        const result = await window.fetchAPI(`/user/init-data?uid=${userUid}`, 'GET');
+        let cachedTxCount = parseInt(localStorage.getItem('tcm_tx_count_' + userUid) || '0');
+        // 🔥 FIX: Send clientTxCount for True Zero-Read Delta Sync
+        const result = await window.fetchAPI(`/user/init-data?uid=${userUid}&clientTxCount=${cachedTxCount}`, 'GET');
 
         if (result && result.success && result.data) {
             const { user, wallet, transactions } = result.data;
@@ -3556,12 +3521,23 @@
                 window.renderWalletData(window.RAM_STATE.balances);
             }
 
-            // 🔥 Store Transactions in RAM and Render History
-            window.allTransactions = transactions || [];
+            let newTxCount = (user && user.counters) ? parseInt(user.counters.txCount || 0) : 0;
+            localStorage.setItem('tcm_tx_count_' + userUid, newTxCount);
+
+            if (result.data.isUpToDate && window.TX_CACHE && window.TX_CACHE.length > 0) {
+                window.allTransactions = window.TX_CACHE;
+            } else {
+                window.TX_CACHE = transactions || [];
+                localStorage.setItem("USER_TX_VAULT_" + userUid, JSON.stringify(window.TX_CACHE));
+                window.allTransactions = window.TX_CACHE;
+            }
+            
+            window.hasMoreTxInDB = window.allTransactions.length >= 20;
+            window.isFetchingMoreTx = false;
             window.applyTxFilter();
 
-            if (typeof window.fetchInitialDataFromAPI === 'function') {
-                window.fetchInitialDataFromAPI();
+            if (typeof window.loadTodaysHistoryFromAPI === 'function') {
+                window.loadTodaysHistoryFromAPI(false);
             }
 
             const l = document.getElementById('loader');
@@ -4051,10 +4027,10 @@
                                  <p style="color:var(--success); font-size: 0.85rem; font-weight: 700; margin: 0;">+ ${parseFloat(retAmount).toFixed(2)} ₮</p>
                              </div>
                          </div>
-                         <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 8px 10px; font-size: 0.7rem; font-family: monospace; display: flex; flex-direction: column; gap: 4px; border: 1px dashed rgba(255,255,255,0.15); margin-top: 4px;">
-                             <div style="display: flex; justify-content: space-between; color: var(--text-main);"><span>Gross Profit:</span><span>+ ${grossAmount.toFixed(2)} ₮</span></div>
-                             <div style="display: flex; justify-content: space-between; color: var(--error);"><span>Trading Fee (21%):</span><span>- ${Math.abs(feeAmount).toFixed(2)} ₮</span></div>
-                             <div style="display: flex; justify-content: space-between; color: var(--warning); font-weight: 700; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 6px; margin-top: 2px;"><span>Net Return:</span><span>+ ${Math.abs(netAmount).toFixed(2)} ₮</span></div>
+                         <div style="background: var(--bg-main); border-radius: 10px; padding: 10px 12px; font-size: 0.8rem; font-family: monospace; display: flex; flex-direction: column; gap: 6px; border: 1px dashed var(--border); margin-top: 6px;">
+                             <div style="display: flex; justify-content: space-between; color: var(--text-main); font-weight: 600;"><span>Gross Profit:</span><span>+ ${grossAmount.toFixed(2)} ₮</span></div>
+                             <div style="display: flex; justify-content: space-between; color: var(--error); font-weight: 600;"><span>Trading Fee (21%):</span><span>- ${Math.abs(feeAmount).toFixed(2)} ₮</span></div>
+                             <div style="display: flex; justify-content: space-between; color: var(--warning); font-weight: 800; font-size: 0.9rem; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 2px;"><span>Net Return:</span><span>+ ${Math.abs(netAmount).toFixed(2)} ₮</span></div>
                          </div>
                      </div>`;
 
@@ -4275,10 +4251,10 @@
                                  <p style="color:var(--success); font-size: 0.85rem; font-weight: 700; margin: 0;">+ ${parseFloat(data.Amount).toFixed(2)} ₮</p>
                              </div>
                          </div>
-                         <div style="background: rgba(0, 0, 0, 0.2); border-radius: 8px; padding: 8px 10px; font-size: 0.7rem; font-family: monospace; display: flex; flex-direction: column; gap: 4px; border: 1px dashed rgba(255,255,255,0.15); margin-top: 4px;">
-                             <div style="display: flex; justify-content: space-between; color: var(--text-main);"><span>Gross Profit:</span><span>+ ${gross.toFixed(2)} ₮</span></div>
-                             <div style="display: flex; justify-content: space-between; color: var(--error);"><span>Trading Fee (21%):</span><span>- ${Math.abs(fee).toFixed(2)} ₮</span></div>
-                             <div style="display: flex; justify-content: space-between; color: var(--warning); font-weight: 700; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 6px; margin-top: 2px;"><span>Net Return:</span><span>+ ${Math.abs(net).toFixed(2)} ₮</span></div>
+                         <div style="background: var(--bg-main); border-radius: 10px; padding: 10px 12px; font-size: 0.8rem; font-family: monospace; display: flex; flex-direction: column; gap: 6px; border: 1px dashed var(--border); margin-top: 6px;">
+                             <div style="display: flex; justify-content: space-between; color: var(--text-main); font-weight: 600;"><span>Gross Profit:</span><span>+ ${gross.toFixed(2)} ₮</span></div>
+                             <div style="display: flex; justify-content: space-between; color: var(--error); font-weight: 600;"><span>Trading Fee (21%):</span><span>- ${Math.abs(fee).toFixed(2)} ₮</span></div>
+                             <div style="display: flex; justify-content: space-between; color: var(--warning); font-weight: 800; font-size: 0.9rem; border-top: 1px dashed var(--border); padding-top: 6px; margin-top: 2px;"><span>Net Return:</span><span>+ ${Math.abs(net).toFixed(2)} ₮</span></div>
                          </div>
                      </div>`;
                  }
