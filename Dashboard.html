@@ -2589,13 +2589,20 @@
         if (tS) setText('lifetimeRoiVal', tS, true);
 
         /* Auto-update Active Stake */
-        let totalActivePrincipal = 0;
-        if (w.Active_Stakes && w.Active_Stakes.length > 0) {
-            w.Active_Stakes.forEach(stk => {
-                if (stk.status === 'Active') totalActivePrincipal += parseFloat(stk.amount);
-            });
-        }
+        let totalActivePrincipal = parseFloat(w.Active_Stakes_Capital || 0);
         setText('stakeTotalValue', totalActivePrincipal, true);
+
+        /* Bind Dynamic 16-Digit Cards from Wallets */
+        if (w.cards) {
+            const setCardNum = (id, num) => {
+                const el = document.getElementById(id);
+                if (el && num) el.innerText = num;
+            };
+            setCardNum('cardNo_silver', w.cards.silver);
+            setCardNum('cardNo_gold', w.cards.gold);
+            setCardNum('cardNo_platinum', w.cards.platinum);
+            setCardNum('cardNo_diamond', w.cards.diamond);
+        }
     };
 
     window.formatTxDate = t => {
@@ -2637,6 +2644,48 @@
        if(l === 2) return {html:`<i class="fas fa-award"></i> <span>Level 2</span>`, cls:'b-lv2'};
        if(l === 1) return {html:`<i class="fas fa-medal"></i> <span>Level 1</span>`, cls:'b-lv1'};
        return {html:`<i class="fas fa-user"></i> <span>Level 0</span>`, cls:'b-blue'};
+    };
+
+    window.loadActiveStakesForCard = async (cardNumber, containerId) => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        container.innerHTML = '<div style="text-align:center; padding: 40px 10px; color: var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading 24H Stakes...</div>';
+
+        try {
+            const rawCard = cardNumber.trim();
+            const result = await window.fetchAPI(`/finance/get-active-stakes?cardNumber=${encodeURIComponent(rawCard)}`, 'GET');
+
+            if (result && result.success && result.data && result.data.length > 0) {
+                let html = '<div style="overflow-y: auto; max-height: 180px; padding: 10px 5px;">';
+                result.data.forEach(stk => {
+                    html += `
+                    <div class="clean-tx-card" style="flex-direction: column; align-items: stretch; gap: 8px; padding: 12px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.08); padding-bottom: 6px;">
+                            <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${stk.Order_ID}</span></span>
+                            <span style="font-size: 0.6rem; color: #f59e0b; font-weight: 800; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 4px;">ACTIVE</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                            <div>
+                                <span style="font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 700; display: block;">Principal</span>
+                                <span class="tx-amt" style="color:#ffffff;">${parseFloat(stk.amount).toFixed(2)} ₮</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <span style="font-size: 0.6rem; color: #64748b; text-transform: uppercase; font-weight: 700; display: block;">Time Left</span>
+                                <span class="atm-live-timer" data-unlock="${stk.unlockTime}" style="font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">
+                                    --:--:--
+                                </span>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                container.innerHTML = html + '</div>';
+            } else {
+                container.innerHTML = '<div style="text-align:center; padding: 50px 10px; color: #71717a; font-size: 0.8rem;"><i class="fas fa-ghost" style="font-size:1.8rem; margin-bottom:8px; display:block;"></i>No Stakes Maturing in 24H</div>';
+            }
+        } catch (e) {
+            container.innerHTML = '<div style="text-align:center; color:var(--error); padding: 30px 10px; font-size: 0.75rem;">Failed to load.</div>';
+        }
     };
 
     window.setDefaultMonth = () => {
@@ -7893,18 +7942,7 @@
     setInterval(() => {
         let wallet = window.RAM_STATE?.balances || window.lastWalletData;
 
-        const uid = localStorage.getItem('uid') || "TCM0000";
-        let numericUid = uid.replace(/\D/g, '');
-        let paddedUid = numericUid.padStart(12, '0');
-
-        const setCardNo = (id, prefix) => {
-            let el = document.getElementById(id);
-            if(el) el.innerText = `${prefix} ${paddedUid.substring(0,4)} ${paddedUid.substring(4,8)} ${paddedUid.substring(8,12)}`;
-        };
-        setCardNo('cardNo_silver', '4592');
-        setCardNo('cardNo_gold', '7812');
-        setCardNo('cardNo_platinum', '9023');
-        setCardNo('cardNo_diamond', '3456');
+        // Card numbers are dynamically managed by renderWalletData from Wallets.cards
 
         // 🔥 MEMO 125: Dynamic User Name Injector for Staking Cards
         try {
@@ -7971,6 +8009,26 @@
             const gcEl = document.getElementById('txCount_gold'); if(gcEl) gcEl.innerText = gCnt;
             const pcEl = document.getElementById('txCount_platinum'); if(pcEl) pcEl.innerText = pCnt;
             const dcEl = document.getElementById('txCount_diamond'); if(dcEl) dcEl.innerText = dCnt;
+        }
+
+        const nowTime = Date.now();
+        let needsCardRefresh = false;
+        document.querySelectorAll('.atm-live-timer').forEach(el => {
+            const unlock = parseInt(el.getAttribute('data-unlock'));
+            if (!unlock || isNaN(unlock)) return;
+            const diff = unlock - nowTime;
+            if (diff <= 0) {
+                el.innerText = '00:00:00';
+                needsCardRefresh = true;
+            } else {
+                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
+                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
+                el.innerText = `${h}:${m}:${s}`;
+            }
+        });
+        if (needsCardRefresh && typeof window.renderActiveStakes === 'function') {
+            window.renderActiveStakes();
         }
     }, 1000);
 
@@ -8241,11 +8299,18 @@
                 isFlipping = true;
                 cinemaCardInner.style.transform = "rotateZ(-3deg) rotateY(18deg) rotateX(10deg) scale(0.92)";
 
+                // Fetch 24H Stakes from new API dynamically on card flip
+                const cardNumEl = cardElement.querySelector('.atm-number');
+                const backBox = cinemaCardInner.querySelector('.atm-face-back');
+                if (cardNumEl && backBox) {
+                    window.loadActiveStakesForCard(cardNumEl.innerText, backBox.id);
+                }
+
                 setTimeout(() => {
                     cinemaCardInner.style.transform = "";
                     cinemaCardInner.classList.add('is-flipped');
                     isFlipping = false;
-                }, 3000);
+                }, 600);
             }
         };
 
