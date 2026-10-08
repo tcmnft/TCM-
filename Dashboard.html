@@ -2670,11 +2670,12 @@
                                 <span style="font-size: 0.65rem; color: #64748b; text-transform: uppercase; font-weight: 700; display: block;">Principal</span>
                                 <span class="tx-amt" style="color:#ffffff;">${parseFloat(stk.amount).toFixed(2)} ₮</span>
                             </div>
-                            <div style="text-align: right;">
-                                <span style="font-size: 0.6rem; color: #64748b; text-transform: uppercase; font-weight: 700; display: block;">Time Left</span>
-                                <span class="atm-live-timer" data-unlock="${stk.unlockTime}" style="font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">
-                                    --:--:--
-                                </span>
+                            <div style="text-align: right; min-width: 85px;" id="claim_box_${stk.id}">
+                                ${Number(stk.unlockTime) <= Date.now() 
+                                    ? `<button class="btn-claim-glass" style="padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;" onclick="window.executeClaimStake('${stk.id}', ${stk.amount})">Claim</button>`
+                                    : `<span style="font-size: 0.6rem; color: #64748b; text-transform: uppercase; font-weight: 700; display: block;">Time Left</span>
+                                       <span class="atm-live-timer" data-unlock="${stk.unlockTime}" data-id="${stk.id}" data-amt="${stk.amount}" style="font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">--:--:--</span>`
+                                }
                             </div>
                         </div>
                     </div>`;
@@ -2687,6 +2688,79 @@
             container.innerHTML = '<div style="text-align:center; color:var(--error); padding: 30px 10px; font-size: 0.75rem;">Failed to load.</div>';
         }
     };
+
+    setInterval(() => {
+        document.querySelectorAll('.atm-live-timer').forEach(el => {
+            let unlockTime = parseInt(el.getAttribute('data-unlock'));
+            let remaining = unlockTime - Date.now();
+            if (remaining <= 0) {
+                let stkId = el.getAttribute('data-id');
+                let amt = el.getAttribute('data-amt');
+                let parent = document.getElementById('claim_box_' + stkId);
+                if(parent) parent.innerHTML = `<button class="btn-claim-glass" style="padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;" onclick="window.executeClaimStake('${stkId}', ${amt})">Claim</button>`;
+            } else {
+                let h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
+                let m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
+                let s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+                el.innerText = `${h}:${m}:${s}`;
+            }
+        });
+    }, 1000);
+
+    window.executeClaimStake = async (stakeId, principalAmt) => {
+        const uid = localStorage.getItem('uid');
+        const btn = document.querySelector(`#claim_box_${stakeId} button`);
+        if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
+
+        try {
+            const result = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
+            if (result.success) {
+                if (window.RAM_STATE && window.RAM_STATE.balances) {
+                    window.RAM_STATE.balances.Main_Balance = (parseFloat(window.RAM_STATE.balances.Main_Balance) || 0) + parseFloat(principalAmt);
+                    if (result.updatedBalances) {
+                        window.RAM_STATE.balances.Total_Stake = result.updatedBalances.Total_Stake;
+                        window.RAM_STATE.balances.Daily_Stake = result.updatedBalances.Daily_Stake;
+                    }
+                    window.lastWalletData = window.RAM_STATE.balances;
+                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+                    if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
+                }
+
+                const stakeCard = document.getElementById(`claim_box_${stakeId}`).closest('.clean-tx-card');
+                if (stakeCard) {
+                    stakeCard.style.transition = "all 0.4s ease";
+                    stakeCard.style.transform = "scale(0.8) translateY(-20px)";
+                    stakeCard.style.opacity = "0";
+                    setTimeout(() => stakeCard.remove(), 400);
+                }
+
+                const popAmt = document.getElementById('popClaimAmt');
+                const popProfit = document.getElementById('popClaimProfit');
+                const popOldBal = document.getElementById('popOldBal');
+                const popNewBal = document.getElementById('popNewBal');
+
+                if(popAmt) popAmt.innerText = parseFloat(principalAmt).toFixed(2) + " ₮";
+                if(popProfit) popProfit.style.display = 'none';
+
+                let newBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || principalAmt);
+                let oldBal = newBal - parseFloat(principalAmt);
+                
+                if(popOldBal) popOldBal.innerText = oldBal.toFixed(2) + " ₮";
+                if(popNewBal) popNewBal.innerText = newBal.toFixed(2) + " ₮";
+
+                window.openModal('claimPopup');
+                window.showToast("Staking Principal Successfully Claimed!");
+            } else {
+                window.showToast(result.message, true);
+                if(btn) { btn.innerHTML = 'Claim'; btn.disabled = false; }
+            }
+        } catch (e) {
+            window.showToast("Error claiming stake: " + e.message, true);
+            if(btn) { btn.innerHTML = 'Claim'; btn.disabled = false; }
+        }
+    };
+
+    window.closeClaimPopup = () => { window.closeModal('claimPopup'); };
 
     window.setDefaultMonth = () => {
        const d = new Date();
