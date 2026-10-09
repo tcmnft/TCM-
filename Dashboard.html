@@ -2727,7 +2727,9 @@
 
     window.executeClaimStake = async (stakeId, principalAmt) => {
         const uid = localStorage.getItem('uid');
-        const btn = document.querySelector(`#claim_box_${stakeId} button`);
+        const claimButtonBox = document.getElementById(`claim_box_${stakeId}`);
+        const btn = claimButtonBox ? claimButtonBox.querySelector('button') : null;
+        if (btn && btn.disabled) return;
         if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
         const animateClaimAmount = (targetAmount) => {
@@ -2774,6 +2776,8 @@
                     }
 
                     window.lastWalletData = balances;
+                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+                    if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
 
                     if (typeof window.renderWalletData === 'function') {
                         window.renderWalletData(balances);
@@ -2829,6 +2833,17 @@
 
                 window.openModal('claimPopup');
                 animateClaimAmount(principal);
+
+                if (
+                    result.injectionData &&
+                    typeof window.forceInjectToHistory === 'function'
+                ) {
+                    window.forceInjectToHistory(
+                        result.injectionData,
+                        result.txCount
+                    );
+                }
+
                 window.showToast("Security Clearance: Principal moved to Locked Vault");
             } else {
                 window.showToast(result.message, true);
@@ -3236,17 +3251,53 @@
     window.currentRenderedCount = 0;
     window.txIntersectionObserver = null;
 
-    window.forceInjectToHistory = (newTx) => {
-        if (!window.allTransactions) window.allTransactions = [];
-        window.allTransactions.unshift(newTx);
-        window.TX_CACHE = window.allTransactions;
-        localStorage.setItem("USER_TX_VAULT_" + localStorage.getItem('uid'), JSON.stringify(window.TX_CACHE));
-        
-        let uid = localStorage.getItem('uid');
-        let currentCount = parseInt(localStorage.getItem('tcm_tx_count_' + uid) || '0');
-        localStorage.setItem('tcm_tx_count_' + uid, currentCount + 1);
+    // MEMO TCM-STK-010 | 2026-10-10 00:51 IST | Asia/Kolkata
+    window.forceInjectToHistory = (newTx, serverTxCount) => {
+        if (!newTx || typeof newTx !== 'object') return;
 
-        if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
+        const uid = localStorage.getItem('uid');
+        if (!uid || (newTx.UID !== undefined && newTx.UID !== uid)) return;
+
+        const rows = Array.isArray(window.allTransactions)
+            ? window.allTransactions
+            : (Array.isArray(window.TX_CACHE) ? window.TX_CACHE : []);
+
+        const txId = newTx.id;
+        const existingIndex = typeof txId === 'string' && txId
+            ? rows.findIndex(tx => tx && tx.id === txId)
+            : -1;
+
+        if (existingIndex >= 0) {
+            rows[existingIndex] = { ...rows[existingIndex], ...newTx };
+        } else {
+            rows.unshift(newTx);
+        }
+
+        window.allTransactions = rows;
+        window.TX_CACHE = rows;
+        localStorage.setItem('USER_TX_VAULT_' + uid, JSON.stringify(rows));
+
+        const countKey = 'tcm_tx_count_' + uid;
+        const parsedCount = Number(localStorage.getItem(countKey));
+        const currentCount = Number.isSafeInteger(parsedCount) && parsedCount >= 0
+            ? parsedCount
+            : 0;
+
+        if (Number.isSafeInteger(serverTxCount) && serverTxCount >= 0) {
+            localStorage.setItem(
+                countKey,
+                String(Math.max(currentCount, serverTxCount))
+            );
+        } else if (
+            existingIndex < 0 &&
+            currentCount < Number.MAX_SAFE_INTEGER
+        ) {
+            localStorage.setItem(countKey, String(currentCount + 1));
+        }
+
+        if (typeof window.applyTxFilter === 'function') {
+            window.applyTxFilter();
+        }
     };
 
     window.initTxObserver = () => {
@@ -5386,9 +5437,22 @@
                  });
              }
          });
-         if (needsSync) {
-             wallet.Locked_Withdrawals = stillLocked;
-             if (typeof window.fetchInitialDataFromAPI === 'function') window.fetchInitialDataFromAPI();
+         // MEMO TCM-STK-008 | 2026-10-10 00:22 IST | Asia/Kolkata
+         if (
+             needsSync &&
+             !window.vaultReleaseSyncPending &&
+             now >= (window.vaultReleaseNextSyncAt || 0) &&
+             typeof window.fetchInitialDataFromAPI === 'function'
+         ) {
+             window.vaultReleaseSyncPending = true;
+             window.vaultReleaseNextSyncAt = now + 5000;
+
+             Promise.resolve()
+                 .then(() => window.fetchInitialDataFromAPI())
+                 .catch((error) => console.warn('Vault release sync failed:', error))
+                 .finally(() => {
+                     window.vaultReleaseSyncPending = false;
+                 });
          }
      }
 
@@ -7328,11 +7392,18 @@
                 let newTxCount = (u && u.counters) ? parseInt(u.counters.txCount || 0) : 0;
                 localStorage.setItem('tcm_tx_count_' + uid, newTxCount);
 
-                if (newTxCount === cachedTxCount && window.TX_CACHE && window.TX_CACHE.length > 0) {
+                if (
+                    result.data.isUpToDate === true &&
+                    Array.isArray(window.TX_CACHE) &&
+                    window.TX_CACHE.length > 0
+                ) {
                     window.allTransactions = window.TX_CACHE;
                 } else {
                     window.TX_CACHE = result.data.transactions || [];
-                    localStorage.setItem("USER_TX_VAULT_" + uid, JSON.stringify(window.TX_CACHE));
+                    localStorage.setItem(
+                        "USER_TX_VAULT_" + uid,
+                        JSON.stringify(window.TX_CACHE)
+                    );
                     window.allTransactions = window.TX_CACHE;
                 }
                 
@@ -8389,89 +8460,8 @@
     if (dBox) { dBox.style.background = "#000000"; dBox.innerHTML = dCount > 0 ? diamondHtml + '</div>' : emptyHtml; }
 };
 
-    window.executeClaimStake = async (stakeId, amount) => {
-        const uid = localStorage.getItem('uid');
-        const loader = document.getElementById('loader');
-        const claimBox = document.getElementById(`claim_box_${stakeId}`);
-        const btn = claimBox ? claimBox.querySelector('button') : null;
-
-        if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
-        if (loader) { loader.style.display = 'flex'; loader.style.opacity = '1'; loader.querySelector('p').innerText = 'Moving Principal to Locked Vault...'; }
-
-        try {
-            const res = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
-            if (res.success) {
-                const principal = parseFloat(amount || 0);
-
-                if (window.RAM_STATE && window.RAM_STATE.balances) {
-                    if (res.updatedBalances) {
-                        window.RAM_STATE.balances.Locked_Balance = res.updatedBalances.Locked_Balance;
-                        window.RAM_STATE.balances.Locked_Withdrawals = res.updatedBalances.Locked_Withdrawals;
-                    }
-
-                    if (window.RAM_STATE.balances.Active_Stakes) {
-                        window.RAM_STATE.balances.Active_Stakes = window.RAM_STATE.balances.Active_Stakes.map(stk => {
-                            const currentId = stk.id || stk.Order_ID || stk.orderId;
-                            return currentId === stakeId ? { ...stk, status: 'Completed' } : stk;
-                        });
-                    }
-
-                    window.lastWalletData = window.RAM_STATE.balances;
-                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-                }
-
-                const stakeCard = claimBox ? (claimBox.closest('[data-stake-card]') || claimBox.closest('.final-unlock-card') || claimBox.closest('.clean-tx-card') || claimBox.parentElement) : null;
-                if (stakeCard) {
-                    stakeCard.style.transition = "all 0.4s ease";
-                    stakeCard.style.transform = "scale(0.8) translateY(-20px)";
-                    stakeCard.style.opacity = "0";
-                    setTimeout(() => stakeCard.remove(), 400);
-                }
-
-                const popup = document.getElementById('claimPopup');
-                if (popup) {
-                    const elAmt = document.getElementById('popClaimAmt');
-                    const elProf = document.getElementById('popClaimProfit');
-                    const elOld = document.getElementById('popOldBal');
-                    const elNew = document.getElementById('popNewBal');
-
-                    if(elAmt) elAmt.innerText = principal.toFixed(2) + ' ₮';
-                    if(elProf) elProf.innerText = 'Principal moved to 30 Mins Locked Vault';
-                    if(elOld) elOld.innerText = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0).toFixed(2) + ' ₮';
-                    if(elNew) elNew.innerText = parseFloat(window.RAM_STATE?.balances?.Locked_Balance || 0).toFixed(2) + ' ₮';
-
-                    popup.style.display = 'flex';
-                    setTimeout(() => popup.classList.add('show'), 10);
-                }
-
-                if (typeof window.forceInjectToHistory === 'function') {
-                    window.forceInjectToHistory({
-                        id: 'claim_' + Date.now(),
-                        UID: uid,
-                        Type: 'Stake Unlocked',
-                        Amount: principal,
-                        Status: 'Success',
-                        Date: new Date().toISOString(),
-                        timestamp: Date.now(),
-                        Order_ID: stakeId,
-                        Details: 'Staking Principal Moved to Locked Vault'
-                    });
-                }
-
-                if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
-                window.showToast("Principal moved to Locked Vault");
-            } else {
-                window.showToast(res.message, true);
-                if (btn) { btn.innerHTML = 'CLAIM ' + parseFloat(amount || 0).toFixed(2) + ' ₮'; btn.disabled = false; }
-            }
-        } catch(e) {
-            window.showToast('Error claiming: ' + e.message, true);
-            if (btn) { btn.innerHTML = 'CLAIM ' + parseFloat(amount || 0).toFixed(2) + ' ₮'; btn.disabled = false; }
-        } finally {
-            if (loader) { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none',300); }
-        }
-    };
+    // MEMO TCM-STK-008 | 2026-10-10 00:22 IST | Asia/Kolkata
+    // Use the earlier Sci-Fi executeClaimStake implementation.
 
     window.processClaim = (stakeId, amount) => window.executeClaimStake(stakeId, amount);
 
