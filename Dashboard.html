@@ -1441,24 +1441,34 @@
 
 <!-- === CLAIM CELEBRATION POPUP === -->
 <div id="claimPopup" class="modal" style="z-index: calc(var(--z-max) + 50);">
-    <div class="claim-card-pop">
-        <div class="claim-icon-pop"><i class="fas fa-check"></i></div>
-        <h3 style="color:var(--text-sub); font-size:0.9rem; text-transform:uppercase; letter-spacing:1px;">Contract Matured</h3>
-        <div class="claim-amount-pop" id="popClaimAmt">0.00</div>
-        <div class="claim-profit-pop" id="popClaimProfit">+ 0.00 ₮ Profit</div>
+    <div class="claim-card-pop" style="position:relative; width:100%; max-width:360px; overflow:hidden; border-radius:24px; padding:24px; text-align:center; background:linear-gradient(145deg, rgba(2,6,23,0.96), rgba(6,18,32,0.92)); border:1px solid rgba(34,211,238,0.35); box-shadow:0 0 45px rgba(34,211,238,0.22), inset 0 0 35px rgba(16,185,129,0.08); backdrop-filter:blur(18px);">
+        <div style="position:absolute; inset:-2px; pointer-events:none; background:radial-gradient(circle at top, rgba(34,211,238,0.24), transparent 35%), radial-gradient(circle at bottom right, rgba(16,185,129,0.18), transparent 35%);"></div>
+        <div style="position:absolute; left:18px; right:18px; top:12px; height:1px; background:linear-gradient(90deg, transparent, rgba(34,211,238,0.9), transparent); box-shadow:0 0 18px rgba(34,211,238,0.8);"></div>
 
-        <div style="background: rgba(0,0,0,0.3); border-radius: 12px; padding: 15px; margin-bottom: 20px; text-align: left; border: 1px dashed rgba(255,255,255,0.1);">
-            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-sub); margin-bottom:8px;">
-                <span>Previous Balance:</span>
-                <span id="popOldBal" style="font-family:monospace; color:#fff;">0.00 ₮</span>
+        <div class="claim-icon-pop" style="position:relative; margin:4px auto 14px; width:64px; height:64px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#22c55e; background:rgba(16,185,129,0.12); border:1px solid rgba(34,197,94,0.45); box-shadow:0 0 28px rgba(34,197,94,0.35), inset 0 0 18px rgba(34,197,94,0.16);">
+            <i class="fas fa-shield-alt" style="font-size:1.6rem;"></i>
+        </div>
+
+        <h3 style="position:relative; color:#67e8f9; font-size:0.72rem; text-transform:uppercase; letter-spacing:2px; margin-bottom:8px;">Vault Transfer Complete</h3>
+        <div style="position:relative; color:#e2e8f0; font-size:0.78rem; font-weight:700; margin-bottom:10px;">Principal secured in TCM Locked Vault</div>
+
+        <div class="claim-amount-pop" id="popClaimAmt" style="position:relative; font-size:2.6rem; line-height:1; font-weight:900; color:#86efac; font-family:monospace; text-shadow:0 0 18px rgba(134,239,172,0.65); margin-bottom:8px;">0.00 ₮</div>
+        <div class="claim-profit-pop" id="popClaimProfit" style="position:relative; display:inline-flex; align-items:center; gap:7px; padding:7px 12px; border-radius:999px; color:#facc15; background:rgba(250,204,21,0.1); border:1px solid rgba(250,204,21,0.26); font-size:0.72rem; font-weight:800; margin-bottom:16px;">
+            <i class="fas fa-clock"></i> 30 Mins Cooling Lock
+        </div>
+
+        <div style="position:relative; background:rgba(15,23,42,0.72); border-radius:16px; padding:15px; margin-bottom:18px; text-align:left; border:1px solid rgba(34,211,238,0.18); box-shadow:inset 0 0 22px rgba(34,211,238,0.06);">
+            <div style="display:flex; justify-content:space-between; gap:12px; font-size:0.76rem; color:#94a3b8; margin-bottom:9px;">
+                <span id="popOldBalLabel">Main Balance:</span>
+                <span id="popOldBal" style="font-family:monospace; color:#e2e8f0;">0.00 ₮</span>
             </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.95rem; font-weight:800; border-top:1px solid rgba(255,255,255,0.05); padding-top:8px;">
-                <span style="color:#fff;">New Balance:</span>
-                <span id="popNewBal" style="color:var(--success); font-family:monospace;">0.00 ₮</span>
+            <div style="display:flex; justify-content:space-between; gap:12px; font-size:0.86rem; font-weight:900; border-top:1px solid rgba(34,211,238,0.12); padding-top:10px;">
+                <span id="popNewBalLabel" style="color:#cffafe;">Locked Vault:</span>
+                <span id="popNewBal" style="color:#86efac; font-family:monospace; text-shadow:0 0 12px rgba(134,239,172,0.45);">0.00 ₮</span>
             </div>
         </div>
 
-        <button class="act-btn btn-dep" style="width:100%;" onclick="window.closeClaimPopup()">Awesome!</button>
+        <button class="act-btn" style="position:relative; width:100%; border:none; color:#02110a; font-weight:900; letter-spacing:1px; background:linear-gradient(135deg, #86efac, #22d3ee); box-shadow:0 0 24px rgba(34,211,238,0.35); padding:13px; border-radius:14px;" onclick="window.closeClaimPopup()">AWESOME</button>
     </div>
 </div>
 
@@ -2720,32 +2730,71 @@
         const btn = document.querySelector(`#claim_box_${stakeId} button`);
         if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
+        const animateClaimAmount = (targetAmount) => {
+            const popAmt = document.getElementById('popClaimAmt');
+            if (!popAmt) return;
+
+            const target = parseFloat(targetAmount || 0);
+            const duration = 1500;
+            const startedAt = performance.now();
+
+            const tick = (now) => {
+                const progress = Math.min((now - startedAt) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 4);
+                const current = target * eased;
+
+                popAmt.innerText = current.toFixed(2) + " ₮";
+
+                if (progress < 1) {
+                    requestAnimationFrame(tick);
+                } else {
+                    popAmt.innerText = target.toFixed(2) + " ₮";
+                }
+            };
+
+            popAmt.innerText = "0.00 ₮";
+            requestAnimationFrame(tick);
+        };
+
         try {
             const result = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
             if (result.success) {
-                if (window.RAM_STATE && window.RAM_STATE.balances) {
-                    // 🔥 Main Balance অপরিবর্তিত থাকবে, Locked Balance এবং Withdrawal Array আপডেট হবে
-                    if (result.updatedBalances) {
-                        window.RAM_STATE.balances.Locked_Balance = result.updatedBalances.Locked_Balance;
-                        window.RAM_STATE.balances.Locked_Withdrawals = result.updatedBalances.Locked_Withdrawals;
-                    }
-                    window.lastWalletData = window.RAM_STATE.balances;
-                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                    
-                    // 🚀 ZERO-READ FIX: শুধুমাত্র Locked Vault UI আপডেট করা হচ্ছে (ফায়ারবেস রিড ছাড়াই)
-                    const lockedUI = document.getElementById('uLocked');
-                    if(lockedUI && typeof window.formatMagicNumber === 'function') {
-                        lockedUI.innerText = window.formatMagicNumber(window.RAM_STATE.balances.Locked_Balance);
-                    }
-                    // Awesome পপআপ বন্ধ হওয়ার পর Vault Carousel রিস্টার্ট করার লজিক
-                    window.setTimeout(() => {
-                         if (typeof window.vaultCarouselIndex !== 'undefined') window.vaultCarouselIndex = 0;
-                    }, 100);
+                const balances = window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances : null;
 
-                    if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
+                if (balances && result.updatedBalances) {
+                    // 🚀 ZERO-READ STATE SYNC: Main_Balance কখনো inflate হবে না
+                    balances.Locked_Balance = result.updatedBalances.Locked_Balance;
+                    balances.Locked_Withdrawals = result.updatedBalances.Locked_Withdrawals || balances.Locked_Withdrawals || [];
+
+                    if (balances.Active_Stakes) {
+                        balances.Active_Stakes = balances.Active_Stakes.map(stk => {
+                            const currentId = stk.id || stk.Order_ID || stk.orderId;
+                            return currentId === stakeId ? { ...stk, status: 'Completed' } : stk;
+                        });
+                    }
+
+                    window.lastWalletData = balances;
+
+                    if (typeof window.renderWalletData === 'function') {
+                        window.renderWalletData(balances);
+                    }
+
+                    const lockedUI = document.getElementById('uLocked');
+                    if (lockedUI && typeof window.formatMagicNumber === 'function') {
+                        lockedUI.innerText = window.formatMagicNumber(balances.Locked_Balance);
+                    }
+
+                    if (typeof window.triggerWalletRefreshAnimation === 'function') {
+                        window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
+                    }
+
+                    window.setTimeout(() => {
+                        if (typeof window.vaultCarouselIndex !== 'undefined') window.vaultCarouselIndex = 0;
+                    }, 1);
                 }
 
-                const stakeCard = document.getElementById(`claim_box_${stakeId}`).closest('.clean-tx-card');
+                                const claimBox = document.getElementById(`claim_box_${stakeId}`);
+                const stakeCard = claimBox ? (claimBox.closest('[data-stake-card]') || claimBox.closest('.final-unlock-card') || claimBox.closest('.clean-tx-card') || claimBox.parentElement) : null;
                 if (stakeCard) {
                     stakeCard.style.transition = "all 0.4s ease";
                     stakeCard.style.transform = "scale(0.8) translateY(-20px)";
@@ -2753,34 +2802,34 @@
                     setTimeout(() => stakeCard.remove(), 400);
                 }
 
-                const popAmt = document.getElementById('popClaimAmt');
                 const popProfit = document.getElementById('popClaimProfit');
                 const popOldBal = document.getElementById('popOldBal');
                 const popNewBal = document.getElementById('popNewBal');
+                const popOldLabel = document.getElementById('popOldBalLabel') || (popOldBal ? popOldBal.previousElementSibling : null);
+                const popNewLabel = document.getElementById('popNewBalLabel') || (popNewBal ? popNewBal.previousElementSibling : null);
 
-                if(popAmt) popAmt.innerText = parseFloat(principalAmt).toFixed(2) + " ₮";
-                
-                // 🔥 ভুয়া প্রফিট মুছে Locked Vault মেসেজ দেওয়া হলো
-                if(popProfit) {
-                    popProfit.innerHTML = '<i class="fas fa-lock" style="color:var(--warning);"></i> 30 Mins Cooling Lock';
-                    popProfit.style.color = "var(--warning)";
-                    popProfit.style.display = 'block';
+                const currentMainBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0);
+                const lockedBal = parseFloat(window.RAM_STATE?.balances?.Locked_Balance || result.updatedBalances?.Locked_Balance || 0);
+                const principal = parseFloat(principalAmt || 0);
+
+                if (popProfit) {
+                    popProfit.innerHTML = '<i class="fas fa-satellite-dish"></i> 30 Mins Cooling Lock Activated';
+                    popProfit.style.color = "#facc15";
+                    popProfit.style.display = 'inline-flex';
                 }
 
-                let currentMainBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0);
-                
-                if(popOldBal) {
-                    popOldBal.previousElementSibling.innerText = "Current Main Balance:";
-                    popOldBal.innerText = currentMainBal.toFixed(2) + " ₮";
-                }
-                if(popNewBal) {
-                    popNewBal.previousElementSibling.innerText = "TCM Locked Vault:";
-                    popNewBal.innerText = "+ " + parseFloat(principalAmt).toFixed(2) + " ₮";
-                    popNewBal.style.color = "var(--warning)";
+                if (popOldLabel) popOldLabel.innerText = "Main Balance:";
+                if (popOldBal) popOldBal.innerText = currentMainBal.toFixed(2) + " ₮";
+
+                if (popNewLabel) popNewLabel.innerText = "TCM Locked Vault:";
+                if (popNewBal) {
+                    popNewBal.innerText = lockedBal.toFixed(2) + " ₮";
+                    popNewBal.style.color = "#86efac";
                 }
 
                 window.openModal('claimPopup');
-                window.showToast("Security Clearance: Sent to Locked Vault");
+                animateClaimAmount(principal);
+                window.showToast("Security Clearance: Principal moved to Locked Vault");
             } else {
                 window.showToast(result.message, true);
                 if(btn) { btn.innerHTML = 'Claim'; btn.disabled = false; }
@@ -2791,7 +2840,13 @@
         }
     };
 
-    window.closeClaimPopup = () => { window.closeModal('claimPopup'); };
+    window.closeClaimPopup = () => {
+        const popup = document.getElementById('claimPopup');
+        if (popup) {
+            popup.classList.remove('show');
+            popup.style.display = 'none';
+        }
+    };
 
     window.setDefaultMonth = () => {
        const d = new Date();
@@ -8008,6 +8063,7 @@
 
                     window.RAM_STATE.balances.Active_Stakes.push({
                         id: finalStakeId,
+                        Card_Number: cardNumber,
                         amount: amount,
                         duration: days,
                         dailyRoi: roi,
@@ -8139,212 +8195,299 @@
 
     /* === MODULE 32: ACTIVE CONTRACTS & CARD RENDERER === */
     window.renderActiveStakes = () => {
-        let wallet = window.RAM_STATE?.balances || window.lastWalletData;
-        const list = document.getElementById('activeStakesList');
-        if (!wallet || !wallet.Active_Stakes || !list) return;
+    let wallet = window.RAM_STATE?.balances || window.lastWalletData;
+    const list = document.getElementById('activeStakesList');
+    if (!wallet || !wallet.Active_Stakes || !list) return;
 
-        let html = '';
-        let hasExpiringContract = false;
-        let now = Date.now();
+    let html = '';
+    let hasExpiringContract = false;
+    let now = Date.now();
 
-        let scrollStyle = 'overflow-y: auto; max-height: 180px; padding-right: 4px; touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; pointer-events: auto;';
-        let silverHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#d4d4d8;"><i class="fas fa-history"></i> SILVER HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
-        let goldHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#facc15;"><i class="fas fa-history"></i> GOLD HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
-        let platHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#0ea5e9;"><i class="fas fa-history"></i> PLATINUM HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
-        let diamondHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#a1a1aa;"><i class="fas fa-history"></i> DIAMOND HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+    const getCleanCardNumber = (value) => String(value || '').replace(/\s+/g, ' ').trim();
 
-        let sCount = 0, gCount = 0, pCount = 0, dCount = 0;
-        let sortedStakes = [...wallet.Active_Stakes].sort((a, b) => (b.startTime || 0) - (a.startTime || 0));
-
-        sortedStakes.forEach(stk => {
-            if(stk.status === 'Active') {
-                let diff = stk.unlockTime - now;
-                let daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-                if (daysLeft < 1 && diff > 0) {
-                    hasExpiringContract = true;
-                    let startStr = new Date(stk.startTime || Date.now()).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-                    let endStr = new Date(stk.unlockTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-
-                    html += `
-                    <div class="final-unlock-card" id="card_${stk.id}">
-                        <div class="fuc-header">
-                            <span class="fuc-title"><i class="fas fa-lock-open fa-fade"></i> Unlocking Soon</span>
-                            <span class="fuc-id">ID: ${stk.id}</span>
-                        </div>
-                        <div class="fuc-body">
-                            <div class="fuc-amt-box">
-                                <span class="fuc-amt">${parseFloat(stk.amount).toFixed(2)} ₮</span>
-                                <span class="fuc-roi">Reserved: ${startStr} - ${endStr}</span>
-                            </div>
-                            <div class="fuc-timer-box">
-                                <div class="fuc-timer atm-live-timer" data-unlock="${stk.unlockTime}">--:--:--</div>
-                            </div>
-                        </div>
-                    </div>`;
-                } else if (diff <= 0) {
-                    hasExpiringContract = true;
-                    let totalProfit = (parseFloat(stk.amount) * (parseFloat(stk.dailyRoi) / 100) * stk.duration).toFixed(2);
-                    let claimAmt = (parseFloat(stk.amount) + parseFloat(totalProfit)).toFixed(2);
-                    html += `
-                    <div class="final-unlock-card" style="border-color:var(--success); background: radial-gradient(circle at top right, rgba(16,185,129,0.1) 0%, rgba(15, 23, 42, 0.9) 70%);">
-                        <div class="fuc-header">
-                            <span class="fuc-title" style="color:var(--success);"><i class="fas fa-check-circle"></i> Contract Matured</span>
-                            <span class="fuc-id">ID: ${stk.id}</span>
-                        </div>
-                        <div class="fuc-body" style="align-items:flex-end;">
-                            <div class="fuc-amt-box">
-                                <span class="fuc-amt">${parseFloat(stk.amount).toFixed(2)} ₮</span>
-                                <span class="fuc-roi" style="color:var(--success);">+ ${totalProfit} ₮ Profit</span>
-                            </div>
-                            <div style="width:140px;">
-                                <button class="btn-claim-glass" onclick="window.processClaim('${stk.id}', ${stk.amount}, ${totalProfit})">CLAIM ${claimAmt} ₮</button>
-                            </div>
-                        </div>
-                    </div>`;
-                } else {
-                    html += `
-                    <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-left: 3px solid var(--success); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom:10px;">
-                        <div>
-                            <span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace;">ID: ${stk.id}</span>
-                            <h4 style="font-size: 1.1rem; color: #fff; margin: 3px 0; font-weight: 800;">${parseFloat(stk.amount).toFixed(2)} ₮</h4>
-                            <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">${stk.dailyRoi}% Daily ROI</span>
-                        </div>
-                        <div style="text-align: right;">
-                            <span class="badge glow-locked" style="margin-bottom: 5px;">Locked</span>
-                            <span class="atm-live-timer" data-unlock="${stk.unlockTime}" style="display: block; font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">--:--:--</span>
-                        </div>
-                    </div>`;
-                }
-            }
-
-            let startDate = new Date(stk.startTime || Date.now());
-            let unlockDate = new Date(stk.unlockTime);
-
-            let formatDateTime = (d) => {
-                let day = d.getDate().toString().padStart(2, '0');
-                let month = d.toLocaleString('en-US', { month: 'short' });
-                let year = d.getFullYear().toString().slice(-2);
-                let time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                return `${day}-${month}-${year} <span style="opacity:0.5;">|</span> ${time}`;
-            };
-
-            let startFmt = formatDateTime(startDate);
-            let endFmt = formatDateTime(unlockDate);
-
-            let displayTx = stk.txId || stk.id || stk.orderId || stk.Order_ID || (stk.timestamp ? ('TX-' + String(stk.timestamp).slice(-8)) : 'TX-ACTIVE');
-            let statusBadge = stk.status === 'Active' ? `<span style="font-size:0.6rem; color:#f59e0b; font-weight:800; text-transform:uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">● ACTIVE</span>` : `<span style="font-size:0.6rem; color:#10b981; font-weight:800; text-transform:uppercase; background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">● CLAIMED</span>`;
-
-            let itemHtml = `
-            <div class="clean-tx-card" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 14px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 8px;">
-                    <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${displayTx}</span></span>
-                    ${statusBadge}
-                </div>
-
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                    <div style="display: flex; flex-direction: column; gap: 4px;">
-                        <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-lock" style="color:var(--warning); margin-right:4px;"></i>Locked: <span style="color:#e2e8f0; margin-left:2px;">${startFmt}</span></span>
-                        <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-unlock-alt" style="color:var(--success); margin-right:4px;"></i>Release: <span style="color:#e2e8f0; margin-left:2px;">${endFmt}</span></span>
-                    </div>
-                    <span class="tx-amt" style="color: var(--primary); font-size: 1.1rem;">${parseFloat(stk.amount).toFixed(2)} ₮</span>
-                </div>
-            </div>`;
-
-            if(stk.duration == 7) { silverHtml += itemHtml; sCount++; }
-            else if(stk.duration == 15) { goldHtml += itemHtml; gCount++; }
-            else if(stk.duration == 30) { platHtml += itemHtml; pCount++; }
-            else if(stk.duration == 60) { diamondHtml += itemHtml; dCount++; }
-        });
-
-        if(!hasExpiringContract) {
-            list.innerHTML = `<div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-box-open"></i><p>No active staking contracts.</p></div>`;
-        } else {
-            list.innerHTML = html;
-        }
-
-        const sBox = document.getElementById('back_silver_data');
-        const gBox = document.getElementById('back_gold_data');
-        const pBox = document.getElementById('back_platinum_data');
-        const dBox = document.getElementById('back_diamond_data');
-
-        const emptyHtml = `<div style="text-align:center; padding-top:60px; color:#52525b;"><i class="fas fa-ghost" style="font-size:2rem; margin-bottom:10px;"></i><br>No Transactions Yet</div>`;
-
-        if(sBox) { sBox.style.background = "#000000"; sBox.innerHTML = sCount > 0 ? silverHtml + '</div>' : emptyHtml; }
-        if(gBox) { gBox.style.background = "#000000"; gBox.innerHTML = gCount > 0 ? goldHtml + '</div>' : emptyHtml; }
-        if(pBox) { pBox.style.background = "#000000"; pBox.innerHTML = pCount > 0 ? platHtml + '</div>' : emptyHtml; }
-        if(dBox) { dBox.style.background = "#000000"; dBox.innerHTML = dCount > 0 ? diamondHtml + '</div>' : emptyHtml; }
+    const cardMap = {
+        silver: { duration: 7, roi: 1.2, cardNumber: getCleanCardNumber(document.getElementById('cardNo_silver')?.innerText), backId: 'back_silver_data' },
+        gold: { duration: 15, roi: 1.5, cardNumber: getCleanCardNumber(document.getElementById('cardNo_gold')?.innerText), backId: 'back_gold_data' },
+        platinum: { duration: 30, roi: 2.0, cardNumber: getCleanCardNumber(document.getElementById('cardNo_platinum')?.innerText), backId: 'back_platinum_data' },
+        diamond: { duration: 60, roi: 2.5, cardNumber: getCleanCardNumber(document.getElementById('cardNo_diamond')?.innerText), backId: 'back_diamond_data' }
     };
 
-    window.processClaim = async (stakeId, amount, profit) => {
+    const detectActiveCard = () => {
+        if (window.currentActiveStakeCard && cardMap[window.currentActiveStakeCard]) {
+            return window.currentActiveStakeCard;
+        }
+        const flippedCard = document.querySelector('.atm-card.is-flipped');
+        if (flippedCard) {
+            if (flippedCard.classList.contains('card-silver')) return 'silver';
+            if (flippedCard.classList.contains('card-gold')) return 'gold';
+            if (flippedCard.classList.contains('card-platinum')) return 'platinum';
+            if (flippedCard.classList.contains('card-diamond')) return 'diamond';
+        }
+        const activeCinemaCard = document.getElementById('cinema3DCardInner');
+        if (activeCinemaCard) {
+            if (activeCinemaCard.classList.contains('card-silver')) return 'silver';
+            if (activeCinemaCard.classList.contains('card-gold')) return 'gold';
+            if (activeCinemaCard.classList.contains('card-platinum')) return 'platinum';
+            if (activeCinemaCard.classList.contains('card-diamond')) return 'diamond';
+        }
+        return null;
+    };
+
+    const activeCardKey = detectActiveCard();
+    const activeCard = activeCardKey ? cardMap[activeCardKey] : null;
+
+    let scrollStyle = 'overflow-y: auto; max-height: 180px; padding-right: 4px; touch-action: pan-y; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; pointer-events: auto;';
+    let silverHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#d4d4d8;"><i class="fas fa-history"></i> SILVER HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+    let goldHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#facc15;"><i class="fas fa-history"></i> GOLD HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+    let platHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#0ea5e9;"><i class="fas fa-history"></i> PLATINUM HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+    let diamondHtml = `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #27272a; padding-bottom:10px;"><span style="font-weight:800; font-size:0.85rem; color:#a1a1aa;"><i class="fas fa-history"></i> DIAMOND HISTORY</span></div><div style="${scrollStyle}" class="scroll-hide-bar" onclick="event.stopPropagation()">`;
+
+    let sCount = 0, gCount = 0, pCount = 0, dCount = 0;
+    let sortedStakes = [...wallet.Active_Stakes].sort((a, b) => (b.startTime || 0) - (a.startTime || 0));
+
+    const stakeMatchesActiveCard = (stk) => {
+        if (!activeCardKey || !activeCard) return false;
+        const stakeCardNumber = getCleanCardNumber(stk.Card_Number || stk.cardNumber || stk.card_number);
+        const stakeDuration = Number(stk.duration || 0);
+        const stakeRoi = Number(stk.dailyRoi || 0);
+        const stakeTier = String(stk.cardType || stk.tier || stk.tierTheme || stk.cardTier || stk.vaultType || '').toLowerCase();
+
+        if (stakeTier && stakeTier.includes(activeCardKey)) return true;
+        if (stakeCardNumber && activeCard.cardNumber && stakeCardNumber === activeCard.cardNumber) return true;
+        if (stakeDuration === activeCard.duration) return true;
+        if (Math.abs(stakeRoi - activeCard.roi) < 0.0001) return true;
+
+        return false;
+    };
+
+    // 🚀 THE FIX: Loop over ALL stakes to populate the card backs, but filter the bottom list safely!
+    sortedStakes.forEach(stk => {
+        const stakeStatus = String(stk.status || 'Active');
+        const isActiveOrMatured = ['Active', 'Matured'].includes(stakeStatus);
+        const stakeId = stk.id || stk.Order_ID || stk.orderId;
+        const principal = parseFloat(stk.amount || 0);
+
+        // Check if this stake should show in the BOTTOM UI list
+        const isMatchingActiveView = stakeMatchesActiveCard(stk);
+
+        // Only append to the bottom list IF it matches the active card
+        if(isActiveOrMatured && isMatchingActiveView) {
+            let diff = Number(stk.unlockTime || 0) - now;
+            let daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+            if (stakeStatus === 'Matured' || diff <= 0) {
+                hasExpiringContract = true;
+                html += `
+                <div class="final-unlock-card" data-stake-card="${stakeId}" style="border-color:var(--success); background: radial-gradient(circle at top right, rgba(16,185,129,0.12) 0%, rgba(15, 23, 42, 0.92) 70%);">
+                    <div class="fuc-header">
+                        <span class="fuc-title" style="color:var(--success);"><i class="fas fa-check-circle"></i> Contract Matured</span>
+                        <span class="fuc-id">ID: ${stakeId}</span>
+                    </div>
+                    <div class="fuc-body" style="align-items:flex-end;">
+                        <div class="fuc-amt-box">
+                            <span class="fuc-amt">${principal.toFixed(2)} ₮</span>
+                            <span class="fuc-roi" style="color:var(--warning);"><i class="fas fa-lock"></i> Principal Only - ROI Already Paid Daily</span>
+                        </div>
+                        <div style="width:150px;" id="claim_box_${stakeId}">
+                            <button class="btn-claim-glass" onclick="window.executeClaimStake('${stakeId}', ${principal})">CLAIM ${principal.toFixed(2)} ₮</button>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (daysLeft < 1 && diff > 0) {
+                hasExpiringContract = true;
+                let startStr = new Date(stk.startTime || Date.now()).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+                let endStr = new Date(stk.unlockTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+
+                html += `
+                <div class="final-unlock-card" id="card_${stakeId}" data-stake-card="${stakeId}">
+                    <div class="fuc-header">
+                        <span class="fuc-title"><i class="fas fa-lock-open fa-fade"></i> Unlocking Soon</span>
+                        <span class="fuc-id">ID: ${stakeId}</span>
+                    </div>
+                    <div class="fuc-body">
+                        <div class="fuc-amt-box">
+                            <span class="fuc-amt">${principal.toFixed(2)} ₮</span>
+                            <span class="fuc-roi">Reserved: ${startStr} - ${endStr}</span>
+                        </div>
+                        <div class="fuc-timer-box" id="claim_box_${stakeId}">
+                            <div class="fuc-timer atm-live-timer" data-id="${stakeId}" data-amt="${principal}" data-unlock="${stk.unlockTime}">--:--:--</div>
+                        </div>
+                    </div>
+                </div>`;
+            } else {
+                html += `
+                <div data-stake-card="${stakeId}" style="background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-left: 3px solid var(--success); padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; margin-bottom:10px;">
+                    <div>
+                        <span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace;">ID: ${stakeId}</span>
+                        <h4 style="font-size: 1.1rem; color: #fff; margin: 3px 0; font-weight: 800;">${principal.toFixed(2)} ₮</h4>
+                        <span style="font-size: 0.75rem; color: var(--success); font-weight: 700;">${stk.dailyRoi}% Daily ROI</span>
+                    </div>
+                    <div style="text-align: right;" id="claim_box_${stakeId}">
+                        <span class="badge glow-locked" style="margin-bottom: 5px;">Locked</span>
+                        <span class="atm-live-timer" data-id="${stakeId}" data-amt="${principal}" data-unlock="${stk.unlockTime}" style="display: block; font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">--:--:--</span>
+                    </div>
+                </div>`;
+            }
+        }
+
+        // 🚀 ALWAYS generate the HTML for the card backs!
+        let startDate = new Date(stk.startTime || Date.now());
+        let unlockDate = new Date(stk.unlockTime);
+
+        let formatDateTime = (d) => {
+            let day = d.getDate().toString().padStart(2, '0');
+            let month = d.toLocaleString('en-US', { month: 'short' });
+            let year = d.getFullYear().toString().slice(-2);
+            let time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+            return `${day}-${month}-${year} <span style="opacity:0.5;">|</span> ${time}`;
+        };
+
+        let startFmt = formatDateTime(startDate);
+        let endFmt = formatDateTime(unlockDate);
+
+        let displayTx = stk.txId || stk.id || stk.orderId || stk.Order_ID || (stk.timestamp ? ('TX-' + String(stk.timestamp).slice(-8)) : 'TX-ACTIVE');
+        let statusBadge = stakeStatus === 'Active' ? `<span style="font-size:0.6rem; color:#f59e0b; font-weight:800; text-transform:uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">● ACTIVE</span>` : stakeStatus === 'Matured' ? `<span style="font-size:0.6rem; color:#22d3ee; font-weight:800; text-transform:uppercase; background: rgba(34,211,238,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(34,211,238,0.3);">● MATURED</span>` : `<span style="font-size:0.6rem; color:#10b981; font-weight:800; text-transform:uppercase; background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">● CLAIMED</span>`;
+
+        let itemHtml = `
+        <div class="clean-tx-card" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 14px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 8px;">
+                <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${displayTx}</span></span>
+                ${statusBadge}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+                <div style="display: flex; flex-direction: column; gap: 4px;">
+                    <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-lock" style="color:var(--warning); margin-right:4px;"></i>Locked: <span style="color:#e2e8f0; margin-left:2px;">${startFmt}</span></span>
+                    <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-unlock-alt" style="color:var(--success); margin-right:4px;"></i>Release: <span style="color:#e2e8f0; margin-left:2px;">${endFmt}</span></span>
+                </div>
+                <span class="tx-amt" style="color: var(--primary); font-size: 1.1rem;">${principal.toFixed(2)} ₮</span>
+            </div>
+        </div>`;
+
+        if (stk.duration == 7) { silverHtml += itemHtml; sCount++; }
+        else if (stk.duration == 15) { goldHtml += itemHtml; gCount++; }
+        else if (stk.duration == 30) { platHtml += itemHtml; pCount++; }
+        else if (stk.duration == 60) { diamondHtml += itemHtml; dCount++; }
+    });
+
+    if (!hasExpiringContract) {
+        const activeLabel = activeCardKey ? activeCardKey.toUpperCase() : 'SELECTED';
+        list.innerHTML = `<div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-box-open"></i><p>No claimable staking contracts for ${activeLabel} card.</p></div>`;
+    } else {
+        list.innerHTML = html;
+    }
+
+    const sBox = document.getElementById('back_silver_data');
+    const gBox = document.getElementById('back_gold_data');
+    const pBox = document.getElementById('back_platinum_data');
+    const dBox = document.getElementById('back_diamond_data');
+
+    const emptyHtml = `<div style="text-align:center; padding-top:60px; color:#52525b;"><i class="fas fa-ghost" style="font-size:2rem; margin-bottom:10px;"></i><br>No Transactions Yet</div>`;
+
+    if (sBox) { sBox.style.background = "#000000"; sBox.innerHTML = sCount > 0 ? silverHtml + '</div>' : emptyHtml; }
+    if (gBox) { gBox.style.background = "#000000"; gBox.innerHTML = gCount > 0 ? goldHtml + '</div>' : emptyHtml; }
+    if (pBox) { pBox.style.background = "#000000"; pBox.innerHTML = pCount > 0 ? platHtml + '</div>' : emptyHtml; }
+    if (dBox) { dBox.style.background = "#000000"; dBox.innerHTML = dCount > 0 ? diamondHtml + '</div>' : emptyHtml; }
+};
+
+    window.executeClaimStake = async (stakeId, amount) => {
         const uid = localStorage.getItem('uid');
         const loader = document.getElementById('loader');
-        if (loader) { loader.style.display = 'flex'; loader.style.opacity = '1'; loader.querySelector('p').innerText = 'Claiming Profit...'; }
+        const claimBox = document.getElementById(`claim_box_${stakeId}`);
+        const btn = claimBox ? claimBox.querySelector('button') : null;
+
+        if (btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
+        if (loader) { loader.style.display = 'flex'; loader.style.opacity = '1'; loader.querySelector('p').innerText = 'Moving Principal to Locked Vault...'; }
 
         try {
             const res = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
             if (res.success) {
+                const principal = parseFloat(amount || 0);
+
+                if (window.RAM_STATE && window.RAM_STATE.balances) {
+                    if (res.updatedBalances) {
+                        window.RAM_STATE.balances.Locked_Balance = res.updatedBalances.Locked_Balance;
+                        window.RAM_STATE.balances.Locked_Withdrawals = res.updatedBalances.Locked_Withdrawals;
+                    }
+
+                    if (window.RAM_STATE.balances.Active_Stakes) {
+                        window.RAM_STATE.balances.Active_Stakes = window.RAM_STATE.balances.Active_Stakes.map(stk => {
+                            const currentId = stk.id || stk.Order_ID || stk.orderId;
+                            return currentId === stakeId ? { ...stk, status: 'Completed' } : stk;
+                        });
+                    }
+
+                    window.lastWalletData = window.RAM_STATE.balances;
+                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
+                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+                }
+
+                const stakeCard = claimBox ? (claimBox.closest('[data-stake-card]') || claimBox.closest('.final-unlock-card') || claimBox.closest('.clean-tx-card') || claimBox.parentElement) : null;
+                if (stakeCard) {
+                    stakeCard.style.transition = "all 0.4s ease";
+                    stakeCard.style.transform = "scale(0.8) translateY(-20px)";
+                    stakeCard.style.opacity = "0";
+                    setTimeout(() => stakeCard.remove(), 400);
+                }
+
                 const popup = document.getElementById('claimPopup');
                 if (popup) {
-                    const oldBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0);
-                    const newBal = oldBal + parseFloat(amount) + parseFloat(profit);
-
                     const elAmt = document.getElementById('popClaimAmt');
                     const elProf = document.getElementById('popClaimProfit');
                     const elOld = document.getElementById('popOldBal');
                     const elNew = document.getElementById('popNewBal');
 
-                    if(elAmt) elAmt.innerText = (parseFloat(amount) + parseFloat(profit)).toFixed(2);
-                    if(elProf) elProf.innerText = '+ ' + parseFloat(profit).toFixed(2) + ' ₮ Profit';
-                    if(elOld) elOld.innerText = oldBal.toFixed(2) + ' ₮';
-                    if(elNew) elNew.innerText = newBal.toFixed(2) + ' ₮';
+                    if(elAmt) elAmt.innerText = principal.toFixed(2) + ' ₮';
+                    if(elProf) elProf.innerText = 'Principal moved to 30 Mins Locked Vault';
+                    if(elOld) elOld.innerText = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0).toFixed(2) + ' ₮';
+                    if(elNew) elNew.innerText = parseFloat(window.RAM_STATE?.balances?.Locked_Balance || 0).toFixed(2) + ' ₮';
 
                     popup.style.display = 'flex';
                     setTimeout(() => popup.classList.add('show'), 10);
                 }
-                if (window.RAM_STATE && window.RAM_STATE.balances) {
-                    window.RAM_STATE.balances.Main_Balance = parseFloat(window.RAM_STATE.balances.Main_Balance || 0) + parseFloat(amount);
-                    if (window.RAM_STATE.balances.Active_Stakes) {
-                        window.RAM_STATE.balances.Active_Stakes = window.RAM_STATE.balances.Active_Stakes.map(stk => stk.id === stakeId ? {...stk, status: 'Completed'} : stk);
-                    }
-                    window.lastWalletData = window.RAM_STATE.balances;
-                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                    if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
-                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-                }
+
                 if (typeof window.forceInjectToHistory === 'function') {
                     window.forceInjectToHistory({
                         id: 'claim_' + Date.now(),
                         UID: uid,
                         Type: 'Stake Unlocked',
-                        Amount: parseFloat(amount),
+                        Amount: principal,
                         Status: 'Success',
                         Date: new Date().toISOString(),
                         timestamp: Date.now(),
                         Order_ID: stakeId,
-                        Details: 'Staking Principal Returned to Main Balance'
+                        Details: 'Staking Principal Moved to Locked Vault'
                     });
                 }
+
+                if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
+                window.showToast("Principal moved to Locked Vault");
             } else {
                 window.showToast(res.message, true);
+                if (btn) { btn.innerHTML = 'CLAIM ' + parseFloat(amount || 0).toFixed(2) + ' ₮'; btn.disabled = false; }
             }
         } catch(e) {
-            window.showToast('Error claiming', true);
+            window.showToast('Error claiming: ' + e.message, true);
+            if (btn) { btn.innerHTML = 'CLAIM ' + parseFloat(amount || 0).toFixed(2) + ' ₮'; btn.disabled = false; }
         } finally {
             if (loader) { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none',300); }
         }
     };
 
+    window.processClaim = (stakeId, amount) => window.executeClaimStake(stakeId, amount);
+
     window.closeClaimPopup = () => {
         const popup = document.getElementById('claimPopup');
-        if (popup) { popup.classList.remove('show'); setTimeout(() => popup.style.display = 'none', 400); }
-        window.switchTab('assets');
+        if (popup) {
+            popup.classList.remove('show');
+            popup.style.display = 'none';
+        }
     };
 
     /* === MODULE 33: CINEMA MODE & HARDWARE ROUTER === */
     window.cinemaProfitInterval = null;
 
     window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
+        window.currentActiveStakeCard = tierTheme;
         window.location.hash = 'cinema';
 
         let overlay = document.getElementById('cinemaOverlay');
@@ -8404,13 +8547,7 @@
                 isFlipping = true;
                 cinemaCardInner.style.transform = "rotateZ(-3deg) rotateY(18deg) rotateX(10deg) scale(0.92)";
 
-                // Fetch 24H Stakes from new API dynamically on card flip
-                const cardNumEl = cardElement.querySelector('.atm-number');
-                const backBox = cinemaCardInner.querySelector('.atm-face-back');
-                if (cardNumEl && backBox) {
-                    window.loadActiveStakesForCard(cardNumEl.innerText, backBox.id);
-                }
-
+                // No API call needed here. renderActiveStakes already populates the card back flawlessly!
                 setTimeout(() => {
                     cinemaCardInner.style.transform = "";
                     cinemaCardInner.classList.add('is-flipped');
