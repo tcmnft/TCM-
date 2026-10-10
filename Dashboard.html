@@ -1878,6 +1878,7 @@
                 </div>
             </div>
 
+            <div style="display: flex; flex-direction: column; gap: 15px;">
             <div class="wallet-card">
                 <div class="bal-hero">
                     <p class="label-sm">
@@ -1914,6 +1915,24 @@
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Staking</span> <span class="v-daily" id="dStaking">0 ₮</span> <span class="v-total" id="tStaking">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Airdrop</span> <span class="v-daily" id="dAir">0 ₮</span> <span class="v-total" id="tAir">0.00 ₮</span></div>
                 </div>
+            </div>
+
+            <!-- MEMO: TCM-DASH-LEDGER-R1 | 2026-10-10 | Asia/Kolkata -->
+            <section id="accountAdjustmentCard" class="history-panel" hidden
+                style="display: none; margin-top: 0; border-color: rgba(245, 158, 11, 0.35);"
+                aria-label="Account Adjustment" aria-live="polite">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <span style="font-weight: 700; color: var(--text-main);">
+                        <i class="fas fa-balance-scale" style="color: #f59e0b; margin-right: 6px;"></i> Account Adjustment
+                    </span>
+                    <span id="accountAdjustmentAmount" style="font-weight: 700; color: #f59e0b; overflow-wrap: anywhere;"></span>
+                </div>
+                <p style="color: var(--text-sub); font-size: 0.8rem; line-height: 1.5; margin: 10px 0 0;">
+                    Approved deposits are applied to this adjustment first, until it is cleared.
+                    Any remaining deposit amount is credited to your Main Wallet.
+                    Check the deposit breakdown in Recent History for details.
+                </p>
+            </section>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -2517,6 +2536,69 @@
        }
     };
 
+    // MEMO: TCM-DASH-LEDGER-R1 | 2026-10-10 | Asia/Kolkata
+    window.dashboardLedgerTypes = Object.freeze({
+        'Deposit': { category: '', icon: 'arrow-down', color: 'var(--success)', background: 'dep', sign: '+' },
+        'Withdraw': { category: '', icon: 'arrow-up', color: 'var(--error)', background: 'wd', sign: '-' },
+        'P2P Sent': { category: '', icon: 'arrow-up', color: 'var(--error)', background: 'wd', sign: '-' },
+        'P2P Received': { category: '', icon: 'arrow-down', color: 'var(--success)', background: 'dep', sign: '+' },
+        'Airdrop': { category: '', icon: 'gift', color: '#facc15', background: 'air', sign: '+' },
+        'Debt Recovery': { category: 'Adjustment', icon: 'balance-scale', color: '#f59e0b', background: 'air', sign: '' },
+        'Staking Reward': { category: 'Income', icon: 'coins', color: 'var(--success)', background: 'dep', sign: '+' },
+        'Stake Unlocked': { category: 'Capital', icon: 'unlock', color: 'var(--primary)', background: 'dep', sign: '' },
+        'Company Profit Share': { category: 'Dividend', icon: 'chart-pie', color: 'var(--success)', background: 'dep', sign: '+' },
+        'NFT Profit': { category: 'Income', icon: 'gem', color: 'var(--success)', background: 'dep', sign: '+' },
+        'Team Bonus (A-Hand)': { category: 'Income', icon: 'users', color: 'var(--success)', background: 'dep', sign: '+' },
+        'Team Bonus (B-Hand)': { category: 'Income', icon: 'users', color: 'var(--success)', background: 'dep', sign: '+' },
+        'Team Bonus (C-Hand)': { category: 'Income', icon: 'users', color: 'var(--success)', background: 'dep', sign: '+' }
+    });
+    window.isDashboardLedgerType = type =>
+        typeof type === 'string' && Object.prototype.hasOwnProperty.call(window.dashboardLedgerTypes, type);
+
+    window.escapeDashboardLedgerText = value => String(value ?? '').replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[character]));
+
+    window.parseDashboardMoneyMicro = value => {
+        if (typeof value !== 'number' && typeof value !== 'string') return null;
+        if (typeof value === 'number' && (!Number.isFinite(value) || value < 0)) return null;
+        const text = String(value).trim();
+        if (!/^\d+(?:\.\d+)?$/.test(text)) return null;
+        const [whole, fraction = ''] = text.split('.');
+        if (fraction.length > 6 && /[1-9]/.test(fraction.slice(6))) return null;
+        return BigInt(whole) * 1000000n + BigInt(fraction.slice(0, 6).padEnd(6, '0'));
+    };
+
+    window.formatDashboardMoneyMicro = micro => {
+        const whole = micro / 1000000n;
+        const fraction = (micro % 1000000n).toString().padStart(6, '0');
+        return whole.toString() + '.' + fraction.replace(/0+$/, '').padEnd(2, '0');
+    };
+
+    window.getDashboardDepositBreakdown = tx => {
+        if (tx.Type !== 'Deposit' || tx.Status !== 'Success') return null;
+        const gross = window.parseDashboardMoneyMicro(tx.Amount);
+        const recovered = window.parseDashboardMoneyMicro(tx.Debt_Recovered);
+        const net = window.parseDashboardMoneyMicro(tx.Net_Deposit_Credit);
+        if (gross === null || recovered === null || net === null || gross !== recovered + net) return null;
+        return { gross, recovered, net };
+    };
+
+    window.renderAccountAdjustment = wallet => {
+        const card = document.getElementById('accountAdjustmentCard');
+        const amount = document.getElementById('accountAdjustmentAmount');
+        if (!card || !amount) return;
+        const raw = wallet && wallet.Debt;
+        const debt = raw === undefined || raw === null ? 0n : window.parseDashboardMoneyMicro(raw);
+        const visible = debt !== null && debt > 0n;
+        amount.textContent = visible
+            ? (window.balFormatIndex === 3 ? '****' : window.formatDashboardMoneyMicro(debt)) + ' USDT'
+            : '';
+        card.hidden = !visible;
+        card.style.display = visible ? 'block' : 'none';
+        if (debt === null) console.warn('Account adjustment amount could not be displayed; check the recorded Debt value.');
+    };
+
     /* === MODULE 13: SMART BALANCE & FORMATTING ENGINE === */
     window.balFormatIndex = parseInt(localStorage.getItem('tcm_bal_format')) || 0;
 
@@ -2539,7 +2621,9 @@
     window.toggleBalanceFormat = () => {
        window.balFormatIndex = (window.balFormatIndex + 1) % 4;
        localStorage.setItem('tcm_bal_format', window.balFormatIndex);
+       if (typeof window.hideAssetFlowTooltip === 'function') window.hideAssetFlowTooltip();
        if (window.lastWalletData) window.renderWalletData(window.lastWalletData);
+       if (window.myChartInstance) window.myChartInstance.update('none');
     };
 
     window.formatMagicNumber = num => {
@@ -2557,6 +2641,11 @@
     };
 
     window.renderWalletData = (w) => {
+        if (window.dashboardSync && window.dashboardSync.wallet) {
+            w = JSON.parse(JSON.stringify(window.dashboardSync.wallet));
+            window.lastWalletData = w;
+            if (window.RAM_STATE) window.RAM_STATE.balances = w;
+        }
         const setText = (id, val, sym=false) => {
             const el = document.getElementById(id);
             if(el) {
@@ -2573,6 +2662,7 @@
 
         setText('uBalance', w.Main_Balance, false);
         setText('uLocked', w.Locked_Balance, false);
+        window.renderAccountAdjustment(w);
 
         setText('r_mainBal', w.Main_Balance, true);
         setText('r_resBal', w.Total_Reserve, true);
@@ -2763,39 +2853,16 @@
             if (result.success) {
                 const balances = window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances : null;
 
-                if (balances && result.updatedBalances) {
-                    // 🚀 ZERO-READ STATE SYNC: Main_Balance কখনো inflate হবে না
-                    balances.Locked_Balance = result.updatedBalances.Locked_Balance;
-                    balances.Locked_Withdrawals = result.updatedBalances.Locked_Withdrawals || balances.Locked_Withdrawals || [];
-
-                    if (balances.Active_Stakes) {
-                        balances.Active_Stakes = balances.Active_Stakes.map(stk => {
-                            const currentId = stk.id || stk.Order_ID || stk.orderId;
-                            return currentId === stakeId ? { ...stk, status: 'Completed' } : stk;
-                        });
-                    }
-
-                    window.lastWalletData = balances;
-                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-                    if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
-
-                    if (typeof window.renderWalletData === 'function') {
-                        window.renderWalletData(balances);
-                    }
-
-                    const lockedUI = document.getElementById('uLocked');
-                    if (lockedUI && typeof window.formatMagicNumber === 'function') {
-                        lockedUI.innerText = window.formatMagicNumber(balances.Locked_Balance);
-                    }
-
-                    if (typeof window.triggerWalletRefreshAnimation === 'function') {
-                        window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
-                    }
-
-                    window.setTimeout(() => {
-                        if (typeof window.vaultCarouselIndex !== 'undefined') window.vaultCarouselIndex = 0;
-                    }, 1);
+                // fetchAPI already reconciled the committed backend wallet.
+                // Preserve this sole claim handler, its popup and animation.
+                if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+                if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
+                if (typeof window.triggerWalletRefreshAnimation === 'function') {
+                    window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
                 }
+                window.setTimeout(() => {
+                    if (typeof window.vaultCarouselIndex !== 'undefined') window.vaultCarouselIndex = 0;
+                }, 1);
 
                                 const claimBox = document.getElementById(`claim_box_${stakeId}`);
                 const stakeCard = claimBox ? (claimBox.closest('[data-stake-card]') || claimBox.closest('.final-unlock-card') || claimBox.closest('.clean-tx-card') || claimBox.parentElement) : null;
@@ -3056,12 +3123,8 @@
 
     /* Smart Logout */
     window.logout = () => {
-        let balFormat = localStorage.getItem('tcm_bal_format');
-        let theme = localStorage.getItem('tcm_theme');
-        localStorage.clear();
-        if(balFormat !== null) localStorage.setItem('tcm_bal_format', balFormat);
-        if(theme !== null) localStorage.setItem('tcm_theme', theme);
-        window.location.replace("index.html");
+        window.clearDashboardSession();
+        window.location.replace('index.html');
     };
 
     /* === MODULE 15: THEME ENGINE (DARK / LIGHT) & SETTINGS === */
@@ -3205,40 +3268,11 @@
     window.closeLevelModal = () => { window.closeModal('levelUpModal'); };
 
     /* Background Automation Sync */
+    // MEMO: TCM-DASH-RANK-R1 | 2026-10-10 | Asia/Kolkata
     window.evaluateLevelAutomation = async function(wData, currentKnownRank) {
-        const uid = localStorage.getItem('uid');
-        if(!uid || !wData) return;
-
-        try {
-            const result = await window.fetchAPI('/automation/verify-rank', 'POST', { uid });
-
-            if (result.success && result.rank !== undefined) {
-                let trueRank = parseInt(result.rank);
-                let knownRank = currentKnownRank !== undefined ? currentKnownRank : parseInt(window.getSafeUserData().Rank || 0);
-
-                if (trueRank !== knownRank) {
-                    let uData = window.getSafeUserData();
-                    uData.Rank = trueRank;
-                    localStorage.setItem('tcm_userData', JSON.stringify(uData));
-
-                    if (typeof window.getLevelStyling === 'function') {
-                        const lvStyle = window.getLevelStyling(trueRank);
-                        const pill = document.getElementById('uLevelPill');
-                        if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
-                    }
-
-                    const levelSelect = document.getElementById("levelSelect");
-                    if (levelSelect) {
-                        levelSelect.value = trueRank > 0 ? trueRank : 1;
-                        if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-                    }
-
-                    window.showLevelChange(trueRank, trueRank > knownRank);
-                }
-            }
-        } catch (error) {
-            console.error("Automation Sync Error:", error);
-        }
+        // Legacy arguments remain compatible; identity is derived by the backend.
+        // The shared sync flow reads the authoritative wallet after verification.
+        return window.dashboardRequest('/automation/verify-rank', 'POST', {});
     };
 
     /* === MODULE 18: RECENT HISTORY RENDER ENGINE === */
@@ -3253,51 +3287,9 @@
 
     // MEMO TCM-STK-010 | 2026-10-10 00:51 IST | Asia/Kolkata
     window.forceInjectToHistory = (newTx, serverTxCount) => {
-        if (!newTx || typeof newTx !== 'object') return;
-
-        const uid = localStorage.getItem('uid');
-        if (!uid || (newTx.UID !== undefined && newTx.UID !== uid)) return;
-
-        const rows = Array.isArray(window.allTransactions)
-            ? window.allTransactions
-            : (Array.isArray(window.TX_CACHE) ? window.TX_CACHE : []);
-
-        const txId = newTx.id;
-        const existingIndex = typeof txId === 'string' && txId
-            ? rows.findIndex(tx => tx && tx.id === txId)
-            : -1;
-
-        if (existingIndex >= 0) {
-            rows[existingIndex] = { ...rows[existingIndex], ...newTx };
-        } else {
-            rows.unshift(newTx);
-        }
-
-        window.allTransactions = rows;
-        window.TX_CACHE = rows;
-        localStorage.setItem('USER_TX_VAULT_' + uid, JSON.stringify(rows));
-
-        const countKey = 'tcm_tx_count_' + uid;
-        const parsedCount = Number(localStorage.getItem(countKey));
-        const currentCount = Number.isSafeInteger(parsedCount) && parsedCount >= 0
-            ? parsedCount
-            : 0;
-
-        if (Number.isSafeInteger(serverTxCount) && serverTxCount >= 0) {
-            localStorage.setItem(
-                countKey,
-                String(Math.max(currentCount, serverTxCount))
-            );
-        } else if (
-            existingIndex < 0 &&
-            currentCount < Number.MAX_SAFE_INTEGER
-        ) {
-            localStorage.setItem(countKey, String(currentCount + 1));
-        }
-
-        if (typeof window.applyTxFilter === 'function') {
-            window.applyTxFilter();
-        }
+        // Preserve the existing caller interface; reconcile from the backend only.
+        // Never manufacture ledger rows or advance a server-owned counter locally.
+        return window.syncDashboardState();
     };
 
     window.initTxObserver = () => {
@@ -3333,8 +3325,7 @@
         const selectedMonthValue = monthPicker ? monthPicker.value : '';
 
         window.txHistoryData = window.allTransactions.filter(tx => {
-            const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
-            if (!allowedTypes.includes(tx.Type)) return false;
+            if (!window.isDashboardLedgerType(tx.Type)) return false;
 
             if (selectedMonthValue) {
                 const [targetYear, targetMonth] = selectedMonthValue.split('-');
@@ -3409,9 +3400,10 @@
 
             const isReversedAirdrop = isAir && tx.Status === 'Reversed';
 
-            let clr = (isDep || isP2PRecv) ? 'var(--success)' : ((isWd || isP2PSent) ? 'var(--error)' : '#facc15');
-            let icn = (isDep || isP2PRecv) ? 'arrow-down' : ((isWd || isP2PSent) ? 'arrow-up' : 'gift');
-            let bgCls = (isDep || isP2PRecv) ? 'dep' : ((isWd || isP2PSent) ? 'wd' : 'air');
+            const ledgerStyle = window.isDashboardLedgerType(tType) ? window.dashboardLedgerTypes[tType] : null;
+            let clr = ledgerStyle ? ledgerStyle.color : 'var(--text-sub)';
+            let icn = ledgerStyle ? ledgerStyle.icon : 'file-alt';
+            let bgCls = ledgerStyle ? ledgerStyle.background : 'air';
 
             let stClr = '#f59e0b';
             if(tx.Status === 'Success') stClr = '#10b981';
@@ -3443,15 +3435,43 @@
                         }
                     } else { extractedName = rmk; }
                 } else {
-                    extraRemarks = `<span style="font-size:0.7rem; color:var(--text-sub); display:block; line-height: 1.3; white-space: normal; word-wrap: break-word; margin-top: 2px;">${tx.Admin_Remarks}</span>`;
+                    extraRemarks = `<span style="font-size:0.7rem; color:var(--text-sub); display:block; line-height: 1.3; white-space: normal; word-wrap: break-word; margin-top: 2px;">${window.escapeDashboardLedgerText(tx.Admin_Remarks)}</span>`;
                 }
             }
 
-            let amountSign = (isDep || isP2PRecv || isAir) ? '+' : (isWd || isP2PSent) ? '-' : '';
+            let amountSign = ledgerStyle ? ledgerStyle.sign : '';
             let displayTitle = (isP2P && extractedName) ? extractedName : tType;
             let displayTypeRight = (isP2P && extractedName) ? tType : '';
+            const escapeText = window.escapeDashboardLedgerText;
+            const formatMoney = window.formatDashboardMoneyMicro;
+            const breakdown = window.getDashboardDepositBreakdown(tx);
+            const recordedAmount = window.parseDashboardMoneyMicro(tx.Amount);
+            const displayMicro = breakdown ? breakdown.net : recordedAmount;
+            const displayAmount = displayMicro === null ? 'Unavailable' : formatMoney(displayMicro);
+            const categoryBadgeHtml = ledgerStyle && ledgerStyle.category
+                ? `<span class="badge" style="align-self: flex-start; color: ${clr}; border: 1px solid var(--border); background: transparent; font-size: 0.65rem;">${ledgerStyle.category}</span>`
+                : '';
 
-            let interactiveBadgeHtml = `<span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${tx.Status || 'Pending'}</span>`;
+            if (isDep && tx.Status === 'Success') {
+                if (breakdown) {
+                    extraRemarks += `<span style="font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.5; overflow-wrap: anywhere; margin-top: 3px;">Deposit: ${formatMoney(breakdown.gross)} USDT<br>Adjustment settled: ${formatMoney(breakdown.recovered)} USDT<br>Net wallet credit: ${formatMoney(breakdown.net)} USDT</span>`;
+                } else {
+                    extraRemarks += `<span style="font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.4; margin-top: 3px;">Recorded deposit; net-credit breakdown unavailable.</span>`;
+                }
+            } else if (tType === 'Debt Recovery') {
+                extraRemarks += `<span style="font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.4; overflow-wrap: anywhere; margin-top: 3px;">Settled from deposit; not a separate withdrawal.${tx.Deposit_Transaction_ID ? '<br>Deposit reference: ' + escapeText(tx.Deposit_Transaction_ID) : ''}</span>`;
+            } else if (tType === 'Stake Unlocked') {
+                extraRemarks += `<span style="font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.4; margin-top: 3px;">Principal moved to Locked Vault; not new income.</span>`;
+            }
+
+            displayTitle = escapeText(displayTitle);
+            displayTypeRight = escapeText(displayTypeRight);
+            extractedUid = escapeText(extractedUid);
+            displayDate = escapeText(displayDate);
+            const safeOrderIdText = escapeText(orderIdText);
+            const encodedOrderId = encodeURIComponent(String(orderIdText)).replace(/'/g, '%27');
+
+            let interactiveBadgeHtml = `<span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${window.escapeDashboardLedgerText(tx.Status || 'Pending')}</span>`;
             let simpleTimerHtml = '';
 
             if ((isDep || isWd) && tx.Status === 'Pending') {
@@ -3484,18 +3504,19 @@
                     <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
                         <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${displayTitle}</h4>
                         ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${extractedUid}</span>` : ''}
+                        ${categoryBadgeHtml}
                         ${extraRemarks}
                         <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
                         <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${orderIdText}</span>
-                            <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText('${orderIdText}', this)" title="Copy ID"></i>
+                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${safeOrderIdText}</span>
+                            <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText(decodeURIComponent('${encodedOrderId}'), this)" title="Copy ID"></i>
                         </div>
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
                     ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${displayTypeRight}</span>` : ''}
                     <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
-                        ${amountSign}${parseFloat(tx.Amount).toFixed(2)} ₮
+                        ${displayMicro === null ? '' : amountSign}${displayAmount} ₮
                     </div>
                     ${interactiveBadgeHtml}
                     ${simpleTimerHtml}
@@ -3556,16 +3577,15 @@
                         const res = await window.fetchAPI(`/finance/transactions/more?uid=${uid}&lastTimestamp=${lastTs}`);
                         
                         if (res.success && res.data && res.data.length > 0) {
-                            window.allTransactions = [...window.allTransactions, ...res.data];
-                            window.TX_CACHE = window.allTransactions;
-                            localStorage.setItem("USER_TX_VAULT_" + uid, JSON.stringify(window.TX_CACHE));
-                            if (res.data.length < 20) window.hasMoreTxInDB = false;
+                            const receivedCount = res.data.length;
+                            const seenIds = new Set((window.allTransactions || []).map(record => record.id));
+                            window.mergeDashboardHistory(res.data);
+                            res.data = res.data.filter(record => !seenIds.has(record.id));
+                            if (receivedCount < 20) window.hasMoreTxInDB = false;
                             
                             const selectedMonthValue = document.getElementById('txMonthYear') ? document.getElementById('txMonthYear').value : '';
-                            const allowedTypes = ['Deposit', 'Withdraw', 'P2P Sent', 'P2P Received', 'Airdrop'];
-                            
                             let newFiltered = res.data.filter(tx => {
-                                if (!allowedTypes.includes(tx.Type)) return false;
+                                if (!window.isDashboardLedgerType(tx.Type)) return false;
                                 if (selectedMonthValue) {
                                     const [targetYear, targetMonth] = selectedMonthValue.split('-');
                                     let txDateObj;
@@ -3657,196 +3677,329 @@
  // 🚀 INITIALIZATION (HYBRID STORAGE & SWR ARCHITECTURE)
  // =================================================================================
  window.onload = async () => {
-    window.setDefaultMonth();
-
-    const userUid = localStorage.getItem('uid');
-    if (!userUid) return;
-
-    // 🔥 NEXUS-1: Run daily reset logic in background
-    if (typeof checkAndResetDailyBalances === 'function') {
-        checkAndResetDailyBalances(window.db, userUid);
-    }
-
-    const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
-
-    // ==========================================
-    // 🟢 STEP 1: 1ms COLD START (Load UI instantly from LocalStorage)
-    // ==========================================
-    try {
-        const cachedStaticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-        if (cachedStaticUser.Name) {
-            safeSetText('uName', cachedStaticUser.Name);
-            safeSetText('sbName', cachedStaticUser.Name);
-            safeSetText('uUID', cachedStaticUser.UID || userUid);
-            safeSetText('sbUid', "UID: " + (cachedStaticUser.UID || userUid));
-
-            // 🔥 FIX: tcm_user_dp কে প্রাইওরিটি দেওয়া হলো যাতে মেমোরি থেকে ছবি না হারায়
-            const savedDp = localStorage.getItem('tcm_user_dp');
-            const avatarSrc = savedDp || cachedStaticUser.Avatar || cachedStaticUser.avatar || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
-            const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
-            if(uAvatar) uAvatar.src = avatarSrc;
-            if(sbAvatar) sbAvatar.src = avatarSrc;
-
-            const lvStyle = window.getLevelStyling(cachedStaticUser.Rank || 0);
-            const pill = document.getElementById('uLevelPill');
-            if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
-
-            const levelSelect = document.getElementById('levelSelect');
-            if(levelSelect) {
-                let sRnk = parseInt(cachedStaticUser.Rank) || 0;
-                levelSelect.value = sRnk > 0 ? sRnk : 1;
-                if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-            }
-
-            const currentUserId = localStorage.getItem('uid');
-            if (currentUserId) {
-                const cachedTxs = localStorage.getItem("USER_TX_VAULT_" + currentUserId);
-                if (cachedTxs) {
-                    window.TX_CACHE = JSON.parse(cachedTxs);
-                    window.allTransactions = window.TX_CACHE;
-                    window.hasMoreTxInDB = window.allTransactions.length >= 20;
-                    window.isFetchingMoreTx = false;
-                    if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
-                }
-            }
-
-            const l = document.getElementById('loader');
-            if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
+        window.setDefaultMonth();
+        const uid = localStorage.getItem('uid');
+        if (!uid || !localStorage.getItem('token')) return;
+        // Only restore this account's history cache. Financial balances require a live read.
+        try {
+            const records = JSON.parse(localStorage.getItem('USER_TX_VAULT_' + uid) || '[]');
+            if (Array.isArray(records)) window.mergeDashboardHistory(records, true);
+        } catch (error) {
+            console.warn('Local history cache could not be restored.');
         }
-    } catch(e) { console.warn("Local cache read error", e); }
-
-    // ==========================================
-    // 🟡 STEP 2: STALE-WHILE-REVALIDATE (Fetch Live API from Backend)
-    // ==========================================
-    try {
-        let cachedTxCount = parseInt(localStorage.getItem('tcm_tx_count_' + userUid) || '0');
-        // 🔥 FIX: Send clientTxCount for True Zero-Read Delta Sync
-        const result = await window.fetchAPI(`/user/init-data?uid=${userUid}&clientTxCount=${cachedTxCount}`, 'GET');
-
-        if (result && result.success && result.data) {
-            const { user, wallet, transactions } = result.data;
-
-            safeSetText('uName', user.Name || 'User');
-             safeSetText('sbName', user.Name || 'User');
-             safeSetText('uUID', userUid);
-             safeSetText('sbUid', "UID: " + userUid);
-
-             // 🔥 FIX: Backend Data এবং LocalStorage এর মধ্যে নিখুঁত সিঙ্কিং
-             const liveAvatar = user.Avatar || user.avatar || localStorage.getItem('tcm_user_dp') || `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+`;
-
-             // ডেটাবেস থেকে পাওয়া ছবি মেমোরিতে হার্ড-সেভ করে রাখা হচ্ছে যাতে লগআউট/লগইনে না হারায়
-             if (liveAvatar && liveAvatar.length > 500) {
-                 localStorage.setItem('tcm_user_dp', liveAvatar);
-             }
-
-             const uAvatar = document.getElementById('uAvatar'), sbAvatar = document.getElementById('sbAvatar');
-             if(uAvatar) uAvatar.src = liveAvatar;
-             if(sbAvatar) sbAvatar.src = liveAvatar;
-
-             const lvStyle = window.getLevelStyling(user.Rank || 0);
-             const pill = document.getElementById('uLevelPill');
-             if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
-
-             const levelSelect = document.getElementById('levelSelect');
-             if(levelSelect) {
-                 let uRnk = parseInt(user.Rank) || 0;
-                 levelSelect.value = uRnk > 0 ? uRnk : 1;
-                 if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-             }
-
-             localStorage.setItem('tcm_static_user', JSON.stringify({
-                 Name: user.Name,
-                 UID: userUid,
-                 Avatar: liveAvatar, // 🔥 FIX: null এর বদলে আসল Base64 ডেটা সেভ করা হলো
-                 Rank: user.Rank,
-                 counters: user.counters
-             }));
-            localStorage.setItem('tcm_userData', JSON.stringify({Rank: user.Rank || 0}));
-
-            window.RAM_STATE = {
-                balances: wallet,
-                security: { is2FA: user["2FA_Bound"], isWallet: user.Wallet_Bound },
-                counters: user.counters
-            };
-
-            const b2FA = document.getElementById('badge2FA'), bWall = document.getElementById('badgeWallet');
-            window.is2FABound = window.RAM_STATE.security.is2FA;
-            window.isWalletBound = window.RAM_STATE.security.isWallet;
-
-            if(b2FA) { b2FA.className = window.is2FABound ? "badge glow-green" : "badge glow-red"; b2FA.innerText = window.is2FABound ? "Protected" : "Unbound"; }
-            if(bWall) { bWall.className = window.isWalletBound ? "badge glow-green" : "badge glow-red"; bWall.innerText = window.isWalletBound ? "Protected" : "Unbound"; }
-
-            window.lastWalletData = window.RAM_STATE.balances;
-            if(typeof window.renderWalletData === 'function') {
-                window.renderWalletData(window.RAM_STATE.balances);
-            }
-
-            let newTxCount = (user && user.counters) ? parseInt(user.counters.txCount || 0) : 0;
-            localStorage.setItem('tcm_tx_count_' + userUid, newTxCount);
-
-            if (result.data.isUpToDate && window.TX_CACHE && window.TX_CACHE.length > 0) {
-                window.allTransactions = window.TX_CACHE;
-            } else {
-                window.TX_CACHE = transactions || [];
-                localStorage.setItem("USER_TX_VAULT_" + userUid, JSON.stringify(window.TX_CACHE));
-                window.allTransactions = window.TX_CACHE;
-            }
-            
-            window.hasMoreTxInDB = window.allTransactions.length >= 20;
-            window.isFetchingMoreTx = false;
-            window.applyTxFilter();
-
-            if (typeof window.loadTodaysHistoryFromAPI === 'function') {
-                window.loadTodaysHistoryFromAPI(false);
-            }
-
-            const l = document.getElementById('loader');
-            if(l && l.style.display !== 'none') { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
+        try {
+            const result = await window.syncDashboardState();
+            if (!result.success && window.showToast) window.showToast(result.message, true);
+        } finally {
+            const loader = document.getElementById('loader');
+            if (loader) { loader.style.opacity = '0'; setTimeout(() => { loader.style.display = 'none'; }, 200); }
         }
-    } catch (err) {
-        console.error("Init Data Fetch Failed:", err);
-        const l = document.getElementById('loader');
-        if(l) { l.style.opacity = '0'; setTimeout(() => { l.style.display = 'none'; }, 200); }
-    }
- };
+    };
 
  // =================================================================================
  // 🔗 MODULE 7: SECURE API CALL HANDLER (Fetch Wrapper)
  // =================================================================================
- window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
-    const controller = new AbortController();
-    // রেন্ডার সার্ভারের জন্য টাইমআউট বাড়িয়ে ২৫ সেকেন্ড করা হলো
-    const timeoutId = setTimeout(() => controller.abort(), 25000);
+ // MEMO: TCM-DASH-PHASE-A | 2026-10-10 | Asia/Kolkata
+window.dashboardSession = {
+    closed: false,
+    blocked: false,
+    verified: false,
+    epoch: 0
+};
+window.dashboardSync = {
+    promise: null,
+    dirty: false,
+    version: 0,
+    pending: 0,
+    waiters: [],
+    wallet: null,
+    rankSnapshot: null
+};
 
-    const options = {
-        method,
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}` // Secure Token verification
-        },
-        signal: controller.signal
-    };
-    if (body) options.body = JSON.stringify(body);
-
-    try {
-        const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
-        clearTimeout(timeoutId);
-
-        if (response.status === 401 || response.status === 403) {
-            window.logout();
-            return { success: false, message: "Session Expired. Please login again." };
-        }
-        return await response.json();
-    } catch (error) {
-        clearTimeout(timeoutId);
-        console.error(`API Error (${endpoint}):`, error);
-
-        if (error.name === 'AbortError') {
-            return { success: false, message: "Connection Timeout. Server is unreachable." };
-        }
-        return { success: false, message: "Network Error! Server might be down." };
+window.clearDashboardSession = () => {
+    // Never clear unrelated preferences, drafts or operation request IDs.
+    for (const key of ['token', 'uid', 'tcm_userData', 'tcm_static_user', 'tcm_user_dp']) {
+        localStorage.removeItem(key);
     }
- };
+    window.dashboardSession.closed = true;
+    window.dashboardSession.verified = false;
+    window.dashboardSession.epoch += 1;
+    if (window.socket) window.socket.disconnect();
+    if (window.dashboardSocketRetry) clearTimeout(window.dashboardSocketRetry);
+};
+
+window.handleDashboardAccess = (status, message) => {
+    if (status === 401) {
+        if (window.dashboardSession.closed) return;
+        window.clearDashboardSession();
+        window.location.replace('index.html');
+    } else if (status === 403) {
+        window.dashboardSession.blocked = true;
+        window.dashboardSession.verified = false;
+        window.dashboardSession.epoch += 1;
+        if (window.socket) window.socket.disconnect();
+        if (typeof window.showToast === 'function') {
+            window.showToast(message || 'Access blocked or permission denied.', true);
+        }
+    }
+};
+
+window.dashboardRequest = async (endpoint, method = 'GET', body = null) => {
+    const uid = localStorage.getItem('uid');
+    const token = localStorage.getItem('token');
+    const epoch = window.dashboardSession.epoch;
+    const readVersion = window.dashboardSync.version;
+    if (!uid || !token || window.dashboardSession.closed) {
+        return { success: false, status: 401, message: 'Sign in required.' };
+    }
+    if (window.dashboardSession.blocked) {
+        return { success: false, status: 403, message: 'Access blocked or permission denied.' };
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 25000);
+    try {
+        const headers = { Authorization: 'Bearer ' + token, Accept: 'application/json' };
+        if (body !== null) headers['Content-Type'] = 'application/json';
+        const response = await fetch(API_BASE_URL + endpoint, {
+            method, headers, signal: controller.signal, cache: 'no-store',
+            ...(body !== null ? { body: JSON.stringify(body) } : {})
+        });
+        const type = response.headers.get('content-type') || '';
+        if (!/^application\/(?:json|[\w.+-]+\+json)(?:\s*;|$)/i.test(type)) {
+            throw new Error('Backend returned non-JSON data. Check the API address.');
+        }
+        const result = await response.json();
+        if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token') || epoch !== window.dashboardSession.epoch) {
+            return { success: false, status: 409, message: 'The session changed. Check the recorded action result before retrying.' };
+        }
+        if (method === 'GET' && endpoint.startsWith('/finance/') && readVersion !== window.dashboardSync.version) {
+            return { success: false, status: 409, message: 'A newer financial state is available. Refresh this view.' };
+        }
+        if (response.status === 401 || response.status === 403) {
+            window.handleDashboardAccess(response.status, result.message);
+        }
+        return { ...result, status: response.status, success: response.ok && result.success === true };
+    } catch (error) {
+        return {
+            success: false,
+            status: 0,
+            outcomeUnknown: method !== 'GET',
+            message: method !== 'GET'
+                ? 'Request outcome is unconfirmed. Refresh and check history before retrying.'
+                : (error.name === 'AbortError' ? 'Connection timed out.' : error.message)
+        };
+    } finally {
+        clearTimeout(timer);
+    }
+};
+
+window.mergeDashboardHistory = (records, replace = false) => {
+    const uid = localStorage.getItem('uid');
+    const map = new Map();
+    if (!replace) {
+        for (const record of window.allTransactions || []) {
+            if (record && typeof record.id === 'string' && record.UID === uid) map.set(record.id, record);
+        }
+    }
+    for (const record of records || []) {
+        if (record && typeof record.id === 'string' && record.UID === uid) map.set(record.id, record);
+    }
+    const timestamp = record => {
+        const raw = record.timestamp || record.Date;
+        if (typeof raw === 'number') return raw;
+        if (raw && typeof raw.toDate === 'function') return raw.toDate().getTime();
+        if (raw && (raw.seconds !== undefined || raw._seconds !== undefined)) {
+            return Number(raw.seconds ?? raw._seconds) * 1000;
+        }
+        return Date.parse(raw) || 0;
+    };
+    window.allTransactions = [...map.values()].sort((a, b) => timestamp(b) - timestamp(a) || a.id.localeCompare(b.id));
+    window.TX_CACHE = window.allTransactions;
+    try { localStorage.setItem('USER_TX_VAULT_' + uid, JSON.stringify(window.TX_CACHE)); }
+    catch (error) { console.warn('History cache unavailable.'); }
+    return window.allTransactions;
+};
+
+window.applyDashboardSnapshot = data => {
+    const uid = localStorage.getItem('uid');
+    if (!data || !data.wallet || !data.user || !uid) throw new Error('Invalid dashboard response.');
+    const user = data.user;
+    const counter = user.counters && user.counters.txCount;
+    if (counter === undefined || !Number.isSafeInteger(Number(counter)) || Number(counter) < 0) {
+        throw new Error('Invalid history counter.');
+    }
+    if (!data.isUpToDate && !Array.isArray(data.transactions)) throw new Error('Invalid history response.');
+    const wallet = JSON.parse(JSON.stringify(data.wallet));
+    const previousRank = window.dashboardSync.rankSnapshot;
+    const oldRank = previousRank && previousRank.uid === uid ? previousRank.rank : null;
+    const rank = Number(user.Rank ?? 0);
+    if (!Number.isInteger(rank) || rank < 0 || rank > 6) {
+        throw new Error('Invalid account rank.');
+    }
+    window.dashboardSync.wallet = JSON.parse(JSON.stringify(wallet));
+    window.RAM_STATE = {
+        ...(window.RAM_STATE || {}), user,
+        balances: wallet,
+        security: { is2FA: !!(user['2FA_Key'] || user['2FA_Bound']), isWallet: !!(user.Wallet_BEP20 || user.Wallet_TRC20 || user.Wallet_Bound) },
+        counters: user.counters || {}
+    };
+    window.lastWalletData = wallet;
+    window.is2FABound = window.RAM_STATE.security.is2FA;
+    window.isWalletBound = window.RAM_STATE.security.isWallet;
+    window.userWallets = { BEP20: user.Wallet_BEP20 || '', TRC20: user.Wallet_TRC20 || '' };
+    const text = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+    };
+    text('uName', user.Name || 'User');
+    text('sbName', user.Name || 'User');
+    text('uUID', uid);
+    text('sbUid', 'UID: ' + uid);
+    const avatar = user.Avatar || user.avatar || localStorage.getItem('tcm_user_dp');
+    if (avatar) {
+        for (const id of ['uAvatar', 'sbAvatar']) {
+            const element = document.getElementById(id);
+            if (element) element.src = avatar;
+        }
+    }
+    for (const [id, active, yes, no] of [
+        ['badge2FA', window.is2FABound, 'Protected', 'Unbound'],
+        ['badgeWallet', window.isWalletBound, 'Protected', 'Unbound']
+    ]) {
+        const element = document.getElementById(id);
+        if (element) {
+            element.className = active ? 'badge glow-green' : 'badge glow-red';
+            element.textContent = active ? yes : no;
+        }
+    }
+    const level = document.getElementById('uLevelPill');
+    if (level && typeof window.getLevelStyling === 'function') {
+        const style = window.getLevelStyling(rank);
+        level.innerHTML = style.html;
+        level.className = `pill ${style.cls}`;
+    }
+    const select = document.getElementById('levelSelect');
+    if (select) {
+        select.value = rank > 0 ? rank : 1;
+        if (window.updateAmountRange) window.updateAmountRange();
+    }
+    try {
+        localStorage.setItem('tcm_userData', JSON.stringify({ Name: user.Name, Rank: rank }));
+        localStorage.setItem('tcm_static_user', JSON.stringify({ Name: user.Name, Rank: rank, UID: uid, Avatar: avatar, counters: user.counters }));
+    } catch (error) { console.warn('Profile cache unavailable.'); }
+    // Only server counters are persisted. A UI injection never increments them.
+    try { localStorage.setItem('tcm_tx_count_' + uid, String(counter)); }
+    catch (error) { console.warn('Counter cache unavailable.'); }
+    if (!data.isUpToDate) window.mergeDashboardHistory(data.transactions || []);
+    window.hasMoreTxInDB = (data.transactions || []).length >= 20 || (data.isUpToDate && window.hasMoreTxInDB === true);
+    window.dashboardSession.verified = true;
+    window.renderWalletData(wallet);
+    if (window.initAssetsUI) window.initAssetsUI();
+    if (window.renderActiveStakes) window.renderActiveStakes();
+    if (window.applyTxFilter) window.applyTxFilter();
+    if (typeof window.loadTodaysHistoryFromAPI === 'function') {
+        Promise.resolve(window.loadTodaysHistoryFromAPI(false))
+            .catch(() => console.warn('Today history refresh is pending.'));
+    }
+    window.dashboardSync.rankSnapshot = { uid, rank };
+    if (oldRank !== null && rank !== oldRank && typeof window.showLevelChange === 'function') {
+        window.showLevelChange(rank, rank > oldRank);
+    }
+    const badge = document.getElementById('dashSendIcon');
+    if (badge) badge.classList.toggle('dash-receive-pulse', !!user.hasUnreadP2P);
+};
+
+window.syncDashboardState = () => {
+    const state = window.dashboardSync;
+    state.dirty = true;
+    if (state.promise) return state.promise;
+    state.promise = (async () => {
+        let result = { success: false, message: 'Session unavailable.' };
+        let rankChecked = false;
+        while (state.dirty && !window.dashboardSession.closed && !window.dashboardSession.blocked) {
+            state.dirty = false;
+            if (state.pending > 0) await new Promise(resolve => state.waiters.push(resolve));
+            if (window.dashboardSession.closed || window.dashboardSession.blocked) break;
+            const uid = localStorage.getItem('uid');
+            if (!uid) break;
+            const version = state.version;
+            const epoch = window.dashboardSession.epoch;
+            if (!rankChecked) {
+                rankChecked = true;
+                const verification = await window.evaluateLevelAutomation();
+                if (window.dashboardSession.closed || window.dashboardSession.blocked) {
+                    result = verification;
+                    break;
+                }
+                if (!verification.success) {
+                    // Do not replay an uncertain POST. Read the recorded state instead.
+                    console.warn('Rank verification is pending; displaying the recorded account state.');
+                }
+            }
+            // Bypass potentially stale Redis state. A complete head query refreshes statuses too.
+            result = await window.dashboardRequest('/user/init-data?uid=' + encodeURIComponent(uid) + '&fresh=1&clientTxCount=0');
+            if (version !== state.version || epoch !== window.dashboardSession.epoch) {
+                if (!window.dashboardSession.closed && !window.dashboardSession.blocked) state.dirty = true;
+                continue;
+            }
+            if (result.success) window.applyDashboardSnapshot(result.data);
+        }
+        return result;
+    })().catch(error => ({ success: false, message: error.message })).finally(() => { state.promise = null; });
+    return state.promise;
+};
+
+window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
+    const path = endpoint.split('?')[0];
+    if (method === 'GET' && path === '/user/init-data') return window.syncDashboardState();
+    const mutatesFinance = method !== 'GET' && (path.startsWith('/finance/') || path === '/p2p/transfer');
+    if (mutatesFinance && !window.dashboardSession.verified) {
+        return { success: false, message: 'Wait for a verified wallet refresh before starting a financial action.' };
+    }
+    if (!mutatesFinance) return window.dashboardRequest(endpoint, method, body);
+    const state = window.dashboardSync;
+    state.pending += 1;
+    state.version += 1;
+    let result;
+    try {
+        result = await window.dashboardRequest(endpoint, method, body);
+    } finally {
+        state.pending -= 1;
+        state.version += 1;
+        if (state.pending === 0) {
+            for (const resolve of state.waiters.splice(0)) resolve();
+        }
+    }
+    // Refresh even when a transport timeout leaves the commit outcome uncertain.
+    const refresh = await window.syncDashboardState();
+    if (!refresh.success) window.dashboardSession.verified = false;
+    if (result.success && !refresh.success) {
+        result.stateSyncPending = true;
+        if (window.showToast) window.showToast('Action completed. Wallet refresh is pending; do not repeat the action.', true);
+    }
+    return result;
+};
+
+window.fetchWalletData = () => window.syncDashboardState();
+window.addEventListener('storage', event => {
+    if (event.key === 'token' || event.key === 'uid' || event.key === null) {
+        // Do not remove credentials belonging to a newly logged-in account in another tab.
+        window.dashboardSession.closed = true;
+        window.dashboardSession.epoch += 1;
+        if (window.socket) window.socket.disconnect();
+        window.location.replace('index.html');
+    }
+});
+
+window.scheduleDashboardSocketReconnect = () => {
+    if (window.dashboardSocketRetry || window.dashboardSession.closed || window.dashboardSession.blocked) return;
+    window.dashboardSocketRetry = setTimeout(() => {
+        window.dashboardSocketRetry = null;
+        if (!window.dashboardSession.closed && !window.dashboardSession.blocked && window.socket) {
+            window.socket.connect();
+        }
+    }, 15000);
+};
  // =================================================================================
  // 💎 MODULE 8: NFT ENGINE (RESERVE, SELL, PROFIT & COOLDOWN SCANNER)
  // =================================================================================
@@ -4047,19 +4200,8 @@
          `;
          document.getElementById("nftResultInfo").style.display = 'flex';
 
-         // 🔥 OPTIMISTIC UI: রিজার্ভ করার সাথে সাথে মেইন ব্যালেন্স থেকে কেটে লকড ভল্টে নেবে
-         let wallet = (window.RAM_STATE && window.RAM_STATE.balances) ? window.RAM_STATE.balances : window.lastWalletData;
-         if (wallet) {
-             let nftPrice = parseFloat(window.reservedNFT.price || 0);
-
-             wallet.Main_Balance = (parseFloat(wallet.Main_Balance) || 0) - nftPrice;
-             wallet.Locked_Balance = (parseFloat(wallet.Locked_Balance) || 0) + nftPrice;
-
-             window.lastWalletData = wallet;
-             if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
-             if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-             if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
-         }
+         // Wallet balances were refreshed by fetchAPI after the committed reservation.
+         if (window.initAssetsUI) window.initAssetsUI();
 
          // 🚀 TCM-03: CRASH-PROOF HISTORY INJECTION FOR RESERVE
          if (typeof window.forceInjectToHistory === 'function' && result.injectionData) {
@@ -4341,23 +4483,8 @@
              window.updateNFTStats();
          }, 450);
 
-     // 🔥 OPTIMISTIC UI: লকড ব্যালেন্স থেকে কেটে মেইন ব্যালেন্সে ও শুধুমাত্র রিজার্ভ ইনকামে যোগ করা হচ্ছে
-     let wallet = (window.RAM_STATE && window.RAM_STATE.balances) ? window.RAM_STATE.balances : window.lastWalletData;
-
-     if (wallet) {
-         let currentLocked = parseFloat(wallet.Locked_Balance) || 0;
-         wallet.Locked_Balance = Math.max(0, currentLocked - principal);
-
-         wallet.Main_Balance = (parseFloat(wallet.Main_Balance) || 0) + parseFloat(retAmount);
-
-         wallet.Total_Reserve = (parseFloat(wallet.Total_Reserve) || 0) + parseFloat(netProfit);
-         wallet.Daily_Reserve = (parseFloat(wallet.Daily_Reserve) || 0) + parseFloat(netProfit);
-
-         window.lastWalletData = wallet;
-
-         if (typeof window.renderWalletData === 'function') window.renderWalletData(wallet);
-         if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-     }
+     // No local principal/profit arithmetic: use the committed backend snapshot.
+     if (window.initAssetsUI) window.initAssetsUI();
 
      localStorage.removeItem('tcm_team_cache');
 
@@ -4705,36 +4832,9 @@
              window.showToast("Withdrawal Cancelled & Refunded!");
              window.closeConfirmModal();
 
-             // 🔥 OPTIMISTIC UI: 24H Multi-Lock Array-তে ব্যালেন্স পুশ করা (Option C)
-             if (window.RAM_STATE && window.RAM_STATE.balances) {
-                 let parsedAmt = parseFloat(amount);
-                 window.RAM_STATE.balances.Locked_Balance = (parseFloat(window.RAM_STATE.balances.Locked_Balance) || 0) + parsedAmt;
-                 window.RAM_STATE.balances.Total_Withdraw = Math.max(0, (parseFloat(window.RAM_STATE.balances.Total_Withdraw) || 0) - parsedAmt);
+             // The shared refresh supplies the exact lock array and ledger status.
+             if (window.initAssetsUI) window.initAssetsUI();
 
-                 // Array-তে নতুন লক এন্ট্রি যুক্ত করা
-                 if (!window.RAM_STATE.balances.Locked_Withdrawals) {
-                     window.RAM_STATE.balances.Locked_Withdrawals = [];
-                 }
-                 window.RAM_STATE.balances.Locked_Withdrawals.push({
-                     amount: parsedAmt,
-                     unlockTime: Date.now() + (24 * 60 * 60 * 1000),
-                     txId: txId
-                 });
-
-                 window.lastWalletData = window.RAM_STATE.balances;
-                 if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                 if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-                 if (typeof window.triggerWalletRefreshAnimation === 'function') window.triggerWalletRefreshAnimation(document.getElementById('walletRefreshIcon'));
-             }
-
-             // 🔥 হিস্ট্রি টেবিলে স্ট্যাটাস আপডেট করা
-             if (window.allTransactions) {
-                 const txIndex = window.allTransactions.findIndex(t => t.id === txId || t.Order_ID === txId);
-                 if (txIndex !== -1) {
-                     window.allTransactions[txIndex].Status = 'Refunded'; // 🚀 Changed to Refunded
-                     if (typeof window.applyTxFilter === 'function') window.applyTxFilter();
-                 }
-             }
          } else {
              window.showToast(result.message, true);
          }
@@ -5342,10 +5442,7 @@
                 window.closeTx();
                 window.showSuccessOverlay("Withdrawal request secured!");
 
-                if(window.RAM_STATE && window.RAM_STATE.balances) {
-                    window.RAM_STATE.balances.Main_Balance = Math.max(0, window.RAM_STATE.balances.Main_Balance - amt);
-                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                }
+                // fetchAPI already reconciled the committed wallet; no local debit.
 
                 // 🚀 Server এর পাঠানো আসল Order_ID এবং Date ব্যবহার করা হচ্ছে
                 const sData = result.data || {};
@@ -5727,11 +5824,7 @@
                 window.showSuccessOverlay("P2P Transfer Successful!");
                 window.closeModal('sendMoneyModal');
 
-                if(window.RAM_STATE && window.RAM_STATE.balances) {
-                    window.RAM_STATE.balances.Main_Balance -= amt;
-                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                    if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
-                }
+                // fetchAPI already reconciled the committed wallet; no local debit.
 
                 if (typeof window.forceInjectToHistory === 'function') {
                     window.forceInjectToHistory({
@@ -6747,16 +6840,40 @@
         }[tag] || tag));
     };
 
-    window.socket = typeof io !== 'undefined' ? io(API_BASE_URL.replace('/api', '')) : null;
+    window.socket = typeof io !== 'undefined' ? io(API_BASE_URL.replace(/\/api\/?$/, ''), {
+        auth: callback => callback({ token: localStorage.getItem('token') }),
+        autoConnect: false
+    }) : null;
 
     if (window.socket) {
-        window.socket.on("connect", () => {
-            const myUid = localStorage.getItem('uid');
-            if (myUid) window.socket.emit("join_my_room", myUid);
+        window.socket.on('connect', () => {
+            if (window.dashboardSocketRetry) clearTimeout(window.dashboardSocketRetry);
+            window.dashboardSocketRetry = null;
+            window.socket.emit('join_my_room');
+            if (!window.dashboardSession.closed && !window.dashboardSession.blocked) {
+                window.syncDashboardState();
+                const support = document.getElementById('userSupportModal');
+                if (support && support.style.display !== 'none') window.socket.emit('join_support_chat');
+            }
+        });
+        window.socket.on('connect_error', error => {
+            const status = error.data && error.data.status;
+            if (status === 401 || status === 403) window.handleDashboardAccess(status, error.message);
+            else if (status === 503) window.scheduleDashboardSocketReconnect();
+        });
+        window.socket.on('session_error', error => {
+            if (error.status === 401 || error.status === 403) {
+                window.handleDashboardAccess(error.status, error.message);
+            } else if (window.showToast) {
+                window.showToast('Live connection interrupted. Wallet data will refresh through the API.', true);
+                window.scheduleDashboardSocketReconnect();
+            }
         });
 
         window.socket.on("receive_new_message", (data) => {
             const chatId = data.senderUid;
+            const safeSenderName = window.sanitizeInput(String(data.senderName || 'User'));
+            const safeMessage = window.sanitizeInput(String(data.message || ''));
             if (!window.localChatCache.private[chatId]) {
                 window.localChatCache.private[chatId] = [];
             }
@@ -6766,8 +6883,8 @@
                 let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
                 let html = `
                 <div id="msg-${data.id}" style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
-                    <div class="chat-name">${data.senderName || 'User'}</div>
-                    <div class="chat-bubble other-message" style="position: relative;">${data.message}</div>
+                    <div class="chat-name">${safeSenderName}</div>
+                    <div class="chat-bubble other-message" style="position: relative;">${safeMessage}</div>
                     <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-start; width: 100%;">
                         <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
                     </div>
@@ -6804,6 +6921,10 @@
             window.pendingReqCount++;
             window.updateSuperBadge();
         });
+    }
+
+    if (window.socket && localStorage.getItem('token') && localStorage.getItem('uid')) {
+        window.socket.connect();
     }
 
     window.toggleChatWindow = () => {
@@ -7337,124 +7458,7 @@
     });
 
     /* === MODULE 28: MASTER INITIALIZATION (REAL-TIME SYNC) === */
-    window.fetchInitialDataFromAPI = async () => {
-        const uid = localStorage.getItem('uid');
-        if (!uid) return;
-
-        try {
-            const result = await window.fetchAPI(`/user/init-data?uid=${uid}`);
-
-            if (result.success) {
-                window.lastWalletData = result.data.wallet;
-                window.renderWalletData(window.lastWalletData);
-
-                let currentLocalData = window.getSafeUserData();
-                let oldRank = parseInt(currentLocalData.Rank || 0);
-
-                const u = result.data.user;
-                let newRank = oldRank;
-
-                if (u) {
-                    newRank = parseInt(u.Rank || 0);
-
-                    const safeSetText = (id, text) => { const el = document.getElementById(id); if (el) el.innerText = text; };
-                    safeSetText('uName', u.Name || 'User');
-                    safeSetText('sbName', u.Name || 'User');
-
-                    const avatarSrc = u.Avatar || "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+";
-                    const uAvatar = document.getElementById('uAvatar');
-                    const sbAvatar = document.getElementById('sbAvatar');
-                    if(uAvatar) uAvatar.src = avatarSrc;
-                    if(sbAvatar) sbAvatar.src = avatarSrc;
-
-                    currentLocalData.Name = u.Name;
-                    currentLocalData.Rank = newRank;
-                    localStorage.setItem('tcm_userData', JSON.stringify(currentLocalData));
-
-                    window.is2FABound = !!u["2FA_Key"];
-                    window.isWalletBound = !!(u.Wallet_BEP20 || u.Wallet_TRC20);
-                    window.userWallets = { BEP20: u.Wallet_BEP20 || "", TRC20: u.Wallet_TRC20 || "" };
-
-                    // 🔥 NEW: Dashboard Send Icon Pulse Notification
-                    const dashIcon = document.getElementById('dashSendIcon');
-                    if (dashIcon) {
-                        if (u.hasUnreadP2P) dashIcon.classList.add('dash-receive-pulse');
-                        else dashIcon.classList.remove('dash-receive-pulse');
-                    }
-
-                    const b2FA = document.getElementById('badge2FA');
-                    const bWall = document.getElementById('badgeWallet');
-                    if(b2FA) { b2FA.className = window.is2FABound ? "badge glow-green" : "badge glow-red"; b2FA.innerText = window.is2FABound ? "Protected" : "Unbound"; }
-                    if(bWall) { bWall.className = window.isWalletBound ? "badge glow-green" : "badge glow-red"; bWall.innerText = window.isWalletBound ? "Protected" : "Unbound"; }
-                }
-
-                let cachedTxCount = parseInt(localStorage.getItem('tcm_tx_count_' + uid) || '0');
-                let newTxCount = (u && u.counters) ? parseInt(u.counters.txCount || 0) : 0;
-                localStorage.setItem('tcm_tx_count_' + uid, newTxCount);
-
-                if (
-                    result.data.isUpToDate === true &&
-                    Array.isArray(window.TX_CACHE) &&
-                    window.TX_CACHE.length > 0
-                ) {
-                    window.allTransactions = window.TX_CACHE;
-                } else {
-                    window.TX_CACHE = result.data.transactions || [];
-                    localStorage.setItem(
-                        "USER_TX_VAULT_" + uid,
-                        JSON.stringify(window.TX_CACHE)
-                    );
-                    window.allTransactions = window.TX_CACHE;
-                }
-                
-                window.hasMoreTxInDB = window.allTransactions.length >= 20;
-                window.isFetchingMoreTx = false;
-                window.applyTxFilter();
-                if (typeof window.loadTodaysHistoryFromAPI === 'function') window.loadTodaysHistoryFromAPI();
-
-                if (newRank !== oldRank) {
-                    if (typeof window.getLevelStyling === 'function') {
-                        const lvStyle = window.getLevelStyling(newRank);
-                        const pill = document.getElementById('uLevelPill');
-                        if(pill) { pill.innerHTML = lvStyle.html; pill.className = `pill ${lvStyle.cls}`; }
-                    }
-
-                    const levelSelect = document.getElementById("levelSelect");
-                    if (levelSelect) {
-                        levelSelect.value = newRank;
-                        if(typeof window.updateAmountRange === 'function') window.updateAmountRange();
-                    }
-
-                    if (oldRank !== 0 && typeof window.showLevelChange === 'function') {
-                        window.showLevelChange(newRank, newRank > oldRank);
-                    }
-                }
-
-                if (typeof window.evaluateLevelAutomation === 'function') {
-                    window.evaluateLevelAutomation(window.lastWalletData, newRank);
-                }
-
-                const loader = document.getElementById('loader');
-                if(loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => { loader.style.display = 'none'; }, 300);
-                }
-            } else {
-                const loader = document.getElementById('loader');
-                if(loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => { loader.style.display = 'none'; }, 300);
-                }
-            }
-        } catch (e) {
-            console.error("Init API Error:", e);
-            const loader = document.getElementById('loader');
-            if(loader) {
-                loader.style.opacity = '0';
-                setTimeout(() => { loader.style.display = 'none'; }, 300);
-            }
-        }
-    };
+    window.fetchInitialDataFromAPI = () => window.syncDashboardState();
 
     setTimeout(window.fetchInitialDataFromAPI, 1000);
 
@@ -7716,157 +7720,292 @@
         window.renderMyAnalyticsChart(null, true);
     };
 
+    // MEMO: TCM-ANALYTICS-CORE-R1 | 2026-10-10 | Asia/Kolkata
+    window.buildAssetFlowModel = (transactions, timeframe, now = Date.now()) => {
+        const dayMs = 86400000;
+        const istOffsetMs = 19800000;
+        const todayStart = Math.floor((now + istOffsetMs) / dayMs) * dayMs - istOffsetMs;
+        const incomeTypes = new Set([
+            'Staking Reward', 'NFT Profit', 'Company Profit Share', 'Airdrop',
+            'Team Bonus (A-Hand)', 'Team Bonus (B-Hand)', 'Team Bonus (C-Hand)'
+        ]);
+        const source = Array.isArray(transactions) ? transactions : [];
+        const rows = [];
+        let invalidRecords = 0;
+        for (const tx of source) {
+            if (!tx || tx.Status !== 'Success') continue;
+            const category = tx.Type === 'Deposit' ? 'deposit'
+                : tx.Type === 'Withdraw' ? 'withdraw'
+                : incomeTypes.has(tx.Type) ? 'income' : null;
+            if (!category) continue;
+            const timestamp = window.parseSafeTimestamp(tx.timestamp ?? tx.Date);
+            if (!Number.isSafeInteger(timestamp) || timestamp <= 0 || timestamp > now) {
+                invalidRecords++;
+                continue;
+            }
+            const micro = window.parseDashboardMoneyMicro(tx.Amount);
+            if (micro === null) {
+                invalidRecords++;
+                continue;
+            }
+            rows.push({ timestamp, micro, category });
+        }
+        const formatDate = timestamp => new Intl.DateTimeFormat('en-GB', {
+            timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric'
+        }).format(timestamp);
+        const buckets = [];
+        const addBucket = (start, end, label) => buckets.push({
+            start, end, label, income: 0n, deposit: 0n, withdraw: 0n,
+            count: 0, invalid: false
+        });
+        if (timeframe === '1D') {
+            for (let hour = 0; hour < 24; hour += 4) {
+                const start = todayStart + hour * 3600000;
+                addBucket(start, start + 4 * 3600000,
+                    `${String(hour).padStart(2, '0')}:00–${String(hour + 4).padStart(2, '0')}:00 IST`);
+            }
+        } else if (timeframe === 'ALL') {
+            const earliest = rows.reduce((minimum, row) => Math.min(minimum, row.timestamp), now);
+            const first = new Date(earliest + istOffsetMs);
+            const last = new Date(now + istOffsetMs);
+            let month = first.getUTCFullYear() * 12 + first.getUTCMonth();
+            const lastMonth = last.getUTCFullYear() * 12 + last.getUTCMonth();
+            // Bound display work; complete history requires a server summary.
+            month = Math.max(month, lastMonth - 59);
+            for (; month <= lastMonth; month++) {
+                const year = Math.floor(month / 12);
+                const index = month % 12;
+                const start = Date.UTC(year, index, 1) - istOffsetMs;
+                const end = Date.UTC(year, index + 1, 1) - istOffsetMs;
+                const label = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: 'Asia/Kolkata', month: 'short', year: 'numeric'
+                }).format(start);
+                addBucket(start, end, label);
+            }
+        } else {
+            const days = timeframe === '1M' ? 30 : 7;
+            for (let index = days - 1; index >= 0; index--) {
+                const start = todayStart - index * dayMs;
+                addBucket(start, start + dayMs, formatDate(start));
+            }
+        }
+        for (const row of rows) {
+            const bucket = buckets.find(item => row.timestamp >= item.start && row.timestamp < item.end);
+            if (!bucket) continue;
+            bucket[row.category] += row.micro;
+            bucket.count++;
+            if (bucket[row.category] > BigInt(Number.MAX_SAFE_INTEGER)) bucket.invalid = true;
+        }
+        return { buckets, invalidRecords, formatDate };
+    };
+
     window.renderMyAnalyticsChart = (trueTotal = null, isUpdate = false) => {
         try {
             if (typeof Chart === 'undefined') return;
             const canvas = document.getElementById('myAnalyticsChart');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            let labels = [];
-            let incData = [], depData = [], wdData = [];
-            let totalInc7D = 0, totalWd7D = 0, pureProfit7D = 0;
-
-            const today = new Date();
-            today.setHours(23, 59, 59, 999);
-            const sevenDaysAgo = new Date();
-            sevenDaysAgo.setDate(today.getDate() - 7);
-            sevenDaysAgo.setHours(0, 0, 0, 0);
-            const profitTypes = ['Staking Reward', 'Team Bonus', 'NFT Profit', 'Company Profit Share', 'Airdrop'];
-            let startDate = new Date();
-
-            let points = 7;
-            if (window.currentChartTimeframe === '1D') {
-                startDate.setHours(0, 0, 0, 0);
-                points = 6;
-                for(let i=0; i<=points; i++) {
-                    let d = new Date(startDate); d.setHours(i * 4);
-                    labels.push(d.toLocaleTimeString('en-US', {hour:'numeric', hour12:true}));
-                    incData.push(0); depData.push(0); wdData.push(0);
-                }
-            } else if (window.currentChartTimeframe === '1W') {
-                startDate.setDate(today.getDate() - 6); startDate.setHours(0, 0, 0, 0);
-                points = 6;
-                for(let i=points; i>=0; i--){
-                    let d = new Date(); d.setDate(d.getDate() - i);
-                    labels.push(d.toLocaleDateString('en-US', {weekday:'short'}));
-                    incData.push(0); depData.push(0); wdData.push(0);
-                }
-            } else if (window.currentChartTimeframe === '1M') {
-                startDate.setDate(today.getDate() - 29); startDate.setHours(0, 0, 0, 0);
-                points = 5;
-                for(let i=points; i>=0; i--){
-                    let d = new Date(); d.setDate(d.getDate() - (i*5));
-                    labels.push(`${d.getDate()} ${d.toLocaleString('en-US',{month:'short'})}`);
-                    incData.push(0); depData.push(0); wdData.push(0);
-                }
-            } else {
-                startDate = new Date(0);
-                labels = ['Start', 'Phase 1', 'Phase 2', 'Mid', 'Recent', 'Current', 'Now'];
-                incData = [0,0,0,0,0,0,0]; depData = [0,0,0,0,0,0,0]; wdData = [0,0,0,0,0,0,0];
-            }
-
-            if (window.allTransactions && window.allTransactions.length > 0) {
-                window.allTransactions.forEach(tx => {
-                    let txDate = new Date(window.parseSafeTimestamp(tx.timestamp || tx.Date));
-                    if(isNaN(txDate)) return;
-
-                    if(txDate >= startDate && txDate <= today) {
-                        let amt = parseFloat(tx.Amount) || parseFloat(tx.Net_Amount) || 0;
-                        let type = tx.Type || '';
-
-                        let index = 0;
-                        if(window.currentChartTimeframe === '1D') {
-                            index = Math.floor(txDate.getHours() / 4);
-                        } else if(window.currentChartTimeframe === '1W') {
-                            index = 6 - Math.floor((today - txDate) / (1000 * 60 * 60 * 24));
-                        } else if(window.currentChartTimeframe === '1M') {
-                            index = 5 - Math.floor((today - txDate) / (1000 * 60 * 60 * 24 * 5));
-                        } else {
-                            index = 6;
-                        }
-
-                        if(index >= 0 && index < incData.length) {
-                            if(type.includes('Deposit')) depData[index] += amt;
-                            else if(type.includes('Withdraw')) { wdData[index] += amt; totalWd7D += amt; }
-                            else if(!type.includes('P2P Sent')) { incData[index] += amt; totalInc7D += amt; }
-                        }
-
-                        if (txDate >= sevenDaysAgo && txDate <= today) {
-                            if (profitTypes.some(pt => type.includes(pt))) {
-                                pureProfit7D += amt;
-                            }
-                        }
-                    }
-                });
-            }
-
-            if (!isUpdate && trueTotal !== null) {
-                let badgeEl = document.getElementById('myGrowthBadge');
-                if (badgeEl) {
-                    if (trueTotal > 0 && pureProfit7D > 0) {
-                        let perc = ((pureProfit7D / trueTotal) * 100).toFixed(2);
-                        badgeEl.innerHTML = `<i class="fas fa-arrow-trend-up"></i> +${perc}% This Week`;
-                        badgeEl.style.background = 'rgba(16, 185, 129, 0.2)'; badgeEl.style.color = 'var(--success)'; badgeEl.style.border = '1px solid rgba(16, 185, 129, 0.3)';
-                    } else {
-                        badgeEl.innerHTML = `<i class="fas fa-minus"></i> 0.00% This Week`;
-                        badgeEl.style.background = 'rgba(255, 255, 255, 0.1)'; badgeEl.style.color = 'var(--text-sub)'; badgeEl.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-                    }
-                }
-            }
-
-            let gradInc = ctx.createLinearGradient(0, 0, 0, 240);
-            gradInc.addColorStop(0, 'rgba(16, 185, 129, 0.4)'); gradInc.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
-            let gradDep = ctx.createLinearGradient(0, 0, 0, 240);
-            gradDep.addColorStop(0, 'rgba(0, 245, 255, 0.4)'); gradDep.addColorStop(1, 'rgba(0, 245, 255, 0.0)');
-
+            const model = window.buildAssetFlowModel(window.allTransactions, window.currentChartTimeframe);
+            const buckets = model.buckets;
+            const series = category => buckets.map(bucket =>
+                bucket.invalid ? null : Number(bucket[category]) / 1000000
+            );
             if (window.myChartInstance) window.myChartInstance.destroy();
 
-            window.myChartInstance = new Chart(ctx, {
+            // MEMO: TCM-ANALYTICS-REFINED-R1 | 2026-10-10 | Asia/Kolkata
+            document.getElementById('assetFlowCoverageNotice')?.remove();
+            canvas.setAttribute('aria-label', 'Asset flow from loaded successful transactions. Zero means no loaded activity; history may be incomplete.');
+            const uid = localStorage.getItem('uid');
+            if (trueTotal !== null) {
+                window.assetFlowGrowthBase = { uid, micro: window.parseDashboardMoneyMicro(trueTotal) };
+            }
+            const baseMicro = window.assetFlowGrowthBase?.uid === uid
+                ? window.assetFlowGrowthBase.micro : null;
+            const weeklyModel = window.buildAssetFlowModel(window.allTransactions, '1W');
+            const loadedWeeklyIncome = weeklyModel.buckets.reduce((sum, bucket) => sum + bucket.income, 0n);
+            const growthTenths = baseMicro !== null && baseMicro > 0n
+                ? (loadedWeeklyIncome * 1000n) / baseMicro : 0n;
+            const growthText = `${growthTenths / 10n}.${growthTenths % 10n}`;
+            const badge = document.getElementById('myGrowthBadge');
+            if (badge) {
+                const hidden = window.balFormatIndex === 3;
+                badge.replaceChildren();
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-arrow-trend-up';
+                badge.appendChild(icon);
+                badge.appendChild(document.createTextNode(hidden ? ' ****' :
+                    baseMicro !== null && baseMicro > 0n ? ` +${growthText}% This Week` : ' +0.0% Growth'));
+                badge.title = 'Loaded successful income over the last 7 IST calendar days ÷ displayed portfolio value. Partial-history activity ratio, not investment return.';
+                if (baseMicro === null || baseMicro <= 0n) badge.title += ' A valid portfolio value is not available yet.';
+                if (weeklyModel.invalidRecords) badge.title += ' Invalid records were excluded.';
+                badge.style.background = 'rgba(16,185,129,0.12)';
+                badge.style.color = 'var(--success)';
+                badge.style.border = '1px solid rgba(16,185,129,0.3)';
+            }
+
+            const tooltipCard = document.createElement('div');
+            tooltipCard.setAttribute('role', 'status');
+            // MEMO: TCM-ANALYTICS-POLISH-R1 | 2026-10-10 | Asia/Kolkata
+            tooltipCard.style.cssText = 'position:fixed;display:none;z-index:10000;pointer-events:none;box-sizing:border-box;width:136px;max-width:calc(100vw - 16px);padding:8px;border-radius:12px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--text-main);font:600 10px Inter,sans-serif;';
+            document.body.appendChild(tooltipCard);
+            const hideTooltip = () => { tooltipCard.style.display = 'none'; };
+            const outsidePointer = event => { if (event.target !== canvas) hideTooltip(); };
+            canvas.addEventListener('mouseleave', hideTooltip);
+            document.addEventListener('pointerdown', outsidePointer);
+            window.addEventListener('scroll', hideTooltip, true);
+            window.addEventListener('resize', hideTooltip);
+            window.hideAssetFlowTooltip = hideTooltip;
+            const externalTooltip = ({ chart, tooltip }) => {
+                const active = tooltip.dataPoints?.[0];
+                const bucket = buckets[active?.dataIndex];
+                const metrics = [
+                    { category: 'income', label: 'Income', color: '#10b981', light: '#047857', sign: '+' },
+                    { category: 'deposit', label: 'Deposit', color: '#00f5ff', light: '#0e7490', sign: '+' },
+                    { category: 'withdraw', label: 'Withdraw', color: '#f43f5e', light: '#be123c', sign: '−' }
+                ];
+                const metric = metrics[active?.datasetIndex];
+                if (!tooltip.opacity || !bucket || bucket.invalid || !metric) {
+                    hideTooltip();
+                    return;
+                }
+                const micro = bucket[metric.category];
+                const amount = window.balFormatIndex === 3 ? '****' :
+                    (micro > 0n ? metric.sign : '') + window.formatDashboardMoneyMicro(micro);
+                let dateLabel = new Intl.DateTimeFormat('en-GB', {
+                    timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short'
+                }).format(bucket.start);
+                if (window.currentChartTimeframe === '1D') {
+                    const hour = new Intl.DateTimeFormat('en-GB', {
+                        timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false
+                    }).format(bucket.start);
+                    dateLabel += ` • ${hour}`;
+                } else if (window.currentChartTimeframe === 'ALL') {
+                    dateLabel = bucket.label;
+                }
+                const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+                tooltipCard.replaceChildren();
+                const metricLine = document.createElement('div');
+                metricLine.textContent = `● ${metric.label}: ${amount} ₮`;
+                metricLine.style.cssText = 'font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.5;';
+                const dateLine = document.createElement('div');
+                dateLine.textContent = `${dateLabel} IST`;
+                dateLine.style.cssText = 'margin-top:3px;color:var(--text-sub);font:9px ui-monospace,SFMono-Regular,monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4;';
+                tooltipCard.appendChild(metricLine);
+                tooltipCard.appendChild(dateLine);
+                tooltipCard.title = 'Loaded successful records only. Date identifies the bucket, not an individual transaction. Deposit is gross; withdrawal is recorded amount.';
+                tooltipCard.style.color = dark ? metric.color : metric.light;
+                tooltipCard.style.background = dark ? 'rgba(15,23,42,0.92)' : 'rgba(255,255,255,0.95)';
+                tooltipCard.style.border = `1px solid ${metric.color}88`;
+                tooltipCard.style.boxShadow = `inset 0 1px 0 rgba(255,255,255,0.4), 0 0 12px ${metric.color}55, 0 8px 20px rgba(0,0,0,0.24)`;
+                tooltipCard.style.display = 'block';
+                const rect = chart.canvas.getBoundingClientRect();
+                const point = chart.getDatasetMeta(active.datasetIndex).data[active.dataIndex];
+                const position = point?.tooltipPosition?.() ?? { x: tooltip.caretX, y: tooltip.caretY };
+                const maxLeft = Math.max(8, window.innerWidth - tooltipCard.offsetWidth - 8);
+                const maxTop = Math.max(8, window.innerHeight - tooltipCard.offsetHeight - 8);
+                const above = rect.top + position.y - tooltipCard.offsetHeight - 10;
+                const top = above >= 8 ? above : rect.top + position.y + 10;
+                tooltipCard.style.left = Math.max(8, Math.min(maxLeft,
+                    rect.left + position.x - tooltipCard.offsetWidth / 2)) + 'px';
+                tooltipCard.style.top = Math.max(8, Math.min(maxTop, top)) + 'px';
+            };
+            const dataset = (label, category, color, dash, pointStyle) => ({
+                label, data: series(category), borderColor: color, borderWidth: 2,
+                borderDash: dash, pointStyle, pointRadius: 3, pointHoverRadius: 6,
+                pointBackgroundColor: color, tension: 0.35, capBezierPoints: true,
+                backgroundColor: ({ chart }) => {
+                    const area = chart.chartArea;
+                    if (!area) return color + '00';
+                    const gradient = chart.ctx.createLinearGradient(0, area.top, 0, area.bottom);
+                    gradient.addColorStop(0, color + '17');
+                    gradient.addColorStop(1, color + '02');
+                    return gradient;
+                },
+                fill: 'origin', spanGaps: false
+            });
+            window.myChartInstance = new Chart(canvas.getContext('2d'), {
                 type: 'line',
                 data: {
-                    labels: labels,
+                    labels: buckets.map(bucket => bucket.label),
                     datasets: [
-                        { label: 'Income', data: incData, borderColor: '#10b981', backgroundColor: gradInc, borderWidth: 3, tension: 0.4, fill: true, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#10b981' },
-                        { label: 'Deposit', data: depData, borderColor: '#00f5ff', backgroundColor: gradDep, borderWidth: 3, tension: 0.4, fill: true, pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#00f5ff' },
-                        { label: 'Withdraw', data: wdData, borderColor: '#f43f5e', borderWidth: 2, tension: 0.4, borderDash: [5, 5], pointRadius: 0, pointHoverRadius: 6, pointHoverBackgroundColor: '#fff', pointHoverBorderColor: '#f43f5e' }
+                        dataset('Income — solid', 'income', '#10b981', [], 'circle'),
+                        dataset('Deposit — dashed', 'deposit', '#00f5ff', [7, 4], 'rect'),
+                        dataset('Withdraw — dotted', 'withdraw', '#f43f5e', [2, 4], 'triangle')
                     ]
                 },
+                plugins: [{
+                    id: 'assetFlowTooltipCleanup',
+                    afterDestroy() {
+                        canvas.removeEventListener('mouseleave', hideTooltip);
+                        document.removeEventListener('pointerdown', outsidePointer);
+                        window.removeEventListener('scroll', hideTooltip, true);
+                        window.removeEventListener('resize', hideTooltip);
+                        tooltipCard.remove();
+                        if (window.hideAssetFlowTooltip === hideTooltip) window.hideAssetFlowTooltip = null;
+                    }
+                }],
                 options: {
                     responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
+                    events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+                    interaction: { mode: 'nearest', axis: 'xy', intersect: false },
                     plugins: {
-                        legend: { display: false },
+                        legend: { display: true, labels: { color: '#94a3b8', usePointStyle: true, font: { size: 10 } } },
                         tooltip: {
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleFont: { family: 'Space Grotesk', size: 13 },
-                            bodyFont: { family: 'Inter', size: 12 },
-                            padding: 12,
-                            cornerRadius: 8,
-                            displayColors: true,
-                            borderColor: 'rgba(0, 245, 255, 0.3)',
-                            borderWidth: 1,
-                            callbacks: { label: function(context) { return ` ${context.dataset.label}: ${context.parsed.y} ₮`; } }
+                            enabled: false, mode: 'nearest', axis: 'xy', intersect: false,
+                            filter: (item, index) => index === 0,
+                            external: externalTooltip
                         }
                     },
                     scales: {
-                        x: { grid: { display: false }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 } } },
-                        y: { grid: { color: 'rgba(255,255,255,0.05)', borderDash: [5, 5] }, ticks: { color: '#64748b', font: { family: 'Inter', size: 10 }, maxTicksLimit: 5 } }
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                color: '#64748b', autoSkip: true,
+                                maxRotation: 0, minRotation: 0,
+                                maxTicksLimit: window.currentChartTimeframe === '1D' ? 6 : 7,
+                                font: { size: 10 }
+                            }
+                        },
+                        y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#64748b', maxTicksLimit: 5, callback: value => window.balFormatIndex === 3 ? '****' : value } }
                     }
                 }
             });
-        } catch(e) { console.error("My Analytics Chart Error:", e); }
+        } catch (error) {
+            console.error('Asset Flow Analytics error:', error);
+        }
     };
 
+    // MEMO: TCM-TEAM-CORE-R1 | 2026-10-10 | Asia/Kolkata
     window.teamLedgerData = [];
     window.teamLedgerLimit = 50;
+    window.teamLedgerState = 'unloaded';
+    window.teamLedgerSyncSequence = 0;
+
+    window.escapeTeamLedgerText = (value) => String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    })[character]);
+
+    window.readTeamLedgerAmount = (member, fields) => {
+        const value = fields.map(field => member[field]).find(item => item !== null && item !== undefined);
+        if (value === undefined || value === '' || (typeof value !== 'number' && typeof value !== 'string')) return null;
+        if (typeof value === 'string' && !value.trim()) return null;
+        const parsed = Number(value);
+        return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+    };
 
     window.renderLedgerChunk = () => {
         const tbody = document.getElementById('teamLedgerBody');
         if (!tbody) return;
 
         if (window.teamLedgerData.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">No active network members found</td></tr>';
+            const message = window.teamLedgerState === 'empty'
+                ? 'No team members yet'
+                : window.teamLedgerState === 'loading'
+                    ? 'Loading team data...'
+                    : window.teamLedgerState === 'error'
+                        ? 'Could not load team data. Please retry.'
+                        : 'Team data has not loaded yet.';
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--text-sub);">${message}</td></tr>`;
             return;
         }
 
@@ -7874,14 +8013,18 @@
         let html = '';
 
         currentUsers.forEach(m => {
-            let tDep = parseFloat(m.Total_Deposit || m.totalDeposit || 0);
-            let tEarn = parseFloat(m.Total_Earn || m.totalEarn || 0);
-            let tWd = parseFloat(m.Total_Withdrawal || m.Total_Withdraw || m.totalWithdraw || 0);
-            let bal = parseFloat(m.Main_Balance || m.balance || 0);
+            const tDep = window.readTeamLedgerAmount(m, ['totalDeposit', 'Total_Deposit']);
+            const tEarn = window.readTeamLedgerAmount(m, ['totalEarn', 'Total_Comp', 'Total_Earn']);
+            const tWd = window.readTeamLedgerAmount(m, ['totalWithdraw', 'Total_Withdraw', 'Total_Withdrawal']);
+            const bal = window.readTeamLedgerAmount(m, ['balance', 'Main_Balance']);
+            const formatAmount = value => value === null ? 'Unavailable' : `${value.toFixed(2)} ₮`;
+            const incomplete = m.walletDataAvailable === false || [tDep, tEarn, tWd, bal].some(value => value === null);
 
             let perfHtml = '<span style="background:rgba(255,255,255,0.05); color:var(--text-sub); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(255,255,255,0.1); display:inline-block;"><i class="fas fa-circle-notch"></i> Neutral</span>';
 
-            if (tWd > 0 && tDep > 0) {
+            if (incomplete) {
+                perfHtml = '<span style="color:var(--text-sub); font-size:0.7rem;">Data incomplete</span>';
+            } else if (tWd > 0 && tDep > 0) {
                 let ratio = tWd / tDep;
                 if (ratio < 0.5) {
                     perfHtml = '<span style="background:rgba(16, 185, 129, 0.1); color:var(--success); padding:4px 10px; border-radius:8px; font-size:0.7rem; font-weight:800; border:1px solid rgba(16, 185, 129, 0.3); box-shadow:0 0 10px rgba(16, 185, 129, 0.2); display:inline-block;"><i class="fas fa-arrow-up"></i> Good</span>';
@@ -7898,13 +8041,13 @@
 
             html += `<tr>
                 <td>
-                    <span style="font-weight:800; font-size:0.9rem;">${m.name || 'User'}</span>
-                    <span class="lt-uid">ID: ${m.uid} <span style="color:var(--primary);">| LV${m.rank || 0}</span></span>
+                    <span style="font-weight:800; font-size:0.9rem;">${window.escapeTeamLedgerText(m.name || 'User')}</span>
+                    <span class="lt-uid">ID: ${window.escapeTeamLedgerText(m.uid)} <span style="color:var(--primary);">| LV${window.escapeTeamLedgerText(m.rank ?? 0)}</span></span>
                 </td>
-                <td style="color:var(--success); font-weight:700;">${tDep.toFixed(2)} ₮</td>
-                <td style="color:var(--primary); font-weight:700;">${tEarn.toFixed(2)} ₮</td>
-                <td style="color:var(--primary); font-family:monospace; font-weight:800;">${bal.toFixed(2)} ₮</td>
-                <td style="color:var(--error); font-weight:700;">${tWd.toFixed(2)} ₮</td>
+                <td style="color:var(--success); font-weight:700;">${formatAmount(tDep)}</td>
+                <td style="color:var(--primary); font-weight:700;">${formatAmount(tEarn)}</td>
+                <td style="color:var(--primary); font-family:monospace; font-weight:800;">${formatAmount(bal)}</td>
+                <td style="color:var(--error); font-weight:700;">${formatAmount(tWd)}</td>
                 <td>${perfHtml}</td>
             </tr>`;
         });
@@ -7928,43 +8071,52 @@
     window.syncTeamLedger = async (forceAlert = true) => {
         const tbody = document.getElementById('teamLedgerBody');
         if (!tbody) return;
-
-        if (forceAlert) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:30px;"><i class="fas fa-spinner fa-spin" style="font-size:1.5rem; color:var(--primary);"></i><br><span style="font-size:0.8rem; color:var(--text-sub); display:block; margin-top:10px;">Syncing with Global Ledger...</span></td></tr>';
-        }
+        const uid = localStorage.getItem('uid');
+        const sequence = ++window.teamLedgerSyncSequence;
+        const isCurrent = () => sequence === window.teamLedgerSyncSequence && uid === localStorage.getItem('uid');
+        window.teamLedgerState = 'loading';
+        window.teamLedgerData = [];
+        window.renderLedgerChunk();
+        window.renderTeamRadarChart();
 
         try {
-            const uid = localStorage.getItem('uid');
-            // যেহেতু সার্ভারে /team/ledger নেই, তাই /team/network থেকে ডেটা কল করে মার্জ করা হচ্ছে
-            const response = await window.fetchAPI(`/team/network?uid=${uid}&lastCachedTime=0`);
-            
-            if (response && (response.success || response.status === 'unchanged')) {
-                let networkData = response.data || {};
-                
-                if (response.status === 'unchanged') {
-                    const cachedTeam = JSON.parse(localStorage.getItem('tcm_team_cache') || '{}');
-                    networkData = cachedTeam.data || {};
-                }
-                
-                let allTeamMembers = [];
-                if (networkData.handA && networkData.handA.users) allTeamMembers.push(...networkData.handA.users);
-                if (networkData.handB && networkData.handB.users) allTeamMembers.push(...networkData.handB.users);
-                if (networkData.handC && networkData.handC.users) allTeamMembers.push(...networkData.handC.users);
-
-                // ব্যালেন্স অনুযায়ী বড় থেকে ছোট সাজানো হলো (Leaderboard Style)
-                allTeamMembers.sort((a, b) => (parseFloat(b.balance || 0) - parseFloat(a.balance || 0)));
-
-                window.teamLedgerData = allTeamMembers;
-                window.teamLedgerLimit = 50;
-                window.renderLedgerChunk();
-                if (forceAlert) window.showToast("Team Ledger Synced Successfully!");
-                window.renderTeamRadarChart();
-            } else {
-                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">Failed to load ledger: ${response?.message || 'Data Not Found'}</td></tr>`;
+            if (!uid) throw new Error('Authentication is required.');
+            const response = await window.fetchAPI(`/team/network?uid=${encodeURIComponent(uid)}&lastCachedTime=0`);
+            if (!isCurrent()) return;
+            if (!response || response.success !== true || !response.data) {
+                throw new Error(response?.message || 'Could not load team data.');
             }
-        } catch (e) {
-            console.error("Team Ledger Sync Error:", e);
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px; color:var(--error);">Connection error. Please try again.</td></tr>';
+
+            const networkData = response.data;
+            const allTeamMembers = [];
+            for (const hand of ['handA', 'handB', 'handC']) {
+                if (!networkData[hand] || !Array.isArray(networkData[hand].users)) {
+                    throw new Error('Incomplete team response. Please refresh.');
+                }
+                for (const member of networkData[hand].users) {
+                    if (!member || typeof member !== 'object' || Array.isArray(member)) {
+                        throw new Error('Invalid team member data.');
+                    }
+                    allTeamMembers.push(member);
+                }
+            }
+            allTeamMembers.sort((a, b) =>
+                (window.readTeamLedgerAmount(b, ['balance', 'Main_Balance']) ?? -1) -
+                (window.readTeamLedgerAmount(a, ['balance', 'Main_Balance']) ?? -1)
+            );
+            window.teamLedgerData = allTeamMembers;
+            window.teamLedgerState = allTeamMembers.length === 0 ? 'empty' : 'ready';
+            window.teamLedgerLimit = 50;
+            window.renderLedgerChunk();
+            window.renderTeamRadarChart();
+            if (forceAlert) window.showToast('Team Ledger Synced Successfully!');
+        } catch (error) {
+            if (!isCurrent()) return;
+            console.error('Team Ledger Sync Error:', error);
+            window.teamLedgerState = 'error';
+            window.teamLedgerData = [];
+            window.renderLedgerChunk();
+            window.renderTeamRadarChart();
         }
     };
 
@@ -7978,22 +8130,48 @@
             if (window.teamChartInstance) window.teamChartInstance.destroy();
 
             let totalDep = 0, totalEarn = 0, totalWd = 0, totalBal = 0;
-            if (window.teamLedgerData && window.teamLedgerData.length > 0) {
-                window.teamLedgerData.forEach(m => {
-                    totalDep += parseFloat(m.Total_Deposit || m.totalDeposit || 0);
-                    totalEarn += parseFloat(m.Total_Earn || m.totalEarn || 0);
-                    totalWd += parseFloat(m.Total_Withdrawal || m.Total_Withdraw || m.totalWithdraw || 0);
-                    totalBal += parseFloat(m.Main_Balance || m.balance || 0);
-                });
-            } else {
-                totalDep = 10; totalEarn = 5; totalWd = 2; totalBal = 8; // Dummy Fallback
+            const members = Array.isArray(window.teamLedgerData) ? window.teamLedgerData : [];
+            let radarMessage = window.teamLedgerState === 'empty'
+                ? 'No team members yet'
+                : window.teamLedgerState === 'error'
+                    ? 'Could not load team data'
+                    : window.teamLedgerState === 'loading'
+                        ? 'Loading team data...'
+                        : window.teamLedgerState !== 'ready'
+                            ? 'Team data has not loaded yet'
+                            : '';
+            if (!radarMessage) {
+                for (const member of members) {
+                    const values = [
+                        window.readTeamLedgerAmount(member, ['totalDeposit', 'Total_Deposit']),
+                        window.readTeamLedgerAmount(member, ['totalEarn', 'Total_Comp', 'Total_Earn']),
+                        window.readTeamLedgerAmount(member, ['totalWithdraw', 'Total_Withdraw', 'Total_Withdrawal']),
+                        window.readTeamLedgerAmount(member, ['balance', 'Main_Balance'])
+                    ];
+                    if (member.walletDataAvailable !== true || values.some(value => value === null)) {
+                        radarMessage = 'Team financial data is incomplete';
+                        break;
+                    }
+                    totalDep += values[0];
+                    totalEarn += values[1];
+                    totalWd += values[2];
+                    totalBal += values[3];
+                }
+                if (!radarMessage && ![totalDep, totalEarn, totalWd, totalBal].every(Number.isFinite)) {
+                    radarMessage = 'Team totals are unavailable';
+                }
+                if (!radarMessage && [totalDep, totalEarn, totalWd, totalBal].every(value => value === 0)) {
+                    radarMessage = 'Verified team totals: 0.00';
+                }
             }
+            const showTotals = window.teamLedgerState === 'ready' &&
+                (!radarMessage || radarMessage === 'Verified team totals: 0.00');
 
             window.teamChartInstance = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['Liquidity', 'Investments', 'Withdrawals', 'Active Balance', 'Overall Growth'],
-                    datasets: [{
+                    labels: ['Total Income', 'Total Deposits', 'Total Withdrawals', 'Main Balance', 'Income Less Withdrawals'],
+                    datasets: showTotals ? [{
                         label: 'Team Ecosystem',
                         data: [totalEarn, totalDep, totalWd, totalBal, Math.max(0, totalEarn - totalWd)],
                         backgroundColor: 'rgba(139, 92, 246, 0.2)',
@@ -8003,8 +8181,24 @@
                         pointHoverBackgroundColor: '#fff',
                         pointHoverBorderColor: '#8b5cf6',
                         borderWidth: 2,
-                    }]
+                    }] : []
                 },
+                plugins: [{
+                    id: 'teamDataState',
+                    afterDraw(chart) {
+                        if (!radarMessage) return;
+                        const { ctx, chartArea } = chart;
+                        if (!chartArea) return;
+                        ctx.save();
+                        ctx.font = '12px Inter, sans-serif';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = '#94a3b8';
+                        ctx.fillText(radarMessage, (chartArea.left + chartArea.right) / 2,
+                            (chartArea.top + chartArea.bottom) / 2, chartArea.right - chartArea.left);
+                        ctx.restore();
+                    }
+                }],
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     scales: {
@@ -8122,44 +8316,8 @@
                 window.showToast(`Successfully Staked ${amount} ₮ for ${days} Days!`);
                 amtInput.value = '';
 
-                if (window.RAM_STATE && window.RAM_STATE.balances) {
-                    window.RAM_STATE.balances.Main_Balance -= amount;
-                    window.RAM_STATE.balances.Lifetime_Stake = (parseFloat(window.RAM_STATE.balances.Lifetime_Stake) || 0) + amount;
-
-                    if (!window.RAM_STATE.balances.Active_Stakes) window.RAM_STATE.balances.Active_Stakes = [];
-                    
-                    // 🔥 FIX: Properly generating and assigning STK- ID
-                    let serverId = (result.data && result.data.Order_ID) ? result.data.Order_ID : (result.stakeId || result.orderId);
-                    let finalStakeId = serverId ? serverId : 'STK-' + window.generateOrderId('STK').split('-')[2];
-
-                    window.RAM_STATE.balances.Active_Stakes.push({
-                        id: finalStakeId,
-                        Card_Number: cardNumber,
-                        amount: amount,
-                        duration: days,
-                        dailyRoi: roi,
-                        startTime: Date.now(),
-                        unlockTime: Date.now() + (days * 24 * 60 * 60 * 1000),
-                        status: 'Active'
-                    });
-
-                    // 🔥 FIX: Push to transaction history for instant UI update using forceInjectToHistory
-                    if (typeof window.forceInjectToHistory === 'function') {
-                        window.forceInjectToHistory({
-                            id: finalStakeId,
-                            UID: uid,
-                            Type: 'Stake Lock',
-                            Amount: amount,
-                            Status: 'Success',
-                            Date: new Date().toISOString(),
-                            timestamp: Date.now(),
-                            Order_ID: finalStakeId
-                        });
-                    }
-
-                    if (typeof window.renderWalletData === 'function') window.renderWalletData(window.RAM_STATE.balances);
-                    window.renderActiveStakes();
-                }
+                // Active contracts and capital are supplied by the shared backend snapshot.
+                if (window.renderActiveStakes) window.renderActiveStakes();
             } else {
                 window.showToast(result.message, true);
             }
@@ -8647,7 +8805,16 @@
     });
 
     /* === MODULE 35: BACKGROUND LEAK FIX === */
+   setInterval(() => {
+       if (document.hidden || window.dashboardSession.closed || window.dashboardSession.blocked) return;
+       window.syncDashboardState();
+   }, 60000);
+
    document.addEventListener("visibilitychange", () => {
+       if (!document.hidden && !window.dashboardSession.closed && !window.dashboardSession.blocked) {
+           window.syncDashboardState();
+           if (window.socket && !window.socket.connected) window.socket.connect();
+       }
        if (document.hidden) {
            if (window.globalFeedApiInterval) clearInterval(window.globalFeedApiInterval);
            if (window.chatSyncInterval) clearInterval(window.chatSyncInterval);
