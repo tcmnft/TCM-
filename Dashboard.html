@@ -167,6 +167,54 @@
             box-shadow: 0 18px 40px rgba(0, 0, 0, 0.7), inset 1px 1px 0 rgba(255, 255, 255, 0.05);
         }
 
+        .profile-card {
+            position: relative;
+        }
+        .profile-card.profile-is-admin {
+            padding-bottom: 38px;
+        }
+        .profile-admin-badge {
+            position: absolute;
+            right: 14px;
+            bottom: 9px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            background: linear-gradient(
+                145deg,
+                #ffffff 0%,
+                #e6eef7 35%,
+                #eaeff5 70%,
+                #f9fbfd 100%
+            );
+            color: #ffffff;
+            font-size: 0.68rem;
+            font-weight: 900;
+            line-height: 1;
+            letter-spacing: 0.16em;
+            -webkit-text-stroke: 0;
+            text-shadow: 0 1px 0 rgba(100, 116, 139, 0.65),
+                0 2px 0 rgba(100, 116, 139, 0.35),
+                0 3px 2px rgba(51, 65, 85, 0.25),
+                0 5px 5px rgba(51, 65, 85, 0.15);
+            box-shadow: -2px -2px 5px rgba(255, 255, 255, 0.9),
+                2px 2px 5px rgba(30, 41, 59, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.95),
+                inset 0 -1px 0 rgba(100, 116, 139, 0.18);
+            pointer-events: none;
+        }
+        [data-theme="dark"] .profile-admin-badge {
+            background: linear-gradient(145deg, #11151c, #1b212c);
+            color: #ffffff;
+            -webkit-text-stroke: 0.35px rgba(0, 0, 0, 0.55);
+            text-shadow: 0 -0.5px 0.5px rgba(0, 0, 0, 0.65),
+                -0.5px 0 0.5px rgba(0, 0, 0, 0.55),
+                0.5px 0 0.5px rgba(0, 0, 0, 0.55),
+                0 1.5px 2px rgba(0, 0, 0, 0.85),
+                0 3px 5px rgba(0, 0, 0, 0.65);
+            box-shadow: -1px -1px 3px rgba(255, 255, 255, 0.1),
+                3px 3px 6px rgba(0, 0, 0, 0.8);
+        }
+
         .dp-crater-wrapper {
             position: relative; width: 74px; height: 74px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border-radius: 50%;
             /* 🔥 কার্বন ইনসেট: ভেতরে ঢোকানো মসৃণ গর্তের ফিল দেবে */
@@ -508,6 +556,12 @@
             mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
             -webkit-mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
         }
+        #txHistoryBox.tx-scroll-box {
+            scroll-behavior: auto;
+            overscroll-behavior-y: auto;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y pinch-zoom;
+        }
         .atm-face-back, .modal-box, .cinema-details {
             overscroll-behavior: contain;
             -webkit-overflow-scrolling: touch;
@@ -595,8 +649,37 @@
 
         /* === MODULE 9: SETTINGS & SOCIALS === */
         .settings-wrapper { position: relative; height: 52px; width: 100%; display: flex; align-items: center; justify-content: space-between; }
-        .settings-pill { position: absolute; left: 0; height: 52px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 26px; display: flex; align-items: center; padding: 0 18px; cursor: pointer; overflow: hidden; width: 130px; transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, box-shadow 0.3s; box-shadow: 0 4px 10px var(--shadow); z-index: 50; }
-        .settings-active .settings-pill { width: 100%; border-color: var(--primary); box-shadow: 0 4px 15px rgba(0, 245, 255, 0.15); }
+        .settings-pill {
+            position: absolute;
+            left: 0;
+            height: 52px;
+            background: linear-gradient(135deg, #f8f9fc 0%, #e2e8f0 100%);
+            border: 1px solid #ffffff;
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            padding: 0 18px;
+            cursor: pointer;
+            overflow: hidden;
+            width: 130px;
+            transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), border-color 0.3s, box-shadow 0.3s;
+            box-shadow: inset 4px 4px 8px rgba(148, 163, 184, 0.3),
+                inset -4px -4px 8px #ffffff,
+                2px 2px 6px rgba(148, 163, 184, 0.15);
+            z-index: 50;
+        }
+        .settings-active .settings-pill {
+            width: 100%;
+            border-color: var(--primary);
+        }
+        [data-theme="dark"] .settings-pill {
+            background: #0d1017;
+            border: none;
+            box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.9),
+                inset -1px -1px 4px rgba(255, 255, 255, 0.04),
+                -1px -1px 1.5px rgba(255, 255, 255, 0.12),
+                1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
         #settingsIcon { font-size: 1.2rem; color: var(--primary); margin-right: 10px; flex-shrink: 0; animation: spinGearNormal 5s linear infinite; transition: all 0.3s; }
         .settings-active #settingsIcon { animation: spinGearReverse 5s linear infinite; }
         .settings-label { font-weight: 600; font-size: 0.9rem; color: var(--text-main); flex-shrink: 0; white-space: nowrap; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease; transform: translateX(0); opacity: 1; }
@@ -2602,7 +2685,8 @@
     window.parseDashboardMoneyMicro = value => {
         if (typeof value !== 'number' && typeof value !== 'string') return null;
         if (typeof value === 'number' && (!Number.isFinite(value) || value < 0)) return null;
-        const text = String(value).trim();
+        if (typeof value === 'number' && value > Number.MAX_SAFE_INTEGER) return null;
+        const text = typeof value === 'number' ? value.toFixed(6) : value.trim();
         if (!/^\d+(?:\.\d+)?$/.test(text)) return null;
         const [whole, fraction = ''] = text.split('.');
         if (fraction.length > 6 && /[1-9]/.test(fraction.slice(6))) return null;
@@ -2728,9 +2812,10 @@
         if (w.Lifetime_Stake) setText('lifetimeStakeVal', parseFloat(w.Lifetime_Stake), true);
         if (tS) setText('lifetimeRoiVal', tS, true);
 
-        /* Auto-update Active Stake */
-        let totalActivePrincipal = parseFloat(w.Active_Stakes_Capital || 0);
-        setText('stakeTotalValue', totalActivePrincipal, true);
+        /* Keep staking totals under the shared projection renderer. */
+        if (typeof window.refreshStakingOverview === 'function') {
+            window.refreshStakingOverview(w);
+        }
 
         /* Bind Dynamic 16-Digit Cards from Wallets */
         if (w.cards) {
@@ -3491,15 +3576,15 @@
         window.txHistoryEntranceState = state;
 
         if (typeof IntersectionObserver !== 'function') return;
-        window.txIntersectionObserver = new IntersectionObserver(entries => {
+        window.txIntersectionObserver = new IntersectionObserver((entries, observer) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('show');
-                    const id = entry.target.dataset.ledgerId;
-                    if (id) state.shown.add(id);
-                } else {
-                    entry.target.classList.remove('show');
-                }
+                const id = entry.target.dataset.ledgerId;
+                const alreadyShown = entry.target.classList.contains('show') ||
+                    (id && state.shown.has(id));
+                if (!entry.isIntersecting && !alreadyShown) return;
+                entry.target.classList.add('show');
+                if (id) state.shown.add(id);
+                observer.unobserve(entry.target);
             });
         }, {
             root: tb,
@@ -4080,6 +4165,22 @@ window.applyDashboardSnapshot = data => {
     };
     text('uName', user.Name || 'User');
     text('sbName', user.Name || 'User');
+
+    const profileCard = document.querySelector('.profile-card');
+    if (profileCard) {
+        const isAdmin = user.Role === 'Admin';
+        let adminBadge = profileCard.querySelector('.profile-admin-badge');
+        if (isAdmin && !adminBadge) {
+            adminBadge = document.createElement('span');
+            adminBadge.className = 'profile-admin-badge';
+            adminBadge.textContent = 'ADMIN';
+            adminBadge.setAttribute('aria-label', 'Administrator account');
+            profileCard.appendChild(adminBadge);
+        } else if (!isAdmin && adminBadge) {
+            adminBadge.remove();
+        }
+        profileCard.classList.toggle('profile-is-admin', isAdmin);
+    }
     text('uUID', uid);
     text('sbUid', 'UID: ' + uid);
     const avatar = user.Avatar || user.avatar || localStorage.getItem('tcm_user_dp');
@@ -8718,39 +8819,96 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-    // M2: One display projection; a claimed principal belongs only to its wallet/vault.
+    // Shared display projection: wallet, principal and estimated ROI validate independently.
     window.buildStakingAssetProjection = (wallet, now = Date.now()) => {
-        const readMoney = value => window.parseDashboardMoneyMicro(value ?? 0);
-        const main = readMoney(wallet.Main_Balance);
-        const locked = readMoney(wallet.Locked_Balance);
-        let valid = main !== null && locked !== null;
+        wallet = wallet || {};
+        const main = window.parseDashboardMoneyMicro(wallet.Main_Balance);
+        const locked = window.parseDashboardMoneyMicro(wallet.Locked_Balance ?? 0);
+        const walletValid = main !== null && locked !== null;
+        const collectionAvailable = Array.isArray(wallet.Active_Stakes);
+        let principalValid = collectionAvailable;
+        let roiValid = collectionAvailable;
         let principal = 0n;
         let earningPrincipal = 0n;
         let daily = 0n;
+        const issues = [];
         const tiers = Object.fromEntries(['silver', 'gold', 'platinum', 'diamond'].map(key =>
-            [key, { principal: 0n, count: 0 }]));
+            [key, { principal: 0n, count: 0, valid: collectionAvailable }]));
         const tierByDuration = { 7: 'silver', 15: 'gold', 30: 'platinum', 60: 'diamond' };
-        const seen = new Set();
-        for (const stake of Array.isArray(wallet.Active_Stakes) ? wallet.Active_Stakes : []) {
-            if (!stake || !['Active', 'Matured'].includes(stake.status)) continue;
+        const planRates = { 7: '1.2', 15: '1.5', 30: '2.0', 60: '2.5' };
+        const seen = new Map();
+        const invalidateTier = tierName => {
+            if (tierName) tiers[tierName].valid = false;
+            else Object.values(tiers).forEach(tier => { tier.valid = false; });
+        };
+
+        for (const stake of collectionAvailable ? wallet.Active_Stakes : []) {
+            if (stake && stake.status === 'Completed') continue;
+            if (!stake || !['Active', 'Matured'].includes(stake.status)) {
+                principalValid = false;
+                roiValid = false;
+                invalidateTier(null);
+                issues.push('INVALID_CONTRACT_STATUS');
+                continue;
+            }
+            const duration = Number(stake.duration);
+            const tierName = tierByDuration[duration];
             const id = stake.id || stake.Order_ID || stake.orderId;
-            if (id && seen.has(id)) { valid = false; continue; }
-            if (id) seen.add(id);
+            if (typeof id !== 'string' || !id.trim() || seen.has(id)) {
+                principalValid = false;
+                roiValid = false;
+                invalidateTier(tierName);
+                if (seen.has(id)) invalidateTier(seen.get(id));
+                issues.push('INVALID_OR_DUPLICATE_CONTRACT_ID');
+                continue;
+            }
+            seen.set(id, tierName);
             const amount = window.parseDashboardMoneyMicro(stake.amount);
-            if (amount === null) { valid = false; continue; }
+            if (amount === null || amount <= 0n) {
+                principalValid = false;
+                roiValid = false;
+                invalidateTier(tierName);
+                issues.push('INVALID_CONTRACT_PRINCIPAL');
+                continue;
+            }
             principal += amount;
-            const tier = tiers[tierByDuration[Number(stake.duration)]];
-            if (tier) { tier.principal += amount; tier.count++; }
+            if (tierName) {
+                tiers[tierName].principal += amount;
+                tiers[tierName].count++;
+            } else {
+                invalidateTier(null);
+                issues.push('UNKNOWN_CONTRACT_TIER');
+            }
+            if (stake.status === 'Matured') continue;
             const unlock = Number(stake.unlockTime);
-            if (stake.status !== 'Active' || !Number.isFinite(unlock) || now >= unlock) continue;
-            earningPrincipal += amount;
-            const rate = String(stake.dailyRoi ?? '').trim();
-            if (!/^\d+(?:\.\d{1,12})?$/.test(rate)) { valid = false; continue; }
+            if (!Number.isFinite(unlock) || unlock <= 0) {
+                roiValid = false;
+                issues.push('INVALID_CONTRACT_UNLOCK_TIME');
+                continue;
+            }
+            if (now >= unlock) continue;
+
+            let rate = String(stake.dailyRoi ?? '').trim().replace(/%\s*$/, '').trim();
+            if (!/^\d+(?:\.\d{1,12})?$/.test(rate) || !/[1-9]/.test(rate)) {
+                rate = planRates[duration];
+                if (rate) issues.push('TIER_RATE_FALLBACK');
+            }
+            if (!rate || !/^\d+(?:\.\d{1,12})?$/.test(rate)) {
+                roiValid = false;
+                issues.push('UNAVAILABLE_ESTIMATED_RATE');
+                continue;
+            }
             const [whole, fraction = ''] = rate.split('.');
+            earningPrincipal += amount;
             daily += amount * BigInt(whole + fraction) / (100n * 10n ** BigInt(fraction.length));
         }
-        return { valid, main, locked, principal, earningPrincipal, daily, tiers,
-            total: valid ? main + locked + principal : null };
+        const capitalValid = walletValid && principalValid;
+        return {
+            valid: capitalValid && roiValid,
+            walletValid, principalValid, roiValid, capitalValid,
+            main, locked, principal, earningPrincipal, daily, tiers, issues,
+            total: capitalValid ? main + locked + principal : null
+        };
     };
 
     window.stakingDeadlineState = { timer: null, signature: null, deferred: false };
@@ -8801,7 +8959,7 @@ window.scheduleDashboardSocketReconnect = () => {
         if (document.visibilityState !== 'visible') { state.deferred = true; return; }
         const model = window.buildStakingAssetProjection(wallet);
         const name = String(window.RAM_STATE?.user?.Name || 'TCM USER').toUpperCase();
-        const signature = JSON.stringify([name, model], (key, value) => typeof value === 'bigint' ? value.toString() : value);
+        const signature = JSON.stringify([name, window.balFormatIndex ?? 0, model], (key, value) => typeof value === 'bigint' ? value.toString() : value);
         const text = (id, value) => {
             const node = document.getElementById(id);
             if (node && node.textContent !== String(value)) node.textContent = String(value);
@@ -8810,15 +8968,16 @@ window.scheduleDashboardSocketReconnect = () => {
             document.querySelectorAll('.uNameCardText').forEach(node => {
                 if (node.textContent !== name) node.textContent = name;
             });
+            const hidden = window.balFormatIndex === 3;
             const format = micro => window.formatDashboardMoneyMicro(micro);
             const principal = document.getElementById('stakeTotalValue');
-            if (principal) principal.innerHTML = (model.valid ? format(model.principal) : 'Unavailable') + ' <span style="font-size:1.4rem; color:var(--success);">₮</span>';
-            text('stakeDailyRoi', model.valid ? '+' + format(model.daily) + ' ₮' : 'Unavailable');
+            if (principal) principal.innerHTML = (hidden ? '****' : model.principalValid ? format(model.principal) : 'Unavailable') + ' <span style="font-size:1.4rem; color:var(--success);">₮</span>';
+            text('stakeDailyRoi', hidden ? '****' : model.roiValid ? '+' + format(model.daily) + ' ₮' : 'Unavailable');
             const badge = document.getElementById('stakeGrowthBadge');
             if (badge) {
-                const positive = model.valid && model.earningPrincipal > 0n && model.daily > 0n;
+                const positive = model.roiValid && model.earningPrincipal > 0n && model.daily > 0n;
                 const percentage = positive ? Number(model.daily * 10000n / model.earningPrincipal) / 100 : 0;
-                badge.innerHTML = positive ? `<i class="fas fa-bolt"></i> +${percentage.toFixed(2)}% Daily Speed` : '<i class="fas fa-minus"></i> 0.00% Speed';
+                badge.innerHTML = !model.roiValid ? '<i class="fas fa-minus"></i> Speed Unavailable' : positive ? `<i class="fas fa-bolt"></i> +${percentage.toFixed(2)}% Daily Speed` : '<i class="fas fa-minus"></i> 0.00% Speed';
                 badge.style.background = positive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.1)';
                 badge.style.color = positive ? 'var(--success)' : 'var(--text-sub)';
                 badge.style.border = positive ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255, 255, 255, 0.2)';
@@ -8826,8 +8985,8 @@ window.scheduleDashboardSocketReconnect = () => {
             for (const [tier, value] of Object.entries(model.tiers)) {
                 const cents = (value.principal + 5000n) / 10000n;
                 const tierAmount = (cents / 100n).toLocaleString('en-US') + '.' + (cents % 100n).toString().padStart(2, '0');
-                text('tierTotal_' + tier, model.valid ? tierAmount : 'Unavailable');
-                text('txCount_' + tier, value.count);
+                text('tierTotal_' + tier, hidden ? '****' : value.valid ? tierAmount : 'Unavailable');
+                text('txCount_' + tier, value.valid ? value.count : '—');
             }
             state.signature = signature;
         }
