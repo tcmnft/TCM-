@@ -500,6 +500,34 @@
         .tx-filter-input { background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; padding: 5px 8px; font-size: 0.75rem !important; outline: none; cursor: pointer; color-scheme: dark; }
         [data-theme="light"] .tx-filter-input { color-scheme: light; }
         .tx-scroll-box { max-height: 380px; overflow-y: auto; padding-right: 5px; scrollbar-width: none; }
+        #txHistoryBox, #ordersContentBox, #teamBonusHistoryBox, #p2pHistoryBox {
+            scroll-behavior: smooth;
+            overscroll-behavior: contain;
+            padding-top: 15px;
+            padding-bottom: 15px !important;
+            mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+            -webkit-mask-image: linear-gradient(to bottom, transparent, black 15px, black calc(100% - 15px), transparent);
+        }
+        .atm-face-back, .modal-box, .cinema-details {
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            touch-action: pan-y pinch-zoom;
+        }
+        .modal-box {
+            max-height: calc(100vh - 32px);
+            max-height: calc(100dvh - 32px);
+            overflow-y: auto;
+        }
+        .deletion-puzzle-tile {
+            padding: 2px;
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            background: var(--bg-main);
+            cursor: pointer;
+        }
+        .deletion-puzzle-tile[aria-pressed="true"] { border-color: var(--success); }
+        .deletion-puzzle-tile:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+        .deletion-puzzle-tile img { display: block; width: 100%; aspect-ratio: 1; }
         .tx-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border); transition: 0.3s; }
         .tx-item:last-child { border-bottom: none; padding-bottom: 0; }
         .tx-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0;}
@@ -1205,6 +1233,14 @@
     <div class="modal-box" style="text-align: left; border-color: var(--error);">
         <h2 style="font-size:1.3rem; margin-bottom:10px; font-weight:700;"><i class="fas fa-trash-alt" style="color:var(--error);"></i> Delete Account</h2>
         <p style="font-size:0.8rem; color:var(--error); font-weight:700; margin-bottom:15px;"><i class="fas fa-exclamation-triangle"></i> Account will be permanently deleted after 24 hours.</p>
+        <div id="deletionPuzzle" style="padding:12px; border:1px solid var(--border); border-radius:12px; margin-bottom:15px;">
+            <p style="font-size:0.8rem; margin:0 0 8px;">Match the reference shape before requesting an OTP.</p>
+            <img id="deletionPuzzleReference" alt="Reference shape to match" width="48" height="48" style="display:block; margin-bottom:8px;">
+            <div id="deletionPuzzleTiles" style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; max-width:228px;"></div>
+            <p id="deletionPuzzleStatus" role="status" style="font-size:0.75rem; color:var(--text-sub);">Verification required.</p>
+            <button type="button" class="act-btn" onclick="window.verifyDeletionChallenge()">Verify Selection</button>
+            <button type="button" class="act-btn" onclick="window.startDeletionChallenge()">New Puzzle</button>
+        </div>
 
         <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Email OTP Verification</label>
         <div style="display:flex; gap:10px; margin-top: 5px; margin-bottom: 12px;">
@@ -2338,6 +2374,10 @@
                 <div class="chart-header">
                     <span><i class="fas fa-network-wired" style="color:#8b5cf6; margin-right:5px;"></i> Team Growth & Liquidity</span>
                 </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 14px;color:var(--text-main);font-size:0.72rem;">
+                    <span id="teamBusinessKpi" style="padding:7px 10px;border:1px solid rgba(139,92,246,0.35);border-radius:10px;background:rgba(139,92,246,0.08);">Total Team Business: Awaiting data</span>
+                    <span id="teamNetworkKpi" style="padding:7px 10px;border:1px solid var(--border);border-radius:10px;">Team Network Size: Awaiting data</span>
+                </div>
                 <div style="position: relative; height: 200px; width: 100%;">
                     <canvas id="teamRadarChart"></canvas>
                 </div>
@@ -2789,31 +2829,7 @@
         }
     };
 
-    // 🔥 FIX: Strict ID Isolation Timer to prevent UI overlap glitches
-    setInterval(() => {
-        document.querySelectorAll('.atm-live-timer').forEach(el => {
-            let unlockTime = parseInt(el.getAttribute('data-unlock'));
-            let stkId = el.getAttribute('data-id');
-            let amt = el.getAttribute('data-amt');
-            
-            if (!unlockTime || !stkId) return;
-
-            let remaining = unlockTime - Date.now();
-            
-            if (remaining <= 0) {
-                let parent = document.getElementById('claim_box_' + stkId);
-                // শুধু নির্দিষ্ট আইডির parent থাকলেই বাটন রেন্ডার হবে
-                if(parent && !parent.querySelector('button')) {
-                    parent.innerHTML = `<button class="btn-claim-glass" style="padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;" onclick="window.executeClaimStake('${stkId}', ${amt})">Claim</button>`;
-                }
-            } else {
-                let h = Math.floor(remaining / 3600000).toString().padStart(2, '0');
-                let m = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
-                let s = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
-                el.innerText = `${h}:${m}:${s}`;
-            }
-        });
-    }, 1000);
+    // M2: Staking countdowns and maturity buttons are owned by the shared display scheduler.
 
     window.executeClaimStake = async (stakeId, principalAmt) => {
         const uid = localStorage.getItem('uid');
@@ -3003,28 +3019,107 @@
     window.switchPageView = window.switchTab;
     window.showSection = window.switchTab;
 
+    // R3: Shared ownership prevents one popup from unlocking another popup's background.
+    window.modalScrollOwners = new Set();
+    window.modalScrollSnapshot = null;
+    window.acquireModalScroll = owner => {
+        if (window.modalScrollOwners.has(owner)) return;
+        if (window.modalScrollOwners.size === 0) {
+            const body = document.body;
+            const names = ['overflow', 'position', 'top', 'left', 'right', 'width', 'paddingRight'];
+            const styles = Object.fromEntries(names.map(name => [name, body.style[name]]));
+            const scrollbar = Math.max(0, window.innerWidth - document.documentElement.clientWidth);
+            const padding = parseFloat(getComputedStyle(body).paddingRight) || 0;
+            window.modalScrollSnapshot = { styles, x: window.scrollX, y: window.scrollY };
+            body.style.overflow = 'hidden';
+            body.style.position = 'fixed';
+            body.style.top = -window.modalScrollSnapshot.y + 'px';
+            body.style.left = '0';
+            body.style.right = '0';
+            body.style.width = '100%';
+            if (scrollbar) body.style.paddingRight = padding + scrollbar + 'px';
+        }
+        window.modalScrollOwners.add(owner);
+    };
+    window.releaseModalScroll = owner => {
+        window.modalScrollOwners.delete(owner);
+        if (window.modalScrollOwners.size || !window.modalScrollSnapshot) return;
+        const saved = window.modalScrollSnapshot;
+        window.modalScrollSnapshot = null;
+        Object.assign(document.body.style, saved.styles);
+        const root = document.documentElement;
+        const behavior = root.style.scrollBehavior;
+        root.style.scrollBehavior = 'auto';
+        window.scrollTo(saved.x, saved.y);
+        root.style.scrollBehavior = behavior;
+    };
+    window.modalCloseVersions = new WeakMap();
     window.openModal = id => {
-        const m = document.getElementById(id);
-        if(m) {
-            m.style.display = 'flex';
-            setTimeout(() => m.classList.add('show'), 10);
-        }
+        const modal = document.getElementById(id);
+        if (!modal) return;
+        window.modalCloseVersions.set(modal, (window.modalCloseVersions.get(modal) || 0) + 1);
+        window.acquireModalScroll('modal:' + id);
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('show'), 10);
     };
-
     window.closeModal = id => {
-        const m = document.getElementById(id);
-        if(m) {
-            m.classList.remove('show');
-            setTimeout(() => m.style.display = 'none', 300);
-        }
+        const modal = document.getElementById(id);
+        if (!modal) { window.releaseModalScroll('modal:' + id); return; }
+        const version = (window.modalCloseVersions.get(modal) || 0) + 1;
+        window.modalCloseVersions.set(modal, version);
+        modal.classList.remove('show');
+        setTimeout(() => {
+            if (window.modalCloseVersions.get(modal) !== version) return;
+            modal.style.display = 'none';
+            window.releaseModalScroll('modal:' + id);
+        }, 300);
+    };
+    window.closeAllModals = () => {
+        document.querySelectorAll('.modal, .modal-overlay, .custom-modal-overlay').forEach(modal => {
+            window.modalCloseVersions.set(modal, (window.modalCloseVersions.get(modal) || 0) + 1);
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+            window.releaseModalScroll('modal:' + modal.id);
+        });
+        if (typeof window.closeCinemaMode === 'function') window.closeCinemaMode(true);
     };
 
-    window.closeAllModals = () => {
-        document.querySelectorAll('.modal, .modal-overlay').forEach(m => {
-            m.style.display = 'none';
-            m.classList.remove('show');
-        });
+    // Watch only overlay attributes, not the entire dashboard's per-second DOM updates.
+    window.installOverlayScrollGuards = () => {
+        const tracked = new Map();
+        let nextId = 0;
+        const selector = '.modal, .modal-overlay, .custom-modal-overlay, .cinema-overlay, #claimPopup, #confirmModal';
+        const refresh = element => {
+            const owner = tracked.get(element).owner;
+            const style = getComputedStyle(element);
+            if (element.isConnected && style.display !== 'none' && style.visibility !== 'hidden') {
+                window.acquireModalScroll(owner);
+            } else {
+                window.releaseModalScroll(owner);
+                if (!element.isConnected && element.id) window.releaseModalScroll('modal:' + element.id);
+            }
+        };
+        const discover = () => {
+            document.querySelectorAll(selector).forEach(element => {
+                if (tracked.has(element)) return;
+                const observer = new MutationObserver(() => refresh(element));
+                tracked.set(element, { owner: 'overlay:' + ++nextId, observer });
+                observer.observe(element, { attributes: true, attributeFilter: ['style', 'class'] });
+                refresh(element);
+            });
+            for (const [element] of tracked) {
+                if (!element.isConnected) {
+                    refresh(element);
+                    tracked.get(element).observer.disconnect();
+                    tracked.delete(element);
+                }
+            }
+        };
+        discover();
+        new MutationObserver(discover).observe(document.body, { childList: true });
     };
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', window.installOverlayScrollGuards, { once: true });
+    else window.installOverlayScrollGuards();
 
     window.onclick = e => {
         if(e.target.classList.contains('modal') || e.target.classList.contains('modal-overlay')) {
@@ -3140,6 +3235,8 @@
         document.documentElement.setAttribute('data-theme', newTheme);
         localStorage.setItem('tcm_theme', newTheme);
         window.updateThemeUI(newTheme);
+        if (window.myChartInstance && window.renderMyAnalyticsChart) window.renderMyAnalyticsChart();
+        if (window.teamChartInstance && window.renderTeamRadarChart) window.renderTeamRadarChart();
     };
 
     window.updateThemeUI = (theme) => {
@@ -3287,9 +3384,69 @@
 
     // MEMO TCM-STK-010 | 2026-10-10 00:51 IST | Asia/Kolkata
     window.forceInjectToHistory = (newTx, serverTxCount) => {
-        // Preserve the existing caller interface; reconcile from the backend only.
-        // Never manufacture ledger rows or advance a server-owned counter locally.
-        return window.syncDashboardState();
+        const uid = localStorage.getItem('uid');
+        if (!uid || !newTx || newTx.UID !== uid || typeof newTx.id !== 'string' ||
+            !newTx.id || /^(?:local_|P2P_)/.test(newTx.id) ||
+            !window.isDashboardLedgerType(newTx.Type)) {
+            return { success: false, localOnly: true, message: 'No authoritative Transactions record to inject.' };
+        }
+        const previous = (window.allTransactions || []).find(row => row.id === newTx.id && row.UID === uid);
+        // NFT reservation/sale response IDs identify NFT_History, not Transactions.
+        if (!previous && ['NFT Reserve', 'NFT Profit'].includes(newTx.Type) && newTx.source !== 'Transactions') {
+            return { success: false, localOnly: true, message: 'NFT ledger remains in its own history cache.' };
+        }
+        if (previous && JSON.stringify(previous) === JSON.stringify(newTx)) {
+            return { success: true, localOnly: true, changed: false };
+        }
+        const record = { ...(previous || {}), ...newTx };
+        window.mergeDashboardHistory([record]);
+        // Server counters and wallet balances remain owned by applyDashboardSnapshot.
+        const box = document.getElementById('txHistoryBox');
+        if (!box || typeof window.buildDashboardHistoryRowHTML !== 'function') {
+            return { success: true, localOnly: true, changed: true };
+        }
+        const oldScroll = box.scrollTop;
+        const existing = [...box.querySelectorAll('[data-ledger-id]')]
+            .find(node => node.dataset.ledgerId === record.id);
+        const month = document.getElementById('txMonthYear')?.value || '';
+        const timestamp = window.parseSafeTimestamp(record.timestamp || record.Date);
+        const date = new Date(timestamp);
+        const monthKey = date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0');
+        const matchesMonth = !month || month === monthKey;
+        const wasEmpty = (window.txHistoryData || []).length === 0;
+        const records = (window.txHistoryData || []).filter(row => row.id !== record.id);
+        if (matchesMonth) records.push(record);
+        records.sort((a, b) => window.parseSafeTimestamp(b.timestamp || b.Date) - window.parseSafeTimestamp(a.timestamp || a.Date));
+        window.txHistoryData = records;
+        if (matchesMonth) {
+            const template = document.createElement('template');
+            template.innerHTML = window.buildDashboardHistoryRowHTML(record).trim();
+            const node = template.content.firstElementChild;
+            let inserted = false;
+            if (existing) {
+                // A visible status update must not replay its entrance animation.
+                if (existing.classList.contains('show')) node.classList.add('show');
+                if (window.txIntersectionObserver) window.txIntersectionObserver.unobserve(existing);
+                existing.replaceWith(node);
+                inserted = true;
+            } else if (!previous || wasEmpty) {
+                if (wasEmpty) box.replaceChildren();
+                box.insertBefore(node, box.firstChild);
+                window.currentRenderedCount = (window.currentRenderedCount || 0) + 1;
+                inserted = true;
+            }
+            if (inserted) {
+                if (window.txIntersectionObserver) window.txIntersectionObserver.observe(node);
+                else node.classList.add('show');
+            }
+        } else if (existing) {
+            if (window.txIntersectionObserver) window.txIntersectionObserver.unobserve(existing);
+            existing.remove();
+            window.currentRenderedCount = Math.max(0, (window.currentRenderedCount || 0) - 1);
+        }
+        delete box.dataset.renderKey;
+        box.scrollTop = oldScroll;
+        return { success: true, localOnly: true, changed: true };
     };
 
     window.initTxObserver = () => {
@@ -3297,11 +3454,23 @@
         if (!tb) return;
 
         if (window.txIntersectionObserver) window.txIntersectionObserver.disconnect();
+        window.txIntersectionObserver = null;
 
-        window.txIntersectionObserver = new IntersectionObserver((entries) => {
+        const uid = localStorage.getItem('uid');
+        const viewKey = tb.dataset.viewKey || '';
+        const previous = window.txHistoryEntranceState;
+        const state = previous && previous.uid === uid && previous.viewKey === viewKey
+            ? previous
+            : { uid, viewKey, shown: new Set() };
+        window.txHistoryEntranceState = state;
+
+        if (typeof IntersectionObserver !== 'function') return;
+        window.txIntersectionObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('show');
+                    const id = entry.target.dataset.ledgerId;
+                    if (id) state.shown.add(id);
                 } else {
                     entry.target.classList.remove('show');
                 }
@@ -3354,7 +3523,21 @@
             return true;
         });
 
-        window.txRenderLimit = 4;
+        // MEMO: TCM-DASH-STABILITY-TEAM-R1 | 2026-10-10 | Asia/Kolkata
+        const viewKey = JSON.stringify([localStorage.getItem('uid'), type, selectedMonthValue]);
+        const renderKey = JSON.stringify([viewKey, window.txHistoryData], (key, value) => {
+            if (value && typeof value === 'object' && !Array.isArray(value)) {
+                return Object.fromEntries(Object.keys(value).sort().map(name => [name, value[name]]));
+            }
+            return value;
+        });
+        if (tb.dataset.renderKey === renderKey) return;
+        const sameView = tb.dataset.viewKey === viewKey;
+        const previousScroll = sameView ? tb.scrollTop : 0;
+        const visibleCount = sameView ? Math.max(4, window.currentRenderedCount || 4) : 4;
+        tb.dataset.viewKey = viewKey;
+        tb.dataset.renderKey = renderKey;
+        window.txRenderLimit = visibleCount;
         window.currentRenderedCount = 0;
         tb.innerHTML = '';
 
@@ -3379,17 +3562,12 @@
         }
 
         window.renderTxChunk();
+        window.txRenderLimit = 4;
+        tb.scrollTop = previousScroll;
     };
 
-    /* Micro-Pagination & DOM Render */
-    window.renderTxChunk = () => {
-        const tb = document.getElementById('txHistoryBox');
-        if(!tb || window.currentRenderedCount >= window.txHistoryData.length) return;
-
+    window.buildDashboardHistoryRowHTML = tx => {
         let html = '';
-        const chunk = window.txHistoryData.slice(window.currentRenderedCount, window.currentRenderedCount + window.txRenderLimit);
-
-        chunk.forEach((tx) => {
             let tType = tx.Type || '';
             let isDep = tType === 'Deposit';
             let isWd = tType === 'Withdraw';
@@ -3498,12 +3676,12 @@
             }
 
             html += `
-            <div class="tx-item tx-item-animated" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
+            <div class="tx-item tx-item-animated${window.txHistoryEntranceState?.uid === localStorage.getItem('uid') && window.txHistoryEntranceState.shown.has(String(tx.id || '')) ? ' show' : ''}" data-ledger-id="${escapeText(tx.id || '')}" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
                 <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
                     <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
                     <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${displayTitle}</h4>
-                        ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${extractedUid}</span>` : ''}
+                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${escapeText(displayTitle)}</h4>
+                        ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${escapeText(extractedUid)}</span>` : ''}
                         ${categoryBadgeHtml}
                         ${extraRemarks}
                         <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
@@ -3514,7 +3692,7 @@
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                    ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${displayTypeRight}</span>` : ''}
+                    ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
                     <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
                         ${displayMicro === null ? '' : amountSign}${displayAmount} ₮
                     </div>
@@ -3522,6 +3700,20 @@
                     ${simpleTimerHtml}
                 </div>
             </div>`;
+
+        return html;
+    };
+
+    /* Micro-Pagination & DOM Render */
+    window.renderTxChunk = () => {
+        const tb = document.getElementById('txHistoryBox');
+        if(!tb || window.currentRenderedCount >= window.txHistoryData.length) return;
+
+        let html = '';
+        const chunk = window.txHistoryData.slice(window.currentRenderedCount, window.currentRenderedCount + window.txRenderLimit);
+
+        chunk.forEach(tx => {
+            html += window.buildDashboardHistoryRowHTML(tx);
         });
 
         const oldIndicator = document.getElementById('txLoadMoreIndicator');
@@ -3531,6 +3723,9 @@
         tempDiv.innerHTML = html;
 
         Array.from(tempDiv.children).forEach(child => {
+            if (child.classList.contains('tx-item-animated') && !window.txIntersectionObserver) {
+                child.classList.add('show');
+            }
             tb.appendChild(child);
             if (window.txIntersectionObserver && child.classList.contains('tx-item-animated')) {
                 window.txIntersectionObserver.observe(child);
@@ -3894,6 +4089,7 @@ window.applyDashboardSnapshot = data => {
     window.hasMoreTxInDB = (data.transactions || []).length >= 20 || (data.isUpToDate && window.hasMoreTxInDB === true);
     window.dashboardSession.verified = true;
     window.renderWalletData(wallet);
+    if (window.refreshStakingOverview) window.refreshStakingOverview(wallet);
     if (window.initAssetsUI) window.initAssetsUI();
     if (window.renderActiveStakes) window.renderActiveStakes();
     if (window.applyTxFilter) window.applyTxFilter();
@@ -3952,7 +4148,10 @@ window.syncDashboardState = () => {
 window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
     const path = endpoint.split('?')[0];
     if (method === 'GET' && path === '/user/init-data') return window.syncDashboardState();
-    const mutatesFinance = method !== 'GET' && (path.startsWith('/finance/') || path === '/p2p/transfer');
+    const mutatesFinance = method !== 'GET' && (
+        path.startsWith('/finance/') || path === '/p2p/transfer' ||
+        path === '/nft/reserve' || path === '/nft/sell'
+    );
     if (mutatesFinance && !window.dashboardSession.verified) {
         return { success: false, message: 'Wait for a verified wallet refresh before starting a financial action.' };
     }
@@ -4928,7 +5127,17 @@ window.scheduleDashboardSocketReconnect = () => {
      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
      btn.disabled = true;
 
-     const result = await window.fetchAPI('/auth/send-otp', 'POST', { uid });
+     const isDeletion = btnId === 'btnGetDeleteOTP';
+     const receipt = isDeletion ? window.deletionVerification.receipt : null;
+     if (isDeletion && !receipt) {
+         window.showToast('Complete the visual verification before requesting a deletion OTP.', true);
+         btn.innerHTML = 'Get OTP';
+         btn.disabled = false;
+         return;
+     }
+     if (isDeletion) window.deletionVerification.receipt = null;
+     const result = await window.fetchAPI(isDeletion ? '/user/deletion-otp' : '/auth/send-otp', 'POST',
+         isDeletion ? { uid, verificationReceipt: receipt } : { uid });
 
      if (!result.success) {
          window.showToast(result.message, true);
@@ -7658,19 +7867,11 @@ window.scheduleDashboardSocketReconnect = () => {
             let mainBal = parseFloat(balancesRef.Main_Balance || 0) || 0;
             let lockedBal = parseFloat(balancesRef.Locked_Balance || 0) || 0;
             
-            let activeStakesCapital = 0;
-            if (balancesRef.Active_Stakes && balancesRef.Active_Stakes.length > 0) {
-                balancesRef.Active_Stakes.forEach(stk => {
-                    if (stk.status === 'Active') {
-                        activeStakesCapital += parseFloat(stk.amount || 0);
-                    }
-                });
-            }
-            
-            let trueTotal = mainBal + lockedBal + activeStakesCapital;
+            const projection = window.buildStakingAssetProjection(balancesRef);
+            const trueTotal = projection.total === null ? null : Number(window.formatDashboardMoneyMicro(projection.total));
 
             const elTotal = document.getElementById('assetTotalValue');
-            if(elTotal) elTotal.innerHTML = `${window.formatMagicNumber(trueTotal)} <span style="font-size:1.4rem; color:var(--primary);">₮</span>`;
+            if(elTotal) elTotal.innerHTML = `${trueTotal === null ? 'Unavailable' : window.formatMagicNumber(trueTotal)} <span style="font-size:1.4rem; color:var(--primary);">₮</span>`;
 
             let balances = window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances : {};
             let lifetimeWithdraw = parseFloat(balances.Total_Withdrawal || balances.Total_Withdraw || 0);
@@ -7809,7 +8010,10 @@ window.scheduleDashboardSocketReconnect = () => {
             const series = category => buckets.map(bucket =>
                 bucket.invalid ? null : Number(bucket[category]) / 1000000
             );
-            if (window.myChartInstance) window.myChartInstance.destroy();
+            if (window.myChartInstance && window.myChartInstance.canvas !== canvas) {
+                window.myChartInstance.destroy();
+                window.myChartInstance = null;
+            }
 
             // MEMO: TCM-ANALYTICS-REFINED-R1 | 2026-10-10 | Asia/Kolkata
             document.getElementById('assetFlowCoverageNotice')?.remove();
@@ -7826,7 +8030,10 @@ window.scheduleDashboardSocketReconnect = () => {
                 ? (loadedWeeklyIncome * 1000n) / baseMicro : 0n;
             const growthText = `${growthTenths / 10n}.${growthTenths % 10n}`;
             const badge = document.getElementById('myGrowthBadge');
-            if (badge) {
+            const growthKey = JSON.stringify([uid, growthText, window.balFormatIndex,
+                baseMicro === null ? null : baseMicro.toString(), weeklyModel.invalidRecords]);
+            if (badge && badge.dataset.growthKey !== growthKey) {
+                badge.dataset.growthKey = growthKey;
                 const hidden = window.balFormatIndex === 3;
                 badge.replaceChildren();
                 const icon = document.createElement('i');
@@ -7842,6 +8049,32 @@ window.scheduleDashboardSocketReconnect = () => {
                 badge.style.border = '1px solid rgba(16,185,129,0.3)';
             }
 
+            const chartView = { model, buckets, timeframe: window.currentChartTimeframe };
+            const chartKey = JSON.stringify([
+                uid, chartView.timeframe, window.balFormatIndex,
+                document.documentElement.getAttribute('data-theme'),
+                buckets.map(bucket => [bucket.label, bucket.income.toString(), bucket.deposit.toString(),
+                    bucket.withdraw.toString(), bucket.count, bucket.invalid])
+            ]);
+            if (window.myChartInstance) {
+                const chart = window.myChartInstance;
+                chart.$assetFlowView = chartView;
+                if (chart.$assetFlowKey !== chartKey) {
+                    if (chart.$assetFlowTimeframe !== chartView.timeframe && window.hideAssetFlowTooltip) {
+                        window.hideAssetFlowTooltip();
+                    }
+                    chart.data.labels = buckets.map(bucket => bucket.label);
+                    for (const [index, category] of ['income', 'deposit', 'withdraw'].entries()) {
+                        chart.data.datasets[index].data = series(category);
+                    }
+                    chart.options.scales.x.ticks.maxTicksLimit = chartView.timeframe === '1D' ? 6 : 7;
+                    chart.$assetFlowKey = chartKey;
+                    chart.$assetFlowTimeframe = chartView.timeframe;
+                    chart.update('none');
+                }
+                return;
+            }
+
             const tooltipCard = document.createElement('div');
             tooltipCard.setAttribute('role', 'status');
             // MEMO: TCM-ANALYTICS-POLISH-R1 | 2026-10-10 | Asia/Kolkata
@@ -7855,6 +8088,9 @@ window.scheduleDashboardSocketReconnect = () => {
             window.addEventListener('resize', hideTooltip);
             window.hideAssetFlowTooltip = hideTooltip;
             const externalTooltip = ({ chart, tooltip }) => {
+                const view = chart.$assetFlowView;
+                if (!view) return;
+                const buckets = view.buckets;
                 const active = tooltip.dataPoints?.[0];
                 const bucket = buckets[active?.dataIndex];
                 const metrics = [
@@ -7873,12 +8109,12 @@ window.scheduleDashboardSocketReconnect = () => {
                 let dateLabel = new Intl.DateTimeFormat('en-GB', {
                     timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short'
                 }).format(bucket.start);
-                if (window.currentChartTimeframe === '1D') {
+                if (view.timeframe === '1D') {
                     const hour = new Intl.DateTimeFormat('en-GB', {
                         timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false
                     }).format(bucket.start);
                     dateLabel += ` • ${hour}`;
-                } else if (window.currentChartTimeframe === 'ALL') {
+                } else if (view.timeframe === 'ALL') {
                     dateLabel = bucket.label;
                 }
                 const dark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -7944,7 +8180,7 @@ window.scheduleDashboardSocketReconnect = () => {
                     }
                 }],
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false, animation: false,
                     events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
                     interaction: { mode: 'nearest', axis: 'xy', intersect: false },
                     plugins: {
@@ -7970,6 +8206,9 @@ window.scheduleDashboardSocketReconnect = () => {
                     }
                 }
             });
+            window.myChartInstance.$assetFlowView = chartView;
+            window.myChartInstance.$assetFlowKey = chartKey;
+            window.myChartInstance.$assetFlowTimeframe = chartView.timeframe;
         } catch (error) {
             console.error('Asset Flow Analytics error:', error);
         }
@@ -8074,10 +8313,12 @@ window.scheduleDashboardSocketReconnect = () => {
         const uid = localStorage.getItem('uid');
         const sequence = ++window.teamLedgerSyncSequence;
         const isCurrent = () => sequence === window.teamLedgerSyncSequence && uid === localStorage.getItem('uid');
-        window.teamLedgerState = 'loading';
-        window.teamLedgerData = [];
-        window.renderLedgerChunk();
-        window.renderTeamRadarChart();
+        if (window.teamLedgerLoadedUid !== uid || !['ready', 'empty'].includes(window.teamLedgerState)) {
+            window.teamLedgerState = 'loading';
+            window.teamLedgerData = [];
+            window.renderLedgerChunk();
+            window.renderTeamRadarChart();
+        }
 
         try {
             if (!uid) throw new Error('Authentication is required.');
@@ -8105,6 +8346,7 @@ window.scheduleDashboardSocketReconnect = () => {
                 (window.readTeamLedgerAmount(a, ['balance', 'Main_Balance']) ?? -1)
             );
             window.teamLedgerData = allTeamMembers;
+            window.teamLedgerLoadedUid = uid;
             window.teamLedgerState = allTeamMembers.length === 0 ? 'empty' : 'ready';
             window.teamLedgerLimit = 50;
             window.renderLedgerChunk();
@@ -8125,23 +8367,38 @@ window.scheduleDashboardSocketReconnect = () => {
             if (typeof Chart === 'undefined') return;
             const canvas = document.getElementById('teamRadarChart');
             if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-
-            if (window.teamChartInstance) window.teamChartInstance.destroy();
-
+            const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const webColor = dark ? 'rgba(139,92,246,0.3)' : 'rgba(100,116,139,0.3)';
+            const labelColor = dark ? '#c4b5fd' : '#334155';
+            const membersByUid = new Map();
+            let inconsistentMembers = false;
+            for (const member of window.teamLedgerData || []) {
+                if (!member || typeof member.uid !== 'string' || !member.uid) {
+                    inconsistentMembers = true;
+                    continue;
+                }
+                const existing = membersByUid.get(member.uid);
+                if (existing && ['totalDeposit', 'totalEarn', 'totalWithdraw', 'balance', 'walletDataAvailable']
+                    .some(field => existing[field] !== member[field])) inconsistentMembers = true;
+                if (!existing) membersByUid.set(member.uid, member);
+            }
+            const members = [...membersByUid.values()];
             let totalDep = 0, totalEarn = 0, totalWd = 0, totalBal = 0;
-            const members = Array.isArray(window.teamLedgerData) ? window.teamLedgerData : [];
-            let radarMessage = window.teamLedgerState === 'empty'
-                ? 'No team members yet'
-                : window.teamLedgerState === 'error'
-                    ? 'Could not load team data'
-                    : window.teamLedgerState === 'loading'
-                        ? 'Loading team data...'
-                        : window.teamLedgerState !== 'ready'
-                            ? 'Team data has not loaded yet'
-                            : '';
-            if (!radarMessage) {
+            let message = window.teamLedgerState === 'empty' ? 'No team members yet'
+                : window.teamLedgerState === 'error' ? 'Could not load team data'
+                : window.teamLedgerState === 'loading' ? 'Loading team data...'
+                : window.teamLedgerState !== 'ready' ? 'Team data has not loaded yet' : '';
+            let businessMicro = 0n;
+            let businessAvailable = ['ready', 'empty'].includes(window.teamLedgerState) && !inconsistentMembers;
+            for (const member of members) {
+                const depositMicro = window.parseDashboardMoneyMicro(member.totalDeposit ?? member.Total_Deposit);
+                if (depositMicro === null) businessAvailable = false;
+                else businessMicro += depositMicro;
+            }
+            if (!message) {
+                if (inconsistentMembers) message = 'Team member data is inconsistent';
                 for (const member of members) {
+                    if (message) break;
                     const values = [
                         window.readTeamLedgerAmount(member, ['totalDeposit', 'Total_Deposit']),
                         window.readTeamLedgerAmount(member, ['totalEarn', 'Total_Comp', 'Total_Earn']),
@@ -8149,70 +8406,111 @@ window.scheduleDashboardSocketReconnect = () => {
                         window.readTeamLedgerAmount(member, ['balance', 'Main_Balance'])
                     ];
                     if (member.walletDataAvailable !== true || values.some(value => value === null)) {
-                        radarMessage = 'Team financial data is incomplete';
+                        message = 'Team financial data is incomplete';
                         break;
                     }
-                    totalDep += values[0];
-                    totalEarn += values[1];
-                    totalWd += values[2];
-                    totalBal += values[3];
+                    totalDep += values[0]; totalEarn += values[1];
+                    totalWd += values[2]; totalBal += values[3];
                 }
-                if (!radarMessage && ![totalDep, totalEarn, totalWd, totalBal].every(Number.isFinite)) {
-                    radarMessage = 'Team totals are unavailable';
+                if (!message && ![totalDep, totalEarn, totalWd, totalBal].every(Number.isFinite)) {
+                    message = 'Team totals are unavailable';
                 }
-                if (!radarMessage && [totalDep, totalEarn, totalWd, totalBal].every(value => value === 0)) {
-                    radarMessage = 'Verified team totals: 0.00';
+                if (!message && [totalDep, totalEarn, totalWd, totalBal].every(value => value === 0)) {
+                    message = 'Verified team totals: 0.00';
                 }
             }
             const showTotals = window.teamLedgerState === 'ready' &&
-                (!radarMessage || radarMessage === 'Verified team totals: 0.00');
+                (!message || message === 'Verified team totals: 0.00');
+            const business = document.getElementById('teamBusinessKpi');
+            const network = document.getElementById('teamNetworkKpi');
+            const formatBusiness = micro => {
+                const cents = (micro + 5000n) / 10000n;
+                const whole = (cents / 100n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                return whole + '.' + (cents % 100n).toString().padStart(2, '0');
+            };
+            const setText = (element, text) => {
+                if (element && element.textContent !== text) element.textContent = text;
+            };
+            setText(business, 'Total Team Business: ' + (businessAvailable
+                ? (window.balFormatIndex === 3 ? '****' : formatBusiness(businessMicro)) + ' ₮'
+                : 'Unavailable'));
+            setText(network, 'Team Network Size: ' + (['ready', 'empty'].includes(window.teamLedgerState) && !inconsistentMembers
+                ? members.length + ' Members' : 'Unavailable'));
+            if (business) business.title = 'Gross cumulative deposits of unique members in the loaded A/B/C hands; not company liquidity.';
 
-            window.teamChartInstance = new Chart(ctx, {
+            const datasets = showTotals ? [{
+                label: 'Team Ecosystem',
+                data: [totalEarn, totalDep, totalWd, totalBal, Math.max(0, totalEarn - totalWd)],
+                backgroundColor: 'rgba(139,92,246,0.14)', borderColor: '#8b5cf6', borderWidth: 3,
+                pointBackgroundColor: dark ? '#c4b5fd' : '#7c3aed', pointBorderColor: '#8b5cf6',
+                pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6,
+                pointHoverBackgroundColor: dark ? '#ffffff' : '#5b21b6', pointHoverBorderColor: '#8b5cf6'
+            }] : [];
+            const state = { message, labelColor };
+            const key = JSON.stringify([localStorage.getItem('uid'), dark, window.balFormatIndex,
+                message, datasets.map(dataset => dataset.data), members.length, businessAvailable]);
+            const radialOptions = {
+                beginAtZero: true,
+                angleLines: { color: webColor, lineWidth: 2 },
+                grid: { color: webColor, lineWidth: 2 },
+                pointLabels: { color: labelColor, font: { family: 'Space Grotesk', size: 10 } },
+                ticks: { display: false }
+            };
+            if (window.teamChartInstance && window.teamChartInstance.canvas === canvas) {
+                const chart = window.teamChartInstance;
+                chart.$teamRadarState = state;
+                if (chart.$teamRadarKey !== key) {
+                    chart.data.datasets = datasets;
+                    chart.options.scales.r = radialOptions;
+                    chart.$teamRadarKey = key;
+                    chart.update('none');
+                }
+                return;
+            }
+            if (window.teamChartInstance) window.teamChartInstance.destroy();
+            window.teamChartInstance = new Chart(canvas.getContext('2d'), {
                 type: 'radar',
                 data: {
                     labels: ['Total Income', 'Total Deposits', 'Total Withdrawals', 'Main Balance', 'Income Less Withdrawals'],
-                    datasets: showTotals ? [{
-                        label: 'Team Ecosystem',
-                        data: [totalEarn, totalDep, totalWd, totalBal, Math.max(0, totalEarn - totalWd)],
-                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
-                        borderColor: '#8b5cf6',
-                        pointBackgroundColor: '#8b5cf6',
-                        pointBorderColor: '#fff',
-                        pointHoverBackgroundColor: '#fff',
-                        pointHoverBorderColor: '#8b5cf6',
-                        borderWidth: 2,
-                    }] : []
+                    datasets
                 },
                 plugins: [{
                     id: 'teamDataState',
                     afterDraw(chart) {
-                        if (!radarMessage) return;
+                        const current = chart.$teamRadarState || state;
+                        if (!current.message || !chart.chartArea) return;
                         const { ctx, chartArea } = chart;
-                        if (!chartArea) return;
                         ctx.save();
                         ctx.font = '12px Inter, sans-serif';
-                        ctx.textAlign = 'center';
-                        ctx.textBaseline = 'middle';
-                        ctx.fillStyle = '#94a3b8';
-                        ctx.fillText(radarMessage, (chartArea.left + chartArea.right) / 2,
+                        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+                        ctx.fillStyle = current.labelColor;
+                        ctx.fillText(current.message, (chartArea.left + chartArea.right) / 2,
                             (chartArea.top + chartArea.bottom) / 2, chartArea.right - chartArea.left);
+                        ctx.restore();
+                    }
+                }, {
+                    id: 'teamPointGlow',
+                    afterDatasetsDraw(chart) {
+                        if (!chart.data.datasets.length) return;
+                        const { ctx } = chart;
+                        ctx.save();
+                        ctx.shadowColor = '#8b5cf6'; ctx.shadowBlur = 8;
+                        ctx.fillStyle = '#8b5cf6';
+                        for (const point of chart.getDatasetMeta(0).data) {
+                            if (point.skip || !Number.isFinite(point.x) || !Number.isFinite(point.y)) continue;
+                            ctx.beginPath(); ctx.arc(point.x, point.y, 2.5, 0, Math.PI * 2); ctx.fill();
+                        }
                         ctx.restore();
                     }
                 }],
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: {
-                        r: {
-                            angleLines: { color: 'rgba(255,255,255,0.1)' },
-                            grid: { color: 'rgba(255,255,255,0.1)' },
-                            pointLabels: { color: '#94a3b8', font: { family: 'Space Grotesk', size: 10 } },
-                            ticks: { display: false }
-                        }
-                    },
-                    plugins: { legend: { display: false } }
+                    responsive: true, maintainAspectRatio: false, animation: false,
+                    scales: { r: radialOptions }, plugins: { legend: { display: false } }
                 }
             });
-        } catch(e) { console.error("Team Radar Chart Error:", e); }
+            window.teamChartInstance.$teamRadarState = state;
+            window.teamChartInstance.$teamRadarKey = key;
+        } catch (error) { console.error('Team Radar Chart Error:', error); }
     };
 
     /* === MODULE 31: STAKING UI ENGINE === */
@@ -8328,98 +8626,146 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-    /* Background DOM Sync for Card Display */
-    setInterval(() => {
-        let wallet = window.RAM_STATE?.balances || window.lastWalletData;
-
-        // Card numbers are dynamically managed by renderWalletData from Wallets.cards
-
-        // 🔥 MEMO 125: Dynamic User Name Injector for Staking Cards
-        try {
-            const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-            const dynamicName = (staticUser.Name || "TCM USER").toUpperCase();
-            document.querySelectorAll('.uNameCardText').forEach(el => {
-                if (el.innerText !== dynamicName) el.innerText = dynamicName; // Prevents unnecessary DOM reflows
-            });
-        } catch (e) {}
-
-        if (wallet && wallet.Active_Stakes) {
-            const list = document.getElementById('activeStakesList');
-            if (list && (list.innerHTML.includes('No active') || list.innerHTML.trim() === '') && wallet.Active_Stakes.length > 0) {
-                if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
-            }
-
-            let totalPrincipal = 0, dailyEstRoi = 0;
-            let silverTotal = 0, goldTotal = 0, platinumTotal = 0, diamondTotal = 0;
-            let sCnt = 0, gCnt = 0, pCnt = 0, dCnt = 0;
-
-            wallet.Active_Stakes.forEach(stk => {
-                if (stk.status === 'Active') {
-                    let amt = parseFloat(stk.amount);
-                    totalPrincipal += amt;
-                    dailyEstRoi += (amt * (parseFloat(stk.dailyRoi) / 100));
-
-                    if (stk.duration == 7) { silverTotal += amt; sCnt++; }
-                    else if (stk.duration == 15) { goldTotal += amt; gCnt++; }
-                    else if (stk.duration == 30) { platinumTotal += amt; pCnt++; }
-                    else if (stk.duration == 60) { diamondTotal += amt; dCnt++; }
-                }
-            });
-
-            const dashStakeBox = document.getElementById('stakeTotalValue');
-            if (dashStakeBox) dashStakeBox.innerHTML = totalPrincipal.toFixed(2) + ' <span style="font-size:1.4rem; color:var(--success);">₮</span>';
-
-            const roiBox = document.getElementById('stakeDailyRoi');
-            if (roiBox) roiBox.innerText = '+' + dailyEstRoi.toFixed(2) + ' ₮';
-
-            // 🔥 ALGORITHM FIXED: Average ROI Speed (Prevents percentage drop on new stake)
-            const sBadge = document.getElementById('stakeGrowthBadge');
-            if (sBadge) {
-                if (totalPrincipal > 0 && dailyEstRoi > 0) {
-                    let sPerc = ((dailyEstRoi / totalPrincipal) * 100).toFixed(2);
-                    sBadge.innerHTML = `<i class="fas fa-bolt"></i> +${sPerc}% Daily Speed`;
-                    sBadge.style.background = 'rgba(16, 185, 129, 0.2)';
-                    sBadge.style.color = 'var(--success)';
-                    sBadge.style.border = '1px solid rgba(16, 185, 129, 0.3)';
-                } else {
-                    sBadge.innerHTML = `<i class="fas fa-minus"></i> 0.00% Speed`;
-                    sBadge.style.background = 'rgba(255, 255, 255, 0.1)';
-                    sBadge.style.color = 'var(--text-sub)';
-                    sBadge.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-                }
-            }
-
-            const formatTierAmt = (amt) => parseFloat(amt).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-            const sEl = document.getElementById('tierTotal_silver'); if(sEl) sEl.innerText = formatTierAmt(silverTotal);
-            const gEl = document.getElementById('tierTotal_gold'); if(gEl) gEl.innerText = formatTierAmt(goldTotal);
-            const pEl = document.getElementById('tierTotal_platinum'); if(pEl) pEl.innerText = formatTierAmt(platinumTotal);
-            const dEl = document.getElementById('tierTotal_diamond'); if(dEl) dEl.innerText = formatTierAmt(diamondTotal);
-
-            const scEl = document.getElementById('txCount_silver'); if(scEl) scEl.innerText = sCnt;
-            const gcEl = document.getElementById('txCount_gold'); if(gcEl) gcEl.innerText = gCnt;
-            const pcEl = document.getElementById('txCount_platinum'); if(pcEl) pcEl.innerText = pCnt;
-            const dcEl = document.getElementById('txCount_diamond'); if(dcEl) dcEl.innerText = dCnt;
+    // M2: One display projection; a claimed principal belongs only to its wallet/vault.
+    window.buildStakingAssetProjection = (wallet, now = Date.now()) => {
+        const readMoney = value => window.parseDashboardMoneyMicro(value ?? 0);
+        const main = readMoney(wallet.Main_Balance);
+        const locked = readMoney(wallet.Locked_Balance);
+        let valid = main !== null && locked !== null;
+        let principal = 0n;
+        let earningPrincipal = 0n;
+        let daily = 0n;
+        const tiers = Object.fromEntries(['silver', 'gold', 'platinum', 'diamond'].map(key =>
+            [key, { principal: 0n, count: 0 }]));
+        const tierByDuration = { 7: 'silver', 15: 'gold', 30: 'platinum', 60: 'diamond' };
+        const seen = new Set();
+        for (const stake of Array.isArray(wallet.Active_Stakes) ? wallet.Active_Stakes : []) {
+            if (!stake || !['Active', 'Matured'].includes(stake.status)) continue;
+            const id = stake.id || stake.Order_ID || stake.orderId;
+            if (id && seen.has(id)) { valid = false; continue; }
+            if (id) seen.add(id);
+            const amount = window.parseDashboardMoneyMicro(stake.amount);
+            if (amount === null) { valid = false; continue; }
+            principal += amount;
+            const tier = tiers[tierByDuration[Number(stake.duration)]];
+            if (tier) { tier.principal += amount; tier.count++; }
+            const unlock = Number(stake.unlockTime);
+            if (stake.status !== 'Active' || !Number.isFinite(unlock) || now >= unlock) continue;
+            earningPrincipal += amount;
+            const rate = String(stake.dailyRoi ?? '').trim();
+            if (!/^\d+(?:\.\d{1,12})?$/.test(rate)) { valid = false; continue; }
+            const [whole, fraction = ''] = rate.split('.');
+            daily += amount * BigInt(whole + fraction) / (100n * 10n ** BigInt(fraction.length));
         }
+        return { valid, main, locked, principal, earningPrincipal, daily, tiers,
+            total: valid ? main + locked + principal : null };
+    };
 
-        const nowTime = Date.now();
-        let needsCardRefresh = false;
-        document.querySelectorAll('.atm-live-timer').forEach(el => {
-            const unlock = parseInt(el.getAttribute('data-unlock'));
-            if (!unlock || isNaN(unlock)) return;
-            const diff = unlock - nowTime;
-            if (diff <= 0) {
-                el.innerText = '00:00:00';
-                needsCardRefresh = true;
-            } else {
-                const h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-                const m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-                const s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-                el.innerText = `${h}:${m}:${s}`;
-            }
+    window.stakingDeadlineState = { timer: null, signature: null, deferred: false };
+
+    window.refreshMaturedStakingButtons = () => {
+        const now = Date.now();
+        document.querySelectorAll('.atm-live-timer').forEach(node => {
+            const unlock = Number(node.getAttribute('data-unlock'));
+            const id = node.getAttribute('data-id');
+            const amount = Number(node.getAttribute('data-amt'));
+            if (!id || !Number.isFinite(unlock) || unlock <= 0 || unlock > now || !Number.isFinite(amount) || amount <= 0) return;
+            const inCinema = Boolean(node.closest('#cinemaOverlay'));
+            const parent = document.getElementById((inCinema ? 'cinema_' : '') + 'claim_box_' + id);
+            if (!parent || parent.querySelector('button')) return;
+            const button = document.createElement('button');
+            button.className = 'btn-claim-glass';
+            button.style.cssText = 'padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;';
+            button.textContent = 'Claim';
+            button.addEventListener('click', () => window.executeClaimStake(id, amount));
+            parent.replaceChildren(button);
         });
-        if (needsCardRefresh && typeof window.renderActiveStakes === 'function') {
-            window.renderActiveStakes();
+    };
+
+    window.scheduleStakingDisplayDeadline = wallet => {
+        const state = window.stakingDeadlineState;
+        clearTimeout(state.timer);
+        state.timer = null;
+        const now = Date.now();
+        const deadlines = (Array.isArray(wallet.Active_Stakes) ? wallet.Active_Stakes : [])
+            .filter(stake => stake && stake.status === 'Active')
+            .map(stake => Number(stake.unlockTime)).filter(time => Number.isFinite(time) && time > now);
+        if (deadlines.length === 0) return;
+        const delay = Math.min(2147483647, Math.max(1, Math.min(...deadlines) - now));
+        state.timer = setTimeout(() => {
+            state.timer = null;
+            if (document.visibilityState !== 'visible') { state.deferred = true; return; }
+            const current = window.RAM_STATE?.balances || window.lastWalletData || {};
+            window.refreshStakingOverview(current);
+            window.refreshMaturedStakingButtons();
+            if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
+            if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+        }, delay);
+    };
+
+    window.refreshStakingOverview = wallet => {
+        if (!wallet) return;
+        const state = window.stakingDeadlineState;
+        if (document.visibilityState !== 'visible') { state.deferred = true; return; }
+        const model = window.buildStakingAssetProjection(wallet);
+        const name = String(window.RAM_STATE?.user?.Name || 'TCM USER').toUpperCase();
+        const signature = JSON.stringify([name, model], (key, value) => typeof value === 'bigint' ? value.toString() : value);
+        const text = (id, value) => {
+            const node = document.getElementById(id);
+            if (node && node.textContent !== String(value)) node.textContent = String(value);
+        };
+        if (signature !== state.signature) {
+            document.querySelectorAll('.uNameCardText').forEach(node => {
+                if (node.textContent !== name) node.textContent = name;
+            });
+            const format = micro => window.formatDashboardMoneyMicro(micro);
+            const principal = document.getElementById('stakeTotalValue');
+            if (principal) principal.innerHTML = (model.valid ? format(model.principal) : 'Unavailable') + ' <span style="font-size:1.4rem; color:var(--success);">₮</span>';
+            text('stakeDailyRoi', model.valid ? '+' + format(model.daily) + ' ₮' : 'Unavailable');
+            const badge = document.getElementById('stakeGrowthBadge');
+            if (badge) {
+                const positive = model.valid && model.earningPrincipal > 0n && model.daily > 0n;
+                const percentage = positive ? Number(model.daily * 10000n / model.earningPrincipal) / 100 : 0;
+                badge.innerHTML = positive ? `<i class="fas fa-bolt"></i> +${percentage.toFixed(2)}% Daily Speed` : '<i class="fas fa-minus"></i> 0.00% Speed';
+                badge.style.background = positive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                badge.style.color = positive ? 'var(--success)' : 'var(--text-sub)';
+                badge.style.border = positive ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(255, 255, 255, 0.2)';
+            }
+            for (const [tier, value] of Object.entries(model.tiers)) {
+                const cents = (value.principal + 5000n) / 10000n;
+                const tierAmount = (cents / 100n).toLocaleString('en-US') + '.' + (cents % 100n).toString().padStart(2, '0');
+                text('tierTotal_' + tier, model.valid ? tierAmount : 'Unavailable');
+                text('txCount_' + tier, value.count);
+            }
+            state.signature = signature;
         }
+        state.deferred = false;
+        window.scheduleStakingDisplayDeadline(wallet);
+    };
+
+    document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState !== 'visible') return;
+        if (window.stakingDeadlineState.deferred) {
+            const wallet = window.RAM_STATE?.balances || window.lastWalletData || {};
+            window.refreshStakingOverview(wallet);
+            window.refreshMaturedStakingButtons();
+            if (typeof window.renderActiveStakes === 'function') window.renderActiveStakes();
+            if (typeof window.initAssetsUI === 'function') window.initAssetsUI();
+        }
+    });
+
+    window.stakingCountdownInterval = setInterval(() => {
+        if (document.visibilityState !== 'visible') return;
+        const now = Date.now();
+        document.querySelectorAll('.atm-live-timer').forEach(node => {
+            if (!node.getClientRects().length) return;
+            const unlock = Number(node.getAttribute('data-unlock'));
+            if (!Number.isFinite(unlock) || unlock <= 0) return;
+            const seconds = Math.max(0, Math.floor((unlock - now) / 1000));
+            const value = [Math.floor(seconds / 3600), Math.floor(seconds % 3600 / 60), seconds % 60]
+                .map(part => String(part).padStart(2, '0')).join(':');
+            if (node.textContent !== value) node.textContent = value;
+        });
     }, 1000);
 
     /* === MODULE 32: ACTIVE CONTRACTS & CARD RENDERER === */
@@ -8616,6 +8962,18 @@ window.scheduleDashboardSocketReconnect = () => {
     if (gBox) { gBox.style.background = "#000000"; gBox.innerHTML = gCount > 0 ? goldHtml + '</div>' : emptyHtml; }
     if (pBox) { pBox.style.background = "#000000"; pBox.innerHTML = pCount > 0 ? platHtml + '</div>' : emptyHtml; }
     if (dBox) { dBox.style.background = "#000000"; dBox.innerHTML = dCount > 0 ? diamondHtml + '</div>' : emptyHtml; }
+    const cinemaTier = window.currentActiveStakeCard;
+    if (document.getElementById('cinemaOverlay') && cinemaTier) {
+        const originalBack = document.getElementById('back_' + cinemaTier + '_data');
+        const cinemaBack = document.getElementById('cinema_back_' + cinemaTier + '_data');
+        if (originalBack && cinemaBack && cinemaBack.dataset.sourceMarkup !== originalBack.innerHTML) {
+            const scroll = cinemaBack.scrollTop;
+            cinemaBack.innerHTML = originalBack.innerHTML;
+            window.namespaceCinemaCardIDs(cinemaBack);
+            cinemaBack.dataset.sourceMarkup = originalBack.innerHTML;
+            cinemaBack.scrollTop = scroll;
+        }
+    }
 };
 
     // MEMO TCM-STK-008 | 2026-10-10 00:22 IST | Asia/Kolkata
@@ -8634,6 +8992,35 @@ window.scheduleDashboardSocketReconnect = () => {
     /* === MODULE 33: CINEMA MODE & HARDWARE ROUTER === */
     window.cinemaProfitInterval = null;
 
+    window.namespaceCinemaCardIDs = fullCard => {
+        const cinemaIds = new Map();
+        fullCard.querySelectorAll('[id]').forEach(element => {
+            const originalId = element.id;
+            element.id = 'cinema_' + originalId;
+            cinemaIds.set(originalId, element.id);
+        });
+        fullCard.querySelectorAll('*').forEach(element => {
+            for (const name of ['for', 'aria-labelledby', 'aria-describedby', 'aria-controls']) {
+                if (!element.hasAttribute(name)) continue;
+                const ids = element.getAttribute(name).split(/\s+/);
+                element.setAttribute(name, ids.map(id => cinemaIds.get(id) || id).join(' '));
+            }
+            if (element.getAttribute('href')?.startsWith('#')) {
+                const target = element.getAttribute('href').slice(1);
+                if (cinemaIds.has(target)) element.setAttribute('href', '#' + cinemaIds.get(target));
+            }
+            for (const attribute of [...element.attributes]) {
+                if (!attribute.name.startsWith('on')) continue;
+                let value = attribute.value;
+                for (const [oldId, newId] of cinemaIds) {
+                    value = value.split("'" + oldId + "'").join("'" + newId + "'");
+                    value = value.split('"' + oldId + '"').join('"' + newId + '"');
+                }
+                element.setAttribute(attribute.name, value);
+            }
+        });
+    };
+
     window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
         window.currentActiveStakeCard = tierTheme;
         window.location.hash = 'cinema';
@@ -8647,8 +9034,9 @@ window.scheduleDashboardSocketReconnect = () => {
         }
 
         const fullCard = cardElement.querySelector('.atm-card').cloneNode(true);
-        fullCard.id = "cinema3DCardInner";
+        fullCard.id = 'cinema3DCardInner';
         fullCard.classList.remove('is-flipped');
+        window.namespaceCinemaCardIDs(fullCard);
 
         const inputRow = fullCard.querySelector('.atm-input-row');
         if(inputRow) inputRow.style.display = 'none';
@@ -8659,6 +9047,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
         overlay.innerHTML = `
             <div class="cinema-close-btn" onclick="window.closeCinemaMode()"><i class="fas fa-times"></i></div>
+            <button type="button" id="cinemaFlipButton" class="act-btn" style="position:absolute; top:15px; left:15px; padding:6px 12px; z-index:20;">Flip Card</button>
             <div class="cinema-card-container" id="cinemaCardWrapper" style="cursor: pointer; height: auto; aspect-ratio: 1.586 / 1; max-height: 240px; transition: transform 0.4s ease;">
                 ${fullCard.outerHTML}
             </div>
@@ -8677,31 +9066,56 @@ window.scheduleDashboardSocketReconnect = () => {
             </div>
         `;
 
+        window.cinemaOverlayVersion = (window.cinemaOverlayVersion || 0) + 1;
+        const cinemaVersion = window.cinemaOverlayVersion;
+        window.acquireModalScroll('modal:cinemaOverlay');
         overlay.style.display = 'flex';
-        setTimeout(() => { overlay.classList.add('active'); }, 10);
+        setTimeout(() => {
+            if (window.cinemaOverlayVersion === cinemaVersion) overlay.classList.add('active');
+        }, 10);
 
         const cinemaWrapper = document.getElementById('cinemaCardWrapper');
         const cinemaCardInner = document.getElementById('cinema3DCardInner');
         cinemaCardInner.style.transition = "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
 
         let isFlipping = false;
-
-        cinemaWrapper.onclick = () => {
-            if (isFlipping) return;
-
+        let pointerStart = null;
+        let suppressFlipUntil = 0;
+        cinemaWrapper.addEventListener('pointerdown', event => {
+            pointerStart = { x: event.clientX, y: event.clientY, id: event.pointerId };
+        }, { passive: true });
+        cinemaWrapper.addEventListener('pointermove', event => {
+            if (!pointerStart || pointerStart.id !== event.pointerId) return;
+            if (Math.hypot(event.clientX - pointerStart.x, event.clientY - pointerStart.y) > 8) {
+                suppressFlipUntil = Date.now() + 500;
+            }
+        }, { passive: true });
+        cinemaWrapper.addEventListener('pointerup', () => { pointerStart = null; }, { passive: true });
+        cinemaWrapper.addEventListener('pointercancel', () => {
+            pointerStart = null;
+            suppressFlipUntil = Date.now() + 500;
+        }, { passive: true });
+        const flipCinema = () => {
+            if (isFlipping || Date.now() < suppressFlipUntil) return;
             if (cinemaCardInner.classList.contains('is-flipped')) {
                 cinemaCardInner.classList.remove('is-flipped');
             } else {
                 isFlipping = true;
-                cinemaCardInner.style.transform = "rotateZ(-3deg) rotateY(18deg) rotateX(10deg) scale(0.92)";
-
-                // No API call needed here. renderActiveStakes already populates the card back flawlessly!
+                cinemaCardInner.style.transform = 'rotateZ(-3deg) rotateY(18deg) rotateX(10deg) scale(0.92)';
                 setTimeout(() => {
-                    cinemaCardInner.style.transform = "";
+                    cinemaCardInner.style.transform = '';
                     cinemaCardInner.classList.add('is-flipped');
                     isFlipping = false;
                 }, 600);
             }
+        };
+        cinemaWrapper.onclick = event => {
+            if (event.target.closest('.atm-face-back, button, a, input, select, textarea, [role="button"]')) return;
+            flipCinema();
+        };
+        document.getElementById('cinemaFlipButton').onclick = event => {
+            event.stopPropagation();
+            flipCinema();
         };
 
         let totalPrincipal = 0;
@@ -8742,14 +9156,20 @@ window.scheduleDashboardSocketReconnect = () => {
     window.closeCinemaMode = (fromBackButton = false) => {
         if (!fromBackButton && window.location.hash === '#cinema') {
             window.history.back();
-        } else {
-            const overlay = document.getElementById('cinemaOverlay');
-            if (overlay) {
-                overlay.classList.remove('active');
-                if (window.cinemaProfitInterval) clearInterval(window.cinemaProfitInterval);
-                setTimeout(() => { overlay.style.display = 'none'; overlay.remove(); }, 500);
-            }
+            return;
         }
+        window.cinemaOverlayVersion = (window.cinemaOverlayVersion || 0) + 1;
+        const version = window.cinemaOverlayVersion;
+        const overlay = document.getElementById('cinemaOverlay');
+        if (window.cinemaProfitInterval) clearInterval(window.cinemaProfitInterval);
+        if (!overlay) { window.releaseModalScroll('modal:cinemaOverlay'); return; }
+        overlay.classList.remove('active');
+        setTimeout(() => {
+            if (window.cinemaOverlayVersion !== version) return;
+            overlay.style.display = 'none';
+            overlay.remove();
+            window.releaseModalScroll('modal:cinemaOverlay');
+        }, 500);
     };
 
     /* === MODULE 34: SMART HARDWARE ROUTER === */
@@ -8887,6 +9307,9 @@ window.scheduleDashboardSocketReconnect = () => {
         setTimeout(() => {
             if(accModal) { accModal.style.display = ''; accModal.style.transition = ''; }
             window.openModal('accountDeleteModal');
+            document.getElementById('deleteEmailOTP').value = '';
+            document.getElementById('delete2FACode').value = '';
+            void window.startDeletionChallenge();
         }, 150);
     };
 
@@ -8995,6 +9418,64 @@ window.scheduleDashboardSocketReconnect = () => {
             document.getElementById('accDeleteTimer').innerText = `${h}:${m}:${s}`;
             if (globalTimerText) globalTimerText.innerText = `${h}:${m}:${s}`;
         }, 1000);
+    };
+
+    window.deletionVerification = { version: 0, challenge: null, receipt: null, selected: new Set(), busy: false };
+    window.startDeletionChallenge = async () => {
+        const state = window.deletionVerification;
+        const version = ++state.version;
+        state.receipt = null;
+        state.challenge = null;
+        state.selected.clear();
+        const box = document.getElementById('deletionPuzzleTiles');
+        const status = document.getElementById('deletionPuzzleStatus');
+        const reference = document.getElementById('deletionPuzzleReference');
+        box.replaceChildren();
+        reference.removeAttribute('src');
+        status.textContent = 'Loading verification...';
+        const epoch = window.dashboardSession.epoch;
+        const result = await window.fetchAPI('/user/deletion-challenge', 'POST', {});
+        if (state.version !== version || window.dashboardSession.epoch !== epoch) return;
+        if (!result.success) { status.textContent = result.message || 'Verification unavailable.'; return; }
+        state.challenge = result.challengeId;
+        reference.src = result.reference;
+        status.textContent = 'Select the three tiles with the same shape as the reference. Colors may differ.';
+        for (const [index, tile] of result.tiles.entries()) {
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'deletion-puzzle-tile';
+            button.setAttribute('aria-label', 'Verification tile ' + (index + 1));
+            button.setAttribute('aria-pressed', 'false');
+            const image = document.createElement('img');
+            image.src = tile.image;
+            image.alt = '';
+            image.draggable = false;
+            button.appendChild(image);
+            button.addEventListener('click', () => {
+                if (state.busy) return;
+                if (state.selected.has(tile.id)) state.selected.delete(tile.id);
+                else if (state.selected.size < 3) state.selected.add(tile.id);
+                button.setAttribute('aria-pressed', String(state.selected.has(tile.id)));
+            });
+            box.appendChild(button);
+        }
+    };
+    window.verifyDeletionChallenge = async () => {
+        const state = window.deletionVerification;
+        if (state.busy || !state.challenge || state.selected.size !== 3) return;
+        const version = state.version;
+        state.busy = true;
+        try {
+            const result = await window.fetchAPI('/user/deletion-challenge/verify', 'POST', {
+                challengeId: state.challenge, selections: [...state.selected]
+            });
+            if (state.version !== version) return;
+            state.challenge = null;
+            state.receipt = result.success ? result.verificationReceipt : null;
+            document.getElementById('deletionPuzzleStatus').textContent = result.success
+                ? 'Verified. You can request your deletion OTP now.'
+                : (result.message || 'Verification failed. Request a new puzzle.');
+        } finally { state.busy = false; }
     };
 
     window.submitDeleteAccount = async () => {
