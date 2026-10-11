@@ -4132,6 +4132,26 @@ window.mergeDashboardHistory = (records, replace = false) => {
     return window.allTransactions;
 };
 
+window.renderDashboardRoleBadge = role => {
+    const profileCard = document.querySelector('.profile-card');
+    if (!profileCard) return;
+
+    const isAdmin = role === 'Admin';
+    let badge = profileCard.querySelector('.profile-admin-badge');
+
+    if (isAdmin && !badge) {
+        badge = document.createElement('span');
+        badge.className = 'profile-admin-badge';
+        badge.textContent = 'ADMIN';
+        badge.setAttribute('aria-label', 'Administrator account');
+        profileCard.appendChild(badge);
+    } else if (!isAdmin && badge) {
+        badge.remove();
+    }
+
+    profileCard.classList.toggle('profile-is-admin', isAdmin);
+};
+
 window.applyDashboardSnapshot = data => {
     const uid = localStorage.getItem('uid');
     if (!data || !data.wallet || !data.user || !uid) throw new Error('Invalid dashboard response.');
@@ -4166,21 +4186,7 @@ window.applyDashboardSnapshot = data => {
     text('uName', user.Name || 'User');
     text('sbName', user.Name || 'User');
 
-    const profileCard = document.querySelector('.profile-card');
-    if (profileCard) {
-        const isAdmin = user.Role === 'Admin';
-        let adminBadge = profileCard.querySelector('.profile-admin-badge');
-        if (isAdmin && !adminBadge) {
-            adminBadge = document.createElement('span');
-            adminBadge.className = 'profile-admin-badge';
-            adminBadge.textContent = 'ADMIN';
-            adminBadge.setAttribute('aria-label', 'Administrator account');
-            profileCard.appendChild(adminBadge);
-        } else if (!isAdmin && adminBadge) {
-            adminBadge.remove();
-        }
-        profileCard.classList.toggle('profile-is-admin', isAdmin);
-    }
+    window.renderDashboardRoleBadge(user.Role);
     text('uUID', uid);
     text('sbUid', 'UID: ' + uid);
     const avatar = user.Avatar || user.avatar || localStorage.getItem('tcm_user_dp');
@@ -7230,6 +7236,23 @@ window.scheduleDashboardSocketReconnect = () => {
     }) : null;
 
     if (window.socket) {
+        window.socket.on('user_role_changed', data => {
+            const uid = localStorage.getItem('uid');
+            if (!data || data.uid !== uid ||
+                !['Admin', 'User'].includes(data.role) ||
+                window.dashboardSession.closed || window.dashboardSession.blocked) return;
+
+            // Reject snapshots requested before this committed role change.
+            window.dashboardSync.invalidationVersion =
+                (window.dashboardSync.invalidationVersion || 0) + 1;
+
+            if (window.RAM_STATE && window.RAM_STATE.user) {
+                window.RAM_STATE.user.Role = data.role;
+            }
+
+            window.renderDashboardRoleBadge(data.role);
+        });
+
         window.socket.on('dashboard_invalidated', hint => {
             if (!hint || hint.uid !== localStorage.getItem('uid') ||
                 window.dashboardSession.closed || window.dashboardSession.blocked) return;
