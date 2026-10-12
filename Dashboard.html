@@ -179,7 +179,7 @@
             bottom: 9px;
             padding: 5px 10px;
             border-radius: 5px;
-            background: linear-gradient(
+           background: linear-gradient(
                 145deg,
                 #ffffff 0%,
                 #e6eef7 35%,
@@ -251,8 +251,86 @@
             box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.9), inset -1px -1px 4px rgba(255, 255, 255, 0.04), -1px -1px 1px rgba(255, 255, 255, 0.12), 1px 1px 2px rgba(0, 0, 0, 0.8);
         }
 
-        .status-dot { position: absolute; bottom: 2px; right: 2px; width: 16px; height: 16px; border-radius: 50%; border: 3px solid var(--bg-card); z-index: 15; transition: 0.3s; }
-        .status-dot.online { background: var(--success); box-shadow: 0 0 10px var(--success); animation: pulseGreen 2s infinite; }
+        .status-dot {
+    position: absolute;
+    bottom: 6.5px;
+    right: 6.5px;
+    width: 13.2px;
+    height: 13.2px;
+    border: 0;
+    border-radius: 0;
+    z-index: 15;
+    pointer-events: none;
+    overflow: visible;
+    clip-path: none;
+    transform: none;
+    filter: none;
+    box-shadow: none;
+    animation: none;
+    transition: none;
+    background-color: transparent;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 13.2px 13.2px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cg fill='%2394a3b8' stroke='%23334155' stroke-width='.35' stroke-linejoin='round'%3E%3Cpath class='nano-seg-1' d='M8.55 4.45L10 5L5 10L4.45 8.55Z'/%3E%3Cpath class='nano-seg-2' d='M5.64 3.36L7.82 4.18L4.18 7.82L3.36 5.64Z'/%3E%3Cpath class='nano-seg-3' d='M2 2L4.91 3.09L3.09 4.91Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.status-dot::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border: 1px solid rgba(16, 185, 129, 0.65);
+    border-radius: 50%;
+    background: transparent;
+    pointer-events: none;
+    opacity: 0;
+    transform: scale(0.65);
+    transform-origin: center;
+    box-shadow: none;
+    filter: none;
+}
+
+.status-dot.online::after {
+    animation: nanoEmeraldRipple 5s linear infinite;
+}
+
+@keyframes nanoEmeraldRipple {
+    0%, 23% {
+        opacity: 0;
+        transform: scale(0.65);
+    }
+
+    25% {
+        opacity: 0.5;
+        transform: scale(0.85);
+    }
+
+    35% {
+        opacity: 0.32;
+        transform: scale(1.4);
+    }
+
+    48%, 100% {
+        opacity: 0;
+        transform: scale(1.9);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .status-dot.online::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+.status-dot.online {
+    background-color: transparent;
+    box-shadow: none;
+    filter: none;
+    animation: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cdefs%3E%3ClinearGradient id='emeraldPlate' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ecfdf5'/%3E%3Cstop offset='.28' stop-color='%236ee7b7'/%3E%3Cstop offset='.62' stop-color='%2310b981'/%3E%3Cstop offset='1' stop-color='%23047857'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cstyle%3E.nano-seg-1,.nano-seg-2,.nano-seg-3{animation:nanoPlateLift 5s ease-in-out infinite}.nano-seg-2{animation-delay:.2s}.nano-seg-3{animation-delay:.4s}%40keyframes nanoPlateLift{0%25,15%25,100%25{transform:translate(0,0)}4%25,9%25{transform:translate(-.5px,-.5px)}}%40media(prefers-reduced-motion:reduce){.nano-seg-1,.nano-seg-2,.nano-seg-3{animation:none}}%3C/style%3E%3Cg fill='url(%23emeraldPlate)' stroke='%23064e3b' stroke-width='.35' stroke-linejoin='round'%3E%3Cpath class='nano-seg-1' d='M8.55 4.45L10 5L5 10L4.45 8.55Z'/%3E%3Cpath class='nano-seg-2' d='M5.64 3.36L7.82 4.18L4.18 7.82L3.36 5.64Z'/%3E%3Cpath class='nano-seg-3' d='M2 2L4.91 3.09L3.09 4.91Z'/%3E%3C/g%3E%3C/svg%3E");
+}
 
         .u-data { flex: 1; min-width: 0 !important; }
         .name-weather-row { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; min-width: 0; }
@@ -561,6 +639,20 @@
             overscroll-behavior-y: auto;
             -webkit-overflow-scrolling: touch;
             touch-action: pan-y pinch-zoom;
+            mask-image: linear-gradient(
+                to bottom,
+                transparent,
+                black 16px,
+                black calc(100% - 16px),
+                transparent
+            );
+            -webkit-mask-image: linear-gradient(
+                to bottom,
+                transparent,
+                black 16px,
+                black calc(100% - 16px),
+                transparent
+            );
         }
         .atm-face-back, .modal-box, .cinema-details {
             overscroll-behavior: contain;
@@ -572,16 +664,39 @@
             max-height: calc(100dvh - 32px);
             overflow-y: auto;
         }
-        .deletion-puzzle-tile {
-            padding: 2px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            background: var(--bg-main);
+        .deletion-confirm-widget {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            padding: 14px;
+            box-sizing: border-box;
+            border: 1px solid rgba(103, 232, 249, 0.25);
+            border-radius: 14px;
+            background: linear-gradient(135deg, #0f172a, #102129);
+            color: #f8fafc;
+            text-align: left;
             cursor: pointer;
         }
-        .deletion-puzzle-tile[aria-pressed="true"] { border-color: var(--success); }
-        .deletion-puzzle-tile:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
-        .deletion-puzzle-tile img { display: block; width: 100%; aspect-ratio: 1; }
+
+        .deletion-confirm-widget:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 3px;
+        }
+
+        .deletion-confirm-widget[aria-checked="true"] {
+            border-color: #34d399;
+        }
+
+        #btnGetDeleteOTP:disabled,
+        #deleteEmailOTP:disabled {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        #accountDeleteModal[data-confirmed="true"] #btnGetDeleteOTP:not(:disabled) {
+            box-shadow: 0 0 12px rgba(52, 211, 153, 0.25);
+        }
         .tx-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border); transition: 0.3s; }
         .tx-item:last-child { border-bottom: none; padding-bottom: 0; }
         .tx-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0;}
@@ -635,10 +750,124 @@
         .nft-item-info p { font-size: 0.8rem; margin: 0; font-weight: 700; font-family: 'Space Grotesk', sans-serif; }
 
         #nftScanModal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(10px); z-index: var(--z-modal); display: none; align-items: center; justify-content: center; padding: 20px; flex-direction: column; text-align: center; }
-        .scan-box { width: 220px; height: 220px; border: 2px dashed var(--primary); border-radius: 20px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; background: rgba(0, 245, 255, 0.05); margin-bottom: 20px; box-shadow: 0 0 30px rgba(0, 245, 255, 0.2); }
-        .scan-line { position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: var(--primary); box-shadow: 0 0 15px 5px var(--primary); animation: scanAnim 1.5s linear infinite alternate; }
+        .luxury-nft-portal {
+            position: relative;
+            display: grid;
+            place-items: center;
+            width: 200px;
+            height: 200px;
+            flex-shrink: 0;
+            margin-bottom: 18px;
+            border-radius: 28px;
+            overflow: hidden;
+            perspective: 600px;
+            background: radial-gradient(circle at 50% 45%, #16333b, #080d16 70%);
+            border: 1px solid rgba(226, 196, 132, 0.4);
+            box-shadow:
+                inset 0 1px 1px rgba(255, 239, 195, 0.3),
+                inset 0 -1px 1px rgba(103, 232, 249, 0.2),
+                0 18px 45px rgba(0, 0, 0, 0.45);
+        }
+
+        .luxury-nft-orbits {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .luxury-nft-ring {
+            position: absolute;
+            inset: 20px;
+            border: 1px solid rgba(232, 204, 146, 0.8);
+            border-radius: 50%;
+            border-top-color: #fff0c2;
+            border-bottom-color: rgba(232, 204, 146, 0.12);
+            box-shadow: 0 0 12px rgba(232, 204, 146, 0.15);
+            animation: orbitalSpin 3s linear infinite;
+        }
+
+        .luxury-nft-ring-secondary {
+            inset: 34px;
+            border-color: rgba(103, 232, 249, 0.75);
+            border-top-color: #d5fbff;
+            border-bottom-color: rgba(103, 232, 249, 0.12);
+            box-shadow: 0 0 12px rgba(103, 232, 249, 0.15);
+            animation-direction: reverse;
+            animation-delay: -1.5s;
+        }
+
+        .luxury-nft-core {
+            position: relative;
+            z-index: 1;
+            font-size: 3rem;
+            color: #f4dfb1;
+            text-shadow:
+                0 1px 1px #ffffff,
+                0 8px 18px rgba(0, 0, 0, 0.6),
+                0 0 22px rgba(103, 232, 249, 0.35);
+            animation: luxuryAssetFloat 3s ease-in-out infinite;
+        }
+
+        .luxury-nft-portal .nft-result-img {
+            position: relative;
+            z-index: 2;
+            width: 136px;
+            height: 136px;
+            border: 1px solid rgba(226, 196, 132, 0.45);
+            box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+        }
+
+        @keyframes orbitalSpin {
+            from { transform: rotateX(58deg) rotateZ(0deg); }
+            to { transform: rotateX(58deg) rotateZ(360deg); }
+        }
+
+        @keyframes luxuryAssetFloat {
+            0%, 100% { transform: translateY(0) rotateY(-12deg); }
+            50% { transform: translateY(-5px) rotateY(12deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .luxury-nft-ring,
+            .luxury-nft-core {
+                animation: none;
+            }
+        }
         @keyframes scanAnim { 0% { top: 0%; } 100% { top: 100%; } }
-        .scan-text { color: var(--primary); font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; font-weight: 700; letter-spacing: 1px; animation: pulseText 1s infinite alternate; }
+        .scan-text {
+            width: 100%;
+            max-width: 320px;
+            color: #d9e8ef;
+            font-family: monospace;
+            font-size: 0.8rem;
+            line-height: 1.6;
+            font-weight: 500;
+            letter-spacing: 0.08em;
+        }
+
+        #nftScanModal[data-scan-error="true"] .luxury-nft-portal {
+            display: none;
+        }
+
+        #nftScanModal[data-scan-error="true"] #scanText {
+            box-sizing: border-box;
+            width: calc(100% - 32px);
+            max-width: 320px;
+            max-height: calc(100dvh - 48px);
+            overflow-y: auto;
+            padding: 22px 18px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, #0f172a, #1c1422);
+            border: 1px solid rgba(251, 113, 133, 0.3);
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            color: #f8fafc;
+            font-size: 0.85rem;
+            letter-spacing: normal;
+            text-align: center;
+            animation: none;
+        }
         @keyframes pulseText { 0% { opacity: 0.5; } 100% { opacity: 1; } }
         .nft-result-img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 18px; }
         .nft-result-info { display: none; flex-direction: column; gap: 5px; animation: popIn 0.5s ease; }
@@ -873,8 +1102,25 @@
         .stealth-btn.normal:active { transform: scale(0.96); }
         @keyframes pulseYellow { 0% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0.7); } 70% { box-shadow: 0 0 0 10px rgba(250, 204, 21, 0); } 100% { box-shadow: 0 0 0 0 rgba(250, 204, 21, 0); } }
 
-        .shield-wrapper { position: relative; width: 140px; height: 160px; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
-        .shield-svg { width: 120px; height: 140px; transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); transform-style: preserve-3d; }
+        .shield-wrapper {
+            position: relative;
+            width: 140px;
+            height: 150px;
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+            overflow: visible;
+        }
+
+        .shield-svg {
+            width: 120px;
+            height: 150px;
+            overflow: visible;
+            transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            transform-style: preserve-3d;
+        }
         .shield-layer-0, .shield-layer-50, .shield-layer-100 { display: none; transition: opacity 0.5s ease; opacity: 0; }
         .shield-0 .shield-layer-0 { display: block; opacity: 1; }
         .shield-50 .shield-layer-50 { display: block; opacity: 1; }
@@ -930,8 +1176,34 @@
         .lt-perf.up { background: rgba(16, 185, 129, 0.15); color: var(--success); }
         .lt-perf.down { background: rgba(244, 63, 94, 0.15); color: var(--error); }
 
-        .tx-item-animated { opacity: 0; transform: translateY(40px) scale(0.85); filter: blur(5px); transition: all 0.65s cubic-bezier(0.34, 1.56, 0.64, 1); will-change: transform, opacity, filter; }
-        .tx-item-animated.show { opacity: 1; transform: translateY(0) scale(1); filter: blur(0px); }
+        .tx-item-animated {
+            opacity: 0.15;
+            filter: blur(4px);
+            transform: scale(0.98);
+            transform-origin: center;
+            transition:
+                opacity 0.4s ease,
+                filter 0.4s ease,
+                transform 0.4s ease;
+            will-change: opacity, filter, transform;
+        }
+
+        .tx-item-animated.show {
+            opacity: 1;
+            filter: blur(0px);
+            transform: scale(1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .tx-item-animated,
+            .tx-item-animated.show {
+                opacity: 1;
+                filter: none;
+                transform: none;
+                transition: none;
+                will-change: auto;
+            }
+        }
 
         .flip-btn-container { position: relative; width: 78px; height: 22px; overflow: hidden; border-radius: 6px; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.2); border: 1px solid rgba(250, 204, 21, 0.3); }
         .flip-track { display: flex; flex-direction: column; width: 100%; height: 200%; transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -1312,30 +1584,91 @@
     </div>
 </div>
 
-<div id="accountDeleteModal" class="modal">
-    <div class="modal-box" style="text-align: left; border-color: var(--error);">
-        <h2 style="font-size:1.3rem; margin-bottom:10px; font-weight:700;"><i class="fas fa-trash-alt" style="color:var(--error);"></i> Delete Account</h2>
-        <p style="font-size:0.8rem; color:var(--error); font-weight:700; margin-bottom:15px;"><i class="fas fa-exclamation-triangle"></i> Account will be permanently deleted after 24 hours.</p>
-        <div id="deletionPuzzle" style="padding:12px; border:1px solid var(--border); border-radius:12px; margin-bottom:15px;">
-            <p style="font-size:0.8rem; margin:0 0 8px;">Match the reference shape before requesting an OTP.</p>
-            <img id="deletionPuzzleReference" alt="Reference shape to match" width="48" height="48" style="display:block; margin-bottom:8px;">
-            <div id="deletionPuzzleTiles" style="display:grid; grid-template-columns:repeat(3,1fr); gap:6px; max-width:228px;"></div>
-            <p id="deletionPuzzleStatus" role="status" style="font-size:0.75rem; color:var(--text-sub);">Verification required.</p>
-            <button type="button" class="act-btn" onclick="window.verifyDeletionChallenge()">Verify Selection</button>
-            <button type="button" class="act-btn" onclick="window.startDeletionChallenge()">New Puzzle</button>
+<div id="accountDeleteModal" class="modal" data-confirmed="false">
+    <div class="modal-box" style="box-sizing:border-box;width:calc(100% - 24px);max-width:340px;padding:20px;text-align:left;border-color:var(--error);">
+        <h2 style="font-size:1.1rem;margin:0 0 8px;font-weight:700;">
+            <i class="fas fa-trash-alt" style="color:var(--error);"></i>
+            Delete Account
+        </h2>
+
+        <p style="font-size:.75rem;color:var(--error);margin:0 0 12px;">
+            Account will be permanently deleted after 24 hours.
+        </p>
+
+        <button type="button"
+                id="deleteConfirmationWidget"
+                class="deletion-confirm-widget"
+                role="checkbox"
+                aria-checked="false"
+                onclick="window.verifyDeletionConfirmation()">
+            <span id="deleteConfirmationIcon"
+                  style="width:22px;flex-shrink:0;font-size:1.1rem;text-align:center;"
+                  aria-hidden="true">□</span>
+
+            <span style="min-width:0;flex:1;">
+                <strong id="deleteConfirmationText"
+                        style="display:block;font-size:.8rem;">
+                    Confirm to continue
+                </strong>
+                <span style="display:block;font-size:.6rem;color:#94a3b8;margin-top:4px;">
+                    TCM Shield · Account confirmation
+                </span>
+            </span>
+
+            <i class="fas fa-shield-alt"
+               style="color:#67e8f9;"
+               aria-hidden="true"></i>
+        </button>
+
+        <label for="deleteEmailOTP"
+               style="display:block;font-size:.75rem;color:var(--text-sub);margin-top:12px;">
+            Email OTP Verification
+        </label>
+
+        <div style="display:flex;gap:8px;margin:5px 0 12px;">
+            <input type="text"
+                   inputmode="numeric"
+                   maxlength="6"
+                   id="deleteEmailOTP"
+                   disabled
+                   placeholder="6-Digit OTP"
+                   style="min-width:0;flex:1;padding:11px;background:var(--bg-main);border:1px solid var(--border);border-radius:10px;color:var(--text-main);">
+
+            <button type="button"
+                    id="btnGetDeleteOTP"
+                    disabled
+                    class="act-btn btn-dep"
+                    style="padding:0 12px;border-radius:10px;font-size:.75rem;white-space:nowrap;"
+                    onclick="window.requestSystemOTP('btnGetDeleteOTP')">
+                Get OTP
+            </button>
         </div>
 
-        <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Email OTP Verification</label>
-        <div style="display:flex; gap:10px; margin-top: 5px; margin-bottom: 12px;">
-            <input type="number" id="deleteEmailOTP" placeholder="6-Digit OTP" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); outline: none;">
-            <button id="btnGetDeleteOTP" class="act-btn btn-dep" style="padding:0 15px; border-radius:12px; font-size:0.8rem; white-space:nowrap;" onclick="window.requestSystemOTP('btnGetDeleteOTP')">Get OTP</button>
-        </div>
+        <label for="delete2FACode"
+               style="font-size:.75rem;color:var(--text-sub);">
+            Google Authenticator
+        </label>
 
-        <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600;">Google Authenticator</label>
-        <input type="number" id="delete2FACode" placeholder="Enter 2FA Code" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 15px; color: var(--text-main); outline: none; margin-top: 5px; font-family: monospace; font-weight: 700; letter-spacing: 2px;">
+        <input type="text"
+               inputmode="numeric"
+               maxlength="6"
+               id="delete2FACode"
+               placeholder="Enter 2FA Code"
+               style="box-sizing:border-box;width:100%;padding:11px;background:var(--bg-main);border:1px solid var(--border);border-radius:10px;margin:5px 0 12px;color:var(--text-main);font-family:monospace;letter-spacing:2px;">
 
-        <button class="act-btn btn-wd" style="width:100%; padding: 12px;" id="btnConfirmDelete" onclick="window.submitDeleteAccount()">Initiate Deletion</button>
-        <p onclick="closeModal('accountDeleteModal')" style="margin-top:15px; font-size:0.8rem; color:var(--text-sub); cursor:pointer; text-align: center;">Cancel</p>
+        <button type="button"
+                class="act-btn btn-wd"
+                style="width:100%;padding:11px;"
+                id="btnConfirmDelete"
+                onclick="window.submitDeleteAccount()">
+            Initiate Deletion
+        </button>
+
+        <button type="button"
+                onclick="window.closeModal('accountDeleteModal')"
+                style="display:block;margin:12px auto 0;background:none;border:0;color:var(--text-sub);cursor:pointer;">
+            Cancel
+        </button>
     </div>
 </div>
 
@@ -1870,12 +2203,26 @@
 
 <!-- === NFT MATCHMAKING & SCAN MODALS === -->
 <div id="nftScanModal" class="modal">
-    <div class="scan-box">
-        <div class="scan-line" id="scanLine"></div>
-        <i class="fas fa-fingerprint" id="scanIcon" style="font-size: 4rem; color: rgba(0, 245, 255, 0.3);"></i>
-        <img src="" id="foundNftImg" class="nft-result-img" alt="NFT">
+    <div class="luxury-nft-portal">
+        <div class="luxury-nft-orbits" id="scanLine" aria-hidden="true">
+            <div class="luxury-nft-ring"></div>
+            <div class="luxury-nft-ring luxury-nft-ring-secondary"></div>
+        </div>
+
+        <i class="fas fa-cube luxury-nft-core"
+           id="scanIcon"
+           aria-hidden="true"></i>
+
+        <img src=""
+             id="foundNftImg"
+             class="nft-result-img"
+             alt="Allocated NFT asset">
     </div>
-    <div id="scanText" class="scan-text">Searching in Blockchain...</div>
+
+    <div id="scanText"
+         class="scan-text"
+         role="status"
+         aria-live="polite">Searching Liquidity Nodes</div>
 
     <div id="nftResultInfo" class="nft-result-info">
         <h3 style="color: white; font-size: 1.4rem; font-family: 'Space Grotesk', sans-serif;">Bored Ape #4592</h3>
@@ -1885,25 +2232,40 @@
 </div>
 
 <div id="sellRadarModal" class="modal" style="z-index: calc(var(--z-max) + 5);">
-    <div class="modal-box" style="background: rgba(10, 15, 25, 0.95); border: 1px solid var(--primary); box-shadow: 0 0 30px rgba(0, 245, 255, 0.2); overflow: hidden; position: relative;">
-        <h2 style="font-size: 1.2rem; font-family: 'Space Grotesk', sans-serif; color: var(--primary); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 2px;">Global Node Radar</h2>
-        <p id="radarStatusText" style="font-size: 0.8rem; color: var(--text-sub); margin-bottom: 20px; font-family: monospace;">Connecting to Blockchain...</p>
+    <div class="modal-box" style="box-sizing:border-box;width:calc(100% - 32px);max-width:320px;padding:20px;background:linear-gradient(145deg,#0f172a,#06141b);border:1px solid rgba(34,211,238,.28);border-radius:22px;box-shadow:0 20px 45px rgba(0,0,0,.45);overflow:hidden;position:relative;text-align:center;">
+        <h2 style="font-size:1rem;color:#67e8f9;margin:0 0 8px;letter-spacing:.08em;">
+            Global Node Radar
+        </h2>
 
-        <div class="radar-container">
+        <p id="radarStatusText"
+           role="status"
+           aria-live="polite"
+           style="font-size:.75rem;color:#cbd5e1;margin:0 0 16px;min-height:2.5em;">
+            Connecting to Blockchain...
+        </p>
+
+        <div class="radar-container" style="width:180px;height:180px;">
             <div class="radar-core"></div>
             <div class="radar-circle rc-1"></div>
             <div class="radar-circle rc-2"></div>
-            <div class="radar-circle rc-3"></div>
-            <div class="radar-sweep"></div>
-            <div class="radar-dot" style="top: 20%; left: 30%; animation-delay: 0.5s;"></div>
-            <div class="radar-dot" style="top: 70%; left: 60%; animation-delay: 1.2s;"></div>
-            <div class="radar-dot" style="top: 40%; left: 80%; animation-delay: 2.1s;"></div>
+            <div class="radar-circle rc-3" style="width:160px;height:160px;"></div>
+
+            <div class="radar-sweep"
+                 style="width:90px;height:90px;animation-duration:.8s;"></div>
+
+            <div class="radar-dot"
+                 style="top:20%;left:30%;animation-duration:.9s;"></div>
+
+            <div class="radar-dot"
+                 style="top:70%;left:60%;animation-duration:.9s;animation-delay:.2s;"></div>
+
+            <div class="radar-dot"
+                 style="top:40%;left:80%;animation-duration:.9s;animation-delay:.4s;"></div>
         </div>
 
-        <div style="margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px;">
-            <i class="fas fa-satellite-dish fa-fade" style="color: var(--primary);"></i>
-            <span style="font-size: 0.85rem; font-weight: 700; color: #fff;">Searching for Buyers...</span>
-        </div>
+        <p style="margin:14px 0 0;font-size:.68rem;color:#94a3b8;">
+            Waiting for server-confirmed settlement
+        </p>
     </div>
 </div>
 <!-- === MODULE 11: HEADER & TICKER === -->
@@ -3140,13 +3502,27 @@
     window.openModal = id => {
         const modal = document.getElementById(id);
         if (!modal) return;
-        window.modalCloseVersions.set(modal, (window.modalCloseVersions.get(modal) || 0) + 1);
+
+        const version = (window.modalCloseVersions.get(modal) || 0) + 1;
+        window.modalCloseVersions.set(modal, version);
         window.acquireModalScroll('modal:' + id);
+
+        modal.style.pointerEvents = 'auto';
         modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('show'), 10);
+
+        setTimeout(() => {
+            if (window.modalCloseVersions.get(modal) === version) {
+                modal.classList.add('show');
+            }
+        }, 10);
     };
     window.closeModal = id => {
+        if (id === 'accountDeleteModal' && window.resetDeletionVerification) {
+            window.resetDeletionVerification();
+        }
+
         const modal = document.getElementById(id);
+        if (modal) modal.style.pointerEvents = 'none';
         if (!modal) { window.releaseModalScroll('modal:' + id); return; }
         const version = (window.modalCloseVersions.get(modal) || 0) + 1;
         window.modalCloseVersions.set(modal, version);
@@ -3159,6 +3535,7 @@
     };
     // E4: Immediate cleanup for navigation and access errors; preserve static modal elements.
     window.dismissDashboardOverlays = () => {
+        if (window.resetDeletionVerification) window.resetDeletionVerification();
         window.p2pHistoryLoadVersion = (window.p2pHistoryLoadVersion || 0) + 1;
         window.cinemaOverlayVersion = (window.cinemaOverlayVersion || 0) + 1;
         if (window.cinemaProfitInterval) clearInterval(window.cinemaProfitInterval);
@@ -3168,6 +3545,7 @@
                 window.modalCloseVersions.set(modal, (window.modalCloseVersions.get(modal) || 0) + 1);
             }
             modal.classList.remove('show', 'active');
+            modal.style.pointerEvents = 'none';
             modal.style.display = 'none';
             if (modal.id === 'cinemaOverlay') modal.remove();
         });
@@ -3564,32 +3942,28 @@
         const tb = document.getElementById('txHistoryBox');
         if (!tb) return;
 
-        if (window.txIntersectionObserver) window.txIntersectionObserver.disconnect();
+        if (window.txIntersectionObserver) {
+            window.txIntersectionObserver.disconnect();
+        }
         window.txIntersectionObserver = null;
 
-        const uid = localStorage.getItem('uid');
-        const viewKey = tb.dataset.viewKey || '';
-        const previous = window.txHistoryEntranceState;
-        const state = previous && previous.uid === uid && previous.viewKey === viewKey
-            ? previous
-            : { uid, viewKey, shown: new Set() };
-        window.txHistoryEntranceState = state;
-
         if (typeof IntersectionObserver !== 'function') return;
-        window.txIntersectionObserver = new IntersectionObserver((entries, observer) => {
+
+        window.txIntersectionObserver = new IntersectionObserver(entries => {
             entries.forEach(entry => {
-                const id = entry.target.dataset.ledgerId;
-                const alreadyShown = entry.target.classList.contains('show') ||
-                    (id && state.shown.has(id));
-                if (!entry.isIntersecting && !alreadyShown) return;
-                entry.target.classList.add('show');
-                if (id) state.shown.add(id);
-                observer.unobserve(entry.target);
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.18) {
+                    entry.target.classList.add('show');
+                } else if (
+                    !entry.isIntersecting ||
+                    entry.intersectionRatio <= 0.02
+                ) {
+                    entry.target.classList.remove('show');
+                }
             });
         }, {
             root: tb,
-            rootMargin: '10px 0px',
-            threshold: 0.15
+            rootMargin: '-16px 0px',
+            threshold: [0, 0.02, 0.18, 1]
         });
     };
 
@@ -3787,7 +4161,7 @@
             }
 
             html += `
-            <div class="tx-item tx-item-animated${window.txHistoryEntranceState?.uid === localStorage.getItem('uid') && window.txHistoryEntranceState.shown.has(String(tx.id || '')) ? ' show' : ''}" data-ledger-id="${escapeText(tx.id || '')}" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
+            <div class="tx-item tx-item-animated" data-ledger-id="${escapeText(tx.id || '')}" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
                 <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
                     <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
                     <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
@@ -4421,9 +4795,9 @@ window.scheduleDashboardSocketReconnect = () => {
 
      setTimeout(() => {
          document.getElementById("scanLine").style.display = 'block';
-         document.getElementById("scanIcon").className = 'fas fa-fingerprint';
-         document.getElementById("scanIcon").style.color = 'rgba(0, 245, 255, 0.3)';
-         document.getElementById("scanText").innerHTML = "Searching in Blockchain...";
+         document.getElementById("scanIcon").className = 'fas fa-cube luxury-nft-core';
+         document.getElementById("scanIcon").style.color = '#f4dfb1';
+         document.getElementById("scanText").textContent = 'Searching Liquidity Nodes';
          document.getElementById("foundNftImg").style.display = 'none';
          document.getElementById("nftResultInfo").style.display = 'none';
      }, 400);
@@ -4437,30 +4811,88 @@ window.scheduleDashboardSocketReconnect = () => {
      if (lvl > rank) return window.showToast(`Access Denied! Rank Level ${rank}.`, true);
 
      const modal = document.getElementById('nftScanModal');
-     if(modal) modal.style.opacity = '1';
+     if (modal) {
+         delete modal.dataset.scanError;
+         modal.style.opacity = '1';
+     }
      window.openModal("nftScanModal");
 
      document.getElementById("scanLine").style.display = 'block';
-     document.getElementById("scanIcon").className = 'fas fa-fingerprint';
-     document.getElementById("scanIcon").style.color = 'rgba(0, 245, 255, 0.3)';
+     document.getElementById("scanIcon").className = 'fas fa-cube luxury-nft-core';
+     document.getElementById("scanIcon").style.color = '#f4dfb1';
      document.getElementById("scanIcon").style.display = 'block';
      document.getElementById("foundNftImg").style.display = 'none';
      document.getElementById("nftResultInfo").style.display = 'none';
      document.getElementById("scanText").style.display = 'block';
-     document.getElementById("scanText").innerText = `Scanning Node Network for Level ${lvl}...`;
+     const presentationVersion = window.modalCloseVersions.get(modal);
 
-     // Backend API Call for Reserving NFT
-     const result = await window.fetchAPI('/nft/reserve', 'POST', { uid, level: lvl });
+     const setAllocationStatus = message => {
+         if (
+             modal &&
+             modal.style.display !== 'none' &&
+             window.modalCloseVersions.get(modal) === presentationVersion
+         ) {
+             document.getElementById('scanText').textContent = message;
+         }
+     };
+
+     setAllocationStatus('Connecting to Liquidity Node');
+
+     const contractStatusTimer = setTimeout(() => {
+         setAllocationStatus('Synchronizing Smart Contract');
+     }, 650);
+
+     const assetStatusTimer = setTimeout(() => {
+         setAllocationStatus('Securing Tier Asset · Level ' + lvl);
+     }, 1400);
+
+     let result;
+     try {
+         result = await window.fetchAPI('/nft/reserve', 'POST', { uid, level: lvl });
+     } finally {
+         clearTimeout(contractStatusTimer);
+         clearTimeout(assetStatusTimer);
+     }
 
      if (!result.success) {
          document.getElementById("scanLine").style.display = 'none';
          document.getElementById("scanIcon").className = 'fas fa-exclamation-triangle';
          document.getElementById("scanIcon").style.color = '#f43f5e';
 
-         document.getElementById("scanText").innerHTML = `
-             <div style="color: #f43f5e; margin-bottom: 15px; font-weight: bold; font-size: 0.9rem; text-shadow: none;">${result.message}</div>
-             <button class="act-btn btn-wd" onclick="window.closeNftScannerModal()" style="padding: 10px 25px; font-size: 0.85rem; margin: 0 auto; width: max-content; pointer-events: auto;">Close Window</button>
+         if (modal) modal.dataset.scanError = 'true';
+
+         const scanText = document.getElementById('scanText');
+         scanText.innerHTML = `
+             <div style="display:grid;place-items:center;width:38px;height:38px;margin:0 auto 12px;border-radius:12px;background:rgba(251,113,133,.1);border:1px solid rgba(251,113,133,.2);">
+                 <i class="fas fa-exclamation-circle"
+                    style="font-size:1.2rem;color:#fda4af;"
+                    aria-hidden="true"></i>
+             </div>
+
+             <h3 style="margin:0 0 8px;font-size:1rem;color:#f8fafc;">
+                 Reservation Unavailable
+             </h3>
+
+             <p data-scan-error-message
+                role="status"
+                aria-live="polite"
+                style="margin:0 0 18px;color:#cbd5e1;font-size:.8rem;line-height:1.6;font-weight:400;overflow-wrap:anywhere;"></p>
+
+             <button type="button"
+                     class="act-btn btn-wd"
+                     style="width:100%;padding:12px;border-radius:12px;font-size:.8rem;color:#fff;background:linear-gradient(135deg,#9f1239,#881337);border:1px solid rgba(251,113,133,.35);pointer-events:auto;">
+                 Close Window
+             </button>
          `;
+
+         scanText.querySelector('[data-scan-error-message]').textContent =
+             typeof result.message === 'string' && result.message.trim()
+                 ? result.message
+                 : 'The reservation could not be confirmed. Check your collection before retrying.';
+
+         scanText.querySelector('button').addEventListener('click', () => {
+             window.closeNftScannerModal();
+         });
 
          // 🔥 FIX: Timeout আইডি সেভ করে রাখা হচ্ছে, যাতে ইউজার ক্লোজ করলে এটিকে থামিয়ে দেওয়া যায়
          if (window.nftScanErrorTimeout) clearTimeout(window.nftScanErrorTimeout);
@@ -4536,33 +4968,37 @@ window.scheduleDashboardSocketReconnect = () => {
                  }
              </style>
 
-             <div style="background: rgba(10, 15, 24, 0.85); backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.06); box-shadow: 0 30px 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05); border-radius: 24px; padding: 35px 25px; width: 100%; max-width: 340px; text-align: center; animation: popUp 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards; margin: 0 auto;">
-
-                 <!-- Minimalist Success Icon -->
-                 <div style="margin: 0 auto 20px auto; width: 50px; height: 50px; border-radius: 50%; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; justify-content: center; align-items: center; box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);">
-                     <i class="fas fa-check" style="color: #10b981; font-size: 1.4rem;"></i>
+             <div style="box-sizing:border-box;background:linear-gradient(145deg,#0f172a,#061b20);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(52,211,153,.28);box-shadow:0 18px 40px rgba(0,0,0,.45);border-radius:20px;padding:18px;width:100%;max-width:320px;margin:0 auto;">
+                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                     <span style="display:grid;place-items:center;width:28px;height:28px;border-radius:9px;background:rgba(52,211,153,.12);box-shadow:0 0 14px rgba(52,211,153,.18);">
+                         <i class="fas fa-check" style="color:#6ee7b7;"></i>
+                     </span>
+                     <h3 style="margin:0;font-size:1rem;color:#f8fafc;">
+                         Reservation Confirmed
+                     </h3>
                  </div>
 
-                 <h3 style="color: #f8fafc; margin: 0 0 25px 0; font-size: 1.25rem; font-weight: 600; letter-spacing: 0.5px;">Reservation Confirmed</h3>
+                 <div style="background:rgba(255,255,255,.035);border:1px solid rgba(255,255,255,.08);border-radius:13px;padding:12px;display:flex;align-items:center;gap:12px;margin-bottom:14px;text-align:left;">
+                     <img src="${window.escapeDashboardLedgerText(window.reservedNFT.img)}"
+                          alt="Reserved NFT"
+                          style="width:56px;height:56px;border-radius:10px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,.12);">
 
-                 <!-- Sleek Integrated NFT Info Card -->
-                 <div style="background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 16px; padding: 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 25px; text-align: left;">
-
-                     <img src="${window.reservedNFT.img}" style="width: 65px; height: 65px; border-radius: 12px; object-fit: cover; box-shadow: 0 8px 16px rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.05);">
-
-                     <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 4px;">
-                         <span style="font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600;">Secured Asset</span>
-                         <span style="font-size: 1.05rem; color: #e2e8f0; font-weight: 700; letter-spacing: 0.5px;">${window.reservedNFT.id}</span>
-                         <div style="display: flex; align-items: center; gap: 6px; margin-top: 2px;">
-                             <span style="font-size: 0.7rem; color: #475569; font-weight: 600;">VALUE</span>
-                             <span style="font-size: 0.95rem; color: #10b981; font-weight: 700; font-family: 'Space Grotesk', monospace;">${parseFloat(window.reservedNFT.price).toFixed(2)} ₮</span>
-                         </div>
+                     <div style="min-width:0;flex:1;">
+                         <span style="font-size:.6rem;color:#94a3b8;letter-spacing:.12em;">
+                             SECURED ASSET
+                         </span>
+                         <strong style="display:block;margin:4px 0;color:#f8fafc;font-size:.95rem;overflow-wrap:anywhere;">
+                             ${window.escapeDashboardLedgerText(window.reservedNFT.id)}
+                         </strong>
+                         <span style="font-family:monospace;font-size:1rem;color:#6ee7b7;">
+                             ${parseFloat(window.reservedNFT.price).toFixed(2)} ₮
+                         </span>
                      </div>
-
                  </div>
 
-                 <!-- The Blade Button -->
-                 <button class="btn-luxury-blade" onclick="window.closeScanAndGoToCollection()">
+                 <button class="btn-luxury-blade"
+                         style="padding:12px;font-size:.8rem;letter-spacing:.06em;"
+                         onclick="window.closeScanAndGoToCollection()">
                      View Collection
                  </button>
              </div>
@@ -5172,18 +5608,16 @@ window.scheduleDashboardSocketReconnect = () => {
  // 🛑 USER WITHDRAWAL CANCELLATION ENGINE
  // =================================================================================
  window.closeConfirmModal = () => {
-     const modal = document.getElementById('confirmModal');
-     if(modal) modal.style.display = 'none';
+     window.closeModal('confirmModal');
  };
 
  window.requestCancelWithdrawal = (txId, amount) => {
      const modal = document.getElementById('confirmModal');
      const confirmBtn = document.getElementById('confirmYesBtn');
-     if(modal && confirmBtn) {
+     if (modal && confirmBtn) {
          modal.querySelector('p').innerHTML = `Are you sure? <strong>${amount} ₮</strong> will be instantly refunded to your main wallet.`;
          confirmBtn.onclick = () => window.executeCancelWithdraw(txId, amount);
-         modal.style.display = 'flex';
-         setTimeout(() => modal.classList.add('show'), 10);
+         window.openModal('confirmModal');
      }
  };
 
@@ -5294,20 +5728,23 @@ window.scheduleDashboardSocketReconnect = () => {
          return;
      }
 
+     const isDeletion = btnId === 'btnGetDeleteOTP';
+
+     if (isDeletion && (!window.deletionVerification.verified || btn.disabled)) {
+         window.showToast('Complete the account confirmation first.', true);
+         return;
+     }
+
+     const confirmationVersion = window.deletionVerification.version;
      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
      btn.disabled = true;
 
-     const isDeletion = btnId === 'btnGetDeleteOTP';
-     const receipt = isDeletion ? window.deletionVerification.receipt : null;
-     if (isDeletion && !receipt) {
-         window.showToast('Complete the visual verification before requesting a deletion OTP.', true);
-         btn.innerHTML = 'Get OTP';
-         btn.disabled = false;
-         return;
-     }
-     if (isDeletion) window.deletionVerification.receipt = null;
-     const result = await window.fetchAPI(isDeletion ? '/user/deletion-otp' : '/auth/send-otp', 'POST',
-         isDeletion ? { uid, verificationReceipt: receipt } : { uid });
+     const result = await window.fetchAPI('/auth/send-otp', 'POST', { uid });
+
+     if (
+         isDeletion &&
+         confirmationVersion !== window.deletionVerification.version
+     ) return;
 
      if (!result.success) {
          window.showToast(result.message, true);
@@ -5332,7 +5769,7 @@ window.scheduleDashboardSocketReconnect = () => {
                      btn.innerHTML = 'Get OTP';
                      btn.style.background = ''; // ডিফল্ট স্টাইল ফেরত
                      btn.style.color = '';
-                     btn.disabled = false;
+                     btn.disabled = isDeletion && !window.deletionVerification.verified;
                  } else {
                      btn.innerHTML = `Wait ${timeLeft}s...`;
                      timeLeft--;
@@ -6250,34 +6687,19 @@ window.scheduleDashboardSocketReconnect = () => {
 
     // 🔥 FINAL FIX: Smart Routing synced with Hardware Router (No Double Clicks)
     window.openTransactionLookup = () => {
-        const smModal = document.getElementById('sendMoneyModal');
-        if(smModal) { smModal.classList.remove('show'); setTimeout(() => smModal.style.display = 'none', 300); }
-        
-        const psModal = document.getElementById('p2pSearchModal');
-        if(psModal) { psModal.style.display = 'flex'; setTimeout(() => psModal.classList.add('show'), 10); }
-        
-        window.location.replace(window.location.href.split('#')[0] + '#modal-p2pSearchModal');
+        window.dismissDashboardOverlays();
+        window.openModal('p2pSearchModal');
         window.loadP2PHistory();
     };
 
     window.backToSendMoney = () => {
-        const psModal = document.getElementById('p2pSearchModal');
-        if(psModal) { psModal.classList.remove('show'); setTimeout(() => psModal.style.display = 'none', 300); }
-        
-        const smModal = document.getElementById('sendMoneyModal');
-        if(smModal) { smModal.style.display = 'flex'; setTimeout(() => smModal.classList.add('show'), 10); }
-        
-        window.location.replace(window.location.href.split('#')[0] + '#modal-sendMoneyModal');
+        window.dismissDashboardOverlays();
+        window.openModal('sendMoneyModal');
     };
 
     window.backToLookup = () => {
-        const prModal = document.getElementById('p2pReceiptModal');
-        if(prModal) { prModal.classList.remove('show'); setTimeout(() => prModal.style.display = 'none', 300); }
-        
-        const psModal = document.getElementById('p2pSearchModal');
-        if(psModal) { psModal.style.display = 'flex'; setTimeout(() => psModal.classList.add('show'), 10); }
-        
-        window.location.replace(window.location.href.split('#')[0] + '#modal-p2pSearchModal');
+        window.dismissDashboardOverlays();
+        window.openModal('p2pSearchModal');
     };
 
     window.executeOrderLookup = async () => {
@@ -6398,85 +6820,134 @@ window.scheduleDashboardSocketReconnect = () => {
 
     let html5QrCode = null;
     let isCameraStarting = false;
+    let cameraLifecycle = 0;
+    let cameraStartPromise = null;
+    let cameraCleanupPromise = null;
 
     window.openCameraScanner = () => {
-        window.openModal('cameraScannerModal');
+        if (html5QrCode || isCameraStarting || cameraCleanupPromise) return;
 
-        if (html5QrCode) {
-            try { html5QrCode.clear(); } catch(e) {}
+        const version = ++cameraLifecycle;
+        let scanner;
+        try {
+            scanner = new Html5Qrcode("qr-reader");
+        } catch (error) {
+            window.showToast("Camera scanner could not initialize.", true);
+            return;
         }
 
-        html5QrCode = new Html5Qrcode("qr-reader");
-        const config = { fps: 10, qrbox: { width: 200, height: 200 } };
+        html5QrCode = scanner;
         isCameraStarting = true;
+        window.openModal('cameraScannerModal');
+        const config = { fps: 10, qrbox: { width: 200, height: 200 } };
+        const isCurrent = () => version === cameraLifecycle && html5QrCode === scanner;
 
-        const onScanSuccess = (decodedText) => {
-            window.closeCameraScanner();
-            window.showToast("QR Code Scanned Successfully!");
-            const uidInput = document.getElementById('sendUid');
-            if (uidInput) {
-                uidInput.value = decodedText.toUpperCase().trim();
-                window.checkReceiverUid();
+        const onScanSuccess = decodedText => {
+            if (!isCurrent()) return;
+
+            let receiverUid = String(decodedText || '').trim();
+            try {
+                if (/^https?:\/\//i.test(receiverUid)) {
+                    const scannedUrl = new URL(receiverUid);
+                    const pathParts = scannedUrl.pathname.split('/').filter(Boolean);
+                    receiverUid = scannedUrl.searchParams.get('uid') ||
+                        decodeURIComponent(pathParts[pathParts.length - 1] || '');
+                }
+                receiverUid = receiverUid.replace(/\s+/g, '').toUpperCase();
+            } catch (error) {
+                window.showToast("This QR code does not contain a valid receiver UID.", true);
+                return;
             }
+
+            if (!/^[A-Z0-9]+$/.test(receiverUid) || receiverUid.length < 5) {
+                window.showToast("This QR code does not contain a valid receiver UID.", true);
+                return;
+            }
+
+            const uidInput = document.getElementById('sendUid');
+            if (!uidInput) return;
+
+            window.closeCameraScanner();
+            uidInput.value = receiverUid;
+            uidInput.dispatchEvent(new Event('input', { bubbles: true }));
+            window.checkReceiverUid();
+            window.showToast("QR Code Scanned Successfully!");
         };
 
-        html5QrCode.start(
-            { facingMode: "environment" },
-            config,
-            onScanSuccess,
-            (error) => {}
-        ).then(() => {
-            isCameraStarting = false;
-        }).catch((err) => {
-            console.warn("Back camera not found, trying front camera...");
+        const pendingStart = (async () => {
+            try {
+                await scanner.start({ facingMode: "environment" }, config, onScanSuccess, () => {});
+            } catch (error) {
+                if (!isCurrent()) return;
+                console.warn("Back camera not found, trying front camera...");
+                await scanner.start({ facingMode: "user" }, config, onScanSuccess, () => {});
+            }
+        })();
+        cameraStartPromise = pendingStart;
 
-            html5QrCode.start(
-                { facingMode: "user" },
-                config,
-                onScanSuccess,
-                (error) => {}
-            ).then(() => {
-                isCameraStarting = false;
-            }).catch((err2) => {
-                isCameraStarting = false;
-                window.closeCameraScanner();
-                window.showToast("Camera access denied! Please allow permissions.", true);
-            });
+        void pendingStart.then(() => {
+            if (isCurrent()) isCameraStarting = false;
+        }, error => {
+            if (!isCurrent()) return;
+            isCameraStarting = false;
+            window.closeCameraScanner();
+            window.showToast("Camera access denied! Please allow permissions.", true);
+        }).finally(() => {
+            if (cameraStartPromise === pendingStart) cameraStartPromise = null;
         });
     };
 
-    // 🔥 FIX: One-Click Camera Unmount & Modal Close
     window.closeCameraScanner = () => {
-        // ১. আগে হার্ডওয়্যারের কাজ বন্ধ করা হলো (Hardware Cleanup)
-        if (html5QrCode) {
-            const forceStopTracks = () => {
-                try {
-                    if (window.localStream) { window.localStream.getTracks().forEach(track => track.stop()); }
-                    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                        navigator.mediaDevices.getUserMedia({video: true}).then(s => s.getTracks().forEach(t => t.stop())).catch(e=>e);
-                    }
-                } catch(e) {}
-            };
+        ++cameraLifecycle;
+        const scanner = html5QrCode;
+        const pendingStart = cameraStartPromise;
+        html5QrCode = null;
 
-            const stopCamera = () => {
-                try {
-                    if (html5QrCode.getState && html5QrCode.getState() === 2) {
-                        html5QrCode.stop().then(() => { html5QrCode.clear(); html5QrCode = null; forceStopTracks(); }).catch(() => { html5QrCode.clear(); html5QrCode = null; forceStopTracks(); });
-                    } else {
-                        html5QrCode.clear(); html5QrCode = null; forceStopTracks();
-                    }
-                } catch(e) { html5QrCode = null; forceStopTracks(); }
-            };
-
-            if (isCameraStarting) { setTimeout(stopCamera, 2000); } else { stopCamera(); }
+        window.closeModal('cameraScannerModal');
+        const sendModal = document.getElementById('sendMoneyModal');
+        if (sendModal && getComputedStyle(sendModal).display !== 'none') {
+            window.history.replaceState(
+                null,
+                '',
+                window.location.pathname + window.location.search + '#modal-sendMoneyModal'
+            );
         }
 
-        // ২. মডাল এবং ব্যাকগ্রাউন্ড ওভারলে ইনস্ট্যান্ট গায়েব করা হলো (UI Cleanup)
-        const scanModal = document.getElementById('cameraScannerModal');
-        if (scanModal) {
-            scanModal.classList.remove('show');
-            scanModal.style.display = 'none';
+        if (cameraCleanupPromise) return cameraCleanupPromise;
+        if (!scanner) {
+            isCameraStarting = false;
+            return Promise.resolve();
         }
+
+        const stopAttachedTracks = () => {
+            document.querySelectorAll('#qr-reader video').forEach(video => {
+                const stream = video.srcObject;
+                if (stream && typeof stream.getTracks === 'function') {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+            });
+        };
+
+        stopAttachedTracks();
+        cameraCleanupPromise = (async () => {
+            try {
+                if (pendingStart) await pendingStart.catch(() => {});
+                const state = typeof scanner.getState === 'function' ? scanner.getState() : null;
+                if (state === 2 || state === 3) await scanner.stop();
+            } catch (error) {
+                console.warn("Camera shutdown failed:", error);
+            } finally {
+                stopAttachedTracks();
+                try {
+                    await scanner.clear();
+                } catch (error) {
+                    console.warn("Camera cleanup failed:", error);
+                }
+                isCameraStarting = false;
+                cameraCleanupPromise = null;
+            }
+        })();
+        return cameraCleanupPromise;
     };
 
     /* === MODULE 22: TEAM NETWORK & BONUS LOGIC === */
@@ -9471,6 +9942,11 @@ window.scheduleDashboardSocketReconnect = () => {
 
         const originalCloseModal = window.closeModal;
         window.closeModal = (id, fromBackButton = false) => {
+            if (id === 'p2pSearchModal') {
+                window.dismissDashboardOverlays();
+                return;
+            }
+
             // Close immediately. A missing/history-less hash must never leave an overlay fixed.
             originalCloseModal(id);
             if (!fromBackButton && window.location.hash === '#modal-' + id) {
@@ -9581,7 +10057,7 @@ window.scheduleDashboardSocketReconnect = () => {
             window.openModal('accountDeleteModal');
             document.getElementById('deleteEmailOTP').value = '';
             document.getElementById('delete2FACode').value = '';
-            void window.startDeletionChallenge();
+            window.resetDeletionVerification();
         }, 150);
     };
 
@@ -9692,65 +10168,96 @@ window.scheduleDashboardSocketReconnect = () => {
         }, 1000);
     };
 
-    window.deletionVerification = { version: 0, challenge: null, receipt: null, selected: new Set(), busy: false };
-    window.startDeletionChallenge = async () => {
-        const state = window.deletionVerification;
-        const version = ++state.version;
-        state.receipt = null;
-        state.challenge = null;
-        state.selected.clear();
-        const box = document.getElementById('deletionPuzzleTiles');
-        const status = document.getElementById('deletionPuzzleStatus');
-        const reference = document.getElementById('deletionPuzzleReference');
-        box.replaceChildren();
-        reference.removeAttribute('src');
-        status.textContent = 'Loading verification...';
-        const epoch = window.dashboardSession.epoch;
-        const result = await window.fetchAPI('/user/deletion-challenge', 'POST', {});
-        if (state.version !== version || window.dashboardSession.epoch !== epoch) return;
-        if (!result.success) { status.textContent = result.message || 'Verification unavailable.'; return; }
-        state.challenge = result.challengeId;
-        reference.src = result.reference;
-        status.textContent = 'Select the three tiles with the same shape as the reference. Colors may differ.';
-        for (const [index, tile] of result.tiles.entries()) {
-            const button = document.createElement('button');
-            button.type = 'button';
-            button.className = 'deletion-puzzle-tile';
-            button.setAttribute('aria-label', 'Verification tile ' + (index + 1));
-            button.setAttribute('aria-pressed', 'false');
-            const image = document.createElement('img');
-            image.src = tile.image;
-            image.alt = '';
-            image.draggable = false;
-            button.appendChild(image);
-            button.addEventListener('click', () => {
-                if (state.busy) return;
-                if (state.selected.has(tile.id)) state.selected.delete(tile.id);
-                else if (state.selected.size < 3) state.selected.add(tile.id);
-                button.setAttribute('aria-pressed', String(state.selected.has(tile.id)));
-            });
-            box.appendChild(button);
-        }
+    window.deletionVerification = {
+        version: 0,
+        verified: false,
+        busy: false,
+        timer: null
     };
-    window.verifyDeletionChallenge = async () => {
+
+    window.resetDeletionVerification = () => {
         const state = window.deletionVerification;
-        if (state.busy || !state.challenge || state.selected.size !== 3) return;
+        state.version++;
+        clearTimeout(state.timer);
+        state.timer = null;
+        state.verified = false;
+        state.busy = false;
+
+        document.getElementById('accountDeleteModal').dataset.confirmed = 'false';
+
+        const widget = document.getElementById('deleteConfirmationWidget');
+        widget.disabled = false;
+        widget.setAttribute('aria-checked', 'false');
+
+        document.getElementById('deleteConfirmationIcon').textContent = '□';
+        document.getElementById('deleteConfirmationText').textContent =
+            'Confirm to continue';
+
+        document.getElementById('btnGetDeleteOTP').disabled = true;
+        document.getElementById('btnGetDeleteOTP').textContent = 'Get OTP';
+        document.getElementById('deleteEmailOTP').disabled = true;
+    };
+
+    window.verifyDeletionConfirmation = () => {
+        const state = window.deletionVerification;
+
+        if (
+            state.busy ||
+            state.verified ||
+            window.dashboardSession.closed ||
+            window.dashboardSession.blocked
+        ) return;
+
         const version = state.version;
+        const epoch = window.dashboardSession.epoch;
+        const token = localStorage.getItem('token');
+
         state.busy = true;
-        try {
-            const result = await window.fetchAPI('/user/deletion-challenge/verify', 'POST', {
-                challengeId: state.challenge, selections: [...state.selected]
-            });
-            if (state.version !== version) return;
-            state.challenge = null;
-            state.receipt = result.success ? result.verificationReceipt : null;
-            document.getElementById('deletionPuzzleStatus').textContent = result.success
-                ? 'Verified. You can request your deletion OTP now.'
-                : (result.message || 'Verification failed. Request a new puzzle.');
-        } finally { state.busy = false; }
+        const widget = document.getElementById('deleteConfirmationWidget');
+        widget.disabled = true;
+
+        document.getElementById('deleteConfirmationIcon').innerHTML =
+            '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('deleteConfirmationText').textContent =
+            'Confirming...';
+
+        state.timer = setTimeout(() => {
+            state.timer = null;
+            const modal = document.getElementById('accountDeleteModal');
+
+            if (
+                state.version !== version ||
+                epoch !== window.dashboardSession.epoch ||
+                token !== localStorage.getItem('token') ||
+                window.dashboardSession.closed ||
+                window.dashboardSession.blocked ||
+                modal.style.display === 'none'
+            ) {
+                window.resetDeletionVerification();
+                return;
+            }
+
+            state.busy = false;
+            state.verified = true;
+            modal.dataset.confirmed = 'true';
+            widget.setAttribute('aria-checked', 'true');
+
+            document.getElementById('deleteConfirmationIcon').textContent = '✓';
+            document.getElementById('deleteConfirmationIcon').style.color = '#34d399';
+            document.getElementById('deleteConfirmationText').textContent =
+                'Confirmation complete';
+            document.getElementById('deleteEmailOTP').disabled = false;
+
+            const attempts = window.otpAttempts['btnGetDeleteOTP'];
+            document.getElementById('btnGetDeleteOTP').disabled =
+                !!attempts && Date.now() < attempts.lockUntil;
+        }, 800);
     };
 
     window.submitDeleteAccount = async () => {
+        if (!window.deletionVerification.verified) {
+            return window.showToast('Complete the account confirmation first.', true);
+        }
         const otp = document.getElementById('deleteEmailOTP').value.trim();
         const code2FA = document.getElementById('delete2FACode').value.trim();
         if (!otp || otp.length !== 6) return window.showToast("Enter 6-digit Email OTP!", true);
