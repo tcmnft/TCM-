@@ -135,7 +135,24 @@
         @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; margin-right: 10px; } .crypto-ticker { margin: 0 5px; } .form-pill { padding: 40px 20px 30px; } .m-name { font-size: 1.8rem; } }
     </style>
     <!-- 🚀 Memo 03: Permanent Login Auto-Redirect -->
-    <script>
+        <script>
+        (() => {
+            try {
+                localStorage.removeItem('tcm_rem_pass');
+                localStorage.removeItem('password');
+                if (localStorage.getItem('tcm_auth_profile_v1') !== '1') {
+                    for (const key of ['tcm_userData', 'tcm_static_user']) {
+                        localStorage.removeItem(key);
+                        sessionStorage.removeItem(key);
+                    }
+                    localStorage.setItem('tcm_auth_profile_v1', '1');
+                }
+            } catch (error) {
+                // Storage may be unavailable in restricted browser contexts.
+            }
+        })();
+    </script>
+<script>
         (function() {
             let uid = localStorage.getItem("uid");
             let token = localStorage.getItem("token");
@@ -380,7 +397,7 @@ window.toggleTheme = () => {
     }
 })();
 
-window.APK_DOWNLOAD_URL = "https://tcm-bakend.onrender.com/downloads/tcm_nft_app.apk"; 
+window.APK_DOWNLOAD_URL = "http://127.0.0.1:5000/downloads/tcm_nft_app.apk"; 
 window.downloadedApkBlob = null; 
 
 window.openDownloadModal = () => {
@@ -543,12 +560,10 @@ if (togglePassBtn && loginPass) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+    localStorage.removeItem('tcm_rem_pass');
     const remUID = localStorage.getItem('tcm_rem_uid');
-    const remPass = localStorage.getItem('tcm_rem_pass');
-    
-    if (remUID && remPass) {
+    if (remUID) {
         if (loginUID) loginUID.value = remUID;
-        if (loginPass) loginPass.value = remPass;
         if (rememberMe) rememberMe.checked = true;
         validateLoginInput();
     }
@@ -620,12 +635,12 @@ async function handleLoginRequest() {
             localStorage.removeItem("tcm_user_dp");
         }
 
+        localStorage.removeItem('tcm_rem_pass');
+        localStorage.removeItem('password');
         if (rememberMe && rememberMe.checked) {
-            localStorage.setItem("tcm_rem_uid", identifier);
-            localStorage.setItem("tcm_rem_pass", password);
+            localStorage.setItem('tcm_rem_uid', identifier);
         } else {
-            localStorage.removeItem("tcm_rem_uid");
-            localStorage.removeItem("tcm_rem_pass");
+            localStorage.removeItem('tcm_rem_uid');
         }
 
         if (pAvatar && result.avatar) pAvatar.src = result.avatar;

@@ -6,7 +6,24 @@
     <title>TCM NFT • Premium Dashboard</title>
 
     <!-- === EXTERNAL LIBRARIES === -->
-    <script src="https://cdn.jsdelivr.net/npm/@otplib/preset-browser@12.0.1/build/otplib-browser.min.js"></script>
+        <script>
+        (() => {
+            try {
+                localStorage.removeItem('tcm_rem_pass');
+                localStorage.removeItem('password');
+                if (localStorage.getItem('tcm_auth_profile_v1') !== '1') {
+                    for (const key of ['tcm_userData', 'tcm_static_user']) {
+                        localStorage.removeItem(key);
+                        sessionStorage.removeItem(key);
+                    }
+                    localStorage.setItem('tcm_auth_profile_v1', '1');
+                }
+            } catch (error) {
+                // Storage may be unavailable in restricted browser contexts.
+            }
+        })();
+    </script>
+<script src="https://cdn.jsdelivr.net/npm/@otplib/preset-browser@12.0.1/build/otplib-browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -2328,14 +2345,6 @@
                 <span style="color:var(--text-sub); font-size:0.85rem; font-weight:600;"><i class="fas fa-globe" style="margin-right:6px; opacity:0.7;"></i> Country</span>
                 <span id="bCountry" style="color:var(--text-main); font-size:0.85rem; font-weight:800;">Loading...</span>
             </div>
-            <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-main); padding:12px 15px; border-radius:12px; border:1px solid var(--border);">
-                <span style="color:var(--text-sub); font-size:0.85rem; font-weight:600;"><i class="fas fa-key" style="margin-right:6px; opacity:0.7;"></i> Password</span>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <input type="password" id="bPass" value="********" readonly style="background:transparent; border:none; color:var(--text-main); font-size:1rem; width:90px; outline:none; text-align:right; font-weight:800; font-family:monospace;">
-                    <i class="fas fa-eye" onclick="window.togglePassView(this)" style="cursor:pointer; color:var(--primary); background:rgba(0,245,255,0.1); padding:8px; border-radius:8px;"></i>
-                </div>
-            </div>
-
             <button style="width: 100%; margin-top: 15px; padding: 14px; font-size: 0.95rem; font-weight:800; letter-spacing:0.5px; background:linear-gradient(135deg, #ef4444, #b91c1c); color:#ffffff; border:1px solid #f87171; border-radius:12px; cursor:pointer; box-shadow:0 8px 25px rgba(239,68,68,0.4); transition:transform 0.2s;" onclick="window.openDeleteModal()">
                 <i class="fas fa-trash-alt" style="margin-right:8px;"></i> Delete Account
             </button>
@@ -5245,7 +5254,7 @@ window.applyDashboardSnapshot = data => {
     window.RAM_STATE = {
         ...(window.RAM_STATE || {}), user,
         balances: wallet,
-        security: { is2FA: !!(user['2FA_Key'] || user['2FA_Bound']), isWallet: !!(user.Wallet_BEP20 || user.Wallet_TRC20 || user.Wallet_Bound) },
+        security: { is2FA: user['2FA_Bound'] === true, isWallet: !!(user.Wallet_BEP20 || user.Wallet_TRC20 || user.Wallet_Bound) },
         counters: user.counters || {}
     };
     window.lastWalletData = wallet;
@@ -10935,42 +10944,20 @@ window.scheduleDashboardSocketReconnect = () => {
         window.loadAccountSettingsData();
     };
 
-    window.togglePassView = (icon) => {
-        const input = document.getElementById('bPass');
-        if (input.type === 'password') {
-            input.type = 'text';
-            input.value = input.getAttribute('data-actual-pass') || 'Data not found';
-            icon.className = 'fas fa-eye-slash';
-        } else {
-            input.type = 'password';
-            input.value = '********';
-            icon.className = 'fas fa-eye';
-        }
-    };
-
     window.loadAccountSettingsData = () => {
-        // 🔥 সুপার-অ্যাগ্রেসিভ ডেটা ফাইন্ডার
         const u = (window.RAM_STATE && window.RAM_STATE.user) || window.userData || window.lastUserData || window.user || {};
 
         const emailStr = u.Email || u.email || localStorage.getItem('email') || 'Data not found';
         const phoneStr = u.Phone || u.phone || localStorage.getItem('phone') || 'Data not found';
         const countryStr = u.Country || u.country || localStorage.getItem('country') || 'Data not found';
-        const passStr = u.Password || u.password || localStorage.getItem('password') || '********';
 
         const elEmail = document.getElementById('bEmail');
         const elPhone = document.getElementById('bPhone');
         const elCountry = document.getElementById('bCountry');
-        const elPass = document.getElementById('bPass');
 
         if (elEmail) elEmail.innerText = emailStr;
         if (elPhone) elPhone.innerText = phoneStr;
         if (elCountry) elCountry.innerText = countryStr;
-        if (elPass) {
-            elPass.setAttribute('data-actual-pass', passStr);
-            elPass.type = 'password';
-            elPass.value = '********';
-            if(elPass.nextElementSibling) elPass.nextElementSibling.className = 'fas fa-eye';
-        }
 
         const deleteTime = u.Delete_At || window.accountDeleteTime;
         if (deleteTime && deleteTime > Date.now()) {
@@ -11029,21 +11016,7 @@ window.scheduleDashboardSocketReconnect = () => {
         if(window.accDeleteInterval) clearInterval(window.accDeleteInterval);
     };
 
-    window.togglePassView = (icon) => {
-        const input = document.getElementById('bPass');
-        if (input.type === 'password') {
-            input.type = 'text';
-            input.value = input.getAttribute('data-actual-pass') || 'N/A';
-            icon.className = 'fas fa-eye-slash';
-        } else {
-            input.type = 'password';
-            input.value = '********';
-            icon.className = 'fas fa-eye';
-        }
-    };
-
     window.loadBackProfileData = () => {
-        // 🔥 ফায়ারবেস থেকে আসা আসল ডাটা অবজেক্ট ধরা হচ্ছে
         let u = {};
         if (window.RAM_STATE && window.RAM_STATE.user) {
             u = window.RAM_STATE.user;
@@ -11051,23 +11024,18 @@ window.scheduleDashboardSocketReconnect = () => {
             u = window.lastUserData;
         }
 
-        console.log("Profile Back Data Loaded:", u); // কনসোলে চেক করার জন্য
 
-        // ফায়ারবেসের হুবহু কলামের নাম অনুযায়ী ডেটা বসানো
         const emailStr = u.Email || 'Data not found';
         const phoneStr = u.Phone || 'Data not found';
         const countryStr = u.Country || 'Data not found';
-        const passStr = u.Password || '********';
 
         const elEmail = document.getElementById('bEmail');
         const elPhone = document.getElementById('bPhone');
         const elCountry = document.getElementById('bCountry');
-        const elPass = document.getElementById('bPass');
 
         if (elEmail) elEmail.innerText = emailStr;
         if (elPhone) elPhone.innerText = phoneStr;
         if (elCountry) elCountry.innerText = countryStr;
-        if (elPass) elPass.setAttribute('data-actual-pass', passStr);
 
         const deleteTime = u.Delete_At || window.accountDeleteTime;
         if (deleteTime && deleteTime > Date.now()) {

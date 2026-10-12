@@ -131,7 +131,24 @@
         @media (max-width: 450px) { .logo-box { font-size: 0.95rem; } .header-login-txt { font-size: 0.75rem; margin-right: 10px; } .f-brand { font-size: 0.75rem; } }
     </style>
 <!-- 🚀 Memo 03: Permanent Login Auto-Redirect -->
-    <script>
+        <script>
+        (() => {
+            try {
+                localStorage.removeItem('tcm_rem_pass');
+                localStorage.removeItem('password');
+                if (localStorage.getItem('tcm_auth_profile_v1') !== '1') {
+                    for (const key of ['tcm_userData', 'tcm_static_user']) {
+                        localStorage.removeItem(key);
+                        sessionStorage.removeItem(key);
+                    }
+                    localStorage.setItem('tcm_auth_profile_v1', '1');
+                }
+            } catch (error) {
+                // Storage may be unavailable in restricted browser contexts.
+            }
+        })();
+    </script>
+<script>
         (function() {
             let uid = localStorage.getItem("uid");
             let token = localStorage.getItem("token");
@@ -384,7 +401,7 @@ window.toggleTheme = () => {
 // ==============================================================
 // 📱 APP DOWNLOAD ENGINE (REAL DOWNLOAD PROGRESS)
 // ==============================================================
-window.APK_DOWNLOAD_URL = "https://tcm-bakend.onrender.com/downloads/tcm_nft_app.apk"; 
+window.APK_DOWNLOAD_URL = "http://127.0.0.1:5000/downloads/tcm_nft_app.apk"; 
 window.downloadedApkBlob = null; 
 
 window.openDownloadModal = () => {
