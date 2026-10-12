@@ -539,7 +539,6 @@
             overflow-y: auto;
             overscroll-behavior: contain;
         }
-        /* === LUXURY P2P RECEIVE FLOW & METALLIC NEON CARDS === */
         #p2pReceiveFlow { display: grid; min-width: 0; }
         #p2pReceiveFlow > [data-p2p-panel] {
             grid-area: 1 / 1;
@@ -548,7 +547,7 @@
             visibility: hidden;
             pointer-events: none;
             transform: translateY(-8px);
-            transition: opacity 260ms cubic-bezier(0.16, 1, 0.3, 1), transform 260ms cubic-bezier(0.16, 1, 0.3, 1), visibility 260ms;
+            transition: opacity 220ms ease, transform 220ms ease, visibility 220ms;
             overflow-wrap: anywhere;
         }
         #p2pReceiveFlow[data-state="qr"] > [data-p2p-panel="qr"],
@@ -559,274 +558,35 @@
             pointer-events: auto;
             transform: translateY(0);
         }
-
-        /* 🌟 Ultra-Luxury Glassmorphic & Metallic Live Card */
         #p2pReceiveFlow .p2p-live-card {
-            padding: 24px 18px;
-            border-radius: 20px;
-            align-self: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        /* Light Mode Card Styling */
-        #p2pReceiveFlow .p2p-live-card {
-            background: linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
-            border: 1px solid rgba(2, 132, 199, 0.28);
+            padding: 20px 16px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 18px;
+            background: rgba(16, 185, 129, 0.08);
             color: var(--text-main);
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.95), 0 0 18px rgba(2, 132, 199, 0.06);
+            align-self: center;
         }
-
-        /* Dark Mode Card Styling (Obsidian Metallic Steel & Cyber Glow) */
-        [data-theme="dark"] #p2pReceiveFlow .p2p-live-card {
-            background: linear-gradient(145deg, rgba(15, 23, 42, 0.95) 0%, rgba(10, 15, 26, 0.98) 100%);
-            border: 1px solid rgba(0, 245, 255, 0.3);
-            color: #f8fafc;
-            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 25px rgba(0, 245, 255, 0.1);
-        }
-
-        /* 📡 Glowing Radar Beacon for Waiting Card */
-        #p2pReceiveFlow .p2p-radar-wrap {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 14px;
-        }
+        #p2pReceiveFlow .p2p-live-note { color: var(--text-sub); font-size: 0.8rem; margin-top: 10px; }
+        #p2pReceiptNet { display: block; margin: 12px 0; font-size: 1.5rem; color: var(--success); }
+        #p2pReceiveFlow dl { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 18px 0; font-size: 0.78rem; }
+        #p2pReceiveFlow dt { text-align: left; color: var(--text-sub); }
+        #p2pReceiveFlow dd { margin: 0; text-align: right; }
         #p2pReceiveFlow .p2p-flow-pulse {
             display: inline-block;
-            width: 14px;
-            height: 14px;
+            width: 10px;
+            height: 10px;
+            margin-bottom: 18px;
             border-radius: 50%;
-            background: #10b981;
-            box-shadow: 0 0 14px #10b981, 0 0 24px rgba(16, 185, 129, 0.6);
-            position: relative;
-        }
-        #p2pReceiveFlow .p2p-flow-pulse::after {
-            content: '';
-            position: absolute;
-            inset: -6px;
-            border-radius: 50%;
-            border: 2px solid rgba(16, 185, 129, 0.65);
-            animation: p2pFlowPulse 1.8s cubic-bezier(0.24, 0, 0.38, 1) infinite;
+            background: var(--success);
+            animation: p2pFlowPulse 1.8s ease-out infinite;
         }
         @keyframes p2pFlowPulse {
-            0% { transform: scale(0.8); opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
-            70% { transform: scale(1.6); opacity: 0.3; box-shadow: 0 0 0 14px rgba(16, 185, 129, 0); }
-            100% { transform: scale(2.2); opacity: 0; }
+            from { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.3); }
+            to { box-shadow: 0 0 0 10px rgba(16, 185, 129, 0); }
         }
-
-        /* 🏷️ Sender Typography & Identity Badges */
-        #p2pReceiveFlow .p2p-sender-title {
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.35rem;
-            font-weight: 700;
-            letter-spacing: 0.3px;
-            margin-bottom: 6px;
-            color: var(--text-main);
-        }
-        [data-theme="dark"] #p2pReceiveFlow .p2p-sender-title {
-            color: #ffffff;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-        }
-        #p2pReceiveFlow .p2p-badge-wrap {
-            display: flex;
-            justify-content: center;
-            margin: 6px 0 14px;
-        }
-        #p2pReceiveFlow .p2p-uid-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 5px 14px;
-            border-radius: 20px;
-            font-family: 'Space Grotesk', monospace;
-            font-size: 0.82rem;
-            font-weight: 600;
-            background: rgba(2, 132, 199, 0.08);
-            border: 1px solid rgba(2, 132, 199, 0.25);
-            color: #0284c7;
-        }
-        [data-theme="dark"] #p2pReceiveFlow .p2p-uid-badge {
-            background: rgba(0, 245, 255, 0.08);
-            border: 1px solid rgba(0, 245, 255, 0.35);
-            color: #00f5ff;
-            text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
-        }
-
-        /* 📋 Status Banner for Waiting Card */
-        #p2pReceiveFlow .p2p-status-box {
-            background: rgba(0, 0, 0, 0.03);
-            border-radius: 12px;
-            padding: 12px;
-            margin-top: 8px;
-            border: 1px dashed var(--border);
-        }
-        [data-theme="dark"] #p2pReceiveFlow .p2p-status-box {
-            background: rgba(255, 255, 255, 0.03);
-            border-color: rgba(255, 255, 255, 0.1);
-        }
-        #p2pReceiveFlow .p2p-status-text {
-            color: var(--text-main);
-            font-size: 0.86rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        #p2pReceiveFlow .p2p-status-sub {
-            color: var(--text-sub);
-            font-size: 0.76rem;
-            opacity: 0.85;
-            margin: 0;
-        }
-
-        /* 💎 Settled Phase Receipt UI */
-        #p2pReceiveFlow .p2p-success-banner {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 6px;
-        }
-        #p2pReceiveFlow .p2p-receipt-heading {
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0;
-        }
-        #p2pReceiptNet {
-            display: block;
-            margin: 8px 0;
-            font-family: 'Space Grotesk', sans-serif;
-            font-size: 1.85rem;
-            font-weight: 800;
-            color: #10b981;
-            letter-spacing: -0.5px;
-            text-shadow: 0 0 16px rgba(16, 185, 129, 0.35);
-        }
-        #p2pReceiveFlow .p2p-sender-badge {
-            display: inline-block;
-            padding: 4px 14px;
-            border-radius: 16px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            background: rgba(0, 0, 0, 0.04);
-            border: 1px solid var(--border);
-            color: var(--text-sub);
-        }
-        [data-theme="dark"] #p2pReceiveFlow .p2p-sender-badge {
-            background: rgba(255, 255, 255, 0.05);
-            border-color: rgba(255, 255, 255, 0.12);
-            color: #94a3b8;
-        }
-
-        /* 📊 Financial Breakdown Matrix */
-        #p2pReceiveFlow dl {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 16px 0 20px;
-            padding: 14px 16px;
-            border-radius: 14px;
-            font-size: 0.8rem;
-            background: rgba(0, 0, 0, 0.03);
-            border: 1px solid var(--border);
-        }
-        [data-theme="dark"] #p2pReceiveFlow dl {
-            background: rgba(0, 0, 0, 0.25);
-            border-color: rgba(255, 255, 255, 0.07);
-        }
-        #p2pReceiveFlow dt {
-            text-align: left;
-            color: var(--text-sub);
-            font-weight: 500;
-        }
-        #p2pReceiveFlow dd {
-            margin: 0;
-            text-align: right;
-            color: var(--text-main);
-            font-weight: 700;
-            font-family: 'Space Grotesk', monospace;
-        }
-        #p2pReceiptOrder {
-            font-size: 0.72rem;
-            word-break: break-all;
-        }
-
-        /* 🔥 High-Premium Metallic Steel & Cyan Glow Action Button */
-        .btn-p2p-luxury {
-            width: 100%;
-            padding: 15px 22px;
-            border-radius: 16px;
-            font-family: 'Space Grotesk', sans-serif;
-            font-weight: 700;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
-            outline: none;
-            text-decoration: none;
-            -webkit-tap-highlight-color: transparent;
-            /* Light Mode Default: Rich Titanium Steel with Electric Cyan / Crisp White */
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
-            color: #00f5ff !important;
-            border: 1px solid rgba(0, 245, 255, 0.45);
-            box-shadow: 0 6px 20px rgba(15, 23, 42, 0.25), 0 0 16px rgba(0, 245, 255, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.25);
-            text-shadow: 0 0 10px rgba(0, 245, 255, 0.4);
-        }
-        .btn-p2p-luxury:hover {
-            background: linear-gradient(135deg, #1e293b 0%, #334155 50%, #1e293b 100%);
-            border-color: #00f5ff;
-            color: #ffffff !important;
-            box-shadow: 0 8px 25px rgba(0, 245, 255, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.4);
-            transform: translateY(-2px);
-        }
-        .btn-p2p-luxury:active {
-            transform: scale(0.97);
-        }
-
-        /* Dark Mode: Luxury Obsidian Steel with Radiant Cyan Aura */
-        [data-theme="dark"] .btn-p2p-luxury {
-            background: linear-gradient(135deg, #1e293b 0%, #0f172a 50%, #1e293b 100%);
-            color: #00f5ff !important;
-            border: 1px solid rgba(0, 245, 255, 0.6);
-            box-shadow: 0 8px 26px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 245, 255, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.3);
-            text-shadow: 0 0 12px rgba(0, 245, 255, 0.6);
-        }
-        [data-theme="dark"] .btn-p2p-luxury:hover {
-            background: linear-gradient(135deg, #0e7490 0%, #1e293b 50%, #0f172a 100%);
-            border-color: #38bdf8;
-            color: #ffffff !important;
-            box-shadow: 0 10px 30px rgba(0, 245, 255, 0.45), inset 0 1px 2px rgba(255, 255, 255, 0.5);
-            transform: translateY(-2px);
-        }
-
-        /* 💫 Metallic Specular Light Sweep Sheen */
-        .btn-p2p-luxury::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-            transform: skewX(-25deg);
-            transition: 0.75s ease;
-            pointer-events: none;
-        }
-        .btn-p2p-luxury:hover::before {
-            left: 150%;
-        }
-
         @media (prefers-reduced-motion: reduce) {
             #p2pReceiveFlow > [data-p2p-panel] { transition: none; transform: none; }
             #p2pReceiveFlow .p2p-flow-pulse { animation: none; }
-            .btn-p2p-luxury::before { display: none; }
         }
         [data-theme="dark"] .qr-container:hover {
              transform: none;
@@ -2477,37 +2237,23 @@
                 </div>
             </section>
             <section data-p2p-panel="waiting" class="p2p-live-card" aria-hidden="true" inert>
-                <div class="p2p-radar-wrap">
-                    <span class="p2p-flow-pulse" aria-hidden="true"></span>
-                </div>
-                <h3 id="p2pWaitingName" class="p2p-sender-title"></h3>
-                <div class="p2p-badge-wrap">
-                    <span id="p2pWaitingUid" class="p2p-uid-badge"></span>
-                </div>
-                <div class="p2p-status-box">
-                    <p class="p2p-status-text"><i class="fas fa-satellite-dish" style="margin-right: 6px; color: #10b981;"></i> Preparing transfer... Waiting for funds.</p>
-                    <p class="p2p-status-sub">A QR scan does not confirm payment.</p>
-                </div>
+                <span class="p2p-flow-pulse" aria-hidden="true"></span>
+                <h3 id="p2pWaitingName"></h3>
+                <p id="p2pWaitingUid" class="p2p-live-note"></p>
+                <p class="p2p-live-note">Preparing transfer... Waiting for funds.</p>
+                <p class="p2p-live-note">A QR scan does not confirm payment.</p>
             </section>
             <section data-p2p-panel="settled" class="p2p-live-card" aria-hidden="true" inert>
-                <div class="p2p-success-banner">
-                    <i class="fas fa-check-circle" style="color: #10b981; font-size: 1.25rem;"></i>
-                    <h3 class="p2p-receipt-heading">Transfer received</h3>
-                </div>
+                <h3>Transfer received</h3>
                 <strong id="p2pReceiptNet"></strong>
-                <div class="p2p-badge-wrap">
-                    <span id="p2pReceiptSender" class="p2p-sender-badge"></span>
-                </div>
+                <p id="p2pReceiptSender" class="p2p-live-note"></p>
                 <dl>
                     <dt>Gross transfer</dt><dd id="p2pReceiptGross"></dd>
                     <dt>Transfer fee</dt><dd id="p2pReceiptFee"></dd>
                     <dt>Net credited</dt><dd id="p2pReceiptCredit"></dd>
                     <dt>Order ID</dt><dd id="p2pReceiptOrder"></dd>
                 </dl>
-                <button type="button" class="btn-p2p-luxury" onclick="window.resetP2PReceiveView()">
-                    <i class="fas fa-qrcode"></i>
-                    <span>Show my QR again</span>
-                </button>
+                <button type="button" class="act-btn" onclick="window.resetP2PReceiveView()">Show my QR again</button>
             </section>
         </div>
     </div>
@@ -3321,9 +3067,11 @@
 </div>
 <script>
     /* === MODULE 12: SYSTEM CORE & UTILITIES === */
-    // 🔥 FIX 1: URL Routing with proper HTTPS Protocol (এটি না থাকলে API কাজ করবে না)
-    const isLocal = window.location.hostname === "127.0.0.1" || window.location.hostname === "localhost";
-    const API_BASE_URL = isLocal ? "http://127.0.0.1:5000/api" : "https://tcm-bakend.onrender.com/api";
+    // 🔥 SMART LOCAL & LAN ROUTING
+const host = window.location.hostname;
+const isLocal = host === "127.0.0.1" || host === "localhost" || host.startsWith("192.168.") || host.startsWith("10.");
+const API_BASE_URL = localStorage.getItem('custom_api_url') 
+    || (isLocal ? `${window.location.protocol}//${host}:5000/api` : "https://tcm-bakend.onrender.com/api");
 
     /* Fail-Safe Error Handler */
     window.addEventListener('error', function() {
