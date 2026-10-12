@@ -533,6 +533,43 @@
 
         .qr-container { background: #ffffff; padding: 15px; border-radius: 24px; display: inline-block; margin-bottom: 20px; border: 2px solid #f8f9fc; box-shadow: 0 20px 40px rgba(30, 41, 59, 0.25), 0 0 20px rgba(148, 163, 184, 0.3), inset 0 0 10px rgba(255, 255, 255, 1); transform: translateY(-4px); transition: all 0.3s ease; }
         [data-theme="dark"] .qr-container { background: #030406; border: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 40px rgba(0,0,0,0.8), 0 0 20px rgba(255,255,255,0.05); transform: translateY(-4px); }
+
+        #p2pScanWaitingBadge {
+            margin-top: 18px;
+            padding: 14px;
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 14px;
+            background: rgba(16, 185, 129, 0.08);
+            color: var(--text-main);
+            text-align: left;
+            overflow-wrap: anywhere;
+        }
+        #p2pScanWaitingBadge[hidden] { display: none; }
+        #p2pScanWaitingBadge .p2p-wait-heading {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--success);
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+        #p2pScanWaitingBadge .p2p-wait-dot {
+            width: 8px;
+            height: 8px;
+            flex: 0 0 8px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: p2pWaitingPulse 2s ease-out infinite;
+        }
+        #p2pScanWaitingBadge .p2p-wait-sender { margin-top: 10px; font-size: 0.85rem; }
+        #p2pScanWaitingBadge .p2p-wait-note { margin-top: 6px; color: var(--text-sub); font-size: 0.72rem; }
+        @keyframes p2pWaitingPulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.28); }
+            75%, 100% { box-shadow: 0 0 0 7px rgba(16, 185, 129, 0); }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #p2pScanWaitingBadge .p2p-wait-dot { animation: none; }
+        }
         [data-theme="dark"] .qr-container:hover {
              transform: none;
              box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 1), -1px -1px 1px rgba(255, 255, 255, 0.1);
@@ -2168,9 +2205,9 @@
     <div class="modal-box" style="padding: 30px 20px; text-align: center;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
             <h2 style="font-size:1.2rem; font-weight:700; color:var(--text-main);"><i class="fas fa-qrcode" style="color:var(--primary);"></i> Receive via P2P</h2>
-            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="document.getElementById('p2pMyQrModal').style.display='none'; document.getElementById('p2pMyQrModal').classList.remove('show');"></i>
+            <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="window.closeModal('p2pMyQrModal')"></i>
         </div>
-        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 20px;">Show this QR code to the sender to instantly receive USDT.</p>
+        <p style="font-size: 0.85rem; color: var(--text-sub); margin-bottom: 20px;">Show this QR code to the sender. Funds arrive only after a successful transfer.</p>
 
         <div class="qr-container" style="background: white; padding: 15px; border-radius: 20px; display: inline-block; margin-bottom: 20px; box-shadow: 0 5px 20px rgba(0,245,255,0.2); border: 2px solid var(--primary);">
             <img id="myP2PQrImg" src="" style="width: 160px; height: 160px; display: block;">
@@ -2179,6 +2216,15 @@
         <div class="address-copy-box" style="margin-top: 5px; background: rgba(0,0,0,0.2); border: 1px dashed var(--border); justify-content: center;">
             <span class="addr-text" id="myP2PUidText" style="color:var(--primary); font-weight:800; font-family: monospace; font-size: 1.1rem; text-align: center; flex: none;">---</span>
             <i class="far fa-copy copy-trigger" style="margin-left: 10px;" onclick="window.copyToClipboardVisual(document.getElementById('myP2PUidText').innerText, this)"></i>
+        </div>
+        <div id="p2pScanWaitingBadge" role="status" aria-live="polite" aria-atomic="true" hidden>
+            <div class="p2p-wait-heading">
+                <span class="p2p-wait-dot" aria-hidden="true"></span>
+                <span>Waiting for transfer...</span>
+            </div>
+            <div class="p2p-wait-sender"><strong id="p2pScanSenderName"></strong></div>
+            <div class="p2p-wait-note">Sender UID: <span id="p2pScanSenderUid"></span></div>
+            <div class="p2p-wait-note">QR scanned. This notice does not confirm payment and expires after 60 seconds.</div>
         </div>
     </div>
 </div>
@@ -6549,7 +6595,8 @@ window.scheduleDashboardSocketReconnect = () => {
 
     let uidCheckTimer = null;
 
-    window.checkReceiverUid = () => {
+    window.checkReceiverUid = (options = {}) => {
+        const fromCameraScan = options.scan === true;
         clearTimeout(uidCheckTimer);
         const rUid = document.getElementById('sendUid').value.trim();
         const resBox = document.getElementById('uidCheckResult');
@@ -6579,7 +6626,10 @@ window.scheduleDashboardSocketReconnect = () => {
 
         uidCheckTimer = setTimeout(async () => {
             try {
-                const result = await window.fetchAPI('/p2p/check-user?uid=' + rUid, 'GET');
+                const result = fromCameraScan
+                    ? await window.fetchAPI('/p2p/scan-user', 'POST', { uid: rUid })
+                    : await window.fetchAPI('/p2p/check-user?uid=' + encodeURIComponent(rUid), 'GET');
+                if (document.getElementById('sendUid').value.trim() !== rUid) return;
 
                 if (!result || !result.success) {
                     resBox.innerHTML = '<i class="fas fa-times-circle"></i> User not found!';
@@ -6589,7 +6639,11 @@ window.scheduleDashboardSocketReconnect = () => {
                     btn.style.cssText = "width:100%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 1px solid #a78bfa; margin-top: 15px; padding: 12px; border-radius: 14px;";
                 } else {
                     // 🔥 FIX: color:var(--text-main) ensures visibility in BOTH Light and Dark themes
-                    resBox.innerHTML = `<i class="fas fa-check-circle"></i> Verified: <strong style="color:var(--text-main);">${result.name}</strong>`;
+                    resBox.innerHTML = '<i class="fas fa-check-circle"></i> Verified: ';
+                    const receiverName = document.createElement('strong');
+                    receiverName.style.color = 'var(--text-main)';
+                    receiverName.textContent = String(result.name || 'TCM member');
+                    resBox.appendChild(receiverName);
                     resBox.style.color = 'var(--success)';
 
                     if (window.currentP2pCount < 15) {
@@ -6603,7 +6657,7 @@ window.scheduleDashboardSocketReconnect = () => {
                 resBox.innerHTML = '<i class="fas fa-times-circle"></i> Network Error';
                 resBox.style.color = 'var(--error)';
             }
-        }, 600);
+        }, checkDelay);
     };
 
     window.calculateLiveFee = () => {
@@ -6808,14 +6862,75 @@ window.scheduleDashboardSocketReconnect = () => {
     };
 
     /* === MODULE 21: CAMERA SCANNER & QR GENERATOR === */
-    window.showMyP2PQr = () => {
+    const p2pScanNoticeState = { notice: null, timer: null, opening: false };
+
+    const renderP2PScanNotice = () => {
+        const badge = document.getElementById('p2pScanWaitingBadge');
+        if (!badge) return;
+        const notice = p2pScanNoticeState.notice;
+        const active = notice && notice.receiverUid === localStorage.getItem('uid') &&
+            notice.expiresAt > Date.now() && !window.dashboardSession.closed && !window.dashboardSession.blocked;
+        badge.hidden = !active;
+        document.getElementById('p2pScanSenderName').textContent = active ? notice.senderName : '';
+        document.getElementById('p2pScanSenderUid').textContent = active ? notice.senderUid : '';
+    };
+
+    window.handleP2PScanNotice = data => {
+        if (!data || data.receiverUid !== localStorage.getItem('uid') ||
+            window.dashboardSession.closed || window.dashboardSession.blocked ||
+            typeof data.noticeId !== 'string' || typeof data.senderUid !== 'string' ||
+            typeof data.senderName !== 'string' || !Number.isFinite(data.expiresAt) ||
+            data.expiresAt <= Date.now() || data.noticeId === p2pScanNoticeState.notice?.noticeId) return;
+
+        clearTimeout(p2pScanNoticeState.timer);
+        p2pScanNoticeState.notice = {
+            noticeId: data.noticeId,
+            receiverUid: data.receiverUid,
+            senderUid: data.senderUid.slice(0, 128),
+            senderName: data.senderName.slice(0, 80),
+            expiresAt: Math.min(data.expiresAt, Date.now() + 60000)
+        };
+        renderP2PScanNotice();
+        p2pScanNoticeState.timer = setTimeout(() => {
+            p2pScanNoticeState.notice = null;
+            p2pScanNoticeState.timer = null;
+            renderP2PScanNotice();
+        }, Math.max(0, p2pScanNoticeState.notice.expiresAt - Date.now()));
+
+        const message = data.senderName.slice(0, 80) + ' (' + data.senderUid.slice(0, 128) +
+            ') scanned your P2P QR. Waiting for transfer.';
+        window.showToast(window.sanitizeInput(message));
+        if (!document.hidden && typeof navigator.vibrate === 'function') {
+            try { navigator.vibrate(35); } catch (error) {}
+        }
+    };
+
+    window.showMyP2PQr = async () => {
         const myUid = localStorage.getItem('uid');
-        if (!myUid) return;
+        if (!myUid || p2pScanNoticeState.opening) return;
+        p2pScanNoticeState.opening = true;
+        try {
+            const parent = document.getElementById('sendMoneyModal');
+            if (parent && getComputedStyle(parent).display !== 'none') {
+                window.closeModal('sendMoneyModal');
+                const closeVersion = window.modalCloseVersions.get(parent);
+                const closingHash = window.location.hash;
+                await new Promise(resolve => setTimeout(resolve, 320));
+                if (window.modalCloseVersions.get(parent) !== closeVersion ||
+                    window.location.hash !== closingHash ||
+                    getComputedStyle(parent).display !== 'none') return;
+            }
+            if (myUid !== localStorage.getItem('uid') ||
+                window.dashboardSession.closed || window.dashboardSession.blocked) return;
 
-        document.getElementById('myP2PUidText').innerText = myUid;
-        document.getElementById('myP2PQrImg').src = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(myUid)}&margin=10`;
-
-        window.openModal('p2pMyQrModal');
+            document.getElementById('myP2PUidText').textContent = myUid;
+            document.getElementById('myP2PQrImg').src =
+                'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=' + encodeURIComponent(myUid) + '&margin=10';
+            renderP2PScanNotice();
+            window.openModal('p2pMyQrModal');
+        } finally {
+            p2pScanNoticeState.opening = false;
+        }
     };
 
     let html5QrCode = null;
@@ -6870,7 +6985,7 @@ window.scheduleDashboardSocketReconnect = () => {
             window.closeCameraScanner();
             uidInput.value = receiverUid;
             uidInput.dispatchEvent(new Event('input', { bubbles: true }));
-            window.checkReceiverUid();
+            window.checkReceiverUid({ scan: true });
             window.showToast("QR Code Scanned Successfully!");
         };
 
@@ -7707,6 +7822,8 @@ window.scheduleDashboardSocketReconnect = () => {
     }) : null;
 
     if (window.socket) {
+        window.socket.on('p2p_scan_waiting', window.handleP2PScanNotice);
+
         window.socket.on('user_role_changed', data => {
             const uid = localStorage.getItem('uid');
             if (!data || data.uid !== uid ||
