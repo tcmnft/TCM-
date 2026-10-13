@@ -9041,6 +9041,10 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
+    window.escapeChatDisplay = value => String(value ?? '').replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+    }[character]));
+
     window.renderChatMessages = (messages) => {
         const chatContent = document.getElementById('chat-content');
         if (!chatContent) return;
@@ -9052,7 +9056,7 @@ window.scheduleDashboardSocketReconnect = () => {
             let isMe = msg.senderUid === myUid;
             let align = isMe ? 'flex-end' : 'flex-start';
             let bubbleClass = isMe ? 'my-message' : 'other-message';
-            let nameHtml = isMe ? '' : `<div class="chat-name">${msg.senderName || 'User'}</div>`;
+            let nameHtml = isMe ? '' : `<div class="chat-name">${window.escapeChatDisplay(msg.senderName || 'User')}</div>`;
             let safeTime = window.parseSafeTimestamp ? window.parseSafeTimestamp(msg.timestamp || msg.Date) : (msg.timestamp || msg.Date);
             let timeStr = safeTime ? new Date(safeTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase() : "";
             let deleteBtn = isMe ? `<i class="fas fa-trash-alt" style="font-size:0.7rem; color:var(--error); cursor:pointer; opacity: 0.7; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" onclick="window.deleteMessageForMe('${msg.id}')" title="Delete message"></i>` : '';
@@ -9061,7 +9065,7 @@ window.scheduleDashboardSocketReconnect = () => {
             <div id="msg-${msg.id}" style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
                 ${nameHtml}
                 <div class="chat-bubble ${bubbleClass}" style="position: relative;">
-                    ${msg.message}
+                    ${window.escapeChatDisplay(msg.message)}
                 </div>
                 <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: ${align}; width: 100%;">
                     <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
@@ -9072,7 +9076,8 @@ window.scheduleDashboardSocketReconnect = () => {
 
         if (!html) html = '<div style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin-top:20px;">No messages yet. Say hello! 👋</div>';
 
-        if (chatContent.innerHTML.length !== html.length) {
+        if (chatContent.dataset.renderedChat !== html) {
+            chatContent.dataset.renderedChat = html;
             chatContent.innerHTML = html;
             chatContent.scrollTop = chatContent.scrollHeight;
         }
@@ -9102,7 +9107,7 @@ window.scheduleDashboardSocketReconnect = () => {
         const rawMsg = input.value.trim();
         if (!rawMsg) return;
 
-        const message = window.sanitizeInput(rawMsg);
+        const message = rawMsg;
         const myUid = localStorage.getItem('uid');
         const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
         const senderName = staticUser.Name || 'TCM User';
@@ -9115,7 +9120,7 @@ window.scheduleDashboardSocketReconnect = () => {
         let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
         let html = `
         <div id="msg-${socketData.id}" style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:12px; width:100%;">
-            <div class="chat-bubble my-message">${message}</div>
+            <div class="chat-bubble my-message">${window.escapeChatDisplay(message)}</div>
             <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-end; width: 100%;">
                 <span style="font-size: 0.6rem; color: var(--text-sub); font-family: monospace;">${timeStr}</span>
                 <i class="fas fa-check" style="font-size:0.6rem; color:var(--text-sub);"></i>
@@ -9369,7 +9374,7 @@ window.scheduleDashboardSocketReconnect = () => {
             let html = `
                 <div style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:8px;">
                     <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
-                        ${data.message}
+                        ${window.escapeChatDisplay(data.message)}
                     </div>
                     <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
                 </div>`;
@@ -9424,7 +9429,7 @@ window.scheduleDashboardSocketReconnect = () => {
                 html += `
                     <div style="display:flex; flex-direction:column; align-items:${isMe ? 'flex-end' : 'flex-start'}; margin-bottom:8px;">
                         <div style="max-width:82%; padding:9px 14px; border-radius:14px; ${isMe ? 'background:#0ea5e9; color:#fff; border-bottom-right-radius:2px;' : 'background:rgba(255,255,255,0.08); color:#e2e8f0; border-bottom-left-radius:2px;'} font-size:0.85rem; line-height:1.4; word-break:break-word;">
-                            ${m.message}
+                            ${window.escapeChatDisplay(m.message)}
                         </div>
                         <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
                     </div>`;
@@ -9457,7 +9462,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
         if (!rawMsg || !currentUid) return;
 
-        const msg = window.sanitizeInput ? window.sanitizeInput(rawMsg) : rawMsg.replace(/[&<>'"]/g, tag => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'}[tag] || tag));
+        const msg = rawMsg;
 
         input.value = '';
 
@@ -9470,7 +9475,7 @@ window.scheduleDashboardSocketReconnect = () => {
         let bubbleHtml = `
             <div style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:8px;">
                 <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:#0ea5e9; color:#fff; border-bottom-right-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
-                    ${msg}
+                    ${window.escapeChatDisplay(msg)}
                 </div>
                 <span style="font-size:0.6rem; color:#64748b; margin-top:2px; padding:0 4px; font-family:monospace;">${timeStr}</span>
             </div>`;
