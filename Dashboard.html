@@ -2213,14 +2213,14 @@
 </div>
 
 <div id="accountDeleteModal" class="modal" data-confirmed="false">
-    <div class="modal-box" style="box-sizing:border-box;width:calc(100% - 24px);max-width:340px;padding:20px;text-align:left;border-color:var(--error);">
+    <div class="modal-box" style="box-sizing:border-box;width:calc(100% - 24px);max-width:340px;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:20px;text-align:left;border-color:var(--error);">
         <h2 style="font-size:1.1rem;margin:0 0 8px;font-weight:700;">
             <i class="fas fa-trash-alt" style="color:var(--error);"></i>
             Delete Account
         </h2>
 
         <p style="font-size:.75rem;color:var(--error);margin:0 0 12px;">
-            Account will be permanently deleted after 24 hours.
+            Personal profile removal is scheduled after 24 hours. Financial records are retained.
         </p>
 
         <button type="button"
@@ -2236,10 +2236,10 @@
             <span style="min-width:0;flex:1;">
                 <strong id="deleteConfirmationText"
                         style="display:block;font-size:.8rem;">
-                    Confirm to continue
+                    Verify to continue
                 </strong>
                 <span style="display:block;font-size:.6rem;color:#94a3b8;margin-top:4px;">
-                    TCM Shield · Account confirmation
+                    TCM Shield · Bot verification
                 </span>
             </span>
 
@@ -2247,6 +2247,10 @@
                style="color:#67e8f9;"
                aria-hidden="true"></i>
         </button>
+
+        <div id="deleteTurnstileContainer"
+             hidden
+             style="margin:10px auto 0;width:150px;min-height:140px;"></div>
 
         <label for="deleteEmailOTP"
                style="display:block;font-size:.75rem;color:var(--text-sub);margin-top:12px;">
@@ -6417,78 +6421,68 @@ window.scheduleDashboardSocketReconnect = () => {
  window.otpAttempts = {};
 
  window.requestSystemOTP = async (btnId) => {
+     if (btnId === 'btnGetDeleteOTP') return window.requestDeletionOTP();
      const uid = localStorage.getItem('uid');
+     const token = localStorage.getItem('token');
      const btn = document.getElementById(btnId);
-     if (!btn) return;
-
-     // ইনিশিয়ালাইজেশন
+     if (!btn || btn.disabled) return;
      if (!window.otpAttempts[btnId]) {
          window.otpAttempts[btnId] = { count: 0, lockUntil: 0 };
      }
-
-     let state = window.otpAttempts[btnId];
-     let now = Date.now();
-
-     // লক চেক করা হচ্ছে
+     const state = window.otpAttempts[btnId];
+     const now = Date.now();
      if (now < state.lockUntil) {
-         let timeLeft = Math.ceil((state.lockUntil - now) / 1000);
-         window.showToast(`Too many attempts! Wait ${timeLeft} seconds.`, true);
-         return;
+         return window.showToast('Too many attempts! Wait ' + Math.ceil((state.lockUntil - now) / 1000) + ' seconds.', true);
      }
-
-     const isDeletion = btnId === 'btnGetDeleteOTP';
-
-     if (isDeletion && (!window.deletionVerification.verified || btn.disabled)) {
-         window.showToast('Complete the account confirmation first.', true);
-         return;
-     }
-
-     const confirmationVersion = window.deletionVerification.version;
+     const cancelDeletion = btnId === 'btnGetCancelDelOTP';
+     if (cancelDeletion) window.deletionCancelOTP = null;
      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
      btn.disabled = true;
-
-     const result = await window.fetchAPI('/auth/send-otp', 'POST', { uid });
-
-     if (
-         isDeletion &&
-         confirmationVersion !== window.deletionVerification.version
-     ) return;
-
-     if (!result.success) {
-         window.showToast(result.message, true);
-         btn.innerHTML = 'Get OTP';
+     const endpoint = cancelDeletion ? '/user/cancel-deletion-otp' : '/auth/send-otp';
+     const result = await window.fetchAPI(endpoint, 'POST', { uid });
+     if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) {
+         btn.textContent = 'Get OTP';
          btn.disabled = false;
-     } else {
-         window.showToast("OTP sent to your email!");
-         state.count += 1;
-
-         if (state.count >= 3) {
-             // ৩ বার শেষ, এবার ৬০ সেকেন্ডের লক এবং লাইভ টাইমার
-             state.lockUntil = now + 60000;
-             state.count = 0; // রিসেট
-
-             let timeLeft = 60;
-             btn.style.background = 'rgba(255, 255, 255, 0.1)';
-             btn.style.color = 'var(--warning)';
-
-             let timerInterval = setInterval(() => {
-                 if (timeLeft <= 0) {
-                     clearInterval(timerInterval);
-                     btn.innerHTML = 'Get OTP';
-                     btn.style.background = ''; // ডিফল্ট স্টাইল ফেরত
-                     btn.style.color = '';
-                     btn.disabled = isDeletion && !window.deletionVerification.verified;
-                 } else {
-                     btn.innerHTML = `Wait ${timeLeft}s...`;
-                     timeLeft--;
-                 }
-             }, 1000);
-         } else {
-             // লিমিট পার না হলে বাটন আবার আগের রূপে ফিরবে
-             btn.innerHTML = 'Get OTP';
-             btn.disabled = false;
-         }
+         return;
      }
+     if (!result.success) {
+         window.showToast(result.message || 'OTP request could not complete.', true);
+         btn.textContent = 'Get OTP';
+         btn.disabled = false;
+         return;
+     }
+     if (cancelDeletion) {
+         if (typeof result.otpRequestId !== 'string') {
+             btn.textContent = 'Get OTP';
+             btn.disabled = false;
+             return window.showToast('Cancellation OTP request is unconfirmed. Request a new code.', true);
+         }
+         window.deletionCancelOTP = { id: result.otpRequestId, uid, token };
+         document.getElementById('cancelDelEmailOTP').value = '';
+     }
+     window.showToast(result.message || 'OTP sent to your email!');
+     state.count += 1;
+     if (state.count < 3) {
+         btn.textContent = 'Get OTP';
+         btn.disabled = false;
+         return;
+     }
+     state.lockUntil = Date.now() + 60000;
+     state.count = 0;
+     btn.style.background = 'rgba(255, 255, 255, 0.1)';
+     btn.style.color = 'var(--warning)';
+     const interval = setInterval(() => {
+         const seconds = Math.ceil((state.lockUntil - Date.now()) / 1000);
+         if (seconds <= 0) {
+             clearInterval(interval);
+             btn.textContent = 'Get OTP';
+             btn.style.background = '';
+             btn.style.color = '';
+             btn.disabled = false;
+         } else {
+             btn.textContent = 'Wait ' + seconds + 's...';
+         }
+     }, 1000);
  };
 
  window.requestEmailOTP = () => window.requestSystemOTP('btnGetOTP');
@@ -10960,7 +10954,7 @@ window.scheduleDashboardSocketReconnect = () => {
         if (elCountry) elCountry.innerText = countryStr;
 
         const deleteTime = u.Delete_At || window.accountDeleteTime;
-        if (deleteTime && deleteTime > Date.now()) {
+        if (Number.isFinite(Number(deleteTime)) && Number(deleteTime) > 0) {
             document.getElementById('normalProfileBack').style.display = 'none';
             document.getElementById('pendingDeleteBack').style.display = 'flex';
             window.startDeleteTimer(deleteTime);
@@ -11038,7 +11032,7 @@ window.scheduleDashboardSocketReconnect = () => {
         if (elCountry) elCountry.innerText = countryStr;
 
         const deleteTime = u.Delete_At || window.accountDeleteTime;
-        if (deleteTime && deleteTime > Date.now()) {
+        if (Number.isFinite(Number(deleteTime)) && Number(deleteTime) > 0) {
             document.getElementById('normalProfileBack').style.display = 'none';
             document.getElementById('pendingDeleteBack').style.display = 'flex';
             window.startDeleteTimer(deleteTime);
@@ -11048,169 +11042,304 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-    window.startDeleteTimer = (targetTime) => {
+    window.startDeleteTimer = targetTime => {
         if (window.accDeleteInterval) clearInterval(window.accDeleteInterval);
-        const globalBanner = document.getElementById('globalQuarantineBanner');
-        const globalTimerText = document.getElementById('globalQuarantineTimer');
-        if (globalBanner) globalBanner.style.display = 'block';
-
-        window.accDeleteInterval = setInterval(() => {
-            let diff = targetTime - Date.now();
-            if (diff <= 0) {
-                clearInterval(window.accDeleteInterval);
-                document.getElementById('accDeleteTimer').innerText = '00:00:00';
-                if (globalTimerText) globalTimerText.innerText = '00:00:00';
-                window.logout();
-                return;
+        const banner = document.getElementById('globalQuarantineBanner');
+        const globalTimer = document.getElementById('globalQuarantineTimer');
+        const localTimer = document.getElementById('accDeleteTimer');
+        if (banner) banner.style.display = 'block';
+        const tick = () => {
+            const remaining = Number(targetTime) - Date.now();
+            if (!Number.isFinite(remaining) || remaining <= 0) {
+                if (window.accDeleteInterval) clearInterval(window.accDeleteInterval);
+                window.accDeleteInterval = null;
+                if (localTimer) localTimer.innerText = 'Awaiting cleanup';
+                if (globalTimer) globalTimer.innerText = 'Awaiting cleanup';
+                return false;
             }
-            let h = Math.floor(diff / 3600000).toString().padStart(2, '0');
-            let m = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-            let s = Math.floor((diff % 60000) / 1000).toString().padStart(2, '0');
-            document.getElementById('accDeleteTimer').innerText = `${h}:${m}:${s}`;
-            if (globalTimerText) globalTimerText.innerText = `${h}:${m}:${s}`;
-        }, 1000);
+            const hours = Math.floor(remaining / 3600000).toString().padStart(2, '0');
+            const minutes = Math.floor((remaining % 3600000) / 60000).toString().padStart(2, '0');
+            const seconds = Math.floor((remaining % 60000) / 1000).toString().padStart(2, '0');
+            const text = hours + ':' + minutes + ':' + seconds;
+            if (localTimer) localTimer.innerText = text;
+            if (globalTimer) globalTimer.innerText = text;
+            return true;
+        };
+        if (tick()) window.accDeleteInterval = setInterval(tick, 1000);
     };
 
     window.deletionVerification = {
-        version: 0,
-        verified: false,
-        busy: false,
-        timer: null
+        version: 0, verified: false, busy: false, issueBusy: false, submitBusy: false,
+        widgetId: null, token: '', nonce: '', otpRequestId: ''
     };
+    window.deletionCancelOTP = null;
 
     window.resetDeletionVerification = () => {
         const state = window.deletionVerification;
         state.version++;
-        clearTimeout(state.timer);
-        state.timer = null;
+        if (state.widgetId !== null && window.turnstile) {
+            try { window.turnstile.remove(state.widgetId); } catch (error) {}
+        }
+        state.widgetId = null;
         state.verified = false;
         state.busy = false;
-
+        state.issueBusy = false;
+        state.submitBusy = false;
+        state.token = '';
+        state.nonce = '';
+        state.otpRequestId = '';
         document.getElementById('accountDeleteModal').dataset.confirmed = 'false';
-
         const widget = document.getElementById('deleteConfirmationWidget');
         widget.disabled = false;
         widget.setAttribute('aria-checked', 'false');
-
         document.getElementById('deleteConfirmationIcon').textContent = '□';
-        document.getElementById('deleteConfirmationText').textContent =
-            'Confirm to continue';
-
+        document.getElementById('deleteConfirmationIcon').style.color = '';
+        document.getElementById('deleteConfirmationText').textContent = 'Verify to continue';
+        const container = document.getElementById('deleteTurnstileContainer');
+        container.replaceChildren();
+        container.hidden = true;
         document.getElementById('btnGetDeleteOTP').disabled = true;
         document.getElementById('btnGetDeleteOTP').textContent = 'Get OTP';
         document.getElementById('deleteEmailOTP').disabled = true;
+        document.getElementById('deleteEmailOTP').value = '';
+        document.getElementById('btnConfirmDelete').disabled = false;
+        document.getElementById('btnConfirmDelete').textContent = 'Initiate Deletion';
     };
 
-    window.verifyDeletionConfirmation = () => {
+    window.loadDeletionTurnstile = () => {
+        if (window.turnstile) return Promise.resolve(window.turnstile);
+        if (window.deletionTurnstileLoader) return window.deletionTurnstileLoader;
+        const loading = new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            let finished = false;
+            const finish = error => {
+                if (finished) return;
+                finished = true;
+                clearTimeout(timer);
+                if (error) { script.remove(); reject(error); }
+                else resolve(window.turnstile);
+            };
+            const timer = setTimeout(() => finish(new Error('Bot verification loading timed out.')), 12000);
+            script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+            script.async = true;
+            script.onload = () => {
+                if (!window.turnstile) return finish(new Error('Bot verification could not load.'));
+                window.turnstile.ready(() => finish());
+            };
+            script.onerror = () => finish(new Error('Bot verification could not load. Check your connection.'));
+            document.head.appendChild(script);
+        });
+        window.deletionTurnstileLoader = loading.catch(error => {
+            window.deletionTurnstileLoader = null;
+            throw error;
+        });
+        return window.deletionTurnstileLoader;
+    };
+
+    window.verifyDeletionConfirmation = async () => {
         const state = window.deletionVerification;
-
-        if (
-            state.busy ||
-            state.verified ||
-            window.dashboardSession.closed ||
-            window.dashboardSession.blocked
-        ) return;
-
+        if (state.busy || state.issueBusy || state.submitBusy || state.verified ||
+            window.dashboardSession.closed || window.dashboardSession.blocked) return;
         const version = state.version;
         const epoch = window.dashboardSession.epoch;
         const token = localStorage.getItem('token');
-
-        state.busy = true;
+        const current = () => state.version === version && epoch === window.dashboardSession.epoch &&
+            token === localStorage.getItem('token') && !window.dashboardSession.closed &&
+            !window.dashboardSession.blocked && document.getElementById('accountDeleteModal').style.display !== 'none';
         const widget = document.getElementById('deleteConfirmationWidget');
+        state.busy = true;
         widget.disabled = true;
-
-        document.getElementById('deleteConfirmationIcon').innerHTML =
-            '<i class="fas fa-spinner fa-spin"></i>';
-        document.getElementById('deleteConfirmationText').textContent =
-            'Confirming...';
-
-        state.timer = setTimeout(() => {
-            state.timer = null;
-            const modal = document.getElementById('accountDeleteModal');
-
-            if (
-                state.version !== version ||
-                epoch !== window.dashboardSession.epoch ||
-                token !== localStorage.getItem('token') ||
-                window.dashboardSession.closed ||
-                window.dashboardSession.blocked ||
-                modal.style.display === 'none'
-            ) {
-                window.resetDeletionVerification();
-                return;
+        document.getElementById('deleteConfirmationIcon').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('deleteConfirmationText').textContent = 'Loading verification...';
+        try {
+            const config = await window.fetchAPI('/user/deletion-config', 'GET');
+            if (!current()) return;
+            if (!config.success || !config.siteKey || !/^[a-f0-9]{48}$/.test(config.verificationNonce || '')) {
+                throw new Error(config.message || 'Deletion verification is unavailable.');
             }
-
+            const turnstile = await window.loadDeletionTurnstile();
+            if (!current()) return;
+            if (state.widgetId !== null) turnstile.remove(state.widgetId);
+            state.nonce = config.verificationNonce;
+            state.token = '';
+            const container = document.getElementById('deleteTurnstileContainer');
+            container.replaceChildren();
+            container.hidden = false;
+            const invalidate = message => {
+                if (!current()) return;
+                state.busy = false;
+                state.verified = false;
+                state.token = '';
+                widget.disabled = false;
+                widget.setAttribute('aria-checked', 'false');
+                document.getElementById('deleteConfirmationIcon').textContent = '□';
+                document.getElementById('deleteConfirmationText').textContent = message;
+                document.getElementById('btnGetDeleteOTP').disabled = true;
+            };
+            state.widgetId = turnstile.render(container, {
+                sitekey: config.siteKey, action: 'account_delete', cData: state.nonce,
+                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+                size: 'compact', 'response-field': false,
+                callback: responseToken => {
+                    if (!current()) return;
+                    state.busy = false;
+                    state.verified = true;
+                    state.token = responseToken;
+                    widget.disabled = true;
+                    widget.setAttribute('aria-checked', 'true');
+                    document.getElementById('deleteConfirmationIcon').textContent = '✓';
+                    document.getElementById('deleteConfirmationIcon').style.color = '#34d399';
+                    document.getElementById('deleteConfirmationText').textContent = 'Verification ready';
+                    document.getElementById('deleteEmailOTP').disabled = false;
+                    document.getElementById('btnGetDeleteOTP').disabled = state.issueBusy;
+                },
+                'expired-callback': () => invalidate('Verification expired. Click to verify again.'),
+                'timeout-callback': () => invalidate('Verification timed out. Click to retry.'),
+                'error-callback': () => invalidate('Verification unavailable. Click to retry.')
+            });
+            document.getElementById('deleteConfirmationText').textContent = 'Complete verification below';
+        } catch (error) {
+            if (!current()) return;
             state.busy = false;
-            state.verified = true;
-            modal.dataset.confirmed = 'true';
-            widget.setAttribute('aria-checked', 'true');
+            state.verified = false;
+            state.token = '';
+            widget.disabled = false;
+            document.getElementById('deleteConfirmationIcon').textContent = '□';
+            document.getElementById('deleteConfirmationText').textContent = 'Click to retry verification';
+            window.showToast(error.message, true);
+        }
+    };
 
-            document.getElementById('deleteConfirmationIcon').textContent = '✓';
-            document.getElementById('deleteConfirmationIcon').style.color = '#34d399';
-            document.getElementById('deleteConfirmationText').textContent =
-                'Confirmation complete';
+    window.requestDeletionOTP = async () => {
+        const state = window.deletionVerification;
+        if (state.issueBusy || state.submitBusy) return;
+        if (!state.verified || !state.token || !state.nonce) {
+            return window.showToast('Complete bot verification before requesting a deletion OTP.', true);
+        }
+        const version = state.version;
+        const btn = document.getElementById('btnGetDeleteOTP');
+        state.issueBusy = true;
+        state.otpRequestId = '';
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        document.getElementById('deleteEmailOTP').value = '';
+        const result = await window.fetchAPI('/user/deletion-otp', 'POST', {
+            uid: localStorage.getItem('uid'), turnstileToken: state.token, verificationNonce: state.nonce
+        });
+        if (state.version !== version) return;
+        state.issueBusy = false;
+        state.verified = false;
+        state.token = '';
+        state.nonce = '';
+        if (state.widgetId !== null && window.turnstile) {
+            try { window.turnstile.remove(state.widgetId); } catch (error) {}
+        }
+        state.widgetId = null;
+        document.getElementById('deleteTurnstileContainer').replaceChildren();
+        document.getElementById('deleteTurnstileContainer').hidden = true;
+        document.getElementById('deleteConfirmationWidget').disabled = false;
+        document.getElementById('deleteConfirmationWidget').setAttribute('aria-checked', 'false');
+        document.getElementById('deleteConfirmationIcon').textContent = '□';
+        document.getElementById('deleteConfirmationText').textContent = result.success
+            ? 'OTP sent. Verify again only to resend.' : 'Verify again to request a new code';
+        btn.textContent = 'Get OTP';
+        btn.disabled = true;
+        if (result.success && typeof result.otpRequestId === 'string') {
+            state.otpRequestId = result.otpRequestId;
             document.getElementById('deleteEmailOTP').disabled = false;
-
-            const attempts = window.otpAttempts['btnGetDeleteOTP'];
-            document.getElementById('btnGetDeleteOTP').disabled =
-                !!attempts && Date.now() < attempts.lockUntil;
-        }, 800);
+            window.showToast(result.message || 'Deletion OTP sent to your email.');
+        } else {
+            document.getElementById('deleteEmailOTP').disabled = true;
+            window.showToast(result.message || 'Deletion OTP request could not complete.', true);
+        }
     };
 
     window.submitDeleteAccount = async () => {
-        if (!window.deletionVerification.verified) {
-            return window.showToast('Complete the account confirmation first.', true);
+        const state = window.deletionVerification;
+        if (state.submitBusy || state.issueBusy) return;
+        if (!state.otpRequestId) {
+            return window.showToast('Verify and request a deletion OTP in this modal first.', true);
         }
         const otp = document.getElementById('deleteEmailOTP').value.trim();
         const code2FA = document.getElementById('delete2FACode').value.trim();
-        if (!otp || otp.length !== 6) return window.showToast("Enter 6-digit Email OTP!", true);
-        if (!code2FA || code2FA.length !== 6) return window.showToast("Enter 2FA Code!", true);
-
+        if (!/^\d{6}$/.test(otp)) return window.showToast('Enter a 6-digit deletion OTP.', true);
+        if (!/^\d{6}$/.test(code2FA)) return window.showToast('Enter a 6-digit 2FA code.', true);
+        const version = state.version;
         const btn = document.getElementById('btnConfirmDelete');
+        state.submitBusy = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         btn.disabled = true;
-
         try {
-            const result = await window.fetchAPI('/user/request-delete', 'POST', { uid: localStorage.getItem('uid'), otp, code2FA });
-            if (result.success) {
+            const result = await window.fetchAPI('/user/request-delete', 'POST', {
+                uid: localStorage.getItem('uid'), otp, code2FA, otpRequestId: state.otpRequestId
+            });
+            if (state.version !== version) return;
+            if (result.success && Number.isFinite(result.deleteTime)) {
                 window.accountDeleteTime = result.deleteTime;
-                if (window.RAM_STATE && window.RAM_STATE.user) window.RAM_STATE.user.Delete_At = result.deleteTime;
-                window.showToast("Account Deletion Initiated! 24H Timer Started.");
+                if (window.RAM_STATE?.user) {
+                    window.RAM_STATE.user.Delete_At = result.deleteTime;
+                    window.RAM_STATE.user.Status = 'Pending_Deletion';
+                }
+                window.showToast('Deletion scheduled after 24 hours. Financial records are retained.');
                 window.closeModal('accountDeleteModal');
                 window.loadBackProfileData();
             } else {
-                window.showToast(result.message, true);
+                window.showToast(result.message || 'Deletion could not be scheduled.', true);
+                if (result.outcomeUnknown) {
+                    window.showToast('Check Account Info before submitting another deletion request.', true);
+                }
             }
-        } catch(e) { window.showToast("Error processing request.", true); }
-        btn.innerHTML = 'Initiate Deletion'; btn.disabled = false;
+        } catch (error) {
+            if (state.version === version) window.showToast('Check Account Info before retrying this request.', true);
+        } finally {
+            if (state.version === version) {
+                state.submitBusy = false;
+                btn.textContent = 'Initiate Deletion';
+                btn.disabled = false;
+            }
+        }
     };
 
     window.submitCancelDelete = async () => {
+        const proof = window.deletionCancelOTP;
+        if (!proof || proof.uid !== localStorage.getItem('uid') || proof.token !== localStorage.getItem('token')) {
+            return window.showToast('Request a fresh cancellation OTP in this modal.', true);
+        }
         const otp = document.getElementById('cancelDelEmailOTP').value.trim();
         const code2FA = document.getElementById('cancelDel2FACode').value.trim();
-        if (!otp || otp.length !== 6) return window.showToast("Enter 6-digit Email OTP!", true);
-        if (!code2FA || code2FA.length !== 6) return window.showToast("Enter 2FA Code!", true);
-
+        if (!/^\d{6}$/.test(otp)) return window.showToast('Enter a 6-digit cancellation OTP.', true);
+        if (!/^\d{6}$/.test(code2FA)) return window.showToast('Enter a 6-digit 2FA code.', true);
         const btn = document.getElementById('btnConfirmCancelDelete');
+        if (btn.disabled) return;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Restoring...';
         btn.disabled = true;
-
         try {
-            const result = await window.fetchAPI('/user/cancel-delete', 'POST', { uid: localStorage.getItem('uid'), otp, code2FA });
+            const result = await window.fetchAPI('/user/cancel-delete', 'POST', {
+                uid: proof.uid, otp, code2FA, otpRequestId: proof.id
+            });
+            if (proof.uid !== localStorage.getItem('uid') || proof.token !== localStorage.getItem('token')) return;
             if (result.success) {
+                window.deletionCancelOTP = null;
                 window.accountDeleteTime = null;
-                if (window.RAM_STATE && window.RAM_STATE.user) delete window.RAM_STATE.user.Delete_At;
-                window.showToast("Deletion Aborted. Account Restored!");
+                if (window.RAM_STATE?.user) {
+                    delete window.RAM_STATE.user.Delete_At;
+                    window.RAM_STATE.user.Status = 'Active';
+                }
+                window.showToast('Deletion cancelled. Account restored.');
                 window.closeModal('cancelDeleteModal');
-                if(window.accDeleteInterval) clearInterval(window.accDeleteInterval);
-                const globalBanner = document.getElementById('globalQuarantineBanner');
-                if (globalBanner) globalBanner.style.display = 'none';
+                if (window.accDeleteInterval) clearInterval(window.accDeleteInterval);
+                const banner = document.getElementById('globalQuarantineBanner');
+                if (banner) banner.style.display = 'none';
                 window.loadBackProfileData();
             } else {
-                window.showToast(result.message, true);
+                window.showToast(result.message || 'Account restoration could not complete.', true);
             }
-        } catch(e) { window.showToast("Error processing request.", true); }
-        btn.innerHTML = 'Restore Account'; btn.disabled = false;
+        } catch (error) {
+            window.showToast('Check Account Info before retrying this request.', true);
+        } finally {
+            btn.textContent = 'Restore Account';
+            btn.disabled = false;
+        }
     };
 </script>
 </body>
