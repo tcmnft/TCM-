@@ -3191,11 +3191,11 @@
                     <div class="t-header"><span class="t-header-left"></span><span class="t-header-mid">Daily</span><span class="t-header-right">Total</span></div>
 
                     <div class="t-row comp-row"><span class="v-name" style="font-weight:700;"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="18"> Comprehensive</span> <span class="v-daily" id="dComp">0 ₮</span> <span class="v-total" id="tComp">0.00 ₮</span></div>
+                    <div class="t-row" id="dividendIncomeRow" style="display:none;"><span class="v-name"><i class="fas fa-crown"></i> Dividend</span> <span class="v-daily" id="dDividend">0 ₮</span> <span class="v-total" id="tDividend">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Earning</span> <span class="v-daily" id="dEarning">0 ₮</span> <span class="v-total" id="tEarning">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Reserve</span> <span class="v-daily" id="dReserve">0 ₮</span> <span class="v-total" id="tReserve">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Team</span> <span class="v-daily" id="dTeam">0 ₮</span> <span class="v-total" id="tTeam">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Staking</span> <span class="v-daily" id="dStaking">0 ₮</span> <span class="v-total" id="tStaking">0.00 ₮</span></div>
-                    <div class="t-row" id="dividendIncomeRow" style="display:none;"><span class="v-name"><i class="fas fa-crown"></i> Dividend</span> <span class="v-daily" id="dDividend">0 ₮</span> <span class="v-total" id="tDividend">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Airdrop</span> <span class="v-daily" id="dAir">0 ₮</span> <span class="v-total" id="tAir">0.00 ₮</span></div>
                 </div>
             </div>
@@ -4332,6 +4332,9 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         }
     };
     window.closeModal = id => {
+        if (id === 'sendMoneyModal' && window.cancelP2PScanHandshake) {
+            window.cancelP2PScanHandshake();
+        }
         if (id === 'accountDeleteModal' && window.resetDeletionVerification) {
             window.resetDeletionVerification();
         }
@@ -4350,6 +4353,7 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
     };
     // E4: Immediate cleanup for navigation and access errors; preserve static modal elements.
     window.dismissDashboardOverlays = () => {
+        if (window.cancelP2PScanHandshake) window.cancelP2PScanHandshake();
         if (window.resetDeletionVerification) window.resetDeletionVerification();
         window.p2pHistoryLoadVersion = (window.p2pHistoryLoadVersion || 0) + 1;
         window.cinemaOverlayVersion = (window.cinemaOverlayVersion || 0) + 1;
@@ -7327,6 +7331,7 @@ window.scheduleDashboardSocketReconnect = () => {
             return;
         }
 
+        window.cancelP2PScanHandshake();
         window.openModal('sendMoneyModal');
         window.fetchAPI('/p2p/read-glow', 'POST', { uid: localStorage.getItem('uid') });
 
@@ -7372,10 +7377,34 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-        let uidCheckTimer = null;
+    let uidCheckTimer = null;
     let uidCheckVersion = 0;
 
+    let p2pOutboundScan = null;
+
+    window.emitP2PScanCancellation = notice => {
+        if (!notice || notice.ownerUid !== localStorage.getItem('uid') ||
+            notice.sessionToken !== localStorage.getItem('token') ||
+            !window.socket?.connected) return;
+        window.socket.emit('p2p_scan_cancel', {
+            receiverUid: notice.receiverUid,
+            scanEventId: notice.scanEventId
+        });
+    };
+
+    window.cancelP2PScanHandshake = () => {
+        ++uidCheckVersion;
+        clearTimeout(uidCheckTimer);
+        uidCheckTimer = null;
+        const notice = p2pOutboundScan;
+        p2pOutboundScan = null;
+        window.emitP2PScanCancellation(notice);
+        const button = document.getElementById('btnSendMoney');
+        if (button) button.disabled = true;
+    };
+
     window.checkReceiverUid = (options = {}) => {
+        window.cancelP2PScanHandshake();
         const fromCameraScan = options.scan === true;
         const version = ++uidCheckVersion;
         clearTimeout(uidCheckTimer);
@@ -7387,8 +7416,10 @@ window.scheduleDashboardSocketReconnect = () => {
         if (!input || !resBox || !btn) return;
         const rUid = input.value.trim();
         const myUid = localStorage.getItem('uid');
+        const sessionToken = localStorage.getItem('token');
         const isCurrent = () => version === uidCheckVersion &&
             input.value.trim() === rUid && localStorage.getItem('uid') === myUid &&
+            localStorage.getItem('token') === sessionToken &&
             !window.dashboardSession.closed && !window.dashboardSession.blocked;
 
         btn.disabled = true;
@@ -7417,12 +7448,31 @@ window.scheduleDashboardSocketReconnect = () => {
                 const endpoint = '/p2p/check-user?uid=' + encodeURIComponent(rUid) +
                     (fromCameraScan ? '&isQr=1' : '');
                 const result = await Promise.race([
-                    window.fetchAPI(endpoint, 'GET'),
+                    window.fetchAPI(endpoint, 'GET').then(result => {
+                        if (fromCameraScan && result?.success && result.scanEventId) {
+                            const notice = {
+                                receiverUid: result.receiverUid,
+                                scanEventId: result.scanEventId,
+                                ownerUid: myUid,
+                                sessionToken
+                            };
+                            if (isCurrent()) p2pOutboundScan = notice;
+                            else window.emitP2PScanCancellation(notice);
+                        }
+                        return result;
+                    }),
                     new Promise((resolve, reject) => {
                         timeout = setTimeout(() => reject(new Error('Receiver lookup timed out. Please try again.')), 8000);
                     })
                 ]);
                 if (!isCurrent()) return;
+
+                if (result?.isPendingDeletion === true) {
+                    resBox.innerHTML = '<i class="fas fa-ban"></i> Account Scheduled for Deletion (Inflows Suspended)';
+                    resBox.style.color = 'var(--error)';
+                    btn.disabled = true;
+                    return;
+                }
 
                 if (!result || !result.success) {
                     resBox.innerHTML = '<i class="fas fa-times-circle"></i> ';
@@ -7449,6 +7499,7 @@ window.scheduleDashboardSocketReconnect = () => {
                 }
             } catch (error) {
                 if (!isCurrent()) return;
+                window.cancelP2PScanHandshake();
                 console.error('Scanner Error:', error);
                 resBox.innerHTML = '<i class="fas fa-times-circle"></i> ';
                 const message = document.createElement('span');
@@ -7499,6 +7550,7 @@ window.scheduleDashboardSocketReconnect = () => {
             const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA });
 
             if (result.success) {
+                p2pOutboundScan = null;
                 window.showSuccessOverlay("P2P Transfer Successful!");
                 window.closeModal('sendMoneyModal');
 
@@ -7535,8 +7587,9 @@ window.scheduleDashboardSocketReconnect = () => {
         } catch(e) {
             window.showToast(e.message, true);
         } finally {
+            window.cancelP2PScanHandshake();
             btn.innerHTML = 'Confirm Transfer';
-            btn.disabled = false;
+            btn.disabled = true;
             btn.className = 'act-btn';
             btn.style.cssText = "width:100%; background: linear-gradient(135deg, #8b5cf6, #6d28d9); border: 1px solid #a78bfa; margin-top: 15px; padding: 12px; border-radius: 14px;";
             document.getElementById('sendUid').value = '';
@@ -7705,6 +7758,9 @@ window.scheduleDashboardSocketReconnect = () => {
     const p2pReceiveState = {
         ownerUid: null,
         phase: 'qr',
+        waitingSenderUid: null,
+        waitingEventId: null,
+        cancelledScans: new Set(),
         timer: null,
         deadline: 0,
         opening: false,
@@ -7728,6 +7784,8 @@ window.scheduleDashboardSocketReconnect = () => {
         clearTimeout(p2pReceiveState.timer);
         p2pReceiveState.timer = null;
         p2pReceiveState.deadline = 0;
+        p2pReceiveState.waitingSenderUid = null;
+        p2pReceiveState.waitingEventId = null;
         showP2PReceivePhase('qr');
     };
 
@@ -7737,6 +7795,7 @@ window.scheduleDashboardSocketReconnect = () => {
         p2pReceiveState.ownerUid = uid;
         p2pReceiveState.seenEvents.clear();
         p2pReceiveState.settledOrders.clear();
+        p2pReceiveState.cancelledScans.clear();
     };
 
     const rememberP2PEvent = (set, key) => {
@@ -7781,6 +7840,10 @@ window.scheduleDashboardSocketReconnect = () => {
             }
 
             if (kind === 'waiting') {
+                if (p2pReceiveState.cancelledScans.has(data.senderUid + ':' + data.eventId)) {
+                    reply({ accepted: false, reason: 'scan-cancelled' });
+                    return;
+                }
                 if (p2pReceiveState.phase === 'settled') {
                     reply({ accepted: false, reason: 'receipt-active' });
                     return;
@@ -7788,6 +7851,8 @@ window.scheduleDashboardSocketReconnect = () => {
                 clearTimeout(p2pReceiveState.timer);
                 document.getElementById('p2pWaitingName').textContent = data.senderName.slice(0, 80);
                 document.getElementById('p2pWaitingUid').textContent = 'Sender UID: ' + data.senderUid.slice(0, 128);
+                p2pReceiveState.waitingSenderUid = data.senderUid;
+                p2pReceiveState.waitingEventId = data.eventId;
                 showP2PReceivePhase('waiting');
                 const duration = Number.isFinite(data.validForMs)
                     ? Math.max(1000, Math.min(data.validForMs, 60000)) : 60000;
@@ -7835,6 +7900,20 @@ window.scheduleDashboardSocketReconnect = () => {
         }
         if (!document.hidden && typeof navigator.vibrate === 'function') {
             try { navigator.vibrate(kind === 'waiting' ? 35 : [35, 40, 60]); } catch (error) {}
+        }
+    };
+
+    window.handleP2PScanCancelled = data => {
+        const uid = localStorage.getItem('uid');
+        if (!data || data.receiverUid !== uid || window.dashboardSession.closed ||
+            window.dashboardSession.blocked || typeof data.senderUid !== 'string' ||
+            typeof data.scanEventId !== 'string' || !/^[a-f0-9-]{36}$/i.test(data.scanEventId)) return;
+        alignP2PReceiveOwner(uid);
+        rememberP2PEvent(p2pReceiveState.cancelledScans, data.senderUid + ':' + data.scanEventId);
+        if (p2pReceiveState.phase === 'waiting' &&
+            p2pReceiveState.waitingSenderUid === data.senderUid &&
+            p2pReceiveState.waitingEventId === data.scanEventId) {
+            window.resetP2PReceiveView();
         }
     };
 
@@ -8766,6 +8845,7 @@ window.scheduleDashboardSocketReconnect = () => {
             });
         });
         window.socket.on('p2p_scan_waiting', window.handleP2PScanNotice);
+        window.socket.on('p2p_scan_cancelled', window.handleP2PScanCancelled);
         window.socket.on('p2p_transfer_received', window.handleP2PSettlementNotice);
 
         window.socket.on('user_role_changed', data => {
