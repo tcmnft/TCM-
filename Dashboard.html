@@ -11123,8 +11123,12 @@ window.scheduleDashboardSocketReconnect = () => {
             script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
             script.async = true;
             script.onload = () => {
-                if (!window.turnstile) return finish(new Error('Bot verification could not load.'));
-                window.turnstile.ready(() => finish());
+                if (!window.turnstile ||
+                    typeof window.turnstile.render !== 'function') {
+                    return finish(new Error('Bot verification could not load.'));
+                }
+
+                finish();
             };
             script.onerror = () => finish(new Error('Bot verification could not load. Check your connection.'));
             document.head.appendChild(script);
