@@ -908,8 +908,8 @@
                 #1e3a5f 42%,
                 #0f172a 100%
             );
-            color: #ffffff !important;
-            -webkit-text-fill-color: #ffffff;
+            color: #00f5ff !important;
+            -webkit-text-fill-color: #00f5ff;
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.3),
                 inset 0 -1px 0 rgba(0, 0, 0, 0.35),
@@ -1289,6 +1289,63 @@
         #accountDeleteModal[data-confirmed="true"] #btnGetDeleteOTP:not(:disabled) {
             box-shadow: 0 0 12px rgba(52, 211, 153, 0.25);
         }
+        #accountDeleteModal .deletion-clearance {
+            margin: 0 0 14px;
+            padding: 12px;
+            border: 1px solid rgba(100, 116, 139, 0.35);
+            border-radius: 12px;
+            background: #f1f5f9;
+            color: #0f172a;
+            font-size: 0.75rem;
+            line-height: 1.45;
+        }
+        #accountDeleteModal .deletion-clearance > p { margin: 8px 0; }
+        #accountDeleteModal .deletion-clearance summary { cursor: pointer; font-weight: 700; }
+        #accountDeleteModal #deleteClearanceRows {
+            list-style: none;
+            margin: 8px 0;
+            padding: 0;
+            max-height: 220px;
+            overflow-y: auto;
+            overscroll-behavior-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        #accountDeleteModal #deleteClearanceRows li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(100, 116, 139, 0.25);
+        }
+        #accountDeleteModal .deletion-clearance-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        #accountDeleteModal .deletion-clearance-badge { color: #047857; font-weight: 700; }
+        #accountDeleteModal [data-status="blocked"] .deletion-clearance-badge { color: #b45309; }
+        #accountDeleteModal [data-status="unknown"] .deletion-clearance-badge { color: #b91c1c; }
+        #accountDeleteModal .deletion-clearance-amount { margin-top: 4px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+        #accountDeleteModal #deleteClearanceRows p { margin: 4px 0 0; color: #475569; }
+        #accountDeleteModal #deleteClearanceTime { display: block; margin-top: 8px; color: #475569; }
+        #accountDeleteModal #btnRefreshDeleteClearance {
+            margin-top: 10px;
+            padding: 7px 10px;
+            border: 1px solid #64748b;
+            border-radius: 8px;
+            background: #e2e8f0;
+            color: #0f172a;
+            font: inherit;
+            cursor: pointer;
+        }
+        #accountDeleteModal #btnRefreshDeleteClearance:disabled { opacity: 0.5; cursor: wait; }
+        #accountDeleteModal #btnRefreshDeleteClearance:focus-visible { outline: 2px solid #0891b2; outline-offset: 2px; }
+        [data-theme="dark"] #accountDeleteModal .deletion-clearance { background: #0f172a; color: #f1f5f9; }
+        [data-theme="dark"] #accountDeleteModal .deletion-clearance-badge { color: #6ee7b7; }
+        [data-theme="dark"] #accountDeleteModal [data-status="blocked"] .deletion-clearance-badge { color: #fcd34d; }
+        [data-theme="dark"] #accountDeleteModal [data-status="unknown"] .deletion-clearance-badge { color: #fda4af; }
+        [data-theme="dark"] #accountDeleteModal #deleteClearanceRows p,
+        [data-theme="dark"] #accountDeleteModal #deleteClearanceTime { color: #cbd5e1; }
+        [data-theme="dark"] #accountDeleteModal #btnRefreshDeleteClearance { background: #1e293b; color: #f1f5f9; }
         .tx-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border); transition: 0.3s; }
         .tx-item:last-child { border-bottom: none; padding-bottom: 0; }
         .tx-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0;}
@@ -2222,6 +2279,17 @@
         <p style="font-size:.75rem;color:var(--error);margin:0 0 12px;">
             Personal profile removal is scheduled after 24 hours. Financial records are retained.
         </p>
+
+        <section class="deletion-clearance" aria-labelledby="deleteClearanceTitle">
+            <strong id="deleteClearanceTitle">Account settlement</strong>
+            <p id="deleteClearanceSummary" role="status" aria-live="polite">Settlement has not been checked.</p>
+            <details open>
+                <summary>Settlement breakdown</summary>
+                <ul id="deleteClearanceRows"></ul>
+            </details>
+            <small id="deleteClearanceTime"></small>
+            <button type="button" id="btnRefreshDeleteClearance" onclick="window.loadDeletionClearance()">Check again</button>
+        </section>
 
         <button type="button"
                 id="deleteConfirmationWidget"
@@ -4225,6 +4293,14 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
                 modal.classList.add('show');
             }
         }, 10);
+        if (id === 'accountDeleteModal') {
+            queueMicrotask(() => {
+                if (window.modalCloseVersions.get(modal) === version &&
+                    typeof window.loadDeletionClearance === 'function') {
+                    window.loadDeletionClearance();
+                }
+            });
+        }
     };
     window.closeModal = id => {
         if (id === 'accountDeleteModal' && window.resetDeletionVerification) {
@@ -11068,6 +11144,110 @@ window.scheduleDashboardSocketReconnect = () => {
         if (tick()) window.accDeleteInterval = setInterval(tick, 1000);
     };
 
+    window.deletionClearance = { version: 0, pending: null, report: null };
+
+    window.resetDeletionClearance = () => {
+        const state = window.deletionClearance;
+        state.version += 1;
+        state.pending = null;
+        state.report = null;
+        document.getElementById('deleteClearanceSummary').textContent = 'Settlement has not been checked.';
+        document.getElementById('deleteClearanceRows').replaceChildren();
+        document.getElementById('deleteClearanceTime').textContent = '';
+        document.getElementById('btnRefreshDeleteClearance').disabled = false;
+    };
+
+    window.renderDeletionClearance = report => {
+        const list = document.getElementById('deleteClearanceRows');
+        const summary = document.getElementById('deleteClearanceSummary');
+        const timestamp = document.getElementById('deleteClearanceTime');
+        const refresh = document.getElementById('btnRefreshDeleteClearance');
+        list.replaceChildren();
+        refresh.disabled = false;
+        if (!report || report.version !== 1 || !Array.isArray(report.rows) || report.rows.length !== 9) {
+            window.deletionClearance.report = null;
+            summary.textContent = 'Settlement could not be verified. Use Check again.';
+            timestamp.textContent = '';
+            return;
+        }
+        window.deletionClearance.report = report;
+        summary.textContent = report.canDelete === true
+            ? 'Clear to continue. Eligibility is checked again when you submit.'
+            : report.verified === true
+                ? 'Settle the items below before closing your account.'
+                : 'Some items could not be verified. Please check again later.';
+        const labels = { clear: 'Clear', dust: 'Clear · small residual',
+            blocked: 'Needs settlement', unknown: 'Could not verify' };
+        for (const row of report.rows) {
+            const status = Object.hasOwn(labels, row.status) ? row.status : 'unknown';
+            const item = document.createElement('li');
+            item.dataset.status = status;
+            const heading = document.createElement('div');
+            heading.className = 'deletion-clearance-heading';
+            const label = document.createElement('strong');
+            label.textContent = String(row.label || 'Account item');
+            const badge = document.createElement('span');
+            badge.className = 'deletion-clearance-badge';
+            badge.textContent = labels[status];
+            heading.append(label, badge);
+            item.append(heading);
+            if (typeof row.amount === 'string') {
+                const amount = document.createElement('div');
+                amount.className = 'deletion-clearance-amount';
+                amount.textContent = row.amount + ' USDT';
+                item.append(amount);
+            }
+            const detail = document.createElement('p');
+            detail.textContent = String(row.detail || '');
+            item.append(detail);
+            list.append(item);
+        }
+        const checkedAt = new Date(report.checkedAt);
+        timestamp.textContent = Number.isFinite(checkedAt.getTime())
+            ? 'Checked: ' + checkedAt.toLocaleString() + '. This preview does not reserve balances.'
+            : 'This preview does not reserve balances.';
+    };
+
+    window.loadDeletionClearance = () => {
+        const state = window.deletionClearance;
+        const modal = document.getElementById('accountDeleteModal');
+        if (!modal || modal.style.display === 'none' ||
+            window.dashboardSession.closed || window.dashboardSession.blocked) return;
+        if (state.pending) return state.pending;
+        const version = state.version;
+        const verificationVersion = window.deletionVerification.version;
+        const epoch = window.dashboardSession.epoch;
+        const uid = localStorage.getItem('uid');
+        const token = localStorage.getItem('token');
+        const current = () => state.version === version &&
+            window.deletionVerification.version === verificationVersion &&
+            window.dashboardSession.epoch === epoch && !window.dashboardSession.closed &&
+            !window.dashboardSession.blocked && uid === localStorage.getItem('uid') &&
+            token === localStorage.getItem('token') && modal.style.display !== 'none';
+        document.getElementById('btnRefreshDeleteClearance').disabled = true;
+        document.getElementById('deleteClearanceSummary').textContent = 'Checking settlement...';
+        const pending = (async () => {
+            try {
+                const result = await window.fetchAPI('/user/deletion-clearance', 'GET');
+                if (!current()) return;
+                window.renderDeletionClearance(result.success ? result.clearance : null);
+                if (!result.success) {
+                    document.getElementById('deleteClearanceSummary').textContent =
+                        result.message || 'Settlement could not be verified. Please try again.';
+                }
+            } catch (error) {
+                if (current()) window.renderDeletionClearance(null);
+            } finally {
+                if (current()) {
+                    state.pending = null;
+                    document.getElementById('btnRefreshDeleteClearance').disabled = false;
+                }
+            }
+        })();
+        state.pending = pending;
+        return pending;
+    };
+
     window.deletionVerification = {
         version: 0, verified: false, busy: false, issueBusy: false, submitBusy: false,
         widgetId: null, token: '', nonce: '', otpRequestId: ''
@@ -11075,6 +11255,7 @@ window.scheduleDashboardSocketReconnect = () => {
     window.deletionCancelOTP = null;
 
     window.resetDeletionVerification = () => {
+        window.resetDeletionClearance();
         const state = window.deletionVerification;
         state.version++;
         if (state.widgetId !== null && window.turnstile) {
@@ -11288,6 +11469,11 @@ window.scheduleDashboardSocketReconnect = () => {
                 window.closeModal('accountDeleteModal');
                 window.loadBackProfileData();
             } else {
+                if (result.clearance) {
+                    window.deletionClearance.version += 1;
+                    window.deletionClearance.pending = null;
+                    window.renderDeletionClearance(result.clearance);
+                }
                 window.showToast(result.message || 'Deletion could not be scheduled.', true);
                 if (result.outcomeUnknown) {
                     window.showToast('Check Account Info before submitting another deletion request.', true);
