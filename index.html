@@ -2,6 +2,18 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (() => {
+            let theme = 'dark';
+            try {
+                const saved = localStorage.getItem('tcm_theme');
+                if (saved === 'light' || saved === 'dark') theme = saved;
+            } catch (error) {
+                // Keep the default theme when browser storage is unavailable.
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>TCM NFT • Ecosystem Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
@@ -387,7 +399,7 @@ window.toggleTheme = () => {
 };
 
 (()=>{
-    let savedTheme = localStorage.getItem('tcm_theme') || 'dark';
+    const savedTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', savedTheme);
     const icon = document.getElementById('themeIcon');
     const text = document.getElementById('themeText');

@@ -2,6 +2,18 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
+    <script>
+        (() => {
+            let theme = 'dark';
+            try {
+                const saved = localStorage.getItem('tcm_theme');
+                if (saved === 'light' || saved === 'dark') theme = saved;
+            } catch (error) {
+                // Keep the default theme when browser storage is unavailable.
+            }
+            document.documentElement.setAttribute('data-theme', theme);
+        })();
+    </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>TCM NFT • Premium Dashboard</title>
 
@@ -2499,6 +2511,15 @@
     </div>
 </div>
 
+<div id="depositDeletionWarningModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="depositDeletionWarningTitle">
+    <div class="modal-box" style="max-width:400px;">
+        <h2 id="depositDeletionWarningTitle" style="color:var(--text-main);font-size:1.15rem;">Deposits suspended</h2>
+        <p style="color:var(--text-sub);line-height:1.6;margin:16px 0;">Account deletion is in progress. Inflows are suspended. Abort deletion to resume transactions.</p>
+        <button type="button" class="act-btn btn-dep" onclick="window.closeModal('depositDeletionWarningModal'); window.openCancelDeleteModal();">Abort Deletion</button>
+        <button type="button" class="act-btn" style="margin-top:12px;background:var(--bg-main);color:var(--text-main);border:1px solid var(--border);" onclick="window.closeModal('depositDeletionWarningModal')">Close</button>
+    </div>
+</div>
+
 <!-- === FINANCE & TRANSACTION MODAL === -->
 <div id="txModal" class="modal">
     <div class="modal-box" style="position: relative; padding: 20px; max-height: 90vh; overflow-y: auto; scrollbar-width: none;">
@@ -3174,6 +3195,7 @@
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Reserve</span> <span class="v-daily" id="dReserve">0 ₮</span> <span class="v-total" id="tReserve">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Team</span> <span class="v-daily" id="dTeam">0 ₮</span> <span class="v-total" id="tTeam">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Staking</span> <span class="v-daily" id="dStaking">0 ₮</span> <span class="v-total" id="tStaking">0.00 ₮</span></div>
+                    <div class="t-row" id="dividendIncomeRow" style="display:none;"><span class="v-name"><i class="fas fa-crown"></i> Dividend</span> <span class="v-daily" id="dDividend">0 ₮</span> <span class="v-total" id="tDividend">0.00 ₮</span></div>
                     <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Airdrop</span> <span class="v-daily" id="dAir">0 ₮</span> <span class="v-total" id="tAir">0.00 ₮</span></div>
                 </div>
             </div>
@@ -3921,8 +3943,15 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         let dE = parseFloat(w.Daily_Earn || 0), dS = parseFloat(w.Daily_Stake || 0), dR = parseFloat(w.Daily_Reserve || 0), dT = parseFloat(w.Daily_Team || 0), dA = parseFloat(w.Daily_Airdrop || 0);
         let tE = parseFloat(w.Total_Earn || 0), tS = parseFloat(w.Total_Stake || 0), tR = parseFloat(w.Total_Reserve || 0), tT = parseFloat(w.Total_Team || 0), tA = parseFloat(w.Total_Airdrop || 0);
 
-        let smartDailyComp = dE + dS + dR + dT + dA;
-        let smartTotalComp = tE + tS + tR + tT + tA;
+        const dDividend = Number(w.Daily_Dividend || 0);
+        const tDividend = Number(w.Total_Dividend || 0);
+        const dividendRow = document.getElementById('dividendIncomeRow');
+        if (dividendRow) dividendRow.style.display = window.RAM_STATE?.user?.Role === 'Admin' ? '' : 'none';
+        setText('dDividend', dDividend, true);
+        setText('tDividend', tDividend, true);
+
+        let smartDailyComp = dE + dS + dR + dT + dA + dDividend;
+        let smartTotalComp = tE + tS + tR + tT + tA + tDividend;
 
         setText('uBalance', w.Main_Balance, false);
         setText('uLocked', w.Locked_Balance, false);
@@ -4499,7 +4528,7 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
 
     /* === MODULE 15: THEME ENGINE (DARK / LIGHT) & SETTINGS === */
     window.initTheme = () => {
-        let savedTheme = localStorage.getItem('tcm_theme') || 'dark';
+        const savedTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
         window.updateThemeUI(savedTheme);
     };
@@ -5295,6 +5324,8 @@ window.mergeDashboardHistory = (records, replace = false) => {
 };
 
 window.renderDashboardRoleBadge = role => {
+    const dividendRow = document.getElementById('dividendIncomeRow');
+    if (dividendRow) dividendRow.style.display = role === 'Admin' ? '' : 'none';
     const profileCard = document.querySelector('.profile-card');
     if (!profileCard) return;
 
@@ -6796,7 +6827,16 @@ window.scheduleDashboardSocketReconnect = () => {
 
  window.securityTimerInterval = null;
 
+ window.showDepositDeletionWarning = () => {
+     window.closeModal('txModal');
+     window.openModal('depositDeletionWarningModal');
+ };
+
  window.openTxModal = async (type) => {
+     if (type === 'Deposit' && window.RAM_STATE?.user?.Status === 'Pending_Deletion') {
+         window.showDepositDeletionWarning();
+         return;
+     }
      window.txMode = type;
      const mTitle = document.getElementById('mTitle');
      const depArea = document.getElementById('depArea');
@@ -6976,6 +7016,10 @@ window.scheduleDashboardSocketReconnect = () => {
     const uid = localStorage.getItem('uid');
 
     if (window.txMode === 'Deposit') {
+        if (window.RAM_STATE?.user?.Status === 'Pending_Deletion') {
+            window.showDepositDeletionWarning();
+            return;
+        }
         const hash = document.getElementById('txHash').value;
         if (!amt || !hash) return window.showToast("Please fill Amount and TxID!", true);
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -7005,6 +7049,9 @@ window.scheduleDashboardSocketReconnect = () => {
                 if (typeof window.forceInjectToHistory === 'function') {
                     window.forceInjectToHistory(newTx);
                 }
+            } else if (result.code === 'DELETION_IN_PROGRESS') {
+                if (window.RAM_STATE?.user) window.RAM_STATE.user.Status = 'Pending_Deletion';
+                window.showDepositDeletionWarning();
             } else {
                 window.showToast("Deposit Failed: " + result.message, true);
             }
