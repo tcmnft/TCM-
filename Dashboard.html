@@ -18,7 +18,7 @@
     <title>TCM NFT • Premium Dashboard</title>
 
     <!-- === EXTERNAL LIBRARIES === -->
-        <script>
+    <script>
         (() => {
             try {
                 localStorage.removeItem('tcm_rem_pass');
@@ -35,7 +35,7 @@
             }
         })();
     </script>
-<script src="https://cdn.jsdelivr.net/npm/@otplib/preset-browser@12.0.1/build/otplib-browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@otplib/preset-browser@12.0.1/build/otplib-browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
@@ -408,18 +408,201 @@
         .v-daily { width: 70px; text-align: right; font-weight: 600; color: #f8f9fc; font-size: 0.85rem; white-space: nowrap; }
         .v-total { width: 85px; text-align: right; font-weight: 700; color: var(--success); font-size: 0.85rem; white-space: nowrap; }
 
-        .grid-panel { background: var(--bg-card); border-radius: 24px; padding: 25px 20px; border: 1px solid var(--border); box-shadow: 0 8px 25px var(--shadow); margin-top: 15px; margin-bottom: 20px; }
+        .grid-panel {
+            background: #eff4f8;
+            border-radius: 24px;
+            padding: 25px 20px;
+            border: 2px solid #ffffff;
+            box-shadow: 10px 15px 30px rgba(30, 41, 59, 0.09), -10px -10px 25px rgba(255, 255, 255, 1);
+            margin-top: 15px;
+            margin-bottom: 20px;
+        }
+        [data-theme="dark"] .grid-panel {
+            background: rgba(20, 24, 32, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.14);
+            border-left: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(0, 0, 0, 0.6);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.9);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), inset 1px 1px 0 rgba(255, 255, 255, 0.05);
+        }
         .grid-box { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; }
         .f-item { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; cursor: pointer; }
-        .f-icon { width: 52px; height: 52px; background: var(--bg-main); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: var(--primary); border: 1px solid var(--border); transition: all 0.3s; box-shadow: inset 0 2px 4px var(--shadow), 0 4px 10px var(--shadow); }
-        .f-item:hover .f-icon { background: var(--primary); color: #fff; transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0, 245, 255, 0.3); }
-        .f-item span { font-size: 0.65rem; font-weight: 600; color: var(--text-sub); }
+        .f-icon {
+            position: relative;
+            width: 52px;
+            height: 52px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            background: linear-gradient(145deg, #ffffff, #e4ecf4);
+            border: 1.5px solid #ffffff;
+            box-shadow: 6px 8px 16px rgba(30, 41, 59, 0.12), -5px -5px 12px #ffffff, inset 0 1px 1px #ffffff;
+            transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
+        }
+        .f-icon::before {
+            content: "";
+            position: absolute;
+            inset: 5px;
+            border-radius: 11px;
+            background: linear-gradient(145deg, #e8eff6, #f8fafc);
+            box-shadow: inset 2px 2px 4px rgba(148, 163, 184, 0.28), inset -2px -2px 4px #ffffff;
+            pointer-events: none;
+        }
+        .f-icon i { position: relative; z-index: 2; transition: transform 0.22s ease; }
+        [data-theme="dark"] .f-icon {
+            background: linear-gradient(145deg, #181e2c, #0c0f17);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 6px 8px 16px rgba(0, 0, 0, 0.75), -2px -2px 6px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+        [data-theme="dark"] .f-icon::before {
+            background: linear-gradient(145deg, #0b0e15, #141923);
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.85), inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+        }
+        .f-icon.dash-receive-pulse::before {
+            background: linear-gradient(145deg, #fdf2f8, #fce7f3);
+            box-shadow: inset 0 0 10px rgba(236, 72, 153, 0.35);
+        }
+        [data-theme="dark"] .f-icon.dash-receive-pulse::before {
+            background: linear-gradient(145deg, #ffffff, #e2e8f0);
+            box-shadow: inset 0 0 12px #ffffff;
+        }
+        .grid-box .f-item:nth-child(1) .f-icon:not(.dash-receive-pulse) { color: #0284c7 !important; }
+        .grid-box .f-item:nth-child(2) .f-icon:not(.dash-receive-pulse) { color: #d97706 !important; }
+        .grid-box .f-item:nth-child(3) .f-icon:not(.dash-receive-pulse) { color: #059669 !important; }
+        .grid-box .f-item:nth-child(4) .f-icon:not(.dash-receive-pulse) { color: #4f46e5 !important; }
+        .grid-box .f-item:nth-child(5) .f-icon:not(.dash-receive-pulse) { color: #e11d48 !important; }
+        .grid-box .f-item:nth-child(6) .f-icon:not(.dash-receive-pulse) { color: #0d9488 !important; }
+        .grid-box .f-item:nth-child(7) .f-icon:not(.dash-receive-pulse) { color: #2563eb !important; }
+        .grid-box .f-item:nth-child(8) .f-icon:not(.dash-receive-pulse) { color: #7c3aed !important; }
+        [data-theme="dark"] .grid-box .f-item:nth-child(1) .f-icon:not(.dash-receive-pulse) { color: #00f5ff !important; text-shadow: 0 0 10px rgba(0, 245, 255, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(2) .f-icon:not(.dash-receive-pulse) { color: #facc15 !important; text-shadow: 0 0 10px rgba(250, 204, 21, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(3) .f-icon:not(.dash-receive-pulse) { color: #34d399 !important; text-shadow: 0 0 10px rgba(52, 211, 153, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(4) .f-icon:not(.dash-receive-pulse) { color: #38bdf8 !important; text-shadow: 0 0 10px rgba(56, 189, 248, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(5) .f-icon:not(.dash-receive-pulse) { color: #fb7185 !important; text-shadow: 0 0 10px rgba(251, 113, 133, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(6) .f-icon:not(.dash-receive-pulse) { color: #2dd4bf !important; text-shadow: 0 0 10px rgba(45, 212, 191, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(7) .f-icon:not(.dash-receive-pulse) { color: #60a5fa !important; text-shadow: 0 0 10px rgba(96, 165, 250, 0.35); }
+        [data-theme="dark"] .grid-box .f-item:nth-child(8) .f-icon:not(.dash-receive-pulse) { color: #a78bfa !important; text-shadow: 0 0 10px rgba(167, 139, 250, 0.35); }
+        .f-item:hover .f-icon { transform: translateY(-3px); }
+        .f-item:hover .f-icon i { transform: scale(1.1); }
+        .f-item:active .f-icon {
+            transform: translateY(1px) scale(0.95);
+            box-shadow: inset 4px 4px 8px rgba(30, 41, 59, 0.16), inset -4px -4px 8px #ffffff;
+        }
+        [data-theme="dark"] .f-item:active .f-icon {
+            box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.9), inset -1px -1px 4px rgba(255, 255, 255, 0.04);
+        }
+        .f-item span { font-size: 0.68rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.1px; }
 
      /* === MODULE 5: UI COMPONENTS (Buttons, Pills, Badges, Animations) === */
-        .act-btn { padding: 16px; border-radius: 18px; border: none; font-weight: 700; font-size: 0.95rem; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 8px 20px var(--shadow); }
-        .act-btn:active { transform: scale(0.96); }
-        .btn-dep { background: linear-gradient(135deg, #0ea5e9, #0284c7); border: 1px solid #38bdf8; }
-        .btn-wd { background: linear-gradient(135deg, #f43f5e, #e11d48); border: 1px solid #fb7185; }
+        /* 🛸 Sunlit Glacier & Sakura Breeze Crystal Glass Buttons */
+        .act-btn {
+            position: relative;
+            overflow: hidden;
+            padding: 15px 16px;
+            border-radius: 20px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            letter-spacing: 0.5px;
+            backdrop-filter: blur(28px) saturate(190%);
+            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+        }
+        .act-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 55%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+            transform: skewX(-25deg);
+            animation: sunlitBreezeShimmer 6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        .btn-wd::after { animation-delay: 3s; }
+        @keyframes sunlitBreezeShimmer {
+            0%, 70%, 100% { left: -120%; opacity: 0; }
+            15% { opacity: 1; }
+            35% { left: 160%; opacity: 0; }
+        }
+        .act-btn i {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.78rem;
+            background: rgba(255, 255, 255, 0.65);
+            box-shadow: inset 0 1px 1px #ffffff, 0 2px 5px rgba(0, 0, 0, 0.06);
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        [data-theme="dark"] .act-btn i {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        .act-btn:hover { transform: translateY(-3px); }
+        .btn-dep:hover i { transform: translateY(2px); }
+        .btn-wd:hover i { transform: translateY(-2px); }
+        .act-btn:active { transform: translateY(2px) scale(0.98); }
+
+        /* 🔷 Deposit: Glacier Waterfall & Sunlit Mist Glass */
+        .btn-dep {
+            background:
+                radial-gradient(circle at 18% 15%, rgba(255, 255, 255, 0.95) 0%, transparent 55%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(224, 242, 254, 0.62) 52%, rgba(186, 230, 253, 0.42) 100%);
+            color: #0284c7;
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            border-top: 2px solid #ffffff;
+            border-bottom: 1.5px solid rgba(14, 165, 233, 0.2);
+            box-shadow: 0 14px 30px -4px rgba(2, 132, 199, 0.15), 0 4px 10px rgba(0, 0, 0, 0.03), inset 0 2px 3px #ffffff, inset 0 -2px 6px rgba(2, 132, 199, 0.07);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        [data-theme="dark"] .btn-dep {
+            background:
+                radial-gradient(circle at 18% 15%, rgba(186, 230, 253, 0.25) 0%, transparent 55%),
+                linear-gradient(145deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.10) 55%, rgba(15, 23, 42, 0.55) 100%);
+            color: #f0f9ff;
+            border: 1px solid rgba(56, 189, 248, 0.42);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.78);
+            border-bottom: 1px solid rgba(2, 132, 199, 0.25);
+            box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 0 24px rgba(14, 165, 233, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 0.5), inset 0 -1.5px 3px rgba(0, 0, 0, 0.35);
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.45);
+        }
+
+        /* 🌸 Withdraw: Sakura Petal & Morning Sunlight Glass */
+        .btn-wd {
+            background:
+                radial-gradient(circle at 18% 15%, rgba(255, 255, 255, 0.95) 0%, transparent 55%),
+                linear-gradient(145deg, rgba(255, 255, 255, 0.88) 0%, rgba(255, 228, 230, 0.62) 52%, rgba(254, 205, 211, 0.42) 100%);
+            color: #e11d48;
+            border: 1px solid rgba(253, 164, 175, 0.45);
+            border-top: 2px solid #ffffff;
+            border-bottom: 1.5px solid rgba(225, 29, 72, 0.2);
+            box-shadow: 0 14px 30px -4px rgba(225, 29, 72, 0.15), 0 4px 10px rgba(0, 0, 0, 0.03), inset 0 2px 3px #ffffff, inset 0 -2px 6px rgba(225, 29, 72, 0.07);
+            text-shadow: 0 1px 0 rgba(255, 255, 255, 0.9);
+        }
+        [data-theme="dark"] .btn-wd {
+            background:
+                radial-gradient(circle at 18% 15%, rgba(254, 205, 211, 0.22) 0%, transparent 55%),
+                linear-gradient(145deg, rgba(244, 63, 94, 0.22) 0%, rgba(225, 29, 72, 0.10) 55%, rgba(15, 23, 42, 0.55) 100%);
+            color: #fff1f2;
+            border: 1px solid rgba(251, 113, 133, 0.42);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.78);
+            border-bottom: 1px solid rgba(225, 29, 72, 0.25);
+            box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 0 24px rgba(244, 63, 94, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 0.5), inset 0 -1.5px 3px rgba(0, 0, 0, 0.35);
+            text-shadow: 0 0 10px rgba(251, 113, 133, 0.45);
+        }
 
         /* 🔥 Dashboard P2P Receive Pulse (Strong Pink Glow for Light Mode) */
         .dash-receive-pulse {
@@ -488,30 +671,130 @@
 
         .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px;}
 
-        .pill { padding: 5px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; gap: 5px; margin-top: 10px; border: 1px solid transparent; transition: 0.4s; }
-        .b-lv1 { background: rgba(16, 185, 129, 0.1); color: #10b981; border-color: rgba(16, 185, 129, 0.2); }
-        .b-lv2 { background: rgba(0, 188, 212, 0.1); color: #00bcd4; border-color: rgba(0, 188, 212, 0.3); }
-        .b-lv3 { background: rgba(99, 102, 241, 0.1); color: #6366f1; border-color: rgba(99, 102, 241, 0.3); }
-
-        /* 🔥 Level 4 (Silver): লাইট থিমের জন্য ডার্ক-স্লেট (Brushed Silver) */
-        .b-silver {
-            background: linear-gradient(135deg, rgba(148, 163, 184, 0.15), rgba(100, 116, 139, 0.1));
-            color: #475569;
-            border-color: rgba(100, 116, 139, 0.4);
-            box-shadow: 0 2px 5px rgba(100, 116, 139, 0.15);
-        }
-        /* 🔥 Level 4 (Silver): ডার্ক থিমের জন্য গ্লোয়িং সিলভার */
-        [data-theme="dark"] .b-silver {
-            background: rgba(192, 192, 192, 0.1);
-            color: #e2e8f0;
-            border-color: rgba(192, 192, 192, 0.4);
-            box-shadow: 0 0 10px rgba(192, 192, 192, 0.2);
+        /* 🌟 Ultra-Luxury Neumorphic Level & Points Capsule */
+        .level-points-capsule {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            padding: 5px 14px 5px 14px;
+            border-radius: 28px;
+            margin-top: 10px;
+            background: linear-gradient(145deg, #e7edf4, #f2f6fa);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: inset 2.5px 2.5px 5px rgba(160, 175, 195, 0.45), inset -2.5px -2.5px 5px #ffffff, 0 3px 6px rgba(30, 41, 59, 0.04);
+            transition: all 0.3s ease;
         }
 
-        .b-gold { background: rgba(250, 204, 21, 0.15); color: #facc15; border-color: rgba(250, 204, 21, 0.5); box-shadow: 0 0 15px rgba(250, 204, 21, 0.3); }
-        .b-epic { background: linear-gradient(90deg, rgba(255, 215, 0, 0.2), rgba(255, 140, 0, 0.2)); color: #ffb703; border: 1px solid #ffb703; box-shadow: 0 0 20px rgba(255, 183, 3, 0.5); animation: pulseEpic 2s infinite alternate; }
-        .b-blue { background: rgba(0, 245, 255, 0.1); color: #00bcd4; border: 1px solid rgba(0, 245, 255, 0.2); }
-        .b-green { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .capsule-level-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2.5px;
+        }
+
+        #uLevelText {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: #1e293b;
+            line-height: 1.1;
+            letter-spacing: -0.2px;
+        }
+
+        .capsule-progress-track {
+            width: 46px;
+            height: 4.5px;
+            background: #cbd5e1;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        #uLevelBarFill {
+            height: 100%;
+            background: #f59e0b;
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .capsule-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(148, 163, 184, 0.35);
+            flex-shrink: 0;
+            margin: 0 1px;
+        }
+
+        .capsule-points-section {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .capsule-bolt-circle {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            box-shadow: 1px 2px 4px rgba(100, 116, 139, 0.16), inset 0 1px 1px #ffffff;
+            flex-shrink: 0;
+        }
+
+        .capsule-bolt-circle i {
+            color: #10b981;
+            font-size: 0.8rem;
+        }
+
+        .capsule-pts-text {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: #10b981;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        /* Dark Theme Adaptation */
+        [data-theme="dark"] .level-points-capsule {
+            background: #0d121c;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            box-shadow: inset 2.5px 2.5px 6px rgba(0, 0, 0, 0.85), inset -1.5px -1.5px 4px rgba(255, 255, 255, 0.04), 0 3px 8px rgba(0, 0, 0, 0.4);
+        }
+
+        [data-theme="dark"] #uLevelText {
+            color: #f1f5f9;
+        }
+
+        [data-theme="dark"] .capsule-progress-track {
+            background: #1e293b;
+        }
+
+        [data-theme="dark"] #uLevelBarFill {
+            background: #fbbf24;
+            box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+        }
+
+        [data-theme="dark"] .capsule-divider {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        [data-theme="dark"] .capsule-bolt-circle {
+            background: #151e2e;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.6), 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="dark"] .capsule-bolt-circle i {
+            color: #34d399;
+            filter: drop-shadow(0 0 4px rgba(52, 211, 153, 0.4));
+        }
+
+        [data-theme="dark"] .capsule-pts-text {
+            color: #34d399;
+        }
 
         .badge { padding: 4px 10px; border-radius: 8px; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; }
         .glow-red { background: rgba(244, 63, 94, 0.1); color: #f43f5e; box-shadow: 0 0 10px rgba(244, 63, 94, 0.4); }
@@ -1975,7 +2258,7 @@
         .atm-number { font-family: 'Courier New', Courier, monospace; font-size: 1.15rem; font-weight: 900; color: #000000; letter-spacing: 3px; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); margin: 0; }
         .card-platinum .atm-card-name, .card-platinum .atm-number { color: #ffffff; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); }
         .tier-staked-badge { padding: 4px 10px; border-radius: 8px; font-size: 0.75rem; font-weight: 800; backdrop-filter: blur(6px); display: flex; align-items: center; gap: 5px; transition: all 0.3s ease; }
-        
+
         .card-silver .tier-staked-badge { color: #0f172a; background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(15, 23, 42, 0.2); box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.5); }
         .card-gold .tier-staked-badge { color: #78350f; background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(120, 53, 15, 0.3); box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.5); }
         .card-platinum .tier-staked-badge { color: #312e81; background: rgba(255, 255, 255, 0.45); border: 1px solid rgba(49, 46, 129, 0.3); box-shadow: inset 0 2px 5px rgba(255, 255, 255, 0.5); }
@@ -2273,7 +2556,7 @@
             <h2 style="font-size:1.2rem; margin-bottom:10px; font-weight:800; color:var(--text-main);"><i class="fas fa-bolt" style="color:var(--success);"></i> Weighted Average ROI</h2>
         </div>
         <p style="font-size:0.85rem; color:var(--text-sub); margin-bottom:15px; line-height: 1.5;">When you activate multiple staking cards, the system calculates a <strong>Weighted Average Daily Speed</strong> based on the combined capital across all your active vaults.</p>
-        
+
         <div id="dynamicStakingLedgerContainer" style="background: var(--bg-main); padding: 15px; border-radius: 12px; border: 1px dashed var(--border); margin-bottom: 15px;">
             <!-- Dynamic Content Injected via JS -->
         </div>
@@ -2577,7 +2860,7 @@
             </div>
             <div class="address-copy-box" style="margin-bottom: 12px; padding: 10px 12px;">
                 <span class="addr-text" id="walletAddrText">Loading...</span>
-                <i class="far fa-copy copy-trigger" onclick="window.copyToClipboardVisual(document.getElementById('walletAddrText').innerText, this)"></i>
+                <i id="depositCopyIcon" class="far fa-copy copy-trigger" aria-disabled="true" onclick="if (this.getAttribute('aria-disabled') !== 'true') window.copyToClipboardVisual(document.getElementById('walletAddrText').innerText, this)"></i>
             </div>
         </div>
 
@@ -2762,22 +3045,22 @@
             <label style="font-size: 0.75rem; color: var(--text-sub); font-weight: 600; margin-left: 5px;">Receiver UID</label>
             <div class="p2p-recipient-entry">
                 <input
-                    type="text"
-                    id="sendUid"
-                    placeholder="Scan or Enter UID"
-                    aria-label="Receiver UID"
-                    autocomplete="off"
-                    autocapitalize="characters"
-                    spellcheck="false"
-                    oninput="checkReceiverUid()"
+                        type="text"
+                        id="sendUid"
+                        placeholder="Scan or Enter UID"
+                        aria-label="Receiver UID"
+                        autocomplete="off"
+                        autocapitalize="characters"
+                        spellcheck="false"
+                        oninput="checkReceiverUid()"
                 >
                 <button
-                    type="button"
-                    class="p2p-scan-button"
-                    aria-label="Scan receiver QR code"
-                    title="Scan QR"
-                    onpointerdown="event.stopPropagation(); document.getElementById('sendUid').blur();"
-                    onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('sendUid').blur(); window.openCameraScanner();"
+                        type="button"
+                        class="p2p-scan-button"
+                        aria-label="Scan receiver QR code"
+                        title="Scan QR"
+                        onpointerdown="event.stopPropagation(); document.getElementById('sendUid').blur();"
+                        onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('sendUid').blur(); window.openCameraScanner();"
                 >
                     <i class="fas fa-qrcode" aria-hidden="true"></i>
                 </button>
@@ -2902,11 +3185,11 @@
                 <i class="fas fa-qrcode" aria-hidden="true"></i> Receive USDT
             </h2>
             <button
-                type="button"
-                class="univ-close-btn"
-                style="position: relative; top: auto; right: auto; flex: 0 0 36px; margin: 0;"
-                aria-label="Close receive window"
-                onclick="window.closeModal('p2pMyQrModal')"
+                    type="button"
+                    class="univ-close-btn"
+                    style="position: relative; top: auto; right: auto; flex: 0 0 36px; margin: 0;"
+                    aria-label="Close receive window"
+                    onclick="window.closeModal('p2pMyQrModal')"
             >
                 <i class="fas fa-times" aria-hidden="true"></i>
             </button>
@@ -2926,11 +3209,11 @@
                         <span id="myP2PUidText">---</span>
                     </div>
                     <button
-                        type="button"
-                        class="p2p-copy-button"
-                        aria-label="Copy receiver UID"
-                        title="Copy UID"
-                        onclick="window.copyToClipboardVisual(document.getElementById('myP2PUidText').innerText, this.querySelector('i'))"
+                            type="button"
+                            class="p2p-copy-button"
+                            aria-label="Copy receiver UID"
+                            title="Copy UID"
+                            onclick="window.copyToClipboardVisual(document.getElementById('myP2PUidText').innerText, this.querySelector('i'))"
                     >
                         <i class="far fa-copy copy-trigger" aria-hidden="true"></i>
                     </button>
@@ -2939,12 +3222,12 @@
             <section data-p2p-panel="waiting" class="p2p-live-card" aria-hidden="true" inert>
                 <div class="p2p-usdt-mark">
                     <img
-                        class="p2p-usdt-coin"
-                        src="https://cryptologos.cc/logos/tether-usdt-logo.png"
-                        width="46"
-                        height="46"
-                        alt=""
-                        aria-hidden="true"
+                            class="p2p-usdt-coin"
+                            src="https://cryptologos.cc/logos/tether-usdt-logo.png"
+                            width="46"
+                            height="46"
+                            alt=""
+                            aria-hidden="true"
                     >
                     <span class="p2p-usdt-label">USDT TRANSFER</span>
                 </div>
@@ -3146,9 +3429,20 @@
                                 <div class="w-loc" id="wLoc">Scanning...</div>
                             </div>
                         </div>
-                        <div style="display:flex; gap:8px;">
-                            <div id="uLevelPill" class="pill b-blue"><i class="fas fa-user"></i> <span>Basic Level 0</span></div>
-                            <div class="pill b-green"><i class="fas fa-bolt"></i> <span id="uPoints">0</span> Pts</div>
+                        <div class="level-points-capsule">
+                            <div class="capsule-level-section">
+                                <span id="uLevelText">Level 0</span>
+                                <div class="capsule-progress-track">
+                                    <div id="uLevelBarFill" style="width: 15%;"></div>
+                                </div>
+                            </div>
+                            <div class="capsule-divider"></div>
+                            <div class="capsule-points-section">
+                                <div class="capsule-bolt-circle">
+                                    <i class="fas fa-bolt"></i>
+                                </div>
+                                <span class="capsule-pts-text"><span id="uPoints">0</span> Pts</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -3161,61 +3455,61 @@
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
-            <div class="wallet-card">
-                <div class="bal-hero">
-                    <p class="label-sm">
-                        Main Wallet Balance
-                        <i class="fas fa-sync-alt" id="walletRefreshIcon" style="cursor:pointer; margin-left:8px; display:inline-block; transition: transform 0.6s;" onclick="triggerWalletRefreshAnimation(this, true)"></i>
-                    </p>
-                    <div class="val-hero">
-                        <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="30" style="margin-top:-2px;">
-                        <span id="uBalance" class="number-span animate-wave">0.00</span>
+                <div class="wallet-card">
+                    <div class="bal-hero">
+                        <p class="label-sm">
+                            Main Wallet Balance
+                            <i class="fas fa-sync-alt" id="walletRefreshIcon" style="cursor:pointer; margin-left:8px; display:inline-block; transition: transform 0.6s;" onclick="triggerWalletRefreshAnimation(this, true)"></i>
+                        </p>
+                        <div class="val-hero">
+                            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="30" style="margin-top:-2px;">
+                            <span id="uBalance" class="number-span animate-wave">0.00</span>
+                        </div>
                     </div>
-                </div>
-                <div class="locked-glass" style="position: relative; display: flex; align-items: center; justify-content: space-between;">
-                    <div style="white-space: nowrap; flex-shrink: 0;">
-                        <p class="label-sm"><i class="fas fa-lock"></i> TCM Locked Vault</p>
-                        <div class="locked-val">
-                            <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="20">
-                            <span id="uLocked" class="number-span animate-wave">0.00</span>
+                    <div class="locked-glass" style="position: relative; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="white-space: nowrap; flex-shrink: 0;">
+                            <p class="label-sm"><i class="fas fa-lock"></i> TCM Locked Vault</p>
+                            <div class="locked-val">
+                                <img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="20">
+                                <span id="uLocked" class="number-span animate-wave">0.00</span>
+                            </div>
+                        </div>
+
+                        <div id="vaultCarouselContainer" style="display: none; width: 100px; height: 56px; overflow: hidden; position: relative; background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(15, 20, 30, 0.7) 75%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 18px; border-top: 1px solid rgba(255, 255, 255, 0.3); border-left: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(0, 0, 0, 0.8); border-right: 1px solid rgba(0, 0, 0, 0.8); box-shadow: 0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                            <div id="vaultCarouselTrack" style="display: flex; flex-direction: column; width: 100%; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                            </div>
                         </div>
                     </div>
 
-                    <div id="vaultCarouselContainer" style="display: none; width: 100px; height: 56px; overflow: hidden; position: relative; background: radial-gradient(circle at 35% 25%, rgba(255, 255, 255, 0.12) 0%, rgba(15, 20, 30, 0.7) 75%); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-radius: 18px; border-top: 1px solid rgba(255, 255, 255, 0.3); border-left: 1px solid rgba(255, 255, 255, 0.2); border-bottom: 1px solid rgba(0, 0, 0, 0.8); border-right: 1px solid rgba(0, 0, 0, 0.8); box-shadow: 0 12px 25px rgba(0,0,0,0.7), inset 3px 3px 10px rgba(255, 255, 255, 0.15), inset -4px -4px 15px rgba(0, 0, 0, 0.6); transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                        <div id="vaultCarouselTrack" style="display: flex; flex-direction: column; width: 100%; transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                        </div>
+                    <div class="income-table">
+                        <div class="t-header"><span class="t-header-left"></span><span class="t-header-mid">Daily</span><span class="t-header-right">Total</span></div>
+
+                        <div class="t-row comp-row"><span class="v-name" style="font-weight:700;"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="18"> Comprehensive</span> <span class="v-daily" id="dComp">0 ₮</span> <span class="v-total" id="tComp">0.00 ₮</span></div>
+                        <div class="t-row" id="dividendIncomeRow" style="display:none;"><span class="v-name"><i class="fas fa-crown"></i> Dividend</span> <span class="v-daily" id="dDividend">0 ₮</span> <span class="v-total" id="tDividend">0.00 ₮</span></div>
+                        <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Earning</span> <span class="v-daily" id="dEarning">0 ₮</span> <span class="v-total" id="tEarning">0.00 ₮</span></div>
+                        <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Reserve</span> <span class="v-daily" id="dReserve">0 ₮</span> <span class="v-total" id="tReserve">0.00 ₮</span></div>
+                        <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Team</span> <span class="v-daily" id="dTeam">0 ₮</span> <span class="v-total" id="tTeam">0.00 ₮</span></div>
+                        <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Staking</span> <span class="v-daily" id="dStaking">0 ₮</span> <span class="v-total" id="tStaking">0.00 ₮</span></div>
+                        <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Airdrop</span> <span class="v-daily" id="dAir">0 ₮</span> <span class="v-total" id="tAir">0.00 ₮</span></div>
                     </div>
                 </div>
 
-                <div class="income-table">
-                    <div class="t-header"><span class="t-header-left"></span><span class="t-header-mid">Daily</span><span class="t-header-right">Total</span></div>
-
-                    <div class="t-row comp-row"><span class="v-name" style="font-weight:700;"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="18"> Comprehensive</span> <span class="v-daily" id="dComp">0 ₮</span> <span class="v-total" id="tComp">0.00 ₮</span></div>
-                    <div class="t-row" id="dividendIncomeRow" style="display:none;"><span class="v-name"><i class="fas fa-crown"></i> Dividend</span> <span class="v-daily" id="dDividend">0 ₮</span> <span class="v-total" id="tDividend">0.00 ₮</span></div>
-                    <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Earning</span> <span class="v-daily" id="dEarning">0 ₮</span> <span class="v-total" id="tEarning">0.00 ₮</span></div>
-                    <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Reserve</span> <span class="v-daily" id="dReserve">0 ₮</span> <span class="v-total" id="tReserve">0.00 ₮</span></div>
-                    <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Team</span> <span class="v-daily" id="dTeam">0 ₮</span> <span class="v-total" id="tTeam">0.00 ₮</span></div>
-                    <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Staking</span> <span class="v-daily" id="dStaking">0 ₮</span> <span class="v-total" id="tStaking">0.00 ₮</span></div>
-                    <div class="t-row"><span class="v-name"><img src="https://cryptologos.cc/logos/tether-usdt-logo.png" width="14"> Airdrop</span> <span class="v-daily" id="dAir">0 ₮</span> <span class="v-total" id="tAir">0.00 ₮</span></div>
-                </div>
-            </div>
-
-            <!-- MEMO: TCM-DASH-LEDGER-R1 | 2026-10-10 | Asia/Kolkata -->
-            <section id="accountAdjustmentCard" class="history-panel" hidden
-                style="display: none; margin-top: 0; border-color: rgba(245, 158, 11, 0.35);"
-                aria-label="Account Adjustment" aria-live="polite">
-                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                <!-- MEMO: TCM-DASH-LEDGER-R1 | 2026-10-10 | Asia/Kolkata -->
+                <section id="accountAdjustmentCard" class="history-panel" hidden
+                         style="display: none; margin-top: 0; border-color: rgba(245, 158, 11, 0.35);"
+                         aria-label="Account Adjustment" aria-live="polite">
+                    <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
                     <span style="font-weight: 700; color: var(--text-main);">
                         <i class="fas fa-balance-scale" style="color: #f59e0b; margin-right: 6px;"></i> Account Adjustment
                     </span>
-                    <span id="accountAdjustmentAmount" style="font-weight: 700; color: #f59e0b; overflow-wrap: anywhere;"></span>
-                </div>
-                <p style="color: var(--text-sub); font-size: 0.8rem; line-height: 1.5; margin: 10px 0 0;">
-                    Approved deposits are applied to this adjustment first, until it is cleared.
-                    Any remaining deposit amount is credited to your Main Wallet.
-                    Check the deposit breakdown in Recent History for details.
-                </p>
-            </section>
+                        <span id="accountAdjustmentAmount" style="font-weight: 700; color: #f59e0b; overflow-wrap: anywhere;"></span>
+                    </div>
+                    <p style="color: var(--text-sub); font-size: 0.8rem; line-height: 1.5; margin: 10px 0 0;">
+                        Approved deposits are applied to this adjustment first, until it is cleared.
+                        Any remaining deposit amount is credited to your Main Wallet.
+                        Check the deposit breakdown in Recent History for details.
+                    </p>
+                </section>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -3370,15 +3664,15 @@
             </div>
 
             <div class="ph-bottom-row">
-                    <div class="ph-stat-box left">
-                        <span class="ph-stat-title">Daily Est. ROI</span>
-                        <span class="ph-stat-val green" id="stakeDailyRoi">+0.00 ₮</span>
-                    </div>
-                    <div class="ph-stat-box right">
-                        <span class="ph-stat-title">TODAY'S STAKE ROI</span>
-                        <span class="ph-stat-val green" id="stakeTotalEarned">0.00 ₮</span>
-                    </div>
+                <div class="ph-stat-box left">
+                    <span class="ph-stat-title">Daily Est. ROI</span>
+                    <span class="ph-stat-val green" id="stakeDailyRoi">+0.00 ₮</span>
                 </div>
+                <div class="ph-stat-box right">
+                    <span class="ph-stat-title">TODAY'S STAKE ROI</span>
+                    <span class="ph-stat-val green" id="stakeTotalEarned">0.00 ₮</span>
+                </div>
+            </div>
         </div>
 
         <h3 style="font-size: 1rem; color: var(--text-main); font-weight: 800; margin: 20px 0 10px 5px;"><i class="fas fa-layer-group" style="color:var(--primary); margin-right:5px;"></i> Staking Vaults</h3>
@@ -3744,20 +4038,20 @@
         </div>
     </div>
 
-    <div id="addFriendModal" style="display:none; position:fixed; inset:0; z-index:calc(var(--z-max) + 5); background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center;" onclick="window.closeAddFriendModal(event)">
-        <div class="modal-box" style="max-width: 400px; width: 90%; height: 80vh; display: flex; flex-direction: column; padding: 0; overflow: hidden; position: relative;" onclick="event.stopPropagation()">
-            <div style="padding: 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
-                <h2 style="font-size:1.1rem; color:var(--primary); margin:0;"><i class="fas fa-user-plus"></i> Find Friends</h2>
-                <i class="fas fa-times" onclick="document.getElementById('addFriendModal').style.display='none'" style="cursor:pointer; color:var(--text-sub); font-size:1.2rem;"></i>
+    <div id="addFriendModal" class="custom-modal-overlay" style="display:none; position:fixed; inset:0; z-index:calc(var(--z-max) + 5); background:rgba(0,0,0,0.85); backdrop-filter:blur(10px); align-items:center; justify-content:center;" onclick="window.closeAddFriendModal(event)">
+        <div class="modal-box" style="max-width:400px;width:90%;height:80vh;display:flex;flex-direction:column;padding:0;overflow:hidden;position:relative;" onclick="event.stopPropagation()">
+            <div style="padding:16px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                <h2 style="font-size:1.1rem;color:var(--primary);margin:0;"><i class="fas fa-user-plus"></i> Find Friends</h2>
+                <button type="button" onclick="window.closeAddFriendModal()" aria-label="Close Find Friends" style="background:none;border:0;color:var(--text-sub);font-size:1.2rem;cursor:pointer;"><i class="fas fa-times"></i></button>
             </div>
-            <div style="padding: 15px; background: var(--bg-card); border-bottom: 1px solid var(--border);">
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="search-uid-input" placeholder="Search by Name or UID..." onkeyup="window.filterUsers()" style="flex:1; padding:12px; border-radius:12px; border:1px solid var(--border); background:var(--bg-main); color:var(--text-main); font-size:0.9rem;">
-                    <button style="background:var(--primary); border:none; padding:10px 15px; border-radius:12px; color:#000;"><i class="fas fa-search"></i></button>
+            <div style="padding:12px;background:var(--bg-card);border-bottom:1px solid var(--border);">
+                <div style="display:flex;gap:8px;">
+                    <input type="text" id="search-uid-input" placeholder="Search exact UID..." oninput="window.filterUsers()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.filterUsers(true);}" style="flex:1;min-width:0;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);font-size:0.85rem;">
+                    <button type="button" onclick="window.filterUsers(true)" style="background:var(--primary);border:none;padding:10px 12px;border-radius:10px;color:#000;cursor:pointer;"><i class="fas fa-search"></i></button>
                 </div>
+                <div id="friendDirectoryStatus" role="status" style="margin-top:8px;color:var(--text-sub);font-size:0.7rem;">Loading members...</div>
             </div>
-            <div id="all-users-list" style="flex: 1; overflow-y: auto; padding: 15px; background: var(--bg-main); display: flex; flex-direction: column; gap: 10px;">
-            </div>
+            <div id="all-users-list" style="flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:12px;background:var(--bg-main);display:flex;flex-direction:column;gap:10px;"></div>
         </div>
     </div>
 </div>
@@ -4029,17 +4323,6 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         return `${prefix}-${yyyy}${mm}${dd}-${timeHex}-${salt}`;
     };
 
-    window.getLevelStyling = lv => {
-       let l = Number(lv) || 0;
-       if(l >= 6) return {html:`<i class="fas fa-chess-king"></i> <span>VIP Level 6</span>`, cls:'b-epic'};
-       if(l === 5) return {html:`<i class="fas fa-crown"></i> <span>Level 5</span>`, cls:'b-gold'};
-       if(l === 4) return {html:`<i class="fas fa-gem"></i> <span>Level 4</span>`, cls:'b-silver'};
-       if(l === 3) return {html:`<i class="fas fa-star"></i> <span>Level 3</span>`, cls:'b-lv3'};
-       if(l === 2) return {html:`<i class="fas fa-award"></i> <span>Level 2</span>`, cls:'b-lv2'};
-       if(l === 1) return {html:`<i class="fas fa-medal"></i> <span>Level 1</span>`, cls:'b-lv1'};
-       return {html:`<i class="fas fa-user"></i> <span>Level 0</span>`, cls:'b-blue'};
-    };
-
     window.loadActiveStakesForCard = async (cardNumber, containerId) => {
         const container = document.getElementById(containerId);
         if (!container) return;
@@ -4065,7 +4348,7 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
                                 <span class="tx-amt" style="color:#ffffff;">${parseFloat(stk.amount).toFixed(2)} ₮</span>
                             </div>
                             <div style="text-align: right; min-width: 85px;" id="claim_box_${stk.id}">
-                                ${Number(stk.unlockTime) <= Date.now() 
+                                ${Number(stk.unlockTime) <= Date.now()
                                     ? `<button class="btn-claim-glass" style="padding: 6px 12px; font-size: 0.7rem; border-radius: 8px;" onclick="window.executeClaimStake('${stk.id}', ${stk.amount})">Claim</button>`
                                     : `<span style="font-size: 0.6rem; color: #64748b; text-transform: uppercase; font-weight: 700; display: block;">Time Left</span>
                                        <span class="atm-live-timer" data-unlock="${stk.unlockTime}" data-id="${stk.id}" data-amt="${stk.amount}" style="font-size: 0.8rem; color: var(--primary); font-family: monospace; font-weight: 700;">--:--:--</span>`
@@ -4332,6 +4615,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         }
     };
     window.closeModal = id => {
+        if (id === 'addFriendModal' && window.abortFriendDirectory) window.abortFriendDirectory();
+        if (id === 'userSupportModal' && window.leaveSupportChat) window.leaveSupportChat();
         if (id === 'sendMoneyModal' && window.cancelP2PScanHandshake) {
             window.cancelP2PScanHandshake();
         }
@@ -4353,6 +4638,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
     };
     // E4: Immediate cleanup for navigation and access errors; preserve static modal elements.
     window.dismissDashboardOverlays = () => {
+        if (window.abortFriendDirectory) window.abortFriendDirectory();
+        if (window.leaveSupportChat) window.leaveSupportChat();
         if (window.cancelP2PScanHandshake) window.cancelP2PScanHandshake();
         if (window.resetDeletionVerification) window.resetDeletionVerification();
         window.p2pHistoryLoadVersion = (window.p2pHistoryLoadVersion || 0) + 1;
@@ -4383,6 +4670,7 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
     }, true);
 
     window.closeAllModals = () => {
+        if (window.leaveSupportChat) window.leaveSupportChat();
         document.querySelectorAll('.modal, .modal-overlay, .custom-modal-overlay').forEach(modal => {
             window.modalCloseVersions.set(modal, (window.modalCloseVersions.get(modal) || 0) + 1);
             modal.style.display = 'none';
@@ -4442,8 +4730,15 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         const iconColor = isErr ? 'var(--error)' : 'var(--success)';
         const iconClass = isErr ? 'fas fa-exclamation-circle' : 'fas fa-check-circle';
 
-        t.innerHTML = `<i class="${iconClass}" style="color: ${iconColor}; font-size: 1.3rem;"></i>
-                       <span style="color: #ffffff; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.3px;">${msg}</span>`;
+        const toastIcon = document.createElement('i');
+        toastIcon.className = iconClass;
+        toastIcon.style.cssText = `color: ${iconColor}; font-size: 1.3rem;`;
+
+        const toastText = document.createElement('span');
+        toastText.style.cssText = 'color: #ffffff; font-weight: 500; font-size: 0.95rem; letter-spacing: 0.3px;';
+        toastText.textContent = String(msg ?? '');
+
+        t.replaceChildren(toastIcon, toastText);
 
         t.style.background = 'rgba(10, 10, 20, 0.65)';
         t.style.backdropFilter = 'blur(16px) saturate(180%)';
@@ -4526,6 +4821,14 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
 
     /* Smart Logout */
     window.logout = () => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            fetch(API_BASE_URL + '/auth/logout', {
+                method: 'POST',
+                headers: { Authorization: 'Bearer ' + token },
+                keepalive: true
+            }).catch(() => {});
+        }
         window.clearDashboardSession();
         window.location.replace('index.html');
     };
@@ -5068,22 +5371,22 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
                     window.isFetchingMoreTx = true;
                     const ind = document.getElementById('txLoadMoreIndicator');
                     if (ind) ind.innerHTML = `<i class="fas fa-spinner fa-spin" style="color: var(--primary);"></i> Syncing older records...`;
-                    
+
                     try {
                         let lastTx = window.allTransactions[window.allTransactions.length - 1];
                         let lastTs = lastTx ? (lastTx.timestamp || lastTx.Date) : Date.now();
                         if (typeof lastTs !== 'number') lastTs = window.parseSafeTimestamp(lastTs);
-                        
+
                         const uid = localStorage.getItem('uid');
                         const res = await window.fetchAPI(`/finance/transactions/more?uid=${uid}&lastTimestamp=${lastTs}`);
-                        
+
                         if (res.success && res.data && res.data.length > 0) {
                             const receivedCount = res.data.length;
                             const seenIds = new Set((window.allTransactions || []).map(record => record.id));
                             window.mergeDashboardHistory(res.data);
                             res.data = res.data.filter(record => !seenIds.has(record.id));
                             if (receivedCount < 20) window.hasMoreTxInDB = false;
-                            
+
                             const selectedMonthValue = document.getElementById('txMonthYear') ? document.getElementById('txMonthYear').value : '';
                             let newFiltered = res.data.filter(tx => {
                                 if (!window.isDashboardLedgerType(tx.Type)) return false;
@@ -5102,7 +5405,7 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
                                 }
                                 return true;
                             });
-                            
+
                             window.txHistoryData = [...window.txHistoryData, ...newFiltered];
                             if (ind) ind.remove();
                             window.renderTxChunk();
@@ -5376,6 +5679,8 @@ window.applyDashboardSnapshot = data => {
     window.is2FABound = window.RAM_STATE.security.is2FA;
     window.isWalletBound = window.RAM_STATE.security.isWallet;
     window.userWallets = { BEP20: user.Wallet_BEP20 || '', TRC20: user.Wallet_TRC20 || '' };
+    window.userDepositWallets = { BEP20: user.Deposit_BEP20 || '', TRC20: user.Deposit_TRC20 || '' };
+    window.userDepositWalletOwner = uid;
     const text = (id, value) => {
         const element = document.getElementById(id);
         if (element) element.textContent = value;
@@ -5403,11 +5708,14 @@ window.applyDashboardSnapshot = data => {
             element.textContent = active ? yes : no;
         }
     }
-    const level = document.getElementById('uLevelPill');
-    if (level && typeof window.getLevelStyling === 'function') {
-        const style = window.getLevelStyling(rank);
-        level.innerHTML = style.html;
-        level.className = `pill ${style.cls}`;
+    const levelText = document.getElementById('uLevelText');
+    const levelBarFill = document.getElementById('uLevelBarFill');
+    if (levelText) {
+        levelText.textContent = rank >= 6 ? 'VIP Level 6' : `Level ${rank}`;
+    }
+    if (levelBarFill) {
+        const fillPcts = [15, 25, 42, 62, 78, 88, 100];
+        levelBarFill.style.width = (fillPcts[Math.min(rank, 6)] || 15) + '%';
     }
     const select = document.getElementById('levelSelect');
     if (select) {
@@ -5547,6 +5855,7 @@ window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
 };
 
 window.fetchWalletData = () => window.syncDashboardState();
+window.syncDashboardData = () => window.syncDashboardState();
 window.addEventListener('storage', event => {
     if (event.key === 'token' || event.key === 'uid' || event.key === null) {
         // Do not remove credentials belonging to a newly logged-in account in another tab.
@@ -5919,7 +6228,7 @@ window.scheduleDashboardSocketReconnect = () => {
                     </div>
                 </div>
             </div>`;
-        
+
         if(tTabContainer) {
             tTabContainer.insertAdjacentHTML('afterbegin', newHtml);
         } else if (tTab) {
@@ -6031,7 +6340,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
          if (window.reservedNFT) {
              let soldDocId = window.reservedNFT.docId;
-             
+
              const todayResCard = document.getElementById(`today_res_${soldDocId}`);
              if (todayResCard) {
                  let netAmount = parseFloat(netProfit);
@@ -6102,7 +6411,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
          window.reservedNFT = null;
          window.isSelling = false;
-         
+
          setTimeout(() => {
              if (!window.activeNFTs || window.activeNFTs.length === 0) {
                  const cTab = document.getElementById('tab-collection');
@@ -6800,7 +7109,7 @@ window.scheduleDashboardSocketReconnect = () => {
          if (window.txMode === 'Deposit') {
              btn.className = 'stealth-btn normal';
              btn.innerHTML = 'Submit Deposit';
-             btn.disabled = false;
+             btn.disabled = window.depositAddressIsReady !== true;
              return;
          }
 
@@ -6958,9 +7267,46 @@ window.scheduleDashboardSocketReconnect = () => {
          if (depNetSelect) depNetSelect.style.display = 'block';
          if (subBtn) subBtn.style.display = 'block';
 
+         const uid = localStorage.getItem('uid');
+         const token = localStorage.getItem('token');
+         if (window.userDepositWalletOwner !== uid) {
+             window.userDepositWallets = { BEP20: '', TRC20: '' };
+             window.userDepositWalletOwner = uid;
+         }
+         const missing = !window.userDepositWallets?.BEP20 || !window.userDepositWallets?.TRC20;
+         window.depositWalletStatus = missing ? 'Loading your deposit addresses...' : '';
          window.updateDepositNetwork();
          window.applyStealthButtonLogic(100);
          window.openModal('txModal');
+
+         if (missing) {
+             let request = window.depositWalletRequest;
+             if (!request || request.uid !== uid || request.token !== token) {
+                 request = { uid, token, promise: window.fetchAPI('/finance/deposit-address', 'GET') };
+                 window.depositWalletRequest = request;
+             }
+             try {
+                 const result = await request.promise;
+                 if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return;
+                 if (result.success === true && result.data?.BEP20 && result.data?.TRC20) {
+                     window.userDepositWallets = { BEP20: result.data.BEP20, TRC20: result.data.TRC20 };
+                     window.userDepositWalletOwner = uid;
+                     window.depositWalletStatus = '';
+                 } else {
+                     window.depositWalletStatus = result.message ||
+                         'Deposit wallets are not configured yet. Please contact support.';
+                 }
+             } catch (error) {
+                 if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return;
+                 window.depositWalletStatus = 'Could not load deposit addresses. Close and reopen to retry.';
+             } finally {
+                 if (window.depositWalletRequest === request) window.depositWalletRequest = null;
+                 if (uid === localStorage.getItem('uid') && token === localStorage.getItem('token') &&
+                     window.txMode === 'Deposit' && document.getElementById('txModal')?.style.display !== 'none') {
+                     window.updateDepositNetwork();
+                 }
+             }
+         }
      }
  };
  window.openTx = window.openTxModal;
@@ -6969,9 +7315,31 @@ window.scheduleDashboardSocketReconnect = () => {
      const net = document.getElementById('depNetworkSelect').value;
      const qrImg = document.getElementById('qrImg');
      const addrText = document.getElementById('walletAddrText');
-     let walletAddress = (net === 'BEP20') ? "0x9b03fff1bc3bbe26f225334d23a250b0c79ddfee" : "TLyX3XmN5s3aT7T4mF2oM42A23Xv123456";
-     if (addrText) addrText.innerText = walletAddress;
-     if (qrImg) qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${walletAddress}`;
+     const copyIcon = document.getElementById('depositCopyIcon');
+     const walletAddress = window.userDepositWalletOwner === localStorage.getItem('uid')
+         ? window.userDepositWallets?.[net] || '' : '';
+     const valid = net === 'BEP20'
+         ? /^0x[0-9a-fA-F]{40}$/.test(walletAddress)
+         : net === 'TRC20' && /^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(walletAddress);
+     window.depositAddressIsReady = valid;
+     if (addrText) addrText.textContent = valid ? walletAddress :
+         window.depositWalletStatus || 'Deposit wallets are not configured yet. Please contact support.';
+     if (qrImg) {
+         if (valid) {
+             qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(walletAddress)}`;
+             qrImg.style.display = 'block';
+         } else {
+             qrImg.removeAttribute('src');
+             qrImg.style.display = 'none';
+         }
+     }
+     if (copyIcon) {
+         copyIcon.setAttribute('aria-disabled', valid ? 'false' : 'true');
+         copyIcon.style.pointerEvents = valid ? 'auto' : 'none';
+         copyIcon.style.opacity = valid ? '1' : '0.45';
+     }
+     const btn = document.getElementById('subBtn');
+     if (btn && window.txMode === 'Deposit') btn.disabled = !valid;
  };
 
  window.updateWithdrawNetwork = () => {
@@ -7024,17 +7392,22 @@ window.scheduleDashboardSocketReconnect = () => {
             window.showDepositDeletionWarning();
             return;
         }
+        window.updateDepositNetwork();
+        if (!window.depositAddressIsReady) {
+            return window.showToast(window.depositWalletStatus || 'Deposit address is unavailable.', true);
+        }
         const hash = document.getElementById('txHash').value;
         if (!amt || !hash) return window.showToast("Please fill Amount and TxID!", true);
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
         btn.disabled = true;
 
         try {
-            const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, amount: amt, txid: hash });
+            const network = document.getElementById('depNetworkSelect').value;
+            const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, network, amount: amt, txid: hash });
 
             if (result.success) {
                 window.closeTx();
-                window.showSuccessOverlay("Deposit request sent securely...");
+                window.showSuccessOverlay("Deposit verified on-chain & credited!");
 
                 // 🚀 Server এর পাঠানো আসল Order_ID এবং Date ব্যবহার করা হচ্ছে
                 const sData = result.data || {};
@@ -7042,18 +7415,26 @@ window.scheduleDashboardSocketReconnect = () => {
                     id: sData.id || 'local_dep_' + Date.now(),
                     UID: uid,
                     Type: 'Deposit',
-                    Amount: amt,
-                    TXID: hash,
-                    Status: 'Pending',
+                    Network: sData.Network || document.getElementById('depNetworkSelect').value,
+                    Amount: sData.Amount ?? amt,
+                    Amount_micro: sData.Amount_micro,
+                    TXID: sData.TXID || hash,
+                    Status: sData.Status || 'Success',
+                    status: sData.status || 'Success',
+                    Verified_OnChain: sData.Verified_OnChain === true,
+                    Debt_Recovered: sData.Debt_Recovered ?? 0,
+                    Net_Deposit_Credit: sData.Net_Deposit_Credit ?? (sData.Amount ?? amt),
+                    Sweep_Status: sData.Sweep_Status || 'Pending_Sweep',
                     Date: sData.Date || new Date().toISOString(),
-                    timestamp: Date.now(),
+                    timestamp: sData.timestamp || Date.now(),
                     Order_ID: sData.Order_ID || 'DEP-' + Date.now() // সার্ভারের আসল আইডি
                 };
 
                 if (typeof window.forceInjectToHistory === 'function') {
                     window.forceInjectToHistory(newTx);
                 }
-            } else if (result.code === 'DELETION_IN_PROGRESS') {
+                window.syncDashboardData?.();
+            } else if (['DELETION_IN_PROGRESS', 'DEPOSIT_FROZEN_PENDING_DELETION'].includes(result.code)) {
                 if (window.RAM_STATE?.user) window.RAM_STATE.user.Status = 'Pending_Deletion';
                 window.showDepositDeletionWarning();
             } else {
@@ -8830,6 +9211,96 @@ window.scheduleDashboardSocketReconnect = () => {
         }[tag] || tag));
     };
 
+    window.chatDeliveries = new Map();
+    window.chatStartDelivery = (id, details) => {
+        const state = {
+            ...details, uid: localStorage.getItem('uid'),
+            token: localStorage.getItem('token')
+        };
+        window.chatDeliveries.set(id, state);
+        const node = document.getElementById('msg-' + id);
+        if (node) {
+            node.querySelector('.fa-check')?.remove();
+            const label = document.createElement('small');
+            label.className = 'chat-delivery-status';
+            label.textContent = 'Sending...';
+            node.appendChild(label);
+        }
+        state.timer = setTimeout(() => window.chatFinishDelivery(id,
+            'Delivery could not be confirmed. Reopen the chat before retrying.'), 10000);
+    };
+    window.chatFinishDelivery = (id, error, committed) => {
+        const state = window.chatDeliveries.get(id);
+        if (!state) return;
+        clearTimeout(state.timer);
+        window.chatDeliveries.delete(id);
+        if (state.uid !== localStorage.getItem('uid') ||
+            state.token !== localStorage.getItem('token')) return;
+        const node = document.getElementById('msg-' + id);
+        if (error) {
+            node?.remove();
+            if (state.mode === 'global') {
+                window.localChatCache.global = window.localChatCache.global.filter(m => m.id !== id);
+            } else if (state.mode === 'private') {
+                const rows = window.localChatCache.private[state.target] || [];
+                window.localChatCache.private[state.target] = rows.filter(m => m.id !== id);
+            }
+            const input = document.getElementById(state.input);
+            if (input && !input.value) input.value = state.message;
+            window.showToast(error, true);
+            return;
+        }
+        if (state.optimistic && committed) Object.assign(state.optimistic, committed);
+        if (node) {
+            if (committed?.id) node.id = 'msg-' + committed.id;
+            const label = node.querySelector('.chat-delivery-status');
+            if (label) label.textContent = 'Sent';
+        }
+    };
+    window.chatSendWithAck = (event, payload, id) => {
+        if (!window.socket?.connected) {
+            window.chatFinishDelivery(id, 'Live chat is disconnected. Please try again when connected.');
+            return;
+        }
+        window.socket.timeout(10000).emit(event, payload, (error, result) => {
+            if (error || result?.success !== true || !result.id) {
+                window.chatFinishDelivery(id, result?.message ||
+                    'Delivery could not be confirmed. Reopen the chat before retrying.');
+                return;
+            }
+            window.chatFinishDelivery(id, null, {
+                id: result.id, status: 'sent', timestamp: new Date().toISOString()
+            });
+        });
+    };
+    window.chatReceiveGlobal = data => {
+        if (window.dashboardSession.closed || window.dashboardSession.blocked ||
+            !data || typeof data.id !== 'string' || typeof data.message !== 'string') return;
+        const own = data.senderUid === localStorage.getItem('uid');
+        if (own && data.clientMessageId) {
+            window.chatFinishDelivery(data.clientMessageId, null, data);
+        }
+        const rows = window.localChatCache.global;
+        const existing = rows.find(m => m.id === data.id ||
+            (own && data.clientMessageId && m.id === data.clientMessageId));
+        if (existing) Object.assign(existing, data);
+        else rows.push(data);
+        if (window.currentChatMode === 'global') {
+            window.renderChatMessages(rows);
+        }
+    };
+
+    window.chatEscape = value => String(value ?? '').replace(/[&<>"']/g,
+        char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
+    window.chatInline = (method, args) => window.chatEscape(
+        'window.' + method + '(' + args.map(value => JSON.stringify(String(value ?? ''))).join(',') + ')');
+    window.chatSafeAvatar = value => {
+        const url = String(value || '');
+        if (/^data:image\/(?:png|jpeg|webp|gif|svg\+xml);base64,[a-z0-9+/=]+$/i.test(url)) return url;
+        try { return /^https?:$/.test(new URL(url).protocol) ? url : ''; }
+        catch (error) { return ''; }
+    };
+
     window.socket = typeof io !== 'undefined' ? io(API_BASE_URL.replace(/\/api\/?$/, ''), {
         auth: callback => callback({ token: localStorage.getItem('token') }),
         autoConnect: false
@@ -8919,7 +9390,7 @@ window.scheduleDashboardSocketReconnect = () => {
             if (window.currentChatMode === 'private' && window.activePrivateUid === data.senderUid) {
                 let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
                 let html = `
-                <div id="msg-${data.id}" style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
+                <div id="msg-${window.chatEscape(data.id)}" style="display:flex; flex-direction:column; align-items:flex-start; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
                     <div class="chat-name">${safeSenderName}</div>
                     <div class="chat-bubble other-message" style="position: relative;">${safeMessage}</div>
                     <div style="display: flex; gap: 8px; align-items: center; margin-top: 4px; justify-content: flex-start; width: 100%;">
@@ -8954,10 +9425,24 @@ window.scheduleDashboardSocketReconnect = () => {
             }
         });
 
-        window.socket.on("new_friend_request", (data) => {
-            window.pendingReqCount++;
+        window.socket.on('receive_global_message', data => window.chatReceiveGlobal(data));
+
+        window.socket.on("new_friend_request", data => {
+            const uid = localStorage.getItem('uid');
+            if (!data || data.receiverUid !== uid || typeof data.id !== 'string' ||
+                window.dashboardSession.closed || window.dashboardSession.blocked) return;
+            const state = window.friendDirectory;
+            if (state.pending.has(data.id)) return;
+            state.pending.set(data.id, data);
+            window.pendingReqCount = (window.pendingReqCount || 0) + 1;
+            state.states.set(data.senderUid, 'incoming');
             window.updateSuperBadge();
+            window.renderFriendRequests();
+            if (state.open) window.renderFriendDirectory(state.mode === 'search' ? state.searchRows || [] : state.rows);
+            window.showToast('Friend request from ' + (data.senderName || data.senderUid));
         });
+        window.socket.on('friend_request_resolved', notice => window.friendApplyResolution(notice));
+        window.socket.on('friendship_removed', notice => window.friendRemoveFriendship(notice));
     }
 
     if (window.socket && localStorage.getItem('token') && localStorage.getItem('uid')) {
@@ -9021,23 +9506,44 @@ window.scheduleDashboardSocketReconnect = () => {
         const myUid = localStorage.getItem('uid');
 
         let cachedMessages = mode === 'global' ? window.localChatCache.global : window.localChatCache.private[targetUid];
+        let loaded = false;
+        const roomToken = localStorage.getItem('token');
 
         if (cachedMessages && cachedMessages.length > 0) {
             window.renderChatMessages(cachedMessages);
+            if (mode === 'private') {
+                const result = await window.fetchAPI('/chat/read-private', 'POST', { target: targetUid });
+                loaded = result.success === true;
+                if (!loaded) window.showToast(result.message || 'Unread reset failed.', true);
+            } else loaded = true;
         } else {
             chatContent.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
             const roomData = await window.fetchAPI(`/chat/messages?mode=${mode}&target=${targetUid}&uid=${myUid}`);
+            if (myUid !== localStorage.getItem('uid') || roomToken !== localStorage.getItem('token')) return;
             if (roomData.success && roomData.data) {
-                if (mode === 'global') window.localChatCache.global = roomData.data;
-                else window.localChatCache.private[targetUid] = roomData.data;
-                window.renderChatMessages(roomData.data);
-            }
+                loaded = true;
+                if (mode === 'global') {
+                    const rows = new Map(roomData.data.map(m => [m.id, m]));
+                    for (const m of window.localChatCache.global) rows.set(m.id, m);
+                    window.localChatCache.global = [...rows.values()];
+                } else window.localChatCache.private[targetUid] = roomData.data;
+                if (window.currentChatMode === mode && window.activePrivateUid === targetUid) {
+                    window.renderChatMessages(mode === 'global' ? window.localChatCache.global : roomData.data);
+                }
+            } else window.showToast(roomData.message || 'Could not load chat.', true);
         }
 
+        if (!loaded || mode !== 'private' || myUid !== localStorage.getItem('uid') ||
+            roomToken !== localStorage.getItem('token')) return;
         const friendRow = document.getElementById(`friend-row-${targetUid}`);
-        if(friendRow) {
-            let badge = friendRow.querySelector('.unread-badge');
-            if(badge) badge.remove();
+        const badge = friendRow?.querySelector('.unread-badge');
+        const unread = Math.max(0, Number(badge?.innerText) || 0);
+        badge?.remove();
+        const headBadge = document.getElementById('chat-head-badge');
+        if (headBadge) {
+            const remaining = Math.max(0, (Number(headBadge.innerText) || 0) - unread);
+            headBadge.innerText = remaining;
+            headBadge.style.display = remaining ? 'flex' : 'none';
         }
     };
 
@@ -9059,10 +9565,10 @@ window.scheduleDashboardSocketReconnect = () => {
             let nameHtml = isMe ? '' : `<div class="chat-name">${window.escapeChatDisplay(msg.senderName || 'User')}</div>`;
             let safeTime = window.parseSafeTimestamp ? window.parseSafeTimestamp(msg.timestamp || msg.Date) : (msg.timestamp || msg.Date);
             let timeStr = safeTime ? new Date(safeTime).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase() : "";
-            let deleteBtn = isMe ? `<i class="fas fa-trash-alt" style="font-size:0.7rem; color:var(--error); cursor:pointer; opacity: 0.7; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" onclick="window.deleteMessageForMe('${msg.id}')" title="Delete message"></i>` : '';
+            let deleteBtn = isMe ? `<i class="fas fa-trash-alt" style="font-size:0.7rem; color:var(--error); cursor:pointer; opacity: 0.7; transition: 0.3s;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.7'" onclick="${window.chatInline('deleteMessageForMe', [msg.id])}" title="Delete message"></i>` : '';
 
             html += `
-            <div id="msg-${msg.id}" style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
+            <div id="msg-${window.chatEscape(msg.id)}" style="display:flex; flex-direction:column; align-items:${align}; margin-bottom:12px; width:100%; transition: all 0.3s ease;">
                 ${nameHtml}
                 <div class="chat-bubble ${bubbleClass}" style="position: relative;">
                     ${window.escapeChatDisplay(msg.message)}
@@ -9115,7 +9621,8 @@ window.scheduleDashboardSocketReconnect = () => {
 
         input.value = '';
 
-        const socketData = { senderUid: myUid, receiverUid: window.activePrivateUid, senderName: senderName, avatar: avatar, message: message, timestamp: new Date().toISOString(), id: 'temp-' + Date.now() };
+        const tempId = 'temp-' + crypto.randomUUID();
+        const socketData = { senderUid: myUid, receiverUid: window.activePrivateUid, senderName: senderName, avatar: avatar, message: message, timestamp: new Date().toISOString(), id: tempId, clientMessageId: tempId };
 
         let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
         let html = `
@@ -9134,13 +9641,28 @@ window.scheduleDashboardSocketReconnect = () => {
             chatContent.scrollTop = chatContent.scrollHeight;
         }
 
-        if(window.currentChatMode === 'private') {
-            if(!window.localChatCache.private[window.activePrivateUid]) window.localChatCache.private[window.activePrivateUid] = [];
-            window.localChatCache.private[window.activePrivateUid].push(socketData);
-            if(window.socket) window.socket.emit("send_private_message", socketData);
+        const mode = window.currentChatMode;
+        window.chatStartDelivery(tempId, {
+            mode, target: socketData.receiverUid, message,
+            input: 'chat-input', optimistic: socketData
+        });
+        if (mode === 'private') {
+            if (!window.localChatCache.private[socketData.receiverUid]) window.localChatCache.private[socketData.receiverUid] = [];
+            window.localChatCache.private[socketData.receiverUid].push(socketData);
+            window.chatSendWithAck('send_private_message', socketData, tempId);
         } else {
             window.localChatCache.global.push(socketData);
-            await window.fetchAPI('/chat/send-global', 'POST', socketData);
+            try {
+                const result = await window.fetchAPI('/chat/send-global', 'POST', socketData);
+                const pending = window.chatDeliveries.get(tempId);
+                if (!pending || pending.uid !== localStorage.getItem('uid') ||
+                    pending.token !== localStorage.getItem('token')) return;
+                if (result.success !== true || !result.data?.id) {
+                    window.chatFinishDelivery(tempId, result.message || 'Message could not be sent.');
+                } else window.chatReceiveGlobal(result.data);
+            } catch (error) {
+                window.chatFinishDelivery(tempId, 'Delivery could not be confirmed. Reopen the chat before retrying.');
+            }
         }
     };
 
@@ -9154,36 +9676,17 @@ window.scheduleDashboardSocketReconnect = () => {
         ]);
 
         if (reqResult.success) {
-            window.pendingReqCount = reqResult.count || 0;
-            window.updateSuperBadge();
-
-            const pList = document.getElementById('explicit-pending-list');
-            if (pList) {
-                if (!reqResult.data || reqResult.data.length === 0) {
-                    pList.innerHTML = '<p style="text-align:center; color:var(--text-sub); font-size:0.75rem; margin:0;">No pending requests</p>';
-                } else {
-                    let html = '';
-                    reqResult.data.forEach(req => {
-                        let sName = req.senderName || 'User';
-                        let sAvatar = req.senderAvatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+';
-                        html += `
-                        <div style="display:flex; justify-content:space-between; align-items:center; background:rgba(0,0,0,0.2); padding:10px; border-radius:12px; border:1px solid rgba(255,255,255,0.1); margin-bottom:8px;">
-                            <div style="display:flex; align-items:center; gap:8px;">
-                                <img src="${sAvatar}" style="width:28px; height:28px; border-radius:50%; object-fit:cover;">
-                                <div>
-                                    <span style="color:var(--text-main); font-size:0.85rem; font-weight:700; display:block;">${sName}</span>
-                                    <span style="color:var(--text-sub); font-size:0.65rem; font-family:monospace;">UID: ${req.senderUid}</span>
-                                </div>
-                            </div>
-                            <div style="display:flex; gap:6px;">
-                                <button onclick="window.acceptFriendReq('${req.id}')" style="background:rgba(0, 245, 255, 0.15); color:var(--primary); border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fas fa-check"></i></button>
-                                <button onclick="window.rejectFriendReq('${req.id}')" style="background:rgba(239, 68, 68, 0.1); color:#ef4444; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-weight:700;"><i class="fas fa-times"></i></button>
-                            </div>
-                        </div>`;
-                    });
-                    pList.innerHTML = html;
-                }
+            const state = window.friendDirectory;
+            const incoming = new Map((reqResult.data || []).filter(row =>
+                !state.resolved.has(row.id + ':' + (row.requestVersion || 'legacy') + ':accepted') && !state.resolved.has(row.id + ':' + (row.requestVersion || 'legacy') + ':rejected')
+            ).map(row => [row.id, row]));
+            for (const [id, row] of state.pending) {
+                if (!state.resolved.has(id + ':' + (row.requestVersion || 'legacy') + ':accepted') && !state.resolved.has(id + ':' + (row.requestVersion || 'legacy') + ':rejected')) incoming.set(id, row);
             }
+            state.pending = incoming;
+            window.pendingReqCount = incoming.size;
+            window.updateSuperBadge();
+            window.renderFriendRequests();
         }
 
         if (friendsResult.success) {
@@ -9196,13 +9699,13 @@ window.scheduleDashboardSocketReconnect = () => {
                     friendsResult.data.forEach(f => {
                         let av = f.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+';
                         html += `
-                        <div id="friend-row-${f.uid}" onclick="window.openChatRoom('private', '${f.name || 'User'}', '${av}', '${f.uid}')" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
-                            <img src="${av}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+                        <div id="friend-row-${window.chatEscape(f.uid)}" onclick="${window.chatInline('openChatRoom', ['private', f.name || 'User', window.chatSafeAvatar(av), f.uid])}" style="display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; cursor: pointer; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05); margin-bottom: 8px;">
+                            <img src="${window.chatEscape(window.chatSafeAvatar(av))}" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
                             <div style="flex: 1; overflow: hidden;">
-                                <h4 style="font-size: 0.9rem; margin: 0; color: var(--text-main); font-weight:700;">${f.name || 'User'}</h4>
-                                <p class="last-msg-text" style="font-size: 0.75rem; color: var(--text-sub); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${f.lastMsg || 'Say Hello!'}</p>
+                                <h4 style="font-size: 0.9rem; margin: 0; color: var(--text-main); font-weight:700;">${window.chatEscape(f.name || 'User')}</h4>
+                                <p class="last-msg-text" style="font-size: 0.75rem; color: var(--text-sub); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${window.chatEscape(f.lastMsg || 'Say Hello!')}</p>
                             </div>
-                            ${f.unreadCount > 0 ? `<div class="unread-badge" style="background: var(--error); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px;">${f.unreadCount}</div>` : ''}
+                            ${f.unreadCount > 0 ? `<div class="unread-badge" style="background: var(--error); color: white; font-size: 0.65rem; font-weight: 800; padding: 2px 6px; border-radius: 10px;">${Math.max(0, Math.trunc(Number(f.unreadCount) || 0))}</div>` : ''}
                         </div>`;
                     });
                     fList.innerHTML = html;
@@ -9214,6 +9717,8 @@ window.scheduleDashboardSocketReconnect = () => {
     window.togglePendingRequestsView = () => {
         const view = document.getElementById('explicit-pending-view');
         if (view) {
+
+            window.renderFriendRequests();
             view.style.display = (view.style.display === 'flex' || view.style.display === 'block') ? 'none' : 'flex';
         }
     };
@@ -9238,45 +9743,23 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-    window.acceptFriendReq = async (reqId) => {
-        const myUid = localStorage.getItem('uid');
-        const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-        const myName = staticUser.Name || 'TCM User';
-        const myAvatar = staticUser.Avatar || '';
-
-        const reqResult = await window.fetchAPI(`/chat/requests?uid=${myUid}`);
-        let reqObj = null;
-        if (reqResult.success && reqResult.data) {
-            reqObj = reqResult.data.find(r => r.id === reqId);
-        }
-
-        if (!reqObj) return window.showToast("Request not found", true);
-
-        const payload = {
-            reqId, myUid, myName, myAvatar,
-            senderUid: reqObj.senderUid,
-            senderName: reqObj.senderName,
-            senderAvatar: reqObj.senderAvatar || ''
-        };
-
-        const result = await window.fetchAPI('/friends/accept-request', 'POST', payload);
-        if (result.success) {
-            window.showToast("Friend request accepted!");
-            window.syncChatInitialData();
-        } else {
-            window.showToast(result.message || "Failed to accept request", true);
-        }
+    window.friendRequestBusy = new Set();
+    window.friendDecision = async (action, reqId) => {
+        if (window.friendRequestBusy.has(reqId)) return;
+        window.friendRequestBusy.add(reqId);
+        const uid = localStorage.getItem('uid'), token = localStorage.getItem('token');
+        try {
+            const result = await window.fetchAPI('/friends/' + action + '-request', 'POST', { reqId, myUid: uid });
+            if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return;
+            if (result.success) {
+                window.friendApplyResolution({ reqId, receiverUid: uid, senderUid: result.data.senderUid, requestVersion: result.data.requestVersion,
+                    action: action === 'accept' ? 'accepted' : 'rejected' });
+            }
+            window.showToast(result.message || 'Request could not complete.', !result.success);
+        } finally { window.friendRequestBusy.delete(reqId); }
     };
-
-    window.rejectFriendReq = async (reqId) => {
-        const result = await window.fetchAPI('/friends/reject-request', 'POST', { reqId });
-        if (result.success) {
-            window.showToast("Friend request rejected");
-            window.syncChatInitialData();
-        } else {
-            window.showToast(result.message || "Failed to reject request", true);
-        }
-    };
+    window.acceptFriendReq = reqId => window.friendDecision('accept', reqId);
+    window.rejectFriendReq = reqId => window.friendDecision('reject', reqId);
 
     window.unfriendUser = async (targetUid) => {
         if (!confirm("Are you sure you want to unfriend this user?")) return;
@@ -9285,79 +9768,263 @@ window.scheduleDashboardSocketReconnect = () => {
         if (result.success) {
             window.showToast("Unfriended successfully");
             window.showChatList();
-            window.syncChatInitialData();
+            window.friendRemoveFriendship(result.data);
         } else {
             window.showToast(result.message || "Failed to unfriend", true);
         }
     };
 
-    window.openAddFriendModal = () => {
-        const modal = document.getElementById('addFriendModal');
-        if (modal) modal.style.display = 'flex';
-        const input = document.getElementById('search-uid-input');
-        if (input) input.value = '';
-        const list = document.getElementById('all-users-list');
-        if (list) list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;">Enter a UID (e.g. TCM123456) above to search.</div>';
+    window.friendDirectory = {
+        version: 0, open: false, busy: false, uid: localStorage.getItem('uid') || '', token: localStorage.getItem('token') || '', rows: [],
+        next: '', more: true, until: 0, mode: 'directory', lastTop: 0,
+        states: new Map(), requestVersions: new Map(), pending: new Map(), resolved: new Set()
     };
-
-    window.closeAddFriendModal = (event) => {
-        if (!event || event.target.id === 'addFriendModal') {
-            const modal = document.getElementById('addFriendModal');
-            if (modal) modal.style.display = 'none';
+    window.friendRefreshTimer = null;
+    window.friendScheduleRefresh = () => {
+        const chat = document.getElementById('chat-window');
+        if (window.friendRefreshTimer || !chat || getComputedStyle(chat).display === 'none') return;
+        window.friendRefreshTimer = setTimeout(() => {
+            window.friendRefreshTimer = null;
+            window.syncChatInitialData();
+        }, 60);
+    };
+    window.renderFriendRequests = () => {
+        const box = document.getElementById('explicit-pending-list');
+        if (!box) return;
+        box.replaceChildren();
+        const rows = [...window.friendDirectory.pending.values()];
+        if (!rows.length) {
+            const text = document.createElement('p');
+            text.style.cssText = 'text-align:center;color:var(--text-sub);font-size:0.75rem;margin:0;';
+            text.textContent = 'No pending requests';
+            box.appendChild(text);
+        }
+        for (const req of rows) {
+            const card = document.createElement('div');
+            card.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--bg-card);';
+            const details = document.createElement('div');
+            details.style.minWidth = '0';
+            const name = document.createElement('strong');
+            name.textContent = req.senderName || 'TCM member';
+            name.style.cssText = 'display:block;color:var(--text-main);font-size:0.82rem;overflow-wrap:anywhere;';
+            const uid = document.createElement('small');
+            uid.textContent = 'UID: ' + req.senderUid;
+            uid.style.cssText = 'color:var(--text-sub);font-family:monospace;';
+            details.append(name, uid);
+            const actions = document.createElement('div');
+            actions.style.cssText = 'display:flex;gap:6px;flex-shrink:0;';
+            for (const [label, action] of [['Accept', 'accept'], ['Reject', 'reject']]) {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.textContent = label;
+                button.style.cssText = 'padding:6px 8px;border-radius:8px;border:1px solid var(--border);background:var(--bg-main);color:var(--text-main);cursor:pointer;font-size:0.7rem;';
+                button.onclick = () => action === 'accept' ? window.acceptFriendReq(req.id) : window.rejectFriendReq(req.id);
+                actions.appendChild(button);
+            }
+            card.append(details, actions);
+            box.appendChild(card);
         }
     };
-
-    let userSearchDebounce = null;
-    window.filterUsers = () => {
-        clearTimeout(userSearchDebounce);
-        const input = document.getElementById('search-uid-input');
+    window.friendApplyResolution = notice => {
+        const myUid = localStorage.getItem('uid');
+        if (window.dashboardSession.closed || window.dashboardSession.blocked ||
+            !notice || !['accepted', 'rejected'].includes(notice.action) ||
+            (notice.receiverUid !== myUid && notice.senderUid !== myUid)) return;
+        const state = window.friendDirectory;
+        const expected = state.pending.get(notice.reqId)?.requestVersion || state.requestVersions.get(notice.reqId);
+        if (expected && notice.requestVersion && expected !== notice.requestVersion) return;
+        const key = notice.reqId + ':' + (notice.requestVersion || 'legacy') + ':' + notice.action;
+        if (state.resolved.has(key)) return;
+        state.resolved.add(key);
+        while (state.resolved.size > 500) state.resolved.delete(state.resolved.values().next().value);
+        const removed = state.pending.delete(notice.reqId);
+        if (removed) window.pendingReqCount = Math.max(0, (window.pendingReqCount || 0) - 1);
+        const other = notice.senderUid === myUid ? notice.receiverUid : notice.senderUid;
+        state.states.set(other, notice.action === 'accepted' ? 'friends' : 'add');
+        window.updateSuperBadge();
+        window.renderFriendRequests();
+        if (state.open) window.renderFriendDirectory(state.mode === 'search' ? state.searchRows || [] : state.rows);
+        window.friendScheduleRefresh();
+    };
+    window.friendRemovalSeen = new Set();
+    window.friendRemoveFriendship = notice => {
+        const uid = localStorage.getItem('uid');
+        if (!notice || (notice.actorUid !== uid && notice.targetUid !== uid) || window.friendRemovalSeen.has(notice.operationId)) return;
+        window.friendRemovalSeen.add(notice.operationId);
+        while (window.friendRemovalSeen.size > 500) window.friendRemovalSeen.delete(window.friendRemovalSeen.values().next().value);
+        const other = notice.actorUid === uid ? notice.targetUid : notice.actorUid;
+        const state = window.friendDirectory;
+        state.states.set(other, 'add');
+        for (const [id, request] of state.pending) {
+            if (request.senderUid === other || request.receiverUid === other) {
+                state.pending.delete(id);
+                state.resolved.add(id + ':' + (request.requestVersion || 'legacy') + ':rejected');
+                window.pendingReqCount = Math.max(0, (window.pendingReqCount || 0) - 1);
+            }
+        }
+        while (state.resolved.size > 500) state.resolved.delete(state.resolved.values().next().value);
+        window.updateSuperBadge();
+        window.renderFriendRequests();
+        if (state.open) window.renderFriendDirectory(state.mode === 'search' ? state.searchRows || [] : state.rows);
+        window.friendScheduleRefresh();
+    };
+    window.friendDirectoryCard = member => {
+        const state = window.friendDirectory;
+        const card = document.createElement('div');
+        card.style.cssText = 'display:flex;align-items:center;gap:10px;padding:12px;border-radius:14px;border:1px solid var(--border);background:var(--bg-card);flex-shrink:0;';
+        const avatar = document.createElement('img');
+        avatar.alt = 'Member avatar';
+        avatar.style.cssText = 'width:36px;height:36px;border-radius:50%;object-fit:cover;background:var(--bg-main);flex-shrink:0;';
+        const avatarURL = window.chatSafeAvatar(member.avatar);
+        if (avatarURL) avatar.src = avatarURL;
+        avatar.onerror = () => { avatar.onerror = null; avatar.removeAttribute('src'); };
+        const details = document.createElement('div');
+        details.style.cssText = 'flex:1;min-width:0;';
+        const name = document.createElement('strong');
+        name.textContent = member.name || 'TCM member';
+        name.style.cssText = 'display:block;color:var(--text-main);font-size:0.84rem;overflow-wrap:anywhere;';
+        const uid = document.createElement('small');
+        uid.textContent = 'UID: ' + member.uid;
+        uid.style.cssText = 'color:var(--text-sub);font-family:monospace;font-size:0.68rem;';
+        details.append(name, uid);
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.style.cssText = 'padding:7px 10px;border-radius:9px;border:1px solid var(--border);background:var(--bg-main);color:var(--primary);font-size:0.72rem;font-weight:700;cursor:pointer;flex-shrink:0;';
+        const relation = state.states.get(member.uid) || (document.getElementById('friend-row-' + member.uid) ? 'friends' : 'add');
+        button.textContent = member.uid === state.uid ? 'You' : relation === 'friends' ? 'Friends' :
+            relation === 'pending' ? 'Requested' : relation === 'sending' ? 'Sending...' : relation === 'incoming' ? 'Review' : 'Add';
+        button.disabled = member.uid === state.uid || ['friends', 'pending', 'sending'].includes(relation);
+        button.onclick = () => {
+            if (relation === 'incoming') {
+                window.closeAddFriendModal();
+                const view = document.getElementById('explicit-pending-view');
+                if (view) view.style.display = 'flex';
+                window.renderFriendRequests();
+            } else window.sendFriendRequest(member.uid, member.name);
+        };
+        card.append(avatar, details, button);
+        return card;
+    };
+    window.renderFriendDirectory = rows => {
         const list = document.getElementById('all-users-list');
-        if (!input || !list) return;
-        const query = input.value.trim().toUpperCase();
-
-        if (query.length < 3) {
-            list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;">Enter at least 3 characters of UID to search.</div>';
+        if (!list) return;
+        const top = list.scrollTop;
+        window.friendDirectory.lastTop = top;
+        list.replaceChildren(...rows.map(window.friendDirectoryCard));
+        list.scrollTop = top;
+    };
+    window.friendDirectoryStatus = text => {
+        const status = document.getElementById('friendDirectoryStatus');
+        if (status) status.textContent = text;
+    };
+    window.abortFriendDirectory = () => {
+        const state = window.friendDirectory;
+        state.open = false;
+        state.busy = false;
+        state.version += 1;
+    };
+    window.loadFriendDirectory = async initial => {
+        const state = window.friendDirectory;
+        if (!state.open || state.busy || state.mode !== 'directory' || (!initial && !state.more)) return;
+        const version = state.version;
+        const uid = state.uid;
+        const token = state.token;
+        state.busy = true;
+        window.friendDirectoryStatus('Loading members...');
+        try {
+            const endpoint = initial ? '/chat/directory' : '/chat/directory?after=' + encodeURIComponent(state.next);
+            const result = await window.fetchAPI(endpoint);
+            if (!state.open || version !== state.version || uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return;
+            if (!result.success || !Array.isArray(result.data)) {
+                window.friendDirectoryStatus(result.message || 'Could not load members. Close and reopen to retry.');
+                return;
+            }
+            const map = new Map((initial ? [] : state.rows).map(row => [row.uid, row]));
+            for (const row of result.data) map.set(row.uid, row);
+            state.rows = [...map.values()];
+            state.next = result.nextCursor || state.next;
+            state.more = result.hasMore === true;
+            state.until = Date.now() + 60000;
+            if (initial) window.renderFriendDirectory(state.rows);
+            else {
+                const list = document.getElementById('all-users-list');
+                for (const row of result.data) list.appendChild(window.friendDirectoryCard(row));
+            }
+            window.friendDirectoryStatus(state.rows.length + ' members loaded' + (state.more ? ' — scroll to reveal more' : ' — end of list'));
+        } finally {
+            if (version === state.version) state.busy = false;
+        }
+    };
+    window.openAddFriendModal = () => {
+        const state = window.friendDirectory;
+        const uid = localStorage.getItem('uid');
+        const token = localStorage.getItem('token');
+        if (!uid || !token) return;
+        if (state.uid !== uid || state.token !== token) {
+            state.rows = []; state.next = ''; state.more = true; state.until = 0;
+            state.states.clear(); state.requestVersions.clear(); state.pending.clear(); state.resolved.clear();
+        }
+        state.uid = uid; state.token = token; state.open = true; state.busy = false;
+        state.version += 1; state.mode = 'directory'; state.lastTop = 0;
+        document.getElementById('search-uid-input').value = '';
+        window.openModal('addFriendModal');
+        const list = document.getElementById('all-users-list');
+        window.renderFriendDirectory(state.rows);
+        list.scrollTop = 0;
+        list.onscroll = () => {
+            const top = list.scrollTop;
+            const movingDown = top > state.lastTop;
+            state.lastTop = top;
+            if (movingDown && state.mode === 'directory' && list.scrollHeight - top - list.clientHeight <= 1) {
+                window.loadFriendDirectory(false);
+            }
+        };
+        if (!state.rows.length || Date.now() >= state.until) window.loadFriendDirectory(true);
+        else window.friendDirectoryStatus(state.rows.length + ' members loaded — cached');
+    };
+    window.closeAddFriendModal = event => {
+        if (!event || event.target.id === 'addFriendModal') {
+            window.abortFriendDirectory();
+            window.closeModal('addFriendModal');
+        }
+    };
+    window.filterUsers = async (submit = false) => {
+        const state = window.friendDirectory;
+        if (!state.open) return;
+        const query = document.getElementById('search-uid-input').value.trim().toUpperCase();
+        const version = ++state.version;
+        state.busy = false;
+        if (!query) {
+            state.mode = 'directory';
+            window.renderFriendDirectory(state.rows);
+            window.friendDirectoryStatus(state.rows.length + ' members loaded');
+            if (!state.rows.length) window.loadFriendDirectory(true);
             return;
         }
-
-        list.innerHTML = '<div style="text-align:center; color:var(--text-sub); font-size:0.8rem;"><i class="fas fa-spinner fa-spin"></i> Searching...</div>';
-
-        userSearchDebounce = setTimeout(async () => {
-            const result = await window.fetchAPI(`/p2p/check-user?uid=${query}`);
-            if (result.success && result.name) {
-                list.innerHTML = `
-                    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg-card); padding:12px; border-radius:12px; border:1px solid var(--border);">
-                        <div>
-                            <strong style="color:var(--text-main); font-size:0.9rem; display:block;">${result.name}</strong>
-                            <span style="color:var(--text-sub); font-size:0.7rem; font-family:monospace;">UID: ${query}</span>
-                        </div>
-                        <button class="act-btn btn-dep" style="padding:6px 12px; font-size:0.75rem;" onclick="window.sendFriendRequest('${query}', '${result.name}')">
-                            <i class="fas fa-user-plus"></i> Add
-                        </button>
-                    </div>
-                `;
-            } else {
-                list.innerHTML = `<div style="text-align:center; color:var(--error); font-size:0.8rem;"><i class="fas fa-times-circle"></i> User not found!</div>`;
-            }
-        }, 500);
+        state.mode = 'search';
+        if (!submit) { window.friendDirectoryStatus('Press Search or Enter to find this UID.'); return; }
+        if (!/^[A-Z0-9_-]{3,128}$/.test(query)) return window.friendDirectoryStatus('Enter a valid UID.');
+        const uid = state.uid, token = state.token;
+        window.friendDirectoryStatus('Searching UID...');
+        const result = await window.fetchAPI('/chat/directory?q=' + encodeURIComponent(query));
+        if (!state.open || state.version !== version || uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return;
+        if (!result.success) return window.friendDirectoryStatus(result.message || 'Search could not complete.');
+        state.searchRows = Array.isArray(result.data) ? result.data : [];
+        window.renderFriendDirectory(state.searchRows);
+        window.friendDirectoryStatus(state.searchRows.length ? 'Member found' : 'No active member found for this UID.');
     };
-
     window.sendFriendRequest = async (receiverUid, receiverName) => {
-        const myUid = localStorage.getItem('uid');
-        if (receiverUid === myUid) return window.showToast("Cannot add yourself!", true);
-        const staticUser = JSON.parse(localStorage.getItem('tcm_static_user') || '{}');
-        const senderName = staticUser.Name || 'TCM User';
-        const senderAvatar = staticUser.Avatar || '';
-
-        const payload = { senderUid: myUid, senderName, senderAvatar, receiverUid };
-        const result = await window.fetchAPI('/friends/send-request', 'POST', payload);
-        if (result.success) {
-            window.showToast(`Friend request sent to ${receiverName || receiverUid}!`);
-            const modal = document.getElementById('addFriendModal');
-            if (modal) modal.style.display = 'none';
-        } else {
-            window.showToast(result.message || "Failed to send friend request", true);
-        }
+        const state = window.friendDirectory;
+        if (receiverUid === localStorage.getItem('uid') || state.states.get(receiverUid) === 'sending') return;
+        const uid = localStorage.getItem('uid'), token = localStorage.getItem('token');
+        state.states.set(receiverUid, 'sending');
+        window.renderFriendDirectory(state.mode === 'search' ? state.searchRows || [] : state.rows);
+        const result = await window.fetchAPI('/friends/send-request', 'POST', { senderUid: uid, receiverUid });
+        if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return;
+        state.states.set(receiverUid, result.success ? result.data?.state || 'pending' : 'add');
+        if (result.success && result.data?.reqId && result.data?.requestVersion) state.requestVersions.set(result.data.reqId, result.data.requestVersion);
+        if (state.open) window.renderFriendDirectory(state.mode === 'search' ? state.searchRows || [] : state.rows);
+        window.showToast(result.message || (result.success ? 'Request sent.' : 'Request could not complete.'), !result.success);
     };
 
     /* === MODULE 27: ADMIN SUPPORT CHAT ENGINE === */
@@ -9389,7 +10056,12 @@ window.scheduleDashboardSocketReconnect = () => {
         if (!currentUid) return window.showToast("Please login to your account first to contact support.", true);
 
         const modal = document.getElementById('userSupportModal');
-        if (modal) modal.style.display = 'flex';
+        if (!modal) return;
+        const currentToken = localStorage.getItem('token');
+        const version = (window.supportChatVersion || 0) + 1;
+        window.supportChatVersion = version;
+        window.supportChatOpen = true;
+        window.openModal('userSupportModal');
 
         const messagesContainer = document.getElementById('userSupportMessages');
         if (messagesContainer) {
@@ -9400,6 +10072,8 @@ window.scheduleDashboardSocketReconnect = () => {
 
         try {
             const result = await window.fetchAPI(`/support/messages?uid=${currentUid}`);
+            if (!window.supportChatOpen || version !== window.supportChatVersion ||
+                currentUid !== localStorage.getItem('uid') || currentToken !== localStorage.getItem('token')) return;
             if (!result.success || !result.data || result.data.length === 0) {
                 messagesContainer.innerHTML = '<div style="text-align:center; color:#64748b; font-size:0.8rem; margin-top:40px;">How can we help you today?<br><span style="font-size:0.7rem; color:#0ea5e9;">Send a message to start chatting directly with Admin.</span></div>';
                 return;
@@ -9438,16 +10112,25 @@ window.scheduleDashboardSocketReconnect = () => {
             messagesContainer.innerHTML = html;
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         } catch(err) {
-            messagesContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:0.75rem;">Failed to load messages. Reopen window.</div>';
+            if (window.supportChatOpen && version === window.supportChatVersion &&
+                currentUid === localStorage.getItem('uid') && currentToken === localStorage.getItem('token')) {
+                messagesContainer.innerHTML = '<div style="text-align:center; color:#ef4444; font-size:0.75rem;">Failed to load messages. Reopen window.</div>';
+            }
         }
     }
 
-    function closeSupportChat() {
+    window.leaveSupportChat = () => {
+        const wasOpen = window.supportChatOpen === true;
+        window.supportChatOpen = false;
+        window.supportChatVersion = (window.supportChatVersion || 0) + 1;
         const currentUid = localStorage.getItem('uid');
-        if (window.socket && currentUid) window.socket.emit("leave_support_chat", currentUid);
+        if (wasOpen && window.socket?.connected && currentUid) {
+            window.socket.emit("leave_support_chat", currentUid);
+        }
+    };
 
-        const modal = document.getElementById('userSupportModal');
-        if (modal) modal.style.display = 'none';
+    function closeSupportChat() {
+        window.closeModal('userSupportModal');
     }
 
     function sendUserSupportMessage() {
@@ -9471,9 +10154,10 @@ window.scheduleDashboardSocketReconnect = () => {
             messagesContainer.innerHTML = '';
         }
 
+        const tempId = 'temp-' + crypto.randomUUID();
         let timeStr = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }).toLowerCase();
         let bubbleHtml = `
-            <div style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:8px;">
+            <div id="msg-${tempId}" style="display:flex; flex-direction:column; align-items:flex-end; margin-bottom:8px;">
                 <div style="max-width:82%; padding:9px 14px; border-radius:14px; background:#0ea5e9; color:#fff; border-bottom-right-radius:2px; font-size:0.85rem; line-height:1.4; word-break:break-word;">
                     ${window.escapeChatDisplay(msg)}
                 </div>
@@ -9483,14 +10167,12 @@ window.scheduleDashboardSocketReconnect = () => {
         messagesContainer.innerHTML += bubbleHtml;
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
 
-        if (window.socket) {
-            window.socket.emit("send_support_message", {
-                uid: currentUid,
-                userName,
-                avatar,
-                message: msg
-            });
-        }
+        window.chatStartDelivery(tempId, {
+            mode: 'support', message: msg, input: 'userSupportInput'
+        });
+        window.chatSendWithAck('send_support_message', {
+            uid: currentUid, userName, avatar, message: msg
+        }, tempId);
     }
 
     document.addEventListener('click', (e) => {
@@ -9696,10 +10378,10 @@ window.scheduleDashboardSocketReconnect = () => {
 
             // 🔥 ALGORITHM FIXED: Prevent NaN (Not-a-Number) crash if a balance field is missing in Database
             let balancesRef = (window.RAM_STATE && window.RAM_STATE.balances) ? window.RAM_STATE.balances : (window.lastWalletData || {});
-            
+
             let mainBal = parseFloat(balancesRef.Main_Balance || 0) || 0;
             let lockedBal = parseFloat(balancesRef.Locked_Balance || 0) || 0;
-            
+
             const projection = window.buildStakingAssetProjection(balancesRef);
             const trueTotal = projection.total === null ? null : Number(window.formatDashboardMoneyMicro(projection.total));
 
@@ -10358,30 +11040,30 @@ window.scheduleDashboardSocketReconnect = () => {
             let totalCapital = 0;
             let totalDailyProfit = 0;
             let html = `<span style="font-size: 0.82rem; color: var(--text-main); font-weight: 700; display: block; margin-bottom: 10px;">Your Active Vaults:</span>`;
-           
+
             wallet.Active_Stakes.forEach(stk => {
                 if (stk.status === 'Active') {
                     let amt = parseFloat(stk.amount);
                     let roi = parseFloat(stk.dailyRoi);
                     let duration = parseInt(stk.duration);
                     let dProf = amt * (roi / 100);
-                   
+
                     if (!groupedStakes[duration]) {
                         let cardName = "Card";
                         if (duration == 7) cardName = "Silver";
                         else if (duration == 15) cardName = "Gold";
                         else if (duration == 30) cardName = "Platinum";
                         else if (duration == 60) cardName = "Diamond";
-                       
+
                         groupedStakes[duration] = { name: cardName, roi: roi, totalAmt: 0, totalDProf: 0, count: 0 };
                     }
-                   
+
                     groupedStakes[duration].totalAmt += amt;
                     groupedStakes[duration].totalDProf += dProf;
                     groupedStakes[duration].count += 1;
                 }
             });
-           
+
             Object.values(groupedStakes).forEach(grp => {
                 totalCapital += grp.totalAmt;
                 totalDailyProfit += grp.totalDProf;
@@ -10400,7 +11082,7 @@ window.scheduleDashboardSocketReconnect = () => {
                     </div>
                 </div>`;
             });
-           
+
             if (totalCapital > 0) {
                 let avgRoi = ((totalDailyProfit / totalCapital) * 100).toFixed(2);
                 html += `
