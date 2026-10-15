@@ -2875,7 +2875,8 @@
             </div>
         </div>
 
-        <input type="number" id="txAmt" placeholder="Enter Amount (USDT)" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; color: var(--text-main); outline: none; font-size: 0.85rem;">
+        <input type="number" id="txAmt" placeholder="Enter Amount (USDT)" oninput="window.updateWithdrawalFeePreview()" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; color: var(--text-main); outline: none; font-size: 0.85rem;">
+        <div id="wdLiveFeeDisplay" aria-live="polite" style="display:none; font-size:0.7rem; color:var(--warning); font-weight:700; margin:0 5px 12px;"></div>
         <input type="text" id="txHash" placeholder="Transaction Hash / TxID" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; color: var(--text-main); outline: none; font-size: 0.85rem;">
         <input type="number" id="wd2FACode" placeholder="Google Auth Code" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; color: var(--text-main); outline: none; font-size: 0.85rem; display:none;">
 
@@ -5652,7 +5653,65 @@ window.renderDashboardRoleBadge = role => {
     profileCard.classList.toggle('profile-is-admin', isAdmin);
 };
 
+window.systemFeeConfig = null;
+window.applySystemFees = data => {
+    const keys = ['wdFeePctBEP20', 'wdFeePctTRC20', 'p2pFeePct'];
+    if (!data || !Number.isSafeInteger(data.version) || data.version < 0 || keys.some(key =>
+        typeof data[key] !== 'number' || data[key] < 0.01 || data[key] > 99.99 ||
+        !/^\d{1,2}(?:\.\d{1,2})?$/.test(String(data[key])))) return false;
+    if (window.systemFeeConfig && window.systemFeeConfig.version > data.version) return true;
+    window.systemFeeConfig = Object.fromEntries([...keys, 'version'].map(key => [key, data[key]]));
+    window.updateWithdrawalFeePreview();
+    window.calculateLiveFee?.();
+    return true;
+};
+window.feeConfigFlight = null;
+window.syncSystemFees = () => {
+    if (window.feeConfigFlight) return window.feeConfigFlight;
+    window.feeConfigFlight = (async () => {
+        try {
+            const result = await window.fetchAPI('/finance/fee-config');
+            if (!result.success || !window.applySystemFees(result.data)) return null;
+            return window.systemFeeConfig;
+        } catch (error) { return null; }
+        finally { window.feeConfigFlight = null; }
+    })();
+    return window.feeConfigFlight;
+};
+window.feeReadyForSubmit = async () => {
+    const previous = window.systemFeeConfig?.version;
+    const current = await window.syncSystemFees();
+    if (!current) { window.showToast('Fee preview unavailable. Please retry.', true); return false; }
+    if (previous !== current.version) {
+        window.showToast('Fees updated. Review the new preview and submit again.', true);
+        return false;
+    }
+    return true;
+};
+window.renderFeePreview = (box, amount, percent, label) => {
+    if (!box) return;
+    box.style.display = 'block';
+    if (percent === undefined) { box.textContent = 'Loading current fees...'; return; }
+    if (!/^\d+(?:\.\d{1,6})?$/.test(String(amount))) { box.textContent = 'Enter an amount with up to 6 decimal places.'; return; }
+    const [whole, fraction = ''] = String(amount).split('.');
+    const gross = BigInt(whole) * 1000000n + BigInt(fraction.padEnd(6, '0'));
+    if (gross <= 0n || gross > BigInt(Number.MAX_SAFE_INTEGER)) { box.textContent = 'Enter a valid amount.'; return; }
+    const fee = (gross * BigInt(Math.round(percent * 100)) + 9999n) / 10000n;
+    if (fee >= gross) { box.textContent = 'Amount must leave a positive net payout.'; return; }
+    const money = value => (value / 1000000n) + '.' + (value % 1000000n).toString().padStart(6, '0');
+    box.textContent = 'Fee (' + percent + '%): ' + money(fee) + ' USDT | ' + label + ': ' + money(gross - fee) + ' USDT';
+};
+window.updateWithdrawalFeePreview = () => {
+    const box = document.getElementById('wdLiveFeeDisplay');
+    if (!box) return;
+    if (window.txMode !== 'Withdraw') { box.style.display = 'none'; return; }
+    const network = document.getElementById('wdNetwork').value;
+    window.renderFeePreview(box, document.getElementById('txAmt').value,
+        window.systemFeeConfig?.[network === 'BEP20' ? 'wdFeePctBEP20' : 'wdFeePctTRC20'], 'You receive');
+};
+
 window.applyDashboardSnapshot = data => {
+    if (!window.systemFeeConfig) void window.syncSystemFees();
     const uid = localStorage.getItem('uid');
     if (!data || !data.wallet || !data.user || !uid) throw new Error('Invalid dashboard response.');
     const user = data.user;
@@ -7000,7 +7059,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
     if (result.success) {
         window.isWalletBound = true;
-        window.userWallets[net] = addr;
+        window.userWallets[net] = result.address || addr;
         if (window.RAM_STATE) window.RAM_STATE.security.isWallet = true; // 🔥 Optimistic UI
 
         const bWall = document.getElementById('badgeWallet');
@@ -7151,6 +7210,8 @@ window.scheduleDashboardSocketReconnect = () => {
          return;
      }
      window.txMode = type;
+     window.updateWithdrawalFeePreview();
+     if (type === 'Withdraw') void window.syncSystemFees();
      const mTitle = document.getElementById('mTitle');
      const depArea = document.getElementById('depArea');
      const wdDisplayArea = document.getElementById('wdDisplayArea');
@@ -7344,6 +7405,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
  window.updateWithdrawNetwork = () => {
      const net = document.getElementById('wdNetwork').value;
+     window.updateWithdrawalFeePreview();
      const boundText = document.getElementById('boundWalletText');
      let addr = window.userWallets ? window.userWallets[net] : "";
      if (addr && addr.length > 5) {
@@ -7448,6 +7510,7 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     }
     else if (window.txMode === 'Withdraw') {
+        if (!await window.feeReadyForSubmit()) return;
         if (window.currentWdCount >= 5) return window.showToast("Monthly withdrawal limit (5) reached!", true);
 
         const net = document.getElementById('wdNetwork').value;
@@ -7462,7 +7525,7 @@ window.scheduleDashboardSocketReconnect = () => {
         btn.disabled = true;
 
         try {
-            const result = await window.fetchAPI('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr });
+            const result = await window.fetchAPI('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr, feeConfigVersion: window.systemFeeConfig.version });
 
             if (result.success) {
                 window.closeTx();
@@ -7476,6 +7539,8 @@ window.scheduleDashboardSocketReconnect = () => {
                     id: sData.id || 'local_wd_' + Date.now(),
                     UID: uid,
                     Type: 'Withdraw',
+                    Fee: sData.Fee, Net_Amount: sData.Net_Amount, Fee_Rate_Pct: sData.Fee_Rate_Pct,
+                    Fee_Config_Version: sData.Fee_Config_Version,
                     Amount: amt,
                     Network: net,
                     Status: 'Pending',
@@ -7901,15 +7966,14 @@ window.scheduleDashboardSocketReconnect = () => {
     };
 
     window.calculateLiveFee = () => {
-        const amt = parseFloat(document.getElementById('sendAmt').value) || 0;
-        const feeBox = document.getElementById('liveFeeDisplay');
-        if (amt < 5) { feeBox.style.display = 'none'; return; }
-        let fee = amt * 0.05;
-        feeBox.innerHTML = `Fee: ${fee.toFixed(2)} USDT | Receiver gets: <span style="color:var(--success);">${(amt - fee).toFixed(2)} USDT</span>`;
-        feeBox.style.display = 'block';
+        const input = document.getElementById('sendAmt');
+        const box = document.getElementById('liveFeeDisplay');
+        if (Number(input.value) < 5) { box.style.display = 'none'; return; }
+        window.renderFeePreview(box, input.value, window.systemFeeConfig?.p2pFeePct, 'Receiver gets');
     };
 
     window.submitSendMoney = async () => {
+        if (!await window.feeReadyForSubmit()) return;
         if (window.currentP2pCount >= 15) return window.showToast("Monthly P2P limit (15) reached!", true);
 
         const rUid = document.getElementById('sendUid').value.trim();
@@ -7928,7 +7992,7 @@ window.scheduleDashboardSocketReconnect = () => {
         btn.style.boxShadow = 'none';
 
         try {
-            const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA });
+            const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA, feeConfigVersion: window.systemFeeConfig.version });
 
             if (result.success) {
                 p2pOutboundScan = null;
@@ -9354,7 +9418,9 @@ window.scheduleDashboardSocketReconnect = () => {
             }, 5000);
         });
 
+        window.socket.on('fee_config_updated', data => window.applySystemFees(data));
         window.socket.on('connect', () => {
+            void window.syncSystemFees();
             if (window.dashboardSocketRetry) clearTimeout(window.dashboardSocketRetry);
             window.dashboardSocketRetry = null;
             window.socket.emit('join_my_room');
