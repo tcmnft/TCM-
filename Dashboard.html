@@ -2,7 +2,8 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <script>
+    <script>/* JS 01 | EARLY THEME INITIALIZATION | START */
+
         (() => {
             let theme = 'dark';
             try {
@@ -13,12 +14,14 @@
             }
             document.documentElement.setAttribute('data-theme', theme);
         })();
-    </script>
+    /* JS 01 | EARLY THEME INITIALIZATION | END */
+</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>TCM NFT • Premium Dashboard</title>
 
     <!-- === EXTERNAL LIBRARIES === -->
-    <script>
+    <script>/* JS 02 | STORED CREDENTIAL CLEANUP | START */
+
         (() => {
             try {
                 localStorage.removeItem('tcm_rem_pass');
@@ -34,15 +37,17 @@
                 // Storage may be unavailable in restricted browser contexts.
             }
         })();
-    </script>
+    /* JS 02 | STORED CREDENTIAL CLEANUP | END */
+</script>
     <script src="https://cdn.jsdelivr.net/npm/@otplib/preset-browser@12.0.1/build/otplib-browser.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.4/dist/ethers.umd.min.js" integrity="sha384-6Zl0Pc8zjSz8KvmNeXRvUQgY4ryFb+BwDvKCmLYcBME0joAaru491tQgi9B7zsMM" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
 
     <style>
-        /* === MODULE 1: FONTS & THEME VARIABLES === */
+        /* CSS 01 | FONTS & THEME VARIABLES | START */
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700;800&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@700&display=swap');
 
@@ -85,7 +90,8 @@
            --ticker-bg: rgba(255,255,255,0.05);
         }
 
-        /* === MODULE 2: GLOBAL RESETS & BODY LOCK === */
+        /* CSS 01 | FONTS & THEME VARIABLES | END */
+/* CSS 02 | GLOBAL RESETS & BODY LOCK | START */
         * { margin: 0; padding: 0; box-sizing: border-box; -ms-overflow-style: none !important; scrollbar-width: none !important; }
         *::-webkit-scrollbar { display: none !important; }
 
@@ -105,7 +111,8 @@
         .app-view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-     /* === MODULE 3: HEADER, SIDEBAR & BOTTOM NAV === */
+     /* CSS 02 | GLOBAL RESETS & BODY LOCK | END */
+/* CSS 03 | HEADER, SIDEBAR & BOTTOM NAV | START */
         .header-top {
            position: fixed;
            top: 0;
@@ -166,7 +173,8 @@
         .nav-link.active { color: var(--primary); transform: translateY(-2px); }
         .nav-link i { font-size: 1.25rem; }
 
-        /* === MODULE 4: DASHBOARD CARDS & COMPONENTS === */
+        /* CSS 03 | HEADER, SIDEBAR & BOTTOM NAV | END */
+/* CSS 04 | DASHBOARD CARDS & COMPONENTS | START */
         .dashboard-grid > div { min-width: 0 !important; max-width: 100% !important; }
 
         .profile-card {
@@ -497,7 +505,8 @@
         }
         .f-item span { font-size: 0.68rem; font-weight: 700; color: var(--text-main); letter-spacing: -0.1px; }
 
-     /* === MODULE 5: UI COMPONENTS (Buttons, Pills, Badges, Animations) === */
+     /* CSS 04 | DASHBOARD CARDS & COMPONENTS | END */
+/* CSS 05 | UI COMPONENTS (Buttons, Pills, Badges, Animations) | START */
         /* 🛸 Sunlit Glacier & Sakura Breeze Crystal Glass Buttons */
         .act-btn {
             position: relative;
@@ -530,6 +539,242 @@
             pointer-events: none;
         }
         .btn-wd::after { animation-delay: 3s; }
+
+        /* 🛡️ Security Center: 3D Neumorphic Recessed Cradles & Tactile Keycap Buttons */
+        #securityModal .act-btn::after {
+            display: none !important;
+        }
+        html:not([data-theme="dark"]) #securityModal #authStatusBox,
+        html:not([data-theme="dark"]) #securityModal #walletStatusBox {
+            background: linear-gradient(145deg, #e5ecf4, #f5f9fd) !important;
+            border: 1.5px solid #ffffff !important;
+            border-radius: 18px !important;
+            box-shadow: inset 4px 4px 9px rgba(148, 163, 184, 0.32), inset -4px -4px 9px #ffffff, 0 4px 10px rgba(30, 41, 59, 0.04) !important;
+        }
+        [data-theme="dark"] #securityModal #authStatusBox,
+        [data-theme="dark"] #securityModal #walletStatusBox {
+            background: #0b0f17 !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-radius: 18px !important;
+            box-shadow: inset 4px 4px 10px rgba(0, 0, 0, 0.9), inset -2px -2px 5px rgba(255, 255, 255, 0.03) !important;
+        }
+        html:not([data-theme="dark"]) #securityModal #btnSetup2FA {
+            background: linear-gradient(145deg, #ffffff 0%, #e0f2fe 55%, #bae6fd 100%) !important;
+            color: #0369a1 !important;
+            font-weight: 800 !important;
+            border: 1px solid rgba(56, 189, 248, 0.45) !important;
+            border-top: 2px solid #ffffff !important;
+            border-bottom: 2px solid rgba(2, 132, 199, 0.28) !important;
+            border-radius: 14px !important;
+            text-shadow: 0 1px 0 #ffffff !important;
+            box-shadow: 4px 6px 14px rgba(2, 132, 199, 0.16), -3px -3px 8px #ffffff, inset 0 1px 1px #ffffff !important;
+        }
+        html:not([data-theme="dark"]) #securityModal #btnUnbind2FA {
+            background: linear-gradient(145deg, #ffffff 0%, #ffe4e6 52%, #fecdd3 100%) !important;
+            color: #be123c !important;
+            font-weight: 800 !important;
+            border: 1px solid rgba(251, 113, 133, 0.5) !important;
+            border-top: 2px solid #ffffff !important;
+            border-bottom: 2px solid rgba(225, 29, 72, 0.28) !important;
+            border-radius: 14px !important;
+            text-shadow: 0 1px 0 #ffffff !important;
+            box-shadow: 4px 6px 14px rgba(225, 29, 72, 0.15), -3px -3px 8px #ffffff, inset 0 1px 1px #ffffff !important;
+        }
+        html:not([data-theme="dark"]) #securityModal #btnSetupWallet {
+            background: linear-gradient(145deg, #ffffff 0%, #d1fae5 52%, #a7f3d0 100%) !important;
+            color: #047857 !important;
+            font-weight: 800 !important;
+            border: 1px solid rgba(52, 211, 153, 0.5) !important;
+            border-top: 2px solid #ffffff !important;
+            border-bottom: 2px solid rgba(5, 150, 105, 0.28) !important;
+            border-radius: 14px !important;
+            text-shadow: 0 1px 0 #ffffff !important;
+            box-shadow: 4px 6px 14px rgba(5, 150, 105, 0.15), -3px -3px 8px #ffffff, inset 0 1px 1px #ffffff !important;
+        }
+        html:not([data-theme="dark"]) #securityModal .act-btn:active {
+            transform: translateY(2px) scale(0.98) !important;
+            box-shadow: inset 3px 3px 6px rgba(100, 116, 139, 0.25), inset -3px -3px 6px #ffffff !important;
+        }
+        [data-theme="dark"] #securityModal #btnSetup2FA {
+            background: linear-gradient(145deg, #16243a, #0c1422) !important;
+            color: #67e8f9 !important;
+            border: 1px solid rgba(34, 211, 238, 0.35) !important;
+            border-top: 1.5px solid rgba(165, 243, 252, 0.45) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+        }
+        [data-theme="dark"] #securityModal #btnUnbind2FA {
+            background: linear-gradient(145deg, #2a121d, #160910) !important;
+            color: #fda4af !important;
+            border: 1px solid rgba(244, 63, 94, 0.4) !important;
+            border-top: 1.5px solid rgba(254, 205, 211, 0.4) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+        }
+        [data-theme="dark"] #securityModal #btnSetupWallet {
+            background: linear-gradient(145deg, #112a24, #091714) !important;
+            color: #6ee7b7 !important;
+            border: 1px solid rgba(52, 211, 153, 0.38) !important;
+            border-top: 1.5px solid rgba(167, 243, 208, 0.42) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.14) !important;
+        }
+        [data-theme="dark"] #securityModal .act-btn:active {
+            transform: translateY(2px) scale(0.98) !important;
+            box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.85) !important;
+        }
+
+        /* 🛸 P2P Transfer: Carved Neumorphic Trench Slider (Matches .settings-pill in Light & Dark) */
+        #sendMoneyModal #btnSendMoney {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            height: 56px;
+            min-height: 56px;
+            box-sizing: border-box;
+            padding: 5px !important;
+            border-radius: 28px !important;
+            border: 1.5px solid #ffffff !important;
+            background: linear-gradient(135deg, #e3ebf4 0%, #f5f8fc 100%) !important;
+            box-shadow:
+                inset 5px 5px 10px rgba(148, 163, 184, 0.42),
+                inset -5px -5px 10px #ffffff,
+                0 3px 8px rgba(148, 163, 184, 0.16) !important;
+            color: transparent !important;
+            font-size: 0 !important;
+            text-shadow: none !important;
+            transform: none !important;
+            animation: none !important;
+            touch-action: pan-y;
+            user-select: none;
+            -webkit-user-select: none;
+            cursor: grab;
+        }
+        [data-theme="dark"] #sendMoneyModal #btnSendMoney {
+            background: #0b0e15 !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            box-shadow:
+                inset 5px 5px 11px rgba(0, 0, 0, 0.92),
+                inset -2px -2px 5px rgba(255, 255, 255, 0.04),
+                -1px -1px 1.5px rgba(255, 255, 255, 0.1),
+                1px 1px 2px rgba(0, 0, 0, 0.85) !important;
+        }
+        #sendMoneyModal #btnSendMoney::before {
+            content: '\2192';
+            position: absolute;
+            z-index: 2;
+            left: 6px;
+            top: 50%;
+            width: 44px;
+            height: 44px;
+            display: grid;
+            place-items: center;
+            box-sizing: border-box;
+            border-radius: 50%;
+            border: 1.5px solid #ffffff;
+            background: linear-gradient(145deg, #ffffff 0%, #edf2f8 65%, #dbe4f0 100%);
+            box-shadow:
+                4px 5px 12px rgba(30, 41, 59, 0.2),
+                -2px -2px 6px #ffffff,
+                inset 0 1.5px 1px #ffffff;
+            color: #0284c7;
+            font: 800 21px/1 'Space Grotesk', sans-serif;
+            transform: translate(var(--p2p-slide-x, 0px), -50%);
+            transition: transform 0.32s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.2s ease, color 0.2s ease;
+            pointer-events: none;
+        }
+        [data-theme="dark"] #sendMoneyModal #btnSendMoney::before {
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: linear-gradient(145deg, #243044 0%, #141c29 60%, #0d121b 100%);
+            box-shadow:
+                4px 6px 14px rgba(0, 0, 0, 0.85),
+                -1px -1px 4px rgba(255, 255, 255, 0.08),
+                inset 0 1px 1px rgba(255, 255, 255, 0.22);
+            color: #00f5ff;
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+        }
+        #sendMoneyModal #btnSendMoney:not(:disabled)::before {
+            color: #059669;
+        }
+        [data-theme="dark"] #sendMoneyModal #btnSendMoney:not(:disabled)::before {
+            color: #34d399;
+            border-color: rgba(52, 211, 153, 0.45);
+            text-shadow: 0 0 12px rgba(52, 211, 153, 0.65);
+        }
+        #sendMoneyModal #btnSendMoney::after {
+            content: 'Slide to Confirm Transfer \2192';
+            position: absolute;
+            z-index: 1;
+            inset: 0 16px 0 58px;
+            width: auto;
+            height: 100%;
+            display: grid;
+            place-items: center;
+            font: 700 0.78rem/1.2 'Space Grotesk', sans-serif;
+            letter-spacing: 0.3px;
+            background: linear-gradient(110deg, #475569 20%, #0284c7 48%, #475569 75%);
+            background-size: 220% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            opacity: 1;
+            transform: none;
+            animation: p2pDarkTrenchShimmer 3.6s ease-in-out infinite;
+            pointer-events: none;
+        }
+        [data-theme="dark"] #sendMoneyModal #btnSendMoney::after {
+            background: linear-gradient(110deg, #64748b 20%, #e0f2fe 48%, #64748b 75%);
+            background-size: 220% 100%;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        #sendMoneyModal #btnSendMoney > i {
+            visibility: hidden;
+        }
+        #sendMoneyModal #btnSendMoney[data-swipe-state="dragging"] {
+            cursor: grabbing;
+        }
+        #sendMoneyModal #btnSendMoney[data-swipe-state="dragging"]::before {
+            transition: none;
+        }
+        #sendMoneyModal #btnSendMoney:disabled {
+            cursor: not-allowed;
+        }
+        #sendMoneyModal #btnSendMoney:disabled::before {
+            color: #94a3b8;
+            opacity: 0.75;
+        }
+        #sendMoneyModal #btnSendMoney:disabled::after {
+            content: 'Verify recipient first';
+            background: none;
+            -webkit-text-fill-color: #64748b;
+            animation: none;
+        }
+        #sendMoneyModal #btnSendMoney[data-swipe-state="busy"]::before {
+            content: '\2026';
+        }
+        #sendMoneyModal #btnSendMoney[data-swipe-state="busy"]::after {
+            content: 'Processing transfer...';
+            background: none;
+            -webkit-text-fill-color: #059669;
+            animation: none;
+        }
+        [data-theme="dark"] #sendMoneyModal #btnSendMoney[data-swipe-state="busy"]::after {
+            -webkit-text-fill-color: #6ee7b7;
+        }
+        @keyframes p2pDarkTrenchShimmer {
+            0%, 100% { background-position: 100% 0; }
+            50% { background-position: 0% 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #sendMoneyModal #btnSendMoney::after {
+                animation: none;
+            }
+            #sendMoneyModal #btnSendMoney::before {
+                transition: none;
+            }
+        }
         @keyframes sunlitBreezeShimmer {
             0%, 70%, 100% { left: -120%; opacity: 0; }
             15% { opacity: 1; }
@@ -554,6 +799,97 @@
         .act-btn:hover { transform: translateY(-3px); }
         .btn-dep:hover i { transform: translateY(2px); }
         .btn-wd:hover i { transform: translateY(-2px); }
+
+        .act-btn .tx-icon-capsule {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+            contain: layout paint;
+            flex: 0 0 26px;
+            width: 26px;
+            min-width: 26px;
+            max-width: 26px;
+            height: 26px;
+            box-sizing: border-box;
+            border: 1px solid transparent;
+            border-radius: 50%;
+            font-size: 0.78rem;
+            background: rgba(255, 255, 255, 0.65);
+            box-shadow: inset 0 1px 1px #ffffff, 0 2px 5px rgba(0, 0, 0, 0.06);
+            transition: border-color 0.35s ease, box-shadow 0.45s ease;
+        }
+        [data-theme="dark"] .act-btn .tx-icon-capsule {
+            background: rgba(255, 255, 255, 0.12);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+        .act-btn .tx-icon-capsule > i {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+            font-size: inherit;
+            transform: translateY(0);
+            transition: none;
+            opacity: 1;
+            --fall-from: 0%; --fall-to: 130%;
+            --rise-from: 0%; --rise-to: -130%;
+            --alpha-from: 1; --alpha-to: 0;
+        }
+        .act-btn .tx-icon-capsule > i + i {
+            opacity: 0;
+            --fall-from: -130%; --fall-to: 0%;
+            --rise-from: 130%; --rise-to: 0%;
+            --alpha-from: 0; --alpha-to: 1;
+        }
+        .act-btn .tx-action-label {
+            flex: 0 0 auto;
+            white-space: nowrap;
+        }
+        .act-btn .tx-icon-capsule.dep-holding-state,
+        .act-btn .tx-icon-capsule.wd-holding-state {
+            border-color: #facc15;
+            box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35), 0 0 13px rgba(250, 204, 21, 0.45);
+        }
+        .act-btn .tx-icon-capsule.dep-cascade-active > i {
+            animation: arrowCascadeDown 1.3s cubic-bezier(0.45, 0, 0.2, 1) 7 both;
+        }
+        .act-btn .tx-icon-capsule.wd-cascade-active > i {
+            animation: arrowCascadeUp 1.3s cubic-bezier(0.45, 0, 0.2, 1) 7 both;
+        }
+        @keyframes arrowCascadeDown {
+            from {
+                transform: translateY(var(--fall-from));
+                opacity: var(--alpha-from);
+            }
+            to {
+                transform: translateY(var(--fall-to));
+                opacity: var(--alpha-to);
+            }
+        }
+        @keyframes arrowCascadeUp {
+            from {
+                transform: translateY(var(--rise-from));
+                opacity: var(--alpha-from);
+            }
+            to {
+                transform: translateY(var(--rise-to));
+                opacity: var(--alpha-to);
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .act-btn .tx-icon-capsule.dep-cascade-active > i,
+            .act-btn .tx-icon-capsule.wd-cascade-active > i {
+                animation: none;
+            }
+            .act-btn .tx-icon-capsule {
+                transition: none;
+            }
+        }
         .act-btn:active { transform: translateY(2px) scale(0.98); }
 
         /* 🔷 Deposit: Glacier Waterfall & Sunlit Mist Glass */
@@ -570,14 +906,28 @@
         }
         [data-theme="dark"] .btn-dep {
             background:
-                radial-gradient(circle at 18% 15%, rgba(186, 230, 253, 0.25) 0%, transparent 55%),
-                linear-gradient(145deg, rgba(14, 165, 233, 0.22) 0%, rgba(2, 132, 199, 0.10) 55%, rgba(15, 23, 42, 0.55) 100%);
-            color: #f0f9ff;
-            border: 1px solid rgba(56, 189, 248, 0.42);
-            border-top: 1.5px solid rgba(255, 255, 255, 0.78);
-            border-bottom: 1px solid rgba(2, 132, 199, 0.25);
-            box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 0 24px rgba(14, 165, 233, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 0.5), inset 0 -1.5px 3px rgba(0, 0, 0, 0.35);
-            text-shadow: 0 0 10px rgba(56, 189, 248, 0.45);
+                radial-gradient(120% 95% at 22% 10%, rgba(0, 245, 255, 0.22) 0%, rgba(14, 165, 233, 0.08) 48%, transparent 75%),
+                linear-gradient(145deg, #172336 0%, #0d1422 54%, #080c14 100%);
+            color: #ecfeff;
+            border-top: 1.5px solid rgba(103, 232, 249, 0.5);
+            border-left: 1px solid rgba(56, 189, 248, 0.26);
+            border-right: 1px solid rgba(0, 0, 0, 0.78);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.92);
+            box-shadow:
+                0 14px 28px -4px rgba(0, 0, 0, 0.85),
+                0 4px 14px rgba(0, 245, 255, 0.12),
+                inset 0 1.5px 2px rgba(255, 255, 255, 0.2),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.75);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 12px rgba(34, 211, 238, 0.38);
+        }
+        [data-theme="dark"] .btn-dep .tx-icon-capsule {
+            background: linear-gradient(145deg, #090e17, #141e2e);
+            border: 1px solid rgba(34, 211, 238, 0.28);
+            color: #00f5ff;
+            box-shadow:
+                inset 2px 2px 5px rgba(0, 0, 0, 0.92),
+                inset -1px -1px 3px rgba(255, 255, 255, 0.06),
+                0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
         /* 🌸 Withdraw: Sakura Petal & Morning Sunlight Glass */
@@ -594,14 +944,28 @@
         }
         [data-theme="dark"] .btn-wd {
             background:
-                radial-gradient(circle at 18% 15%, rgba(254, 205, 211, 0.22) 0%, transparent 55%),
-                linear-gradient(145deg, rgba(244, 63, 94, 0.22) 0%, rgba(225, 29, 72, 0.10) 55%, rgba(15, 23, 42, 0.55) 100%);
+                radial-gradient(120% 95% at 22% 10%, rgba(244, 63, 94, 0.24) 0%, rgba(225, 29, 72, 0.08) 48%, transparent 75%),
+                linear-gradient(145deg, #281524 0%, #150b14 54%, #0c060b 100%);
             color: #fff1f2;
-            border: 1px solid rgba(251, 113, 133, 0.42);
-            border-top: 1.5px solid rgba(255, 255, 255, 0.78);
-            border-bottom: 1px solid rgba(225, 29, 72, 0.25);
-            box-shadow: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 0 24px rgba(244, 63, 94, 0.18), inset 0 1.5px 2px rgba(255, 255, 255, 0.5), inset 0 -1.5px 3px rgba(0, 0, 0, 0.35);
-            text-shadow: 0 0 10px rgba(251, 113, 133, 0.45);
+            border-top: 1.5px solid rgba(253, 164, 175, 0.5);
+            border-left: 1px solid rgba(251, 113, 133, 0.26);
+            border-right: 1px solid rgba(0, 0, 0, 0.78);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.92);
+            box-shadow:
+                0 14px 28px -4px rgba(0, 0, 0, 0.85),
+                0 4px 14px rgba(244, 63, 94, 0.12),
+                inset 0 1.5px 2px rgba(255, 255, 255, 0.2),
+                inset 0 -3px 6px rgba(0, 0, 0, 0.75);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85), 0 0 12px rgba(251, 113, 133, 0.38);
+        }
+        [data-theme="dark"] .btn-wd .tx-icon-capsule {
+            background: linear-gradient(145deg, #12070d, #23101b);
+            border: 1px solid rgba(251, 113, 133, 0.28);
+            color: #fb7185;
+            box-shadow:
+                inset 2px 2px 5px rgba(0, 0, 0, 0.92),
+                inset -1px -1px 3px rgba(255, 255, 255, 0.06),
+                0 1px 0 rgba(255, 255, 255, 0.12);
         }
 
         /* 🔥 Dashboard P2P Receive Pulse (Strong Pink Glow for Light Mode) */
@@ -821,7 +1185,8 @@
         .btn-close-3d { display: inline-block; margin-top: 15px; padding: 10px 25px; background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.15); border-bottom: 4px solid rgba(0, 0, 0, 0.5); border-radius: 12px; color: var(--text-sub); font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: all 0.1s ease; box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); outline: none; }
         .btn-close-3d:active { transform: translateY(4px); border-bottom: 0px solid rgba(0, 0, 0, 0.5); box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); color: var(--text-main); background: rgba(255, 255, 255, 0.1); }
 
-        /* === MODULE 6: MODALS, POPUPS & TOASTS === */
+        /* CSS 05 | UI COMPONENTS (Buttons, Pills, Badges, Animations) | END */
+/* CSS 06 | MODALS, POPUPS & TOASTS | START */
         /* 🔥 UNIVERSAL MAGNETIC GLASS CLOSE BUTTON */
         .univ-close-btn { position: absolute; top: 15px; right: 15px; width: 36px; height: 36px; background: rgba(148, 163, 184, 0.1); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(148, 163, 184, 0.2); border-radius: 50%; display: flex; justify-content: center; align-items: center; color: var(--text-sub); font-size: 1rem; cursor: pointer; z-index: 50; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); }
         .univ-close-btn:hover { background: rgba(244, 63, 94, 0.12); color: var(--error); border-color: rgba(244, 63, 94, 0.3); transform: translateY(-3px) scale(1.08); box-shadow: 0 10px 25px rgba(244, 63, 94, 0.25), inset 0 2px 5px rgba(255, 255, 255, 0.15); }
@@ -1456,7 +1821,8 @@
         .bar span { position: absolute; top: -20px; width: 100%; text-align: center; font-size: 0.7rem; font-weight: 700; color: var(--text-main); opacity: 0; transition: 1s; transition-delay: 1.5s; }
         .bar.active span { opacity: 1; }
 
-     /* === MODULE 7: LIVE FEED & HISTORY PANELS === */
+     /* CSS 06 | MODALS, POPUPS & TOASTS | END */
+/* CSS 07 | LIVE FEED & HISTORY PANELS | START */
         .live-feed {
             background: linear-gradient(145deg, #7f1d1d, #3f0a0a); /* Premium Red Leather */
             border-radius: 16px; padding: 10px 15px; display: flex; flex-direction: column; justify-content: center; height: 85px;
@@ -1508,10 +1874,46 @@
         .feed-badges { display: flex; align-items: center; gap: 6px; width: 100%; justify-content: space-between; margin-top: 2px; }
         .ios-slot { background: var(--bg-card); border-radius: 8px; padding: 5px 0; border: 1px solid var(--border); box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: center; white-space: nowrap; flex: 1; }
 
-        .history-panel { background: var(--bg-card); border-radius: 24px; padding: 25px 20px; border: 1px solid var(--border); box-shadow: 0 8px 25px var(--shadow); margin-top: 15px; }
-        .sec-title { font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; }
-        .tx-filter-input { background: var(--bg-main); border: 1px solid var(--border); color: var(--text-main); border-radius: 8px; padding: 5px 8px; font-size: 0.75rem !important; outline: none; cursor: pointer; color-scheme: dark; }
-        [data-theme="light"] .tx-filter-input { color-scheme: light; }
+        .history-panel {
+            background: #eff4f8;
+            border-radius: 24px;
+            padding: 24px 18px;
+            border: 2px solid #ffffff;
+            box-shadow: 10px 15px 30px rgba(30, 41, 59, 0.09), -10px -10px 25px rgba(255, 255, 255, 1);
+            margin-top: 15px;
+        }
+        [data-theme="dark"] .history-panel {
+            background: rgba(20, 24, 32, 0.85);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.14);
+            border-left: 1.5px solid rgba(255, 255, 255, 0.08);
+            border-right: 1px solid rgba(0, 0, 0, 0.6);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.9);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65), inset 1px 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .sec-title { font-size: 0.95rem; font-weight: 800; color: var(--text-main); margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .tx-filter-input {
+            background: linear-gradient(145deg, #e3ebf3, #f5f9fd);
+            border: 1.5px solid #ffffff;
+            color: #1e293b;
+            border-radius: 12px;
+            padding: 6px 11px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.74rem !important;
+            outline: none;
+            cursor: pointer;
+            color-scheme: light;
+            box-shadow: inset 2.5px 2.5px 5px rgba(148, 163, 184, 0.35), inset -2.5px -2.5px 5px #ffffff, 0 2px 5px rgba(30, 41, 59, 0.04);
+        }
+        [data-theme="dark"] .tx-filter-input {
+            background: #0b0f17;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: #e2e8f0;
+            color-scheme: dark;
+            box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.9), inset -1px -1px 3px rgba(255, 255, 255, 0.04);
+        }
         .tx-scroll-box { max-height: 380px; overflow-y: auto; padding-right: 5px; scrollbar-width: none; }
         #txHistoryBox, #ordersContentBox, #teamBonusHistoryBox, #p2pHistoryBox {
             scroll-behavior: smooth;
@@ -1641,25 +2043,369 @@
         [data-theme="dark"] #accountDeleteModal #deleteClearanceRows p,
         [data-theme="dark"] #accountDeleteModal #deleteClearanceTime { color: #cbd5e1; }
         [data-theme="dark"] #accountDeleteModal #btnRefreshDeleteClearance { background: #1e293b; color: #f1f5f9; }
-        .tx-item { display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border); transition: 0.3s; }
-        .tx-item:last-child { border-bottom: none; padding-bottom: 0; }
-        .tx-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0;}
-        .tx-icon { width: 42px; height: 42px; border-radius: 14px; display: flex; justify-content: center; align-items: center; font-size: 1.1rem; flex-shrink: 0; }
-        .tx-icon.wd { background: rgba(244, 63, 94, 0.1); color: var(--error); }
-        .tx-icon.dep { background: rgba(0, 245, 255, 0.1); color: var(--primary); }
-        .tx-icon.air { background: rgba(250, 204, 21, 0.1); color: #facc15; }
-        .tx-icon.air-reversed { background: rgba(244, 63, 94, 0.12); color: rgba(244, 63, 94, 0.65); border: 1px dashed rgba(244, 63, 94, 0.3); }
+        #txHistoryBox {
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+        }
+        .tx-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--border);
+            transition: 0.3s;
+        }
+        #txHistoryBox .tx-item {
+            padding: 14px 14px !important;
+            margin-bottom: 12px !important;
+            border-radius: 18px !important;
+            background: linear-gradient(145deg, #ffffff 0%, #f1f6fb 100%) !important;
+            border: 1.5px solid #ffffff !important;
+            border-bottom: 1.5px solid rgba(148, 163, 184, 0.22) !important;
+            box-shadow: 6px 8px 18px rgba(30, 41, 59, 0.08), -5px -5px 14px #ffffff, inset 0 1px 0 #ffffff !important;
+        }
+        [data-theme="dark"] #txHistoryBox .tx-item {
+            background: linear-gradient(145deg, #171d2a 0%, #0d1119 100%) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.13) !important;
+            border-bottom: 1.5px solid rgba(0, 0, 0, 0.85) !important;
+            box-shadow: 0 10px 22px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+        }
+        #txHistoryBox .tx-item:last-child { margin-bottom: 4px !important; }
+        .tx-breakdown-wrapper {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease, margin-top 0.38s ease;
+            width: 100%;
+        }
+        .tx-breakdown-wrapper.open {
+            max-height: 180px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+        .tx-breakdown-tray {
+            background: linear-gradient(145deg, #e3ebf3, #f5f9fd);
+            border: 1.5px solid #ffffff;
+            border-radius: 13px;
+            padding: 10px 14px;
+            box-shadow: inset 3px 3px 7px rgba(148, 163, 184, 0.35), inset -3px -3px 7px #ffffff, 0 2px 5px rgba(30, 41, 59, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        [data-theme="dark"] .tx-breakdown-tray {
+            background: #080b11;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-top: 1px solid rgba(0, 0, 0, 0.85);
+            box-shadow: inset 4px 4px 9px rgba(0, 0, 0, 0.92), inset -1px -1px 4px rgba(255, 255, 255, 0.03), 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .tx-breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            color: #475569;
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
+            white-space: nowrap;
+        }
+        [data-theme="dark"] .tx-breakdown-row {
+            color: #94a3b8;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+        }
+        .tx-breakdown-row:last-child {
+            border-bottom: none;
+        }
+        .tx-breakdown-row-highlight {
+            color: #0284c7;
+            font-weight: 700;
+            background: rgba(2, 132, 199, 0.07);
+            padding: 5px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(2, 132, 199, 0.22);
+        }
+        [data-theme="dark"] .tx-breakdown-row-highlight {
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.07);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .tx-breakdown-label {
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .tx-breakdown-val {
+            font-family: monospace;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.3px;
+        }
+        [data-theme="dark"] .tx-breakdown-val {
+            color: #f1f5f9;
+        }
+        .tx-breakdown-row-highlight .tx-breakdown-val {
+            color: #059669;
+            font-size: 0.75rem;
+        }
+        [data-theme="dark"] .tx-breakdown-row-highlight .tx-breakdown-val {
+            color: #34d399;
+            text-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+        }
+        .tx-audit-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 24px;
+            padding: 0;
+            border-radius: 7px;
+            background: linear-gradient(145deg, #ffffff 0%, #e8eff7 58%, #d5e2ef 100%);
+            color: #0284c7;
+            border: 1px solid rgba(148, 163, 184, 0.38);
+            border-top: 1.5px solid #ffffff;
+            border-bottom: 2px solid rgba(100, 116, 139, 0.34);
+            font-size: 0.64rem;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+            box-shadow: 2px 3px 6px rgba(30, 41, 59, 0.14), -2px -2px 5px #ffffff, inset 0 1px 0 #ffffff;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin-top: 4px;
+        }
+        .tx-audit-toggle-btn i {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+        .tx-audit-toggle-btn:active {
+            transform: translateY(1.5px) scale(0.95);
+        }
+        .tx-audit-toggle-btn.active {
+            background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%);
+            border-color: rgba(2, 132, 199, 0.45);
+            color: #0369a1;
+            box-shadow: inset 2px 2px 4px rgba(2, 132, 199, 0.22), inset -2px -2px 4px #ffffff;
+        }
+        [data-theme="dark"] .tx-audit-toggle-btn {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 60%, #090d16 100%);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.26);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.92);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.75), -1px -1px 3px rgba(255, 255, 255, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        }
+        [data-theme="dark"] .tx-audit-toggle-btn.active {
+            background: linear-gradient(145deg, #0c192c 0%, #152942 100%);
+            border-color: rgba(0, 245, 255, 0.5);
+            color: #00f5ff;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0, 245, 255, 0.28);
+        }
+        .tx-audit-toggle-btn.active i {
+            transform: rotate(180deg);
+        }
+        .tx-breakdown-wrapper {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.38s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.28s ease, margin-top 0.38s ease;
+            width: 100%;
+        }
+        .tx-breakdown-wrapper.open {
+            max-height: 180px;
+            opacity: 1;
+            margin-top: 10px;
+        }
+        .tx-breakdown-tray {
+            background: linear-gradient(145deg, #e3ebf3, #f5f9fd);
+            border: 1.5px solid #ffffff;
+            border-radius: 13px;
+            padding: 10px 14px;
+            box-shadow: inset 3px 3px 7px rgba(148, 163, 184, 0.35), inset -3px -3px 7px #ffffff, 0 2px 5px rgba(30, 41, 59, 0.04);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        [data-theme="dark"] .tx-breakdown-tray {
+            background: #080b11;
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-top: 1px solid rgba(0, 0, 0, 0.85);
+            box-shadow: inset 4px 4px 9px rgba(0, 0, 0, 0.92), inset -1px -1px 4px rgba(255, 255, 255, 0.03), 0 1px 0 rgba(255, 255, 255, 0.05);
+        }
+        .tx-breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.72rem;
+            color: #475569;
+            padding: 3px 0;
+            border-bottom: 1px dashed rgba(148, 163, 184, 0.3);
+            white-space: nowrap;
+        }
+        [data-theme="dark"] .tx-breakdown-row {
+            color: #94a3b8;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.06);
+        }
+        .tx-breakdown-row:last-child {
+            border-bottom: none;
+        }
+        .tx-breakdown-row-highlight {
+            color: #0284c7;
+            font-weight: 700;
+            background: rgba(2, 132, 199, 0.07);
+            padding: 5px 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(2, 132, 199, 0.22);
+        }
+        [data-theme="dark"] .tx-breakdown-row-highlight {
+            color: #38bdf8;
+            background: rgba(56, 189, 248, 0.07);
+            border: 1px solid rgba(56, 189, 248, 0.2);
+        }
+        .tx-breakdown-label {
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+        .tx-breakdown-val {
+            font-family: monospace;
+            font-weight: 800;
+            color: #0f172a;
+            letter-spacing: 0.3px;
+        }
+        [data-theme="dark"] .tx-breakdown-val {
+            color: #f1f5f9;
+        }
+        .tx-breakdown-row-highlight .tx-breakdown-val {
+            color: #059669;
+            font-size: 0.75rem;
+        }
+        [data-theme="dark"] .tx-breakdown-row-highlight .tx-breakdown-val {
+            color: #34d399;
+            text-shadow: 0 0 8px rgba(52, 211, 153, 0.4);
+        }
+        .tx-audit-toggle-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 26px;
+            height: 24px;
+            padding: 0;
+            border-radius: 7px;
+            background: linear-gradient(145deg, #ffffff 0%, #e8eff7 58%, #d5e2ef 100%);
+            color: #0284c7;
+            border: 1px solid rgba(148, 163, 184, 0.38);
+            border-top: 1.5px solid #ffffff;
+            border-bottom: 2px solid rgba(100, 116, 139, 0.34);
+            font-size: 0.64rem;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.22s ease, background 0.22s ease, color 0.22s ease, border-color 0.22s ease;
+            box-shadow: 2px 3px 6px rgba(30, 41, 59, 0.14), -2px -2px 5px #ffffff, inset 0 1px 0 #ffffff;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin-top: 4px;
+        }
+        .tx-audit-toggle-btn i {
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            pointer-events: none;
+        }
+        .tx-audit-toggle-btn:active {
+            transform: translateY(1.5px) scale(0.95);
+        }
+        .tx-audit-toggle-btn.active {
+            background: linear-gradient(145deg, #e0f2fe 0%, #bae6fd 100%);
+            border-color: rgba(2, 132, 199, 0.45);
+            color: #0369a1;
+            box-shadow: inset 2px 2px 4px rgba(2, 132, 199, 0.22), inset -2px -2px 4px #ffffff;
+        }
+        [data-theme="dark"] .tx-audit-toggle-btn {
+            background: linear-gradient(145deg, #1e293b 0%, #0f172a 60%, #090d16 100%);
+            color: #38bdf8;
+            border: 1px solid rgba(56, 189, 248, 0.28);
+            border-top: 1.5px solid rgba(255, 255, 255, 0.26);
+            border-bottom: 2px solid rgba(0, 0, 0, 0.92);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.75), -1px -1px 3px rgba(255, 255, 255, 0.04), inset 0 1px 1px rgba(255, 255, 255, 0.12);
+        }
+        [data-theme="dark"] .tx-audit-toggle-btn.active {
+            background: linear-gradient(145deg, #0c192c 0%, #152942 100%);
+            border-color: rgba(0, 245, 255, 0.5);
+            color: #00f5ff;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.85), 0 0 10px rgba(0, 245, 255, 0.28);
+        }
+        .tx-audit-toggle-btn.active i {
+            transform: rotate(180deg);
+        }
+        .tx-left { display: flex; align-items: flex-start; gap: 12px; flex: 1; min-width: 0; }
+        .tx-icon {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.05rem;
+            flex-shrink: 0;
+            background: linear-gradient(145deg, #ffffff, #e4ecf4) !important;
+            border: 1.5px solid #ffffff !important;
+            box-shadow: 4px 6px 12px rgba(30, 41, 59, 0.12), -3px -3px 9px #ffffff, inset 0 1px 1px #ffffff !important;
+        }
+        .tx-icon::before {
+            content: "";
+            position: absolute;
+            inset: 4px;
+            border-radius: 10px;
+            background: linear-gradient(145deg, #e7eff7, #f8fafc);
+            box-shadow: inset 2px 2px 4px rgba(148, 163, 184, 0.28), inset -2px -2px 4px #ffffff;
+            pointer-events: none;
+        }
+        .tx-icon i { position: relative; z-index: 2; }
+        [data-theme="dark"] .tx-icon {
+            background: linear-gradient(145deg, #1a2130, #0c1018) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 5px 6px 14px rgba(0, 0, 0, 0.75), -2px -2px 5px rgba(255, 255, 255, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+        }
+        [data-theme="dark"] .tx-icon::before {
+            background: linear-gradient(145deg, #0a0d14, #141924);
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.88), inset -1px -1px 3px rgba(255, 255, 255, 0.03);
+        }
+        .tx-icon.wd { color: #e11d48 !important; }
+        .tx-icon.dep { color: #059669 !important; }
+        .tx-icon.air { color: #d97706 !important; }
+        [data-theme="dark"] .tx-icon.wd { color: #fb7185 !important; text-shadow: 0 0 10px rgba(251, 113, 133, 0.4); }
+        [data-theme="dark"] .tx-icon.dep { color: #00f5ff !important; text-shadow: 0 0 10px rgba(0, 245, 255, 0.4); }
+        [data-theme="dark"] .tx-icon.air { color: #facc15 !important; text-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
+        .tx-icon.air-reversed { color: rgba(244, 63, 94, 0.65) !important; border: 1px dashed rgba(244, 63, 94, 0.35) !important; }
         .tx-amt-reversed { text-decoration: line-through; color: rgba(244, 63, 94, 0.65) !important; opacity: 0.85; }
         .badge.glow-reversed { background: rgba(244, 63, 94, 0.08); color: rgba(244, 63, 94, 0.7); border: 1px solid rgba(244, 63, 94, 0.25); }
         .tx-info { display: flex; flex-direction: column; gap: 5px; width: 100%; min-width: 0; }
         .tx-info h4 { font-size: 0.9rem; font-weight: 700; color: var(--text-main); margin: 0; }
         .tx-date { font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500; margin-bottom: 2px; white-space: nowrap; }
-        .tx-order-id-box { display: inline-flex; align-items: center; gap: 8px; background: #0f172a !important; color: #ffffff !important; padding: 4px 10px; border-radius: 8px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.7rem; letter-spacing: 0.5px; box-shadow: 0 2px 8px rgba(0,0,0,0.3); align-self: flex-start; }
+        .tx-order-id-box {
+            display: inline-flex !important;
+            align-items: center !important;
+            gap: 8px !important;
+            background: linear-gradient(145deg, #e4ecf4, #f5f9fd) !important;
+            color: #334155 !important;
+            padding: 4px 10px !important;
+            border-radius: 9px !important;
+            border: 1px solid #ffffff !important;
+            font-family: monospace !important;
+            font-size: 0.66rem !important;
+            font-weight: 700 !important;
+            letter-spacing: 0.4px !important;
+            box-shadow: inset 2px 2px 4px rgba(148, 163, 184, 0.34), inset -2px -2px 4px #ffffff, 0 1px 3px rgba(30, 41, 59, 0.05) !important;
+            align-self: flex-start !important;
+        }
+        [data-theme="dark"] .tx-order-id-box {
+            background: #080b11 !important;
+            color: #cbd5e1 !important;
+            border: 1px solid rgba(255, 255, 255, 0.07) !important;
+            box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.92), 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        }
         .tx-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
         .tx-amt { font-size: 0.95rem; font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
         .live-timer { font-size: 0.65rem; font-family: monospace; font-weight: 600; color: var(--text-sub); margin-top: 5px; display: block; }
 
-     /* === MODULE 8: NFT RESERVE, COLLECTION & SCANNER === */
+     /* CSS 07 | LIVE FEED & HISTORY PANELS | END */
+/* CSS 08 | NFT RESERVE, COLLECTION & SCANNER | START */
         .stats-grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
         .stat-slim { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 6px; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; box-shadow: 0 4px 12px var(--shadow); }
         .stat-slim-title { font-size: 0.6rem; color: var(--text-sub); font-weight: 700; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; line-height: 1.2; }
@@ -1820,7 +2566,8 @@
         .empty-state i { font-size: 3rem; opacity: 0.2; margin-bottom: 10px; }
         .empty-state p { font-size: 0.85rem; font-weight: 500; }
 
-        /* === MODULE 9: SETTINGS & SOCIALS === */
+        /* CSS 08 | NFT RESERVE, COLLECTION & SCANNER | END */
+/* CSS 09 | SETTINGS & SOCIALS | START */
         .settings-wrapper { position: relative; height: 52px; width: 100%; display: flex; align-items: center; justify-content: space-between; }
         .settings-pill {
             position: absolute;
@@ -1843,15 +2590,76 @@
         }
         .settings-active .settings-pill {
             width: 100%;
-            border-color: var(--primary);
+            border: 2px solid #ffffff !important;
+            box-shadow:
+                inset 4px 4px 9px rgba(148, 163, 184, 0.25),
+                inset -5px -5px 12px #ffffff,
+                0 0 22px 6px rgba(255, 255, 255, 0.98),
+                0 8px 24px rgba(148, 163, 184, 0.22) !important;
         }
         [data-theme="dark"] .settings-pill {
             background: #0d1017;
-            border: none;
+            border: 1px solid rgba(255, 255, 255, 0.06);
             box-shadow: inset 4px 4px 8px rgba(0, 0, 0, 0.9),
                 inset -1px -1px 4px rgba(255, 255, 255, 0.04),
                 -1px -1px 1.5px rgba(255, 255, 255, 0.12),
                 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+        [data-theme="dark"] .settings-active .settings-pill {
+            border: 1.5px solid #ffffff !important;
+            box-shadow:
+                inset 4px 4px 10px rgba(0, 0, 0, 0.92),
+                inset 0 0 14px rgba(255, 255, 255, 0.22),
+                0 0 24px 4px rgba(255, 255, 255, 0.65),
+                0 0 45px rgba(255, 255, 255, 0.28) !important;
+        }
+        /* 💎 P2P Header Pill Buttons (My QR & History) */
+        .p2p-head-pill {
+            padding: 6px 13px;
+            border-radius: 11px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 0.74rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .p2p-head-pill:active {
+            transform: translateY(1.5px) scale(0.97);
+        }
+        .p2p-head-qr {
+            background: linear-gradient(145deg, #ffffff 0%, #e0f2fe 60%, #bae6fd 100%);
+            color: #0369a1;
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            border-top: 1.5px solid #ffffff;
+            box-shadow: 3px 4px 10px rgba(2, 132, 199, 0.14), -2px -2px 6px #ffffff, inset 0 1px 0 #ffffff;
+            text-shadow: 0 1px 0 #ffffff;
+        }
+        .p2p-head-hist {
+            background: linear-gradient(145deg, #ffffff 0%, #f3e8ff 60%, #e9d5ff 100%);
+            color: #6d28d9;
+            border: 1px solid rgba(167, 139, 250, 0.45);
+            border-top: 1.5px solid #ffffff;
+            box-shadow: 3px 4px 10px rgba(109, 40, 217, 0.12), -2px -2px 6px #ffffff, inset 0 1px 0 #ffffff;
+            text-shadow: 0 1px 0 #ffffff;
+        }
+        [data-theme="dark"] .p2p-head-qr {
+            background: linear-gradient(145deg, #152234, #0b121e);
+            color: #00f5ff;
+            border: 1px solid rgba(0, 245, 255, 0.35);
+            border-top: 1px solid rgba(165, 243, 252, 0.45);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            text-shadow: 0 0 8px rgba(0, 245, 255, 0.35);
+        }
+        [data-theme="dark"] .p2p-head-hist {
+            background: linear-gradient(145deg, #1f1633, #110b1d);
+            color: #c4b5fd;
+            border: 1px solid rgba(167, 139, 250, 0.35);
+            border-top: 1px solid rgba(221, 214, 254, 0.4);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+            text-shadow: 0 0 8px rgba(167, 139, 250, 0.35);
         }
         #settingsIcon { font-size: 1.2rem; color: var(--primary); margin-right: 10px; flex-shrink: 0; animation: spinGearNormal 5s linear infinite; transition: all 0.3s; }
         .settings-active #settingsIcon { animation: spinGearReverse 5s linear infinite; }
@@ -1875,7 +2683,8 @@
         .social-icon:nth-child(1) { animation-delay: 0s; } .social-icon:nth-child(2) { animation-delay: 0.5s; } .social-icon:nth-child(3) { animation-delay: 1s; } .social-icon:nth-child(4) { animation-delay: 1.5s; }
         .social-icon:hover { animation: none; color: var(--primary); transform: scale(1.2); text-shadow: 0 0 10px rgba(0, 245, 255, 0.4); }
 
-     /* === MODULE 10: TEAM NETWORK & P2P TRANSFER === */
+     /* CSS 09 | SETTINGS & SOCIALS | END */
+/* CSS 10 | TEAM NETWORK & P2P TRANSFER | START */
         .team-hand-box { background: rgba(0, 0, 0, 0.2); border: 1px solid var(--border); border-radius: 14px; padding: 15px; margin-bottom: 12px; cursor: pointer; transition: 0.3s; text-align: left;}
         .team-hand-box:hover { background: rgba(255, 255, 255, 0.05); }
         .team-list-container { background: var(--bg-main); border-radius: 12px; padding: 10px; margin-bottom: 12px; display: none; max-height: 250px; overflow-y: auto; text-align: left;}
@@ -1892,7 +2701,8 @@
            100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); background: var(--bg-main); color: #8b5cf6; }
         }
 
-        /* === MODULE 11: CHAT SYSTEM & SVG COMPONENTS === */
+        /* CSS 10 | TEAM NETWORK & P2P TRANSFER | END */
+/* CSS 11 | CHAT SYSTEM & SVG COMPONENTS | START */
         #chat-widget-container { position: fixed; bottom: 90px; right: 20px; z-index: var(--z-max); display: flex; flex-direction: column; align-items: flex-end; }
         #chat-window { display: none; width: 320px; height: 420px; background: var(--bg-card); border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border); overflow: hidden; flex-direction: column; margin-bottom: 15px; transform-origin: bottom right; animation: popChat 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         @keyframes popChat { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -1917,7 +2727,8 @@
         .svg-offline { color: #94a3b8; }
         .svg-typing { color: #00f5ff; }
 
-        /* === MODULE 12: MEDIA QUERIES & RESPONSIVE TWEAKS === */
+        /* CSS 11 | CHAT SYSTEM & SVG COMPONENTS | END */
+/* CSS 12 | MEDIA QUERIES & RESPONSIVE TWEAKS | START */
         @media (max-width: 500px) {
            .main-container { max-width: 1200px; margin: calc(90px + env(safe-area-inset-top)) auto 0; padding: 15px; }
            .dashboard-grid { display: grid; gap: 15px; grid-template-columns: 1fr; }
@@ -1972,7 +2783,8 @@
             outline: none !important;
         }
 
-        /* === MODULE 13: ADVANCED ANIMATIONS (RADAR, SHIELD, FEED) === */
+        /* CSS 12 | MEDIA QUERIES & RESPONSIVE TWEAKS | END */
+/* CSS 13 | ADVANCED ANIMATIONS (RADAR, SHIELD, FEED) | START */
         .radar-container {
             position: relative; width: 220px; height: 220px; margin: 0 auto;
             background: rgba(0, 245, 255, 0.05); border-radius: 50%; border: 2px solid rgba(0, 245, 255, 0.3);
@@ -2075,7 +2887,8 @@
         @keyframes pulseMetallicGreen { 0% { filter: drop-shadow(0 10px 15px rgba(34, 197, 94, 0.3)); } 100% { filter: drop-shadow(0 20px 40px rgba(34, 197, 94, 0.7)); } }
         .shield-icon { position: absolute; font-size: 2.2rem; z-index: 10; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); color: #64748b; }
 
-        /* === MODULE 14: ASSETS & LEDGER MODULE === */
+        /* CSS 13 | ADVANCED ANIMATIONS (RADAR, SHIELD, FEED) | END */
+/* CSS 14 | ASSETS & LEDGER MODULE | START */
         .asset-toggle-box { display: flex; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 14px; padding: 5px; margin-bottom: 20px; box-shadow: inset 0 2px 10px rgba(0,0,0,0.5); }
         .a-toggle { flex: 1; text-align: center; padding: 12px; font-size: 0.85rem; font-weight: 700; color: var(--text-sub); cursor: pointer; border-radius: 10px; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
         .a-toggle.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 4px 15px rgba(0, 245, 255, 0.1); border: 1px solid rgba(0, 245, 255, 0.2); }
@@ -2212,7 +3025,8 @@
         .copy-spin-success::before { display: inline-block; animation: innerTickFlip 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes innerTickFlip { 0% { transform: rotateY(-180deg) scale(0.5); opacity: 0; } 100% { transform: rotateY(0deg) scale(1); opacity: 1; } }
 
-        /* === MODULE 15: 3D ATM CARD & CINEMA MODE === */
+        /* CSS 14 | ASSETS & LEDGER MODULE | END */
+/* CSS 15 | 3D ATM CARD & CINEMA MODE | START */
         .atm-grid { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; }
         .atm-scene { perspective: 1000px; width: 100%; height: 240px; }
         .atm-card { width: 100%; height: 100%; position: relative; transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); transform-style: preserve-3d; cursor: pointer; border-radius: 16px; box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5); }
@@ -2312,10 +3126,11 @@
         .card-platinum .engraved-tx-badge .tx-num { color: #ffffff; font-size: 0.9rem; font-weight: 900; }
         .card-diamond .engraved-tx-badge { background: rgba(0, 0, 0, 0.6); border-top: 1px solid rgba(0, 0, 0, 0.9); border-bottom: 1px solid rgba(0, 245, 255, 0.5); box-shadow: inset 1px 2px 8px rgba(0, 0, 0, 0.8), 0 0 15px rgba(0, 245, 255, 0.2); color: var(--primary); text-shadow: 0 0 8px rgba(0, 245, 255, 0.6); }
         .card-diamond .engraved-tx-badge .tx-num { color: #ffffff; font-size: 0.9rem; font-weight: 900; }
-    </style>
+    /* CSS 15 | 3D ATM CARD & CINEMA MODE | END */
+</style>
 </head>
 <body>
-<!-- === GLOBAL OVERLAYS & TOASTS === -->
+<!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
 <div id="toast"><i class="fas fa-check-circle"></i> Action Successful!</div>
 
 <!-- Global Quarantine Banner -->
@@ -2340,7 +3155,9 @@
 
 <div class="sb-overlay" id="overlay" onclick="toggleSidebar(false)"></div>
 
-<!-- === CORE SYSTEM MODALS === -->
+<!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | END
+
+     HTML 02 | CORE SYSTEM MODALS | START -->
 <div id="confirmModal" class="modal">
     <div class="confirm-box">
         <i class="fas fa-exclamation-triangle"></i>
@@ -2394,7 +3211,9 @@
     </div>
 </div>
 
-<!-- === SECURITY & AUTHENTICATION MODALS === -->
+<!-- HTML 02 | CORE SYSTEM MODALS | END
+
+     HTML 03 | SECURITY & AUTHENTICATION MODALS | START -->
 <div id="securityModal" class="modal">
     <div class="modal-box" style="position: relative; border: 1px solid var(--border); box-shadow: 0 15px 40px rgba(0,0,0,0.4);">
         <div class="univ-close-btn" onclick="window.closeModal('securityModal')"><i class="fas fa-times"></i></div>
@@ -2517,7 +3336,7 @@
             <option value="BEP20">Binance Smart Chain (BEP-20)</option>
             <option value="TRC20">Tron (TRC-20)</option>
         </select>
-        <input type="text" id="bindAddress" placeholder="Your Wallet Address" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; color: var(--text-main); outline: none;">
+        <input type="text" id="bindAddress" placeholder="Your Wallet Address" autocapitalize="off" autocomplete="off" spellcheck="false" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; color: var(--text-main); outline: none;">
         <div style="display:flex; gap:10px; margin-bottom: 10px;">
             <input type="number" id="bindOTP" placeholder="Email OTP" style="width: 100%; padding: 12px; background: var(--bg-main); border: 1px solid var(--border); border-radius: 12px; color: var(--text-main); outline: none;">
             <button id="btnGetOTP" class="act-btn btn-dep" style="padding:0 15px; border-radius:12px; font-size:0.8rem; white-space:nowrap;" onclick="requestEmailOTP()">Get OTP</button>
@@ -2686,7 +3505,9 @@
     </div>
 </div>
 
-<!-- === ACCOUNT SETTINGS MODAL === -->
+<!-- HTML 03 | SECURITY & AUTHENTICATION MODALS | END
+
+     HTML 04 | ACCOUNT SETTINGS MODAL | START -->
 <div id="accountSettingsModal" class="modal">
     <div class="modal-box" style="text-align: left; padding: 25px 20px; border-color: var(--primary);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 12px;">
@@ -2731,7 +3552,9 @@
     </div>
 </div>
 
-<!-- === TEAM NETWORK MODAL === -->
+<!-- HTML 04 | ACCOUNT SETTINGS MODAL | END
+
+     HTML 05 | TEAM NETWORK MODAL | START -->
 <div id="teamModal" class="modal">
     <div class="modal-box" style="max-width: 400px; padding: 20px; position: relative;">
         <div class="univ-close-btn" onclick="window.closeModal('teamModal')"><i class="fas fa-times"></i></div>
@@ -2803,7 +3626,47 @@
     </div>
 </div>
 
-<!-- === FINANCE & TRANSACTION MODAL === -->
+<!-- HTML 05 | TEAM NETWORK MODAL | END
+
+     HTML 06 | TRANSACTIONS MODAL | START -->
+<style>/* CSS 16 | TRANSACTIONS MODAL | START */
+
+    #mainLedgerModal .modal-box { width: min(94vw, 720px); max-width:720px; padding:20px; }
+    #mainLedgerModal .t8-toolbar { display:flex; align-items:center; gap:10px; margin:14px 0; flex-wrap:wrap; }
+    #mainLedgerModal select, #mainLedgerModal .t8-more { padding:10px; border:1px solid var(--border); border-radius:10px; background:var(--bg-main); color:var(--text-main); }
+    #mainLedgerModal .t8-scroll { max-height:55vh; min-height:160px; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
+    #mainLedgerModal .t8-row { padding:14px 10px; margin-bottom:10px; border:1px solid var(--border); border-radius:12px; background:var(--bg-main); text-align:left; }
+    #mainLedgerModal .t8-title { display:flex; justify-content:space-between; gap:10px; font-size:.85rem; font-weight:700; }
+    #mainLedgerModal .t8-time { color:var(--text-sub); font-size:.68rem; margin:6px 0 12px; }
+    #mainLedgerModal .t8-balances { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; font-size:.78rem; }
+    #mainLedgerModal .t8-balances small { display:block; color:var(--text-sub); font-size:.65rem; margin-bottom:4px; }
+    #mainLedgerModal .t8-balances strong { overflow-wrap:anywhere; }
+    #mainLedgerModal details { margin-top:10px; font-size:.7rem; color:var(--text-sub); overflow-wrap:anywhere; }
+    #mainLedgerModal .t8-more { width:100%; margin-top:10px; cursor:pointer; }
+/* CSS 16 | TRANSACTIONS MODAL | END */
+</style>
+<div id="mainLedgerModal" class="modal">
+    <div class="modal-box" style="position:relative;">
+        <div class="univ-close-btn" role="button" aria-label="Close transactions" onclick="window.closeModal('mainLedgerModal')"><i class="fas fa-times"></i></div>
+        <h2 style="text-align:left; padding-right:35px;">Transactions</h2>
+        <p style="text-align:left; color:var(--text-sub); font-size:.75rem; margin-top:8px;">Current Main Balance: <strong id="t8CurrentBalance">—</strong></p>
+        <div class="t8-toolbar">
+            <select id="t8Source" aria-label="Transaction history source" onchange="window.t8ChangeSource(this.value)">
+                <option value="balance" selected>Main Balance Ledger</option>
+                <option value="transactions">Transaction Records</option>
+                <option value="reservations">Reservation Records</option>
+            </select>
+            <span id="t8Count" style="font-size:.7rem; color:var(--text-sub);"></span>
+        </div>
+        <p id="t8Status" role="status" style="font-size:.72rem; color:var(--text-sub); margin-bottom:10px; text-align:left;"></p>
+        <div id="t8Scroll" class="t8-scroll" tabindex="0" aria-label="Scrollable transaction history"><div id="t8Rows"></div></div>
+        <button id="t8More" class="t8-more" onclick="window.t8LoadMore()">Load next 20 records</button>
+    </div>
+</div>
+
+<!-- HTML 06 | TRANSACTIONS MODAL | END
+
+     HTML 07 | FINANCE & TRANSACTION MODAL | START -->
 <div id="txModal" class="modal">
     <div class="modal-box" style="position: relative; padding: 20px; max-height: 90vh; overflow-y: auto; scrollbar-width: none;">
         <div class="univ-close-btn" onclick="window.closeTx()"><i class="fas fa-times"></i></div>
@@ -2888,7 +3751,9 @@
     </div>
 </div>
 
-<!-- === CLAIM CELEBRATION POPUP === -->
+<!-- HTML 07 | FINANCE & TRANSACTION MODAL | END
+
+     HTML 08 | CLAIM CELEBRATION POPUP | START -->
 <div id="claimPopup" class="modal" style="z-index: calc(var(--z-max) + 50);">
     <div class="claim-card-pop" style="position:relative; width:100%; max-width:360px; overflow:hidden; border-radius:24px; padding:24px; text-align:center; background:linear-gradient(145deg, rgba(2,6,23,0.96), rgba(6,18,32,0.92)); border:1px solid rgba(34,211,238,0.35); box-shadow:0 0 45px rgba(34,211,238,0.22), inset 0 0 35px rgba(16,185,129,0.08); backdrop-filter:blur(18px);">
         <div style="position:absolute; inset:-2px; pointer-events:none; background:radial-gradient(circle at top, rgba(34,211,238,0.24), transparent 35%), radial-gradient(circle at bottom right, rgba(16,185,129,0.18), transparent 35%);"></div>
@@ -2921,7 +3786,9 @@
     </div>
 </div>
 
-<!-- === SYSTEM ORDERS & RESERVATION === -->
+<!-- HTML 08 | CLAIM CELEBRATION POPUP | END
+
+     HTML 09 | SYSTEM ORDERS & RESERVATION | START -->
 <div id="ordersModal" class="modal">
     <div class="modal-box" style="position: relative; max-width: 450px; padding: 20px; max-height: 85vh; display: flex; flex-direction: column;">
         <div class="univ-close-btn" onclick="window.closeModal('ordersModal')"><i class="fas fa-times"></i></div>
@@ -2955,7 +3822,9 @@
     </div>
 </div>
 
-<!-- === APP DOWNLOAD & REFERRAL === -->
+<!-- HTML 09 | SYSTEM ORDERS & RESERVATION | END
+
+     HTML 10 | APP DOWNLOAD & REFERRAL | START -->
 <div id="appDownloadModal" class="modal">
     <div class="modal-box" style="padding: 30px 20px; text-align: center;">
         <div id="dl-state-1">
@@ -3025,15 +3894,17 @@
     </div>
 </div>
 
-<!-- === P2P TRANSFER SYSTEM === -->
+<!-- HTML 10 | APP DOWNLOAD & REFERRAL | END
+
+     HTML 11 | P2P TRANSFER SYSTEM | START -->
 <div id="sendMoneyModal" class="modal">
     <div class="modal-box" style="position: relative; padding: 20px; max-height: 90vh; display: flex; flex-direction: column;">
         <div class="univ-close-btn" onclick="window.closeModal('sendMoneyModal')"><i class="fas fa-times"></i></div>
         <div style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 15px; padding-right: 40px; gap: 10px;">
             <h2 style="font-size:1.3rem; font-weight:700;"><i class="fas fa-paper-plane" style="color:#8b5cf6;"></i> Send USDT</h2>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button style="background: rgba(0, 245, 255, 0.1); border: 1px solid var(--primary); color: var(--primary); padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onclick="window.showMyP2PQr()"><i class="fas fa-qrcode"></i> My QR</button>
-                <button style="background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6; padding: 4px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; cursor: pointer; transition: 0.3s;" onclick="openTransactionLookup()">History</button>
+                <button type="button" class="p2p-head-pill p2p-head-qr" onclick="window.showMyP2PQr()"><i class="fas fa-qrcode"></i> My QR</button>
+                <button type="button" class="p2p-head-pill p2p-head-hist" onclick="openTransactionLookup()"><i class="fas fa-clock-rotate-left"></i> History</button>
             </div>
         </div>
 
@@ -3178,7 +4049,9 @@
     </div>
 </div>
 
-<!-- === P2P SCANNER & QR MODALS === -->
+<!-- HTML 11 | P2P TRANSFER SYSTEM | END
+
+     HTML 12 | P2P SCANNER & QR MODALS | START -->
 <div id="p2pMyQrModal" class="modal" style="z-index: calc(var(--z-max) + 10);">
     <div class="modal-box" style="padding: 30px 20px; text-align: center;">
         <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; text-align: left;">
@@ -3286,7 +4159,9 @@
     </div>
 </div>
 
-<!-- === NFT MATCHMAKING & SCAN MODALS === -->
+<!-- HTML 12 | P2P SCANNER & QR MODALS | END
+
+     HTML 13 | NFT MATCHMAKING & SCAN MODALS | START -->
 <div id="nftScanModal" class="modal">
     <div class="luxury-nft-portal">
         <div class="luxury-nft-orbits" id="scanLine" aria-hidden="true">
@@ -3353,7 +4228,9 @@
         </p>
     </div>
 </div>
-<!-- === MODULE 11: HEADER & TICKER === -->
+<!-- HTML 13 | NFT MATCHMAKING & SCAN MODALS | END
+
+     HTML 14 | HEADER & TICKER | START -->
 <header class="header-top">
     <div class="logo-box"><i class="fas fa-cube"></i> TCM NFT</div>
     <div class="crypto-ticker">
@@ -3370,7 +4247,9 @@
     </div>
 </header>
 
-<!-- === MODULE 12: SIDEBAR SYSTEM MENU === -->
+<!-- HTML 14 | HEADER & TICKER | END
+
+     HTML 15 | SIDEBAR SYSTEM MENU | START -->
 <div class="sidebar" id="sidebar">
     <div class="sb-header">
         <h2 style="font-size: 1.1rem; color: var(--primary);">System Menu</h2>
@@ -3398,7 +4277,9 @@
     </div>
 </div>
 
-<!-- === MODULE 13: MAIN DASHBOARD VIEWS === -->
+<!-- HTML 15 | SIDEBAR SYSTEM MENU | END
+
+     HTML 16 | MAIN DASHBOARD VIEWS | START -->
 <div class="main-container">
 
     <!-- 🟢 Dashboard Home View -->
@@ -3515,8 +4396,8 @@
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
                 <div class="action-row">
-                    <button class="act-btn btn-dep" onclick="openTx('Deposit')"><i class="fas fa-arrow-down"></i> Deposit</button>
-                    <button class="act-btn btn-wd" onclick="openTx('Withdraw')"><i class="fas fa-arrow-up"></i> Withdraw</button>
+                    <button class="act-btn btn-dep" onclick="openTx('Deposit')"><span id="depositIconCapsule" class="tx-icon-capsule" aria-hidden="true"><i class="fas fa-arrow-down"></i><i class="fas fa-arrow-down"></i></span><span class="tx-action-label">Deposit</span></button>
+                    <button class="act-btn btn-wd" onclick="openTx('Withdraw')"><span id="withdrawIconCapsule" class="tx-icon-capsule" aria-hidden="true"><i class="fas fa-arrow-up"></i><i class="fas fa-arrow-up"></i></span><span class="tx-action-label">Withdraw</span></button>
                 </div>
 
                 <div class="grid-panel">
@@ -3530,7 +4411,7 @@
                             <div class="f-icon"><i class="fas fa-share-nodes"></i></div><span>Referral</span>
                         </div>
 
-                        <div class="f-item"><div class="f-icon"><i class="fas fa-award"></i></div><span>Awards</span></div>
+                        <div class="f-item" onclick="window.openTransactionsModal()"><div class="f-icon"><i class="fas fa-receipt"></i></div><span>Transactions</span></div>
                         <div class="f-item" onclick="openOrdersModal()"><div class="f-icon"><i class="fas fa-clipboard-list"></i></div><span>Orders</span></div>
                         <div class="f-item" onclick="openSecurityCenter()"><div class="f-icon" style="color: #4285F4;"><i class="fas fa-shield-alt"></i></div><span>Security</span></div>
                         <div class="f-item" onclick="openSendModal()"><div class="f-icon" style="color: #8b5cf6;" id="dashSendIcon"><i class="fas fa-paper-plane"></i></div><span>Send</span></div>
@@ -3633,6 +4514,8 @@
                 <p>No NFTs in your collection yet.</p>
             </div>
         </div>
+
+        <!-- Testnet simulation removed. Production reservation flow retained. -->
 
         <div id="tab-today" class="tab-content">
             <div class="empty-state">
@@ -3889,7 +4772,7 @@
                 <h3 class="wv-title"><i class="fas fa-shield-check" style="color:var(--success); margin-right:5px;"></i> Smart Wallet Verifier</h3>
                 <p class="wv-sub">Paste an address from Binance/Trust Wallet before withdrawing to verify if it exactly matches your bound wallets.</p>
                 <div style="display:flex; gap:10px; margin-top:12px;">
-                    <input type="text" id="verifyWalletInput" class="wv-input" placeholder="Paste address here...">
+                    <input type="text" id="verifyWalletInput" class="wv-input" placeholder="Paste address here..." autocapitalize="off" autocomplete="off" spellcheck="false" oninput="document.getElementById('verifyResult').style.display='none'">
                     <button class="act-btn btn-dep" style="padding:10px 18px; border-radius:10px; font-size:0.85rem;" onclick="window.verifySmartWallet()"><i class="fas fa-search"></i> Verify</button>
                 </div>
                 <div id="verifyResult" style="display:none; margin-top:12px; font-size:0.85rem; font-weight:800; padding: 10px; border-radius: 8px; background: rgba(0,0,0,0.2);"></div>
@@ -3952,7 +4835,9 @@
     </div>
 </div>
 
-<!-- === MODULE 14: BOTTOM NAVIGATION === -->
+<!-- HTML 16 | MAIN DASHBOARD VIEWS | END
+
+     HTML 17 | BOTTOM NAVIGATION | START -->
 <nav class="bottom-nav">
     <a href="#" class="nav-link" onclick="switchPageView('stake', this)"><i class="fas fa-cubes"></i><span>STAKE</span></a>
     <a href="#" class="nav-link" onclick="switchPageView('earn', this)"><i class="fas fa-bolt"></i><span>EARN</span></a>
@@ -3961,7 +4846,9 @@
     <a href="#" class="nav-link active" onclick="switchPageView('my', this)"><i class="fas fa-user-circle"></i><span>MY</span></a>
 </nav>
 
-<!-- === MODULE 15: CHAT & SUPPORT ENGINE === -->
+<!-- HTML 17 | BOTTOM NAVIGATION | END
+
+     HTML 18 | CHAT & SUPPORT ENGINE | START -->
 <div id="chat-widget-container">
     <div id="chat-window">
 
@@ -4086,8 +4973,8 @@
         </div>
     </div>
 </div>
-<script>
-    /* === MODULE 12: SYSTEM CORE & UTILITIES === */
+<!-- HTML 18 | CHAT & SUPPORT ENGINE | END --><script>
+    /* JS 03 | SYSTEM CORE & UTILITIES | START */
     // 🔥 FIX 1: URL Routing with proper HTTPS Protocol (এটি না থাকলে API কাজ করবে না)
 const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
     /* Fail-Safe Error Handler */
@@ -4180,7 +5067,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         if (debt === null) console.warn('Account adjustment amount could not be displayed; check the recorded Debt value.');
     };
 
-    /* === MODULE 13: SMART BALANCE & FORMATTING ENGINE === */
+    /* JS 03 | SYSTEM CORE & UTILITIES | END */
+/* JS 04 | SMART BALANCE & FORMATTING ENGINE | START */
     window.balFormatIndex = parseInt(localStorage.getItem('tcm_bal_format')) || 0;
 
     window.triggerWalletRefreshAnimation = (iconElement, isUserClick = false) => {
@@ -4510,7 +5398,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         return 0;
     };
 
- /* === MODULE 14: UI ROUTER & MODAL ENGINE === */
+ /* JS 04 | SMART BALANCE & FORMATTING ENGINE | END */
+/* JS 05 | UI ROUTER & MODAL ENGINE | START */
     window.switchTab = function(targetId, btnElement) {
         // Release overlays before changing views; keep the URL query string intact.
         if (typeof window.dismissDashboardOverlays === 'function') window.dismissDashboardOverlays();
@@ -4834,7 +5723,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         window.location.replace('index.html');
     };
 
-    /* === MODULE 15: THEME ENGINE (DARK / LIGHT) & SETTINGS === */
+    /* JS 05 | UI ROUTER & MODAL ENGINE | END */
+/* JS 06 | THEME ENGINE (DARK / LIGHT) & SETTINGS | START */
     window.initTheme = () => {
         const savedTheme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -4881,7 +5771,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         }
     });
 
-    /* === MODULE 16: SMART WEATHER & LOCATION API === */
+    /* JS 06 | THEME ENGINE (DARK / LIGHT) & SETTINGS | END */
+/* JS 07 | SMART WEATHER & LOCATION API | START */
     window.loadLiveWeather = async () => {
         const tempEl = document.getElementById('wTemp');
         const locEl = document.getElementById('wLoc');
@@ -4932,7 +5823,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         }
     };
     setTimeout(window.loadLiveWeather, 2000);
- /* === MODULE 17: LEVEL AUTOMATION ENGINE === */
+ /* JS 07 | SMART WEATHER & LOCATION API | END */
+/* JS 08 | LEVEL AUTOMATION ENGINE | START */
     window.LEVEL_REQ = {
         1: { bal: 50,    pts: 0 },
         2: { bal: 500,   pts: 100 },
@@ -4984,7 +5876,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         return window.dashboardRequest('/automation/verify-rank', 'POST', {});
     };
 
-    /* === MODULE 18: RECENT HISTORY RENDER ENGINE === */
+    /* JS 08 | LEVEL AUTOMATION ENGINE | END */
+/* JS 09 | RECENT HISTORY RENDER ENGINE | START */
     window.allTransactions = [];
     window.TX_CACHE = [];
     window.hasMoreTxInDB = true;
@@ -5240,9 +6133,33 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
                 ? `<span class="badge" style="align-self: flex-start; color: ${clr}; border: 1px solid var(--border); background: transparent; font-size: 0.65rem;">${ledgerStyle.category}</span>`
                 : '';
 
+            let auditToggleBtnHtml = '';
+            let auditTrayHtml = '';
+
             if (isDep && tx.Status === 'Success') {
                 if (breakdown) {
-                    extraRemarks += `<span style="font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.5; overflow-wrap: anywhere; margin-top: 3px;">Deposit: ${formatMoney(breakdown.gross)} USDT<br>Adjustment settled: ${formatMoney(breakdown.recovered)} USDT<br>Net wallet credit: ${formatMoney(breakdown.net)} USDT</span>`;
+                    auditToggleBtnHtml = `
+                    <button type="button" class="tx-audit-toggle-btn" onclick="window.toggleTxBreakdown(this, event)" aria-label="Toggle deposit breakdown" title="View audit breakdown">
+                        <i class="fas fa-chevron-down"></i>
+                    </button>`;
+
+                    auditTrayHtml = `
+                    <div class="tx-breakdown-wrapper">
+                        <div class="tx-breakdown-tray">
+                            <div class="tx-breakdown-row">
+                                <span class="tx-breakdown-label">Deposit:</span>
+                                <span class="tx-breakdown-val">${formatMoney(breakdown.gross)} USDT</span>
+                            </div>
+                            <div class="tx-breakdown-row">
+                                <span class="tx-breakdown-label">Adjustment settled:</span>
+                                <span class="tx-breakdown-val">${formatMoney(breakdown.recovered)} USDT</span>
+                            </div>
+                            <div class="tx-breakdown-row tx-breakdown-row-highlight">
+                                <span class="tx-breakdown-label">Net wallet credit:</span>
+                                <span class="tx-breakdown-val">${formatMoney(breakdown.net)} USDT</span>
+                            </div>
+                        </div>
+                    </div>`;
                 } else {
                     extraRemarks += `<span style="font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.4; margin-top: 3px;">Recorded deposit; net-credit breakdown unavailable.</span>`;
                 }
@@ -5286,29 +6203,35 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
             }
 
             html += `
-            <div class="tx-item tx-item-animated" data-ledger-id="${escapeText(tx.id || '')}" style="display: flex; justify-content: space-between; align-items: flex-start; padding: 15px 0; border-bottom: 1px solid var(--border);">
-                <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
-                    <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
-                    <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                        <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${escapeText(displayTitle)}</h4>
-                        ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${escapeText(extractedUid)}</span>` : ''}
-                        ${categoryBadgeHtml}
-                        ${extraRemarks}
-                        <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-                        <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
-                            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${safeOrderIdText}</span>
-                            <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText(decodeURIComponent('${encodedOrderId}'), this)" title="Copy ID"></i>
+            <div class="tx-item tx-item-animated" data-ledger-id="${escapeText(tx.id || '')}" style="display: flex; flex-direction: column; padding: 15px 0; border-bottom: 1px solid var(--border);">
+                <div class="tx-card-main-row" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
+                    <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
+                        <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
+                        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
+                            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${escapeText(displayTitle)}</h4>
+                            ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${escapeText(extractedUid)}</span>` : ''}
+                            ${categoryBadgeHtml}
+                            ${extraRemarks}
+                            <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
+                            <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
+                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${safeOrderIdText}</span>
+                                <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText(decodeURIComponent('${encodedOrderId}'), this)" title="Copy ID"></i>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                    ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
-                    <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
-                        ${displayMicro === null ? '' : amountSign}${displayAmount} ₮
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; align-self: stretch; gap: 4px; flex-shrink: 0; padding-left: 10px;">
+                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+                            ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
+                            <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
+                                ${displayMicro === null ? '' : amountSign}${displayAmount} ₮
+                            </div>
+                            ${interactiveBadgeHtml}
+                            ${simpleTimerHtml}
+                        </div>
+                        ${auditToggleBtnHtml}
                     </div>
-                    ${interactiveBadgeHtml}
-                    ${simpleTimerHtml}
                 </div>
+                ${auditTrayHtml}
             </div>`;
 
         return html;
@@ -5359,12 +6282,62 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         }
     };
 
+    /* 3D Audit Tray Controller & Auto-Close on Scroll */
+    window.toggleTxBreakdown = (btn, event) => {
+        if (event) { event.stopPropagation(); event.preventDefault(); }
+        const txItem = btn.closest('.tx-item');
+        if (!txItem) return;
+        const tray = txItem.querySelector('.tx-breakdown-wrapper');
+        const chevron = btn.querySelector('i');
+        if (!tray) return;
+
+        const isOpen = tray.classList.contains('open');
+        document.querySelectorAll('.tx-breakdown-wrapper.open').forEach(t => {
+            if (t !== tray) {
+                t.classList.remove('open');
+                const otherBtn = t.closest('.tx-item')?.querySelector('.tx-audit-toggle-btn');
+                if (otherBtn) {
+                    otherBtn.classList.remove('active');
+                    const ic = otherBtn.querySelector('i');
+                    if (ic) ic.className = 'fas fa-chevron-down';
+                }
+            }
+        });
+
+        if (isOpen) {
+            tray.classList.remove('open');
+            btn.classList.remove('active');
+            if (chevron) chevron.className = 'fas fa-chevron-down';
+        } else {
+            tray.classList.add('open');
+            btn.classList.add('active');
+            if (chevron) chevron.className = 'fas fa-chevron-up';
+        }
+    };
+
+    window.collapseAllTxBreakdowns = () => {
+        const openTrays = document.querySelectorAll('.tx-breakdown-wrapper.open');
+        if (!openTrays || openTrays.length === 0) return;
+        openTrays.forEach(tray => {
+            tray.classList.remove('open');
+            const btn = tray.closest('.tx-item')?.querySelector('.tx-audit-toggle-btn');
+            if (btn) {
+                btn.classList.remove('active');
+                const ic = btn.querySelector('i');
+                if (ic) ic.className = 'fas fa-chevron-down';
+            }
+        });
+    };
+
     /* History Scroll Listener */
     window.attachHistoryScrollListener = () => {
         const tb = document.getElementById('txHistoryBox');
         if (!tb) return;
         tb.removeEventListener('scroll', window.handleHistoryScroll);
         window.handleHistoryScroll = async () => {
+            if (window.collapseAllTxBreakdowns) {
+                window.collapseAllTxBreakdowns();
+            }
             if (tb.scrollTop + tb.clientHeight >= tb.scrollHeight - 20) {
                 if (window.currentRenderedCount < window.txHistoryData.length) {
                     window.renderTxChunk();
@@ -5433,7 +6406,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         if(typeof window.applyTxFilter === 'function') window.applyTxFilter();
     };
 
-    /* === MODULE 19: GLOBAL PENDING TIMER ENGINE === */
+    /* JS 09 | RECENT HISTORY RENDER ENGINE | END */
+/* JS 10 | GLOBAL PENDING TIMER ENGINE | START */
     if (window.liveTimerInterval) clearInterval(window.liveTimerInterval);
     if (window.recentHistoryInterval) clearInterval(window.recentHistoryInterval);
 
@@ -5501,9 +6475,8 @@ const API_BASE_URL = "https://tcm-bakend.onrender.com/api";
         }
     };
 
- // =================================================================================
- // 🔗 MODULE 7: SECURE API CALL HANDLER (Fetch Wrapper)
- // =================================================================================
+/* JS 10 | GLOBAL PENDING TIMER ENGINE | END */
+/* JS 11 | SECURE API CALL HANDLER (Fetch Wrapper) | START */
  // MEMO: TCM-DASH-PHASE-A | 2026-10-10 | Asia/Kolkata
 window.dashboardSession = {
     closed: false,
@@ -5522,6 +6495,7 @@ window.dashboardSync = {
 };
 
 window.clearDashboardSession = () => {
+    window.resetTxIconState();
     // Never clear unrelated preferences, drafts or operation request IDs.
     for (const key of ['token', 'uid', 'tcm_userData', 'tcm_static_user', 'tcm_user_dp']) {
         localStorage.removeItem(key);
@@ -5604,6 +6578,146 @@ window.dashboardRequest = async (endpoint, method = 'GET', body = null) => {
     }
 };
 
+window.txIconState = null;
+window.resetTxIconState = (uid = null) => {
+    const previous = window.txIconState;
+    for (const kind of ['Deposit', 'Withdraw']) {
+        const old = previous?.fx[kind];
+        if (old) {
+            clearTimeout(old.timer);
+            old.cleanup?.();
+        }
+        const capsule = document.getElementById(
+            kind === 'Deposit' ? 'depositIconCapsule' : 'withdrawIconCapsule'
+        );
+        capsule?.classList.remove(
+            'dep-holding-state', 'wd-holding-state',
+            'dep-cascade-active', 'wd-cascade-active'
+        );
+    }
+    window.txIconState = {
+        uid,
+        records: new Map(),
+        played: new Set(),
+        pending: { Deposit: new Set(), Withdraw: new Set() },
+        flights: { Deposit: false, Withdraw: false },
+        fx: {
+            Deposit: { running: false, queued: 0 },
+            Withdraw: { running: false, queued: 0 }
+        }
+    };
+};
+window.getTxIconState = () => {
+    const uid = localStorage.getItem('uid');
+    if (!window.txIconState || window.txIconState.uid !== uid) {
+        window.resetTxIconState(uid);
+    }
+    return window.txIconState;
+};
+window.renderTxIconStates = () => {
+    const state = window.getTxIconState();
+    for (const kind of ['Deposit', 'Withdraw']) {
+        const capsule = document.getElementById(
+            kind === 'Deposit' ? 'depositIconCapsule' : 'withdrawIconCapsule'
+        );
+        const holding = kind === 'Deposit'
+            ? 'dep-holding-state' : 'wd-holding-state';
+        capsule?.classList.toggle(
+            holding,
+            !state.fx[kind].running &&
+            (state.flights[kind] || state.pending[kind].size > 0)
+        );
+    }
+};
+window.txIconFlight = (kind, active, uid) => {
+    const state = window.getTxIconState();
+    if (state.uid !== uid || !state.fx[kind]) return;
+    state.flights[kind] = active;
+    window.renderTxIconStates();
+};
+window.playTxIconCascade = kind => {
+    const state = window.getTxIconState();
+    const fx = state.fx[kind];
+    const capsule = document.getElementById(
+        kind === 'Deposit' ? 'depositIconCapsule' : 'withdrawIconCapsule'
+    );
+    if (!capsule || window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+    if (fx.running) {
+        fx.queued += 1;
+        return;
+    }
+    const active = kind === 'Deposit'
+        ? 'dep-cascade-active' : 'wd-cascade-active';
+    fx.running = true;
+    window.renderTxIconStates();
+
+    const done = event => {
+        if (event && event.target !== capsule.firstElementChild) return;
+        if (window.txIconState !== state || !fx.running) return;
+        clearTimeout(fx.timer);
+        fx.cleanup();
+        capsule.classList.remove(active);
+        fx.running = false;
+
+        if (fx.queued > 0) {
+            fx.queued -= 1;
+            void capsule.offsetWidth;
+            window.playTxIconCascade(kind);
+        } else {
+            window.renderTxIconStates();
+        }
+    };
+
+    fx.cleanup = () => capsule.removeEventListener('animationend', done);
+    capsule.addEventListener('animationend', done);
+    capsule.classList.add(active);
+    fx.timer = setTimeout(() => done(), 9500);
+};
+window.observeTxIconRecords = (records, directSuccess = false) => {
+    const state = window.getTxIconState();
+    if (!state.uid) return;
+
+    for (const row of records || []) {
+        if (!row || row.UID !== state.uid || typeof row.id !== 'string' ||
+            !row.id || /^(?:local_|P2P_)/.test(row.id)) continue;
+
+        const type = String(row.Type || row.type || '').toLowerCase();
+        const kind = type === 'deposit'
+            ? 'Deposit' : type === 'withdraw' ? 'Withdraw' : null;
+        if (!kind) continue;
+
+        const status = String(row.Status || row.status || '').toLowerCase();
+        const previous = state.records.get(row.id);
+        if (previous === 'success' && status === 'pending') continue;
+        if (!status) continue;
+
+        state.records.set(row.id, status);
+
+        if (['pending', 'confirming', 'awaiting_confirmations', 'processing'].includes(status)) {
+            state.pending[kind].add(row.id);
+        } else {
+            const wasPending = state.pending[kind].delete(row.id);
+            if (status === 'success' && (wasPending || directSuccess) &&
+                !state.played.has(row.id)) {
+                state.played.add(row.id);
+                window.playTxIconCascade(kind);
+            }
+        }
+    }
+
+    // Keep observed pending rows until an explicit status update resolves them.
+    if (state.records.size > 1000) {
+        for (const [id, status] of state.records) {
+            if (state.records.size <= 1000) break;
+            if (!['pending', 'confirming', 'awaiting_confirmations', 'processing'].includes(status)) {
+                state.records.delete(id);
+                state.played.delete(id);
+            }
+        }
+    }
+    window.renderTxIconStates();
+};
+
 window.mergeDashboardHistory = (records, replace = false) => {
     const uid = localStorage.getItem('uid');
     const map = new Map();
@@ -5626,11 +6740,291 @@ window.mergeDashboardHistory = (records, replace = false) => {
     };
     window.allTransactions = [...map.values()].sort((a, b) => timestamp(b) - timestamp(a) || a.id.localeCompare(b.id));
     window.TX_CACHE = window.allTransactions;
+    window.observeTxIconRecords(records);
     try { localStorage.setItem('USER_TX_VAULT_' + uid, JSON.stringify(window.TX_CACHE)); }
     catch (error) { console.warn('History cache unavailable.'); }
     return window.allTransactions;
 };
 
+/* JS 11 | SECURE API CALL HANDLER (Fetch Wrapper) | END */
+/* JS 12 | MAIN BALANCE TRANSACTION HISTORY | START */
+(() => {
+    let state = null, dbPromise = null, scrollAt = 0;
+    const el = id => document.getElementById(id);
+    const owner = () => localStorage.getItem('uid');
+    const current = value => Boolean(value) && state === value && owner() === value.uid &&
+        localStorage.getItem('token') === value.token && !window.dashboardSession?.closed && !window.dashboardSession?.blocked;
+    const visible = () => el('mainLedgerModal')?.style.display === 'flex';
+    const status = text => { el('t8Status').textContent = text; };
+    const money = value => {
+        if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) return 'Not recorded';
+        return Number(value).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:6 }) + ' USDT';
+    };
+    const micros = value => {
+        if (value === null || value === undefined || value === '' || !Number.isFinite(Number(value))) return null;
+        const text = Number(value).toFixed(6);
+        if (!/^-?\d+\.\d{6}$/.test(text)) return null;
+        return BigInt(text.replace('.', ''));
+    };
+     function t8ValidHistoryRow(row, uid, id) {
+        if (!row || row.UID !== uid || typeof row.id !== 'string' ||
+            !/^[A-Za-z0-9_-]{1,80}$/.test(row.id) || (id !== undefined && row.id !== id) ||
+            ![1, 2].includes(row.Audit_Version) ||
+            (row.Previous !== null && (typeof row.Previous !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(row.Previous)))) return false;
+        if (![row.Balance_Old, row.Balance_New].every(value => typeof value === 'number' && Number.isFinite(value) && value >= 0)) return false;
+        if (row.Audit_Version === 1) return true;
+        try {
+            const unsigned = /^(?:0|[1-9]\d{0,15})$/;
+            const signed = /^(?:0|-?[1-9]\d{0,15})$/;
+            if (typeof row.Balance_Old_micro !== 'string' || !unsigned.test(row.Balance_Old_micro) ||
+                typeof row.Balance_New_micro !== 'string' || !unsigned.test(row.Balance_New_micro) ||
+                typeof row.Balance_Delta_micro !== 'string' || !signed.test(row.Balance_Delta_micro)) return false;
+            const before = BigInt(row.Balance_Old_micro), after = BigInt(row.Balance_New_micro);
+            const project = (value, micro) => {
+                if (micro > BigInt(Number.MAX_SAFE_INTEGER) || value !== Number(micro) / 1000000 || !/^\d+(?:\.\d{1,6})?$/.test(String(value))) return false;
+                const [whole, fraction = ''] = String(value).split('.');
+                return BigInt(whole) * 1000000n + BigInt(fraction.padEnd(6, '0')) === micro;
+            };
+            return project(row.Balance_Old, before) && project(row.Balance_New, after) &&
+                after - before === BigInt(row.Balance_Delta_micro);
+        } catch (_) { return false; }
+    }
+     function t9ValidSnapshot(row, uid) {
+        if (![1, 2].includes(row.Balance_Snapshot_Version) ||
+            !['Main_Balance', 'Combined_NFT_Commission', 'No_Main_Balance_Movement'].includes(row.Balance_Scope)) return false;
+        const unchanged = row.Balance_Scope === 'No_Main_Balance_Movement';
+        if (unchanged ? row.Main_Ledger_Entry_ID !== null :
+            typeof row.Main_Ledger_Entry_ID !== 'string' || !/^[A-Za-z0-9_-]{1,80}$/.test(row.Main_Ledger_Entry_ID)) return false;
+        if (!t8ValidHistoryRow({ ...row, UID: uid, id: row.Main_Ledger_Entry_ID || 'unchanged', Previous: null,
+            Audit_Version: row.Balance_Snapshot_Version }, uid)) return false;
+        return !unchanged || (row.Balance_Old === row.Balance_New && row.Balance_Delta_micro === '0');
+    }
+    const pageSize = 20;
+    const recordVersion = () => JSON.stringify([
+        'snapshot-schema-1',
+        window.RAM_STATE?.user?.counters?.txCount ?? 'unknown',
+        window.lastWalletData?.Main_Ledger_Head || null
+    ]);
+    const database = () => dbPromise ||= new Promise((resolve, reject) => {
+        if (!window.indexedDB) { reject(new Error('Persistent cache unavailable.')); return; }
+        const request = indexedDB.open('TCM_MAIN_LEDGER_V1', 1);
+        request.onupgradeneeded = () => request.result.createObjectStore('entries');
+        request.onsuccess = () => {
+            request.result.onversionchange = () => { request.result.close(); dbPromise = null; };
+            resolve(request.result);
+        };
+        request.onerror = () => reject(request.error);
+        request.onblocked = () => reject(new Error('History cache is busy in another tab.'));
+    });
+    const cache = async (key, value) => {
+        try {
+            const db = await database();
+            return await new Promise((resolve, reject) => {
+                const transaction = db.transaction('entries', value === undefined ? 'readonly' : 'readwrite');
+                const request = value === undefined ? transaction.objectStore('entries').get(key) : transaction.objectStore('entries').put(value, key);
+                transaction.oncomplete = () => resolve(value === undefined ? request.result : value);
+                transaction.onerror = () => reject(transaction.error);
+                transaction.onabort = () => reject(transaction.error);
+            });
+        } catch (_) { if (state) state.volatile = true; return undefined; }
+    };
+    const key = (s, id) => JSON.stringify([s.uid, s.source, id]);
+    const reset = source => {
+        state = { uid:owner(), token:localStorage.getItem('token'), source,
+            cursor:source === 'balance' ? window.lastWalletData?.Main_Ledger_Head || null : null,
+            head:window.lastWalletData?.Main_Ledger_Head || null,
+            version:recordVersion(), rows:[], seen:new Set(), busy:false, ended:false, volatile:false };
+        el('t8Rows').replaceChildren(); el('t8Scroll').scrollTop = 0;
+        return state;
+    };
+    const rowNode = row => {
+        const node = document.createElement('article'); node.className = 't8-row';
+        const title = document.createElement('div'); title.className = 't8-title';
+        const name = document.createElement('span'); name.textContent = row.Type || 'Transaction';
+        const badge = document.createElement('span'); badge.textContent = row.Status || 'Recorded';
+        title.append(name, badge);
+        const time = document.createElement('div'); time.className = 't8-time';
+        const date = new Date(row.Date); time.textContent = Number.isFinite(date.getTime()) ? date.toLocaleString() : 'Time not recorded';
+        const grid = document.createElement('div'); grid.className = 't8-balances';
+        const exact = row.Audit_Version === 2 || row.Balance_Snapshot_Version === 2;
+        const before = exact ? BigInt(row.Balance_Old_micro) : micros(row.Balance_Old);
+        const after = exact ? BigInt(row.Balance_New_micro) : micros(row.Balance_New);
+        const hasSnapshot = before !== null && after !== null;
+        const delta = before === null || after === null ? null : after - before;
+        const cells = hasSnapshot ? [
+            ['Previous balance', money(row.Balance_Old), 'var(--text-main)'],
+            ['Debit', money(delta < 0n ? Number(-delta) / 1000000 : 0), 'var(--error)'],
+            [row.Balance_Scope === 'Combined_NFT_Commission' ? 'Credit (combined order)' : 'Credit', money(delta > 0n ? Number(delta) / 1000000 : 0), 'var(--success)'],
+            ['Balance after entry', money(row.Balance_New), 'var(--text-main)']
+        ] : [['Transaction amount', money(row.Amount), 'var(--text-main)']];
+        for (const [label, value, color] of cells) {
+            const cell = document.createElement('div'), caption = document.createElement('small'), amount = document.createElement('strong');
+            caption.textContent = label; amount.textContent = value; amount.style.color = color;
+            cell.append(caption, amount); grid.append(cell);
+        }
+        node.append(title, time, grid);
+        let note = '';
+        if (!hasSnapshot && row.Type === 'Debt Recovery') note = 'This amount settled debt; it is not a second Main Balance credit.';
+        else if (!hasSnapshot) note = row.Balance_Source === 'Invalid_Snapshot'
+            ? 'The saved balance snapshot could not be verified. The transaction amount is shown above.'
+            : 'No confirmed Main Balance snapshot is available for this record.';
+        else if (row.Balance_Scope === 'No_Main_Balance_Movement') note = 'This action did not change Main Balance. The transaction amount may represent principal moved to a vault.';
+        else if (row.Balance_Scope === 'Combined_NFT_Commission') note = 'This balance movement covers all NFT commission hands for this order. Do not add the same movement across hand records.';
+        else if (row.Type === 'NFT Profit') note = 'Main Balance credit includes returned principal plus net profit. Transaction amount shows profit only.';
+        if (note) { const caption = document.createElement('div'); caption.className = 't8-time'; caption.textContent = note; node.append(caption); }
+        const details = document.createElement('details'), summary = document.createElement('summary'), text = document.createElement('div');
+        summary.textContent = 'Details';
+        text.textContent = 'Reference: ' + (row.Reference || 'Not recorded') +
+            (row.Legacy
+                ? (hasSnapshot ? ' | Transaction amount: ' + money(row.Amount) : '') +
+                    (row.Balance_Source === 'Linked_Audit' ? ' | Matched to a committed Main Balance audit.' : hasSnapshot ? ' | Saved balance snapshot.' : '')
+                : ' | Committed Main Balance movement.');
+        details.append(summary, text); node.append(details); return node;
+    };
+    const add = (s, rows, prepend = false) => {
+        const fresh = rows.filter(row => row.UID === s.uid && !s.seen.has(row.id));
+        const fragment = document.createDocumentFragment();
+        for (const row of fresh) { s.seen.add(row.id); fragment.append(rowNode(row)); }
+        if (prepend) { s.rows.unshift(...fresh); el('t8Rows').prepend(fragment); }
+        else { s.rows.push(...fresh); el('t8Rows').append(fragment); }
+        el('t8Count').textContent = s.rows.length + ' entries · group ' + Math.max(1, Math.ceil(s.rows.length / 20));
+    };
+    const finish = s => {
+        if (!current(s)) return;
+        el('t8More').disabled = s.busy || s.ended;
+        el('t8More').textContent = s.busy ? 'Loading…' : s.ended ? 'End of records' : 'Load next 20 records';
+    };
+    const load = async (count = pageSize) => {
+        const s = state;
+        if (!s || !current(s) || s.busy || s.ended) return;
+        s.busy = true; finish(s); status('Loading transaction history…');
+        try {
+            if (s.source === 'balance') {
+                if (!s.cursor) { s.ended = true; }
+                else {
+                    let remaining = Math.min(20, count);
+                    while (remaining > 0 && s.cursor && current(s)) {
+                        let rows;
+                        const saved = await cache(key(s, s.cursor));
+                        if (!current(s)) return;
+                        if (t8ValidHistoryRow(saved, s.uid, s.cursor)) rows = [saved];
+                        else {
+                            const result = await window.fetchAPI('/finance/main-ledger?cursor=' + encodeURIComponent(s.cursor) + '&limit=' + remaining);
+                            if (!current(s)) return;
+                            if (!result.success || !Array.isArray(result.data) || !result.data.length) throw new Error(result.message || 'History could not be loaded.');
+                            rows = result.data;
+                            if (rows.length > remaining) throw new Error('Invalid history page size.');
+                            let expected = s.cursor;
+                            const pageIds = new Set();
+                            for (const row of rows) {
+                                if (!t8ValidHistoryRow(row, s.uid, expected) || pageIds.has(row.id)) throw new Error('Invalid history entry or chain.');
+                                pageIds.add(row.id); expected = row.Previous;
+                            }
+                            if (result.nextCursor !== expected || result.hasMore !== Boolean(expected)) throw new Error('Invalid history continuation.');
+                            for (const row of rows) await cache(key(s, row.id), row);
+                        }
+                        if (!current(s)) return;
+                        if (rows.some(row => s.seen.has(row.id))) throw new Error('History cursor repeated.');
+                        add(s, rows); s.cursor = rows[rows.length - 1].Previous; remaining -= rows.length;
+                    }
+                    s.ended = !s.cursor;
+                }
+            } else {
+                const version = s.version;
+                const pageKey = key(s, JSON.stringify([s.cursor, count, version]));
+                let result = await cache(pageKey);
+                if (!current(s)) return;
+               if (!result || result.uid !== s.uid || result.snapshotSchema !== 1 || Date.now() - result.savedAt > 60000) {
+                    result = await window.fetchAPI('/finance/ledger-records?source=' + s.source + '&limit=' + count + (s.cursor ? '&cursor=' + encodeURIComponent(s.cursor) : ''));
+                    if (!current(s)) return;
+                    if (!result.success || !Array.isArray(result.data)) throw new Error(result.message || 'Records could not be loaded.');
+                     if (result.snapshotSchema !== 1 || result.data.some(row => row.UID !== s.uid ||
+                        (row.Balance_Snapshot_Version !== undefined && !t9ValidSnapshot(row, s.uid)))) throw new Error('Invalid record owner or balance snapshot.');
+                    await cache(pageKey, { ...result, savedAt:Date.now() });
+                }
+                if (!current(s)) return;
+                if (result.uid !== s.uid || result.snapshotSchema !== 1 || !Array.isArray(result.data) || result.data.length > count ||
+                    result.data.some(row => row.UID !== s.uid || (row.Balance_Snapshot_Version !== undefined && !t9ValidSnapshot(row, s.uid)))) throw new Error('Invalid cached record page.');
+                add(s, result.data); s.cursor = result.nextCursor; s.ended = !result.hasMore;
+            }
+            if (current(s)) status(s.source === 'balance'
+                ? (s.rows.length ? 'Verified balance snapshots. Older entries stay cached.' : 'Balance tracking starts after these patches. Choose Transaction Records or Reservation Records for existing history.') +
+                    (s.volatile ? ' Persistent cache unavailable; this session still works.' : '')
+                : 'Existing records. Missing balance snapshots are shown as Not recorded.');
+        } catch (error) { if (current(s)) status(error.message || 'History unavailable. Retry using Load next entry.'); }
+        finally {
+            s.busy = false; finish(s);
+            if (current(s) && visible() && (s.source === 'balance'
+                ? s.head !== (window.lastWalletData?.Main_Ledger_Head || null)
+                : s.version !== recordVersion())) {
+                window.t8LedgerSnapshot(window.lastWalletData || {});
+            }
+        }
+    };
+    window.openTransactionsModal = () => {
+        if (!owner() || !window.dashboardSession?.verified || window.dashboardSession?.closed || window.dashboardSession?.blocked) return;
+        window.openModal('mainLedgerModal');
+        el('t8CurrentBalance').textContent = money(window.lastWalletData?.Main_Balance);
+        if (!state || !current(state) || (state.source === 'balance'
+            ? state.head !== (window.lastWalletData?.Main_Ledger_Head || null)
+            : state.version !== recordVersion())) reset(el('t8Source').value);
+        if (!state.rows.length) void load(pageSize);
+    };
+    window.t8ChangeSource = source => { if (['balance', 'transactions', 'reservations'].includes(source)) { reset(source); void load(pageSize); } };
+    window.t8LoadMore = () => { void load(pageSize); };
+    window.t8LedgerSnapshot = wallet => {
+        el('t8CurrentBalance').textContent = money(wallet.Main_Balance);
+        const s = state, head = wallet.Main_Ledger_Head || null;
+        if (!s || !current(s) || !visible()) return;
+        if (s.source !== 'balance') {
+            if (!s.busy && s.version !== recordVersion()) { reset(s.source); void load(pageSize); }
+            return;
+        }
+        if (head === s.head || s.busy) return;
+        // A single new entry is prepended. A larger gap restarts from the head,
+        // retaining every old cached entry and loading only what is requested.
+         if (!head) { reset('balance'); void load(pageSize); return; }
+        s.busy = true; finish(s);
+        void (async () => {
+            try {
+                let row = await cache(key(s, head));
+                if (!current(s)) return;
+                if (!t8ValidHistoryRow(row, s.uid, head)) {
+                    const result = await window.fetchAPI('/finance/main-ledger?cursor=' + encodeURIComponent(head) + '&limit=1');
+                    if (!current(s)) return;
+                    if (!result.success || result.data?.length !== 1) throw new Error('New history entry could not be loaded.');
+                    row = result.data[0];
+                   if (!t8ValidHistoryRow(row, s.uid, head)) throw new Error('Invalid history entry.');
+                    await cache(key(s, head), row);
+                }
+                if (!current(s)) return;
+                if (row.Previous === s.head) { add(s, [row], true); s.head = head; }
+                else { const fresh = reset('balance'); add(fresh, [row]); fresh.cursor = row.Previous; fresh.ended = !row.Previous; finish(fresh); if (!fresh.ended) void load(pageSize - 1); }
+                status('Latest Main Balance movement added.');
+            } catch (error) { if (current(s)) status(error.message); }
+            finally {
+                s.busy = false; finish(state);
+                if (current(state) && visible() && state.source === 'balance' &&
+                    head !== (window.lastWalletData?.Main_Ledger_Head || null)) {
+                    window.t8LedgerSnapshot(window.lastWalletData || {});
+                }
+            }
+        })();
+    };
+    const scroll = el('t8Scroll');
+    const requestNext = () => {
+        if (!visible() || Date.now() - scrollAt < 250 || scroll.scrollTop + scroll.clientHeight < scroll.scrollHeight - 24) return;
+       scrollAt = Date.now(); void load(pageSize);
+    };
+    scroll.addEventListener('wheel', event => { if (event.deltaY > 0) requestNext(); }, { passive:true });
+    let touchY = null;
+    scroll.addEventListener('touchstart', event => { touchY = event.touches[0]?.clientY ?? null; }, { passive:true });
+    scroll.addEventListener('touchend', event => { if (touchY !== null && (event.changedTouches[0]?.clientY ?? touchY) < touchY - 10) requestNext(); touchY = null; }, { passive:true });
+    scroll.addEventListener('keydown', event => { if (['ArrowDown', 'PageDown', 'End'].includes(event.key)) requestNext(); });
+})();
+
+/* JS 12 | MAIN BALANCE TRANSACTION HISTORY | END */
+/* JS 13 | DASHBOARD SYNC, PROFILE AND FEE CONFIGURATION | START */
 window.renderDashboardRoleBadge = role => {
     const dividendRow = document.getElementById('dividendIncomeRow');
     if (dividendRow) dividendRow.style.display = role === 'Admin' ? '' : 'none';
@@ -5690,16 +7084,38 @@ window.feeReadyForSubmit = async () => {
 };
 window.renderFeePreview = (box, amount, percent, label) => {
     if (!box) return;
+    const raw = String(amount ?? '').trim();
+    if (!raw || Number(raw) <= 0) {
+        box.style.display = 'none';
+        return;
+    }
     box.style.display = 'block';
-    if (percent === undefined) { box.textContent = 'Loading current fees...'; return; }
-    if (!/^\d+(?:\.\d{1,6})?$/.test(String(amount))) { box.textContent = 'Enter an amount with up to 6 decimal places.'; return; }
-    const [whole, fraction = ''] = String(amount).split('.');
+    if (percent === undefined) {
+        box.textContent = 'Syncing fee rate...';
+        void window.syncSystemFees();
+        return;
+    }
+    if (!/^\d+(?:\.\d{1,6})?$/.test(raw)) {
+        box.textContent = 'Max 6 decimals allowed.';
+        return;
+    }
+    const [whole, fraction = ''] = raw.split('.');
     const gross = BigInt(whole) * 1000000n + BigInt(fraction.padEnd(6, '0'));
-    if (gross <= 0n || gross > BigInt(Number.MAX_SAFE_INTEGER)) { box.textContent = 'Enter a valid amount.'; return; }
+    if (gross <= 0n || gross > BigInt(Number.MAX_SAFE_INTEGER)) {
+        box.style.display = 'none';
+        return;
+    }
     const fee = (gross * BigInt(Math.round(percent * 100)) + 9999n) / 10000n;
-    if (fee >= gross) { box.textContent = 'Amount must leave a positive net payout.'; return; }
-    const money = value => (value / 1000000n) + '.' + (value % 1000000n).toString().padStart(6, '0');
-    box.textContent = 'Fee (' + percent + '%): ' + money(fee) + ' USDT | ' + label + ': ' + money(gross - fee) + ' USDT';
+    if (fee >= gross) {
+        box.textContent = 'Amount too small.';
+        return;
+    }
+    const money = value => {
+        const w = (value / 1000000n).toString();
+        const f = (value % 1000000n).toString().padStart(6, '0').replace(/0+$/, '');
+        return w + '.' + (f.length <= 2 ? f.padEnd(2, '0') : f);
+    };
+    box.innerHTML = `Fee (${percent}%): ${money(fee)} USDT | ${label}: <span style="color:var(--success);font-weight:800;">${money(gross - fee)} USDT</span>`;
 };
 window.updateWithdrawalFeePreview = () => {
     const box = document.getElementById('wdLiveFeeDisplay');
@@ -5735,9 +7151,11 @@ window.applyDashboardSnapshot = data => {
         counters: user.counters || {}
     };
     window.lastWalletData = wallet;
+    window.t8LedgerSnapshot?.(wallet);
     window.is2FABound = window.RAM_STATE.security.is2FA;
     window.isWalletBound = window.RAM_STATE.security.isWallet;
     window.userWallets = { BEP20: user.Wallet_BEP20 || '', TRC20: user.Wallet_TRC20 || '' };
+    window.userWalletDisplay = { BEP20: user.Wallet_BEP20_Display || '', TRC20: user.Wallet_TRC20_Display || '' };
     window.userDepositWallets = { BEP20: user.Deposit_BEP20 || '', TRC20: user.Deposit_TRC20 || '' };
     window.userDepositWalletOwner = uid;
     const text = (id, value) => {
@@ -5934,9 +7352,8 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     }, 15000);
 };
- // =================================================================================
- // 💎 MODULE 8: NFT ENGINE (RESERVE, SELL, PROFIT & COOLDOWN SCANNER)
- // =================================================================================
+/* JS 13 | DASHBOARD SYNC, PROFILE AND FEE CONFIGURATION | END */
+/* JS 14 | NFT ENGINE (RESERVE, SELL, PROFIT & COOLDOWN SCANNER) | START */
  window.LEVEL_PROFIT_RATES = {0: 0.000, 1: 0.013, 2: 0.018, 3: 0.023, 4: 0.028, 5: 0.033, 6: 0.038};
  window.reservedNFT = null;
  window.isSelling = false;
@@ -5997,9 +7414,9 @@ window.scheduleDashboardSocketReconnect = () => {
  window.startNftReserveScan = async function() {
      const uid = localStorage.getItem("uid");
      const lvl = parseInt(document.getElementById("levelSelect")?.value) || 1;
-     const rank = parseInt(window.getSafeUserData().Rank || 1);
+     const rank = Number(window.getSafeUserData().Rank ?? 0);
 
-     if (lvl > rank) return window.showToast(`Access Denied! Rank Level ${rank}.`, true);
+     if (!Number.isInteger(rank) || lvl > rank) return window.showToast(`Access Denied! Rank Level ${rank}.`, true);
 
      const modal = document.getElementById('nftScanModal');
      if (modal) {
@@ -6027,10 +7444,10 @@ window.scheduleDashboardSocketReconnect = () => {
          }
      };
 
-     setAllocationStatus('Connecting to Liquidity Node');
+     setAllocationStatus('Checking reservation availability');
 
      const contractStatusTimer = setTimeout(() => {
-         setAllocationStatus('Synchronizing Smart Contract');
+         setAllocationStatus('Checking level and available balance');
      }, 650);
 
      const assetStatusTimer = setTimeout(() => {
@@ -6211,7 +7628,8 @@ window.scheduleDashboardSocketReconnect = () => {
                  timestamp: result.injectionData.timestamp || Date.now(),
                  Order_ID: window.reservedNFT.orderId,
                  Image_URL: window.reservedNFT.img || '',
-                 NFT_ID: window.reservedNFT.id || 'TCM NFT'
+                 NFT_ID: window.reservedNFT.id || 'TCM NFT',
+                 Blockchain: window.reservedNFT.Blockchain || null
              });
          }
 
@@ -6252,6 +7670,7 @@ window.scheduleDashboardSocketReconnect = () => {
                         <span style="font-size: 0.8rem; color: var(--success); font-weight: 700;">Est. +${estNet} ₮</span>
                     </div>
                     ${dateBadgeStr}
+                    ${window.renderNFTBlockchainReference(nftObj.Blockchain)}
                 </div>
             </div>
             <button class="btn-sell-nft" onclick="window.reservedNFT = window.activeNFTs.find(n => n.docId === '${nftObj.docId}'); window.startSellMatchmaking(this)">
@@ -6282,7 +7701,6 @@ window.scheduleDashboardSocketReconnect = () => {
                         </div>
                     </div>
                     <div style="text-align: right; flex-shrink: 0; margin-left: 10px; display: flex; flex-direction: column; align-items: flex-end;">
-                        <span class="badge glow-locked" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Active Holding</span>
                         <p style="color:var(--warning); font-size: 0.85rem; font-weight: 700; margin: 0;">- ${parseFloat(window.reservedNFT.price).toFixed(2)} ₮</p>
                     </div>
                 </div>
@@ -6319,10 +7737,10 @@ window.scheduleDashboardSocketReconnect = () => {
 
      window.openModal("sellRadarModal");
      const radarStatus = document.getElementById("radarStatusText");
-     if(radarStatus) radarStatus.innerHTML = "Connecting to Global Blockchain Node...";
+     if(radarStatus) radarStatus.textContent = "Processing platform settlement...";
 
      await new Promise(resolve => setTimeout(resolve, 1000));
-     if(radarStatus) radarStatus.innerHTML = "<span style='color: #facc15;'>Scanning P2P Network for Buyers...</span>";
+     if(radarStatus) radarStatus.textContent = "Verifying reservation and locked principal...";
 
      const result = await window.fetchAPI('/nft/sell', 'POST', {
          uid,
@@ -6334,7 +7752,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
      if (!result.success) {
          window.isSelling = false;
-         if(radarStatus) radarStatus.innerHTML = '<span style="color:var(--error); font-weight:700;">MATCH FAILED! Retrying...</span>';
+         if(radarStatus) radarStatus.textContent = 'Settlement could not complete. No automatic retry.';
 
          setTimeout(() => {
              window.closeModal("sellRadarModal");
@@ -6347,7 +7765,7 @@ window.scheduleDashboardSocketReconnect = () => {
          return;
      }
 
-     if(radarStatus) radarStatus.innerHTML = '<span style="color:var(--success); font-weight:800; font-size:1.1rem; letter-spacing:1px;">BUYER FOUND!</span>';
+     if(radarStatus) radarStatus.textContent = 'Settlement completed';
 
      await new Promise(resolve => setTimeout(resolve, 1000));
      window.closeModal("sellRadarModal");
@@ -6362,7 +7780,7 @@ window.scheduleDashboardSocketReconnect = () => {
                  <div style="width: 60px; height: 60px; background: rgba(16, 185, 129, 0.15); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 15px auto; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); border: 1px solid rgba(16, 185, 129, 0.3);">
                      <i class="fas fa-check" style="font-size: 2.2rem; color: var(--success);"></i>
                  </div>
-                 <h3 style="color: white; margin: 0 0 5px 0; font-size: 1.2rem; font-weight: 700;">Match Successful!</h3>
+                 <h3 style="color: white; margin: 0 0 5px 0; font-size: 1.2rem; font-weight: 700;">Settlement completed</h3>
 
                  <div style="background: rgba(0,0,0,0.3); border: 1px dashed rgba(255,255,255,0.1); border-radius: 10px; padding: 12px; margin: 15px 0;">
                      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-sub); margin-bottom: 5px;">
@@ -6421,7 +7839,7 @@ window.scheduleDashboardSocketReconnect = () => {
                                  </div>
                              </div>
                              <div style="text-align: right; flex-shrink: 0; margin-left: 10px;">
-                                 <span class="badge glow-green" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Match Success</span>
+                                 <span class="badge glow-green" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Settled</span>
                                  <p style="color:var(--success); font-size: 0.85rem; font-weight: 700; margin: 0;">+ ${parseFloat(retAmount).toFixed(2)} ₮</p>
                              </div>
                          </div>
@@ -6490,6 +7908,46 @@ window.scheduleDashboardSocketReconnect = () => {
  };
 
  // 🔥 FIX: API Driven Today's History & Collection Rendering (Zero-Read & Paginated)
+// NFT BLOCKCHAIN REFERENCE START: render recorded identity, not ownership proof.
+window.renderNFTBlockchainReference = raw => {
+    if (
+        !raw ||
+        raw.Chain_ID !== 56 ||
+        !['Unverified_Reference', 'Verified_Mainnet_Snapshot'].includes(raw.Verification_Status) ||
+        typeof raw.Contract_Address !== 'string' ||
+        !/^0x[0-9a-fA-F]{40}$/.test(raw.Contract_Address) ||
+        typeof raw.Token_ID !== 'string' ||
+        !/^[1-9][0-9]{0,77}$/.test(raw.Token_ID) ||
+        BigInt(raw.Token_ID) >= (1n << 256n) ||
+        typeof raw.Mint_TxHash !== 'string' ||
+        !/^0x[0-9a-fA-F]{64}$/.test(raw.Mint_TxHash) ||
+        (raw.Contract_Address.toLowerCase() ===
+            '0xc617c917bb594bb14f2a7ead2d9b650dd3754673' &&
+            (raw.Token_ID !== '1' || raw.Mint_TxHash.toLowerCase() !==
+                '0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e')) ||
+        raw.Mint_TxHash.toLowerCase() ===
+            '0x74ac1c82cfdd43579edd68644b4c756a3c17b524c3be3b1a1a823f9e2cf2b6a5'
+    ) {
+        return '';
+    }
+
+    const address = raw.Contract_Address;
+    const token = raw.Token_ID;
+
+    return `<div style="font-size:.65rem; color:var(--text-sub); margin-top:8px; overflow-wrap:anywhere;">
+        <div>BSC Mainnet reference · Chain ID 56 · Token ${token}</div>
+        <div>Contract: ${address}</div>
+        <div>${raw.Verification_Status === 'Verified_Mainnet_Snapshot' && Number.isFinite(Date.parse(raw.Verified_At))
+            ? 'Mint and platform custody checked at ' + new Date(raw.Verified_At).toISOString()
+            : 'Recorded reference only; mint and current custody not verified here.'}</div>
+        <div>No on-chain user ownership transfer is established by this card.</div>
+        <a href="https://bscscan.com/token/${address}?a=${token}" target="_blank" rel="noopener noreferrer">View token reference</a>
+        <span> · </span>
+        <a href="https://bscscan.com/tx/${raw.Mint_TxHash}" target="_blank" rel="noopener noreferrer">View recorded mint transaction</a>
+    </div>`;
+};
+// NFT BLOCKCHAIN REFERENCE END
+
  window.globalNFTMarketList = [];
 
  window.loadGlobalNFTMarketFromAPI = async () => {
@@ -6630,7 +8088,7 @@ window.scheduleDashboardSocketReconnect = () => {
                                  </div>
                              </div>
                              <div style="text-align: right; flex-shrink: 0; margin-left: 10px;">
-                                 <span class="badge glow-green" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Match Success</span>
+                                 <span class="badge glow-green" style="font-size:0.6rem; margin-bottom: 4px; display: inline-block;">Settled</span>
                                  <p style="color:var(--success); font-size: 0.85rem; font-weight: 700; margin: 0;">+ ${parseFloat(data.Amount).toFixed(2)} ₮</p>
                              </div>
                          </div>
@@ -6657,7 +8115,6 @@ window.scheduleDashboardSocketReconnect = () => {
                              </div>
                              <div style="text-align: right; flex-shrink: 0; margin-left: 10px; display: flex; flex-direction: column; align-items: flex-end;">
                                  ${dateBadgeHTML}
-                                 <span class="nft-holding-badge">Active Holding</span>
                                  <p style="color:var(--warning); font-size: 0.85rem; font-weight: 700; margin: 0;">- ${parseFloat(data.Amount).toFixed(2)} ₮</p>
                              </div>
                          </div>
@@ -6679,6 +8136,7 @@ window.scheduleDashboardSocketReconnect = () => {
                      img: data.Image_URL || 'https://i.ibb.co/3sZxCqT/nft-placeholder.jpg',
                      orderId: data.Order_ID,
                      docId: data.docId || data.id || "",
+                     Blockchain: data.Blockchain || null,
                      level: parseInt(data.NFT_Level || window.getSafeUserData().Rank || 1),
                      timestamp: window.parseSafeTimestamp(data.timestamp || data.Date) || Date.now()
                  };
@@ -6712,6 +8170,7 @@ window.scheduleDashboardSocketReconnect = () => {
                              <span style="font-size: 0.8rem; color: var(--success); font-weight: 700;">Est. +${estNet} ₮</span>
                          </div>
                          ${dateBadgeStr}
+                         ${window.renderNFTBlockchainReference(nftObj.Blockchain)}
                      </div>
                  </div>
                  <button class="btn-sell-nft" onclick="window.reservedNFT = window.activeNFTs.find(n => n.docId === '${nftObj.docId}'); window.startSellMatchmaking(this)">
@@ -6840,9 +8299,8 @@ window.scheduleDashboardSocketReconnect = () => {
      }
  };
 
- // =================================================================================
- // 🛡️ MODULE 9: HYBRID SECURITY ENGINE (IMAGE MATCHING SHIELD)
- // =================================================================================
+/* JS 14 | NFT ENGINE (RESERVE, SELL, PROFIT & COOLDOWN SCANNER) | END */
+/* JS 15 | HYBRID SECURITY ENGINE (IMAGE MATCHING SHIELD) | START */
  window.updateSecurityShieldUI = () => {
     let score = 0;
     if (window.is2FABound) score += 50;
@@ -7060,6 +8518,9 @@ window.scheduleDashboardSocketReconnect = () => {
     if (result.success) {
         window.isWalletBound = true;
         window.userWallets[net] = result.address || addr;
+        window.userWalletDisplay = window.userWalletDisplay || {};
+        window.userWalletDisplay[net] = result.displayAddress || '';
+        window.initAssetsUI?.();
         if (window.RAM_STATE) window.RAM_STATE.security.isWallet = true; // 🔥 Optimistic UI
 
         const bWall = document.getElementById('badgeWallet');
@@ -7121,9 +8582,8 @@ window.scheduleDashboardSocketReconnect = () => {
      btn.innerHTML = 'Secure Unbind'; btn.disabled = false;
  };
 
- // =================================================================================
- // 💰 MODULE 10: FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer)
- // =================================================================================
+/* JS 15 | HYBRID SECURITY ENGINE (IMAGE MATCHING SHIELD) | END */
+/* JS 16 | FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer) | START */
 
  window.updateSpeedometerUI = (score) => {
      const needle = document.getElementById('speedNeedle');
@@ -7193,8 +8653,12 @@ window.scheduleDashboardSocketReconnect = () => {
          }
      };
 
-     amtInput.oninput = updateBtnState;
+     amtInput.oninput = () => {
+         updateBtnState();
+         window.updateWithdrawalFeePreview();
+     };
      updateBtnState();
+     window.updateWithdrawalFeePreview();
  };
 
  window.securityTimerInterval = null;
@@ -7407,7 +8871,7 @@ window.scheduleDashboardSocketReconnect = () => {
      const net = document.getElementById('wdNetwork').value;
      window.updateWithdrawalFeePreview();
      const boundText = document.getElementById('boundWalletText');
-     let addr = window.userWallets ? window.userWallets[net] : "";
+     let addr = window.getBoundWalletDisplay(net);
      if (addr && addr.length > 5) {
          boundText.innerText = addr;
          boundText.style.color = "var(--text-main)";
@@ -7465,7 +8929,9 @@ window.scheduleDashboardSocketReconnect = () => {
 
         try {
             const network = document.getElementById('depNetworkSelect').value;
-            const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, network, amount: amt, txid: hash });
+            window.txIconFlight('Deposit', true, uid);
+            const result = await window.fetchAPI('/finance/deposit', 'POST', { uid, network, amount: amt, txid: hash })
+                .finally(() => window.txIconFlight('Deposit', false, uid));
 
             if (result.success) {
                 window.closeTx();
@@ -7495,6 +8961,7 @@ window.scheduleDashboardSocketReconnect = () => {
                 if (typeof window.forceInjectToHistory === 'function') {
                     window.forceInjectToHistory(newTx);
                 }
+                window.observeTxIconRecords([newTx], true);
                 window.syncDashboardData?.();
             } else if (['DELETION_IN_PROGRESS', 'DEPOSIT_FROZEN_PENDING_DELETION'].includes(result.code)) {
                 if (window.RAM_STATE?.user) window.RAM_STATE.user.Status = 'Pending_Deletion';
@@ -7525,7 +8992,9 @@ window.scheduleDashboardSocketReconnect = () => {
         btn.disabled = true;
 
         try {
-            const result = await window.fetchAPI('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr, feeConfigVersion: window.systemFeeConfig.version });
+            window.txIconFlight('Withdraw', true, uid);
+            const result = await window.fetchAPI('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr, feeConfigVersion: window.systemFeeConfig.version })
+                .finally(() => window.txIconFlight('Withdraw', false, uid));
 
             if (result.success) {
                 window.closeTx();
@@ -7766,7 +9235,8 @@ window.scheduleDashboardSocketReconnect = () => {
          }
      });
  }, 1000);
-/* === MODULE 20: P2P TRANSFER & LOOKUP ENGINE === */
+/* JS 16 | FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer) | END */
+/* JS 17 | P2P TRANSFER & LOOKUP ENGINE | START */
     window.currentWdCount = 0;
     window.currentP2pCount = 0;
 
@@ -7971,6 +9441,230 @@ window.scheduleDashboardSocketReconnect = () => {
         if (Number(input.value) < 5) { box.style.display = 'none'; return; }
         window.renderFeePreview(box, input.value, window.systemFeeConfig?.p2pFeePct, 'Receiver gets');
     };
+
+    (() => {
+        const button = document.getElementById('btnSendMoney');
+        const modal = document.getElementById('sendMoneyModal');
+        if (!button || !modal || button.dataset.darkSwipeBound) return;
+        button.dataset.darkSwipeBound = 'true';
+
+        const dark = () => true;
+        const visible = () => modal.getClientRects().length > 0;
+        const originalDescription = button.getAttribute('aria-description');
+
+        const signature = () => JSON.stringify([
+            ...['sendUid', 'sendAmt', 'send2FA'].map(
+                id => document.getElementById(id)?.value || ''
+            ),
+            localStorage.getItem('uid'),
+            localStorage.getItem('token')
+        ]);
+
+        let drag = null;
+        let progress = 0;
+        let busy = false;
+        let startedWith = null;
+
+        const travel = () => Math.max(0, button.clientWidth - 58);
+
+        const paint = value => {
+            progress = Math.max(0, Math.min(1, value));
+            button.style.setProperty(
+                '--p2p-slide-x',
+                (progress * travel()) + 'px'
+            );
+        };
+
+        const reset = () => {
+            const previous = drag;
+            drag = null;
+            progress = 0;
+            startedWith = null;
+            button.removeAttribute('data-swipe-state');
+            button.style.removeProperty('--p2p-slide-x');
+
+            if (previous) {
+                try {
+                    button.releasePointerCapture(previous.id);
+                } catch (error) {}
+            }
+        };
+
+        const complete = () => {
+            if (
+                busy || !dark() || !visible() || button.disabled ||
+                progress < 1 || startedWith !== signature()
+            ) {
+                if (!busy) reset();
+                return;
+            }
+
+            busy = true;
+            drag = null;
+            button.dataset.swipeState = 'busy';
+
+            try {
+                window.navigator?.vibrate?.(12);
+            } catch (error) {}
+
+            Promise.resolve().then(() => {
+                if (
+                    !dark() || !visible() || button.disabled ||
+                    startedWith !== signature()
+                ) return;
+
+                return window.submitSendMoney();
+            }).catch(() => {
+                window.showToast(
+                    'Unable to start transfer. Please retry.',
+                    true
+                );
+            }).finally(() => {
+                busy = false;
+                reset();
+            });
+        };
+
+        button.addEventListener('click', event => {
+            if (!dark()) return;
+            event.preventDefault();
+            event.stopImmediatePropagation();
+        }, true);
+
+        button.addEventListener('pointerdown', event => {
+            if (
+                !dark() || busy || button.disabled || !visible() ||
+                event.button !== 0 || event.isPrimary === false ||
+                travel() <= 0
+            ) return;
+
+            const rect = button.getBoundingClientRect();
+            if (
+                event.clientX < rect.left ||
+                event.clientX > rect.left + 58
+            ) return;
+
+            event.preventDefault();
+            reset();
+            startedWith = signature();
+            drag = {
+                id: event.pointerId,
+                x: event.clientX,
+                distance: travel()
+            };
+            button.dataset.swipeState = 'dragging';
+
+            try {
+                button.setPointerCapture(event.pointerId);
+            } catch (error) {
+                reset();
+            }
+        });
+
+        button.addEventListener('pointermove', event => {
+            if (!drag || event.pointerId !== drag.id || busy) return;
+
+            if (
+                !dark() || button.disabled || !visible() ||
+                startedWith !== signature()
+            ) {
+                reset();
+                return;
+            }
+
+            event.preventDefault();
+            paint((event.clientX - drag.x) / drag.distance);
+            if (progress >= 1) complete();
+        }, { passive: false });
+
+        const release = event => {
+            if (drag && event.pointerId === drag.id && !busy) reset();
+        };
+
+        for (const name of [
+            'pointerup', 'pointercancel', 'lostpointercapture'
+        ]) {
+            button.addEventListener(name, release);
+        }
+
+        button.addEventListener('keydown', event => {
+            if (!dark()) return;
+
+            const keys = [
+                'ArrowRight', 'ArrowLeft', 'Home', 'End', 'Enter', ' '
+            ];
+            if (!keys.includes(event.key)) return;
+
+            event.preventDefault();
+            event.stopImmediatePropagation();
+
+            if (busy || button.disabled || !visible()) return;
+
+            if (event.key === 'Enter' || event.key === ' ') {
+                window.showToast(
+                    'Use Arrow Right or End to slide and confirm the transfer.'
+                );
+                return;
+            }
+
+            if (startedWith !== signature()) {
+                reset();
+                startedWith = signature();
+            }
+
+            paint(
+                event.key === 'Home' ? 0 :
+                event.key === 'End' ? 1 :
+                Math.round(
+                    (progress + (event.key === 'ArrowRight' ? 0.1 : -0.1)) * 10
+                ) / 10
+            );
+
+            if (progress >= 1) complete();
+        }, true);
+
+        modal.addEventListener('input', event => {
+            if (
+                !busy && dark() &&
+                ['sendUid', 'sendAmt', 'send2FA'].includes(event.target.id)
+            ) reset();
+        }, true);
+
+        window.addEventListener('resize', () => {
+            if (!busy) reset();
+        });
+
+        const sync = () => {
+            if (dark()) {
+                button.setAttribute(
+                    'aria-description',
+                    'Slide right to confirm. Keyboard: Arrow Right or End.'
+                );
+            } else if (originalDescription === null) {
+                button.removeAttribute('aria-description');
+            } else {
+                button.setAttribute('aria-description', originalDescription);
+            }
+
+            if (!busy && (!dark() || !visible() || button.disabled)) reset();
+        };
+
+        const observer = new MutationObserver(sync);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['data-theme']
+        });
+        observer.observe(modal, {
+            attributes: true,
+            attributeFilter: ['style', 'class']
+        });
+        observer.observe(button, {
+            attributes: true,
+            attributeFilter: ['disabled']
+        });
+
+        sync();
+    })();
 
     window.submitSendMoney = async () => {
         if (!await window.feeReadyForSubmit()) return;
@@ -8199,7 +9893,8 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-    /* === MODULE 21: CAMERA SCANNER & QR GENERATOR === */
+    /* JS 17 | P2P TRANSFER & LOOKUP ENGINE | END */
+/* JS 18 | CAMERA SCANNER & QR GENERATOR | START */
     const p2pReceiveState = {
         ownerUid: null,
         phase: 'qr',
@@ -8524,7 +10219,8 @@ window.scheduleDashboardSocketReconnect = () => {
         return cameraCleanupPromise;
     };
 
-    /* === MODULE 22: TEAM NETWORK & BONUS LOGIC === */
+    /* JS 18 | CAMERA SCANNER & QR GENERATOR | END */
+/* JS 19 | TEAM NETWORK & BONUS LOGIC | START */
     window.teamNetworkData = { A: [], B: [], C: [] };
     window.teamNetworkLimits = { A: 5, B: 5, C: 5 };
     window.teamBonusData = [];
@@ -8784,7 +10480,8 @@ window.scheduleDashboardSocketReconnect = () => {
        const box = document.getElementById(`list${hand}Box`);
        if(box) box.style.display = box.style.display === 'block' ? 'none' : 'block';
     };
- /* === MODULE 23: SMART AVATAR UPLOAD & COMPRESSION === */
+ /* JS 19 | TEAM NETWORK & BONUS LOGIC | END */
+/* JS 20 | SMART AVATAR UPLOAD & COMPRESSION | START */
     window.handleDpClick = () => {
         const dpInput = document.getElementById('dpInput');
         let hasCustomImage = localStorage.getItem('tcm_user_dp');
@@ -8898,7 +10595,8 @@ window.scheduleDashboardSocketReconnect = () => {
         });
     }
 
-    /* === MODULE 24: GLOBAL LIVE TRANSACTION FEED === */
+    /* JS 20 | SMART AVATAR UPLOAD & COMPRESSION | END */
+/* JS 21 | GLOBAL LIVE TRANSACTION FEED | START */
     window.globalLiveTransactions = [];
     window.currentLiveTxIndex = 0;
     window.liveFeedInterval = null;
@@ -9029,7 +10727,8 @@ window.scheduleDashboardSocketReconnect = () => {
 
     setTimeout(window.initLiveGlobalFeed, 3500);
 
-    /* === MODULE 25: NFT ORDERS RENDERING ENGINE === */
+    /* JS 21 | GLOBAL LIVE TRANSACTION FEED | END */
+/* JS 22 | NFT ORDERS RENDERING ENGINE | START */
     window.ordersPaginationCache = [];
     window.ordersCurrentIndex = 0;
 
@@ -9260,7 +10959,8 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
- /* === MODULE 26: CHAT ENGINE (SOCKET & BROWSER CACHE) === */
+ /* JS 22 | NFT ORDERS RENDERING ENGINE | END */
+/* JS 23 | CHAT ENGINE (SOCKET & BROWSER CACHE) | START */
     window.currentChatMode = null;
     window.activePrivateUid = null;
     window.activePrivateName = null;
@@ -10093,7 +11793,8 @@ window.scheduleDashboardSocketReconnect = () => {
         window.showToast(result.message || (result.success ? 'Request sent.' : 'Request could not complete.'), !result.success);
     };
 
-    /* === MODULE 27: ADMIN SUPPORT CHAT ENGINE === */
+    /* JS 23 | CHAT ENGINE (SOCKET & BROWSER CACHE) | END */
+/* JS 24 | ADMIN SUPPORT CHAT ENGINE | START */
     if (window.socket) {
         window.socket.on("receive_support_message", (data) => {
             const messagesContainer = document.getElementById('userSupportMessages');
@@ -10247,12 +11948,14 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     });
 
-    /* === MODULE 28: MASTER INITIALIZATION (REAL-TIME SYNC) === */
+    /* JS 24 | ADMIN SUPPORT CHAT ENGINE | END */
+/* JS 25 | MASTER INITIALIZATION (REAL-TIME SYNC) | START */
     window.fetchInitialDataFromAPI = () => window.syncDashboardState();
 
     setTimeout(window.fetchInitialDataFromAPI, 1000);
 
-    /* === MODULE 29: APP DOWNLOAD & REFERRAL SYSTEM === */
+    /* JS 25 | MASTER INITIALIZATION (REAL-TIME SYNC) | END */
+/* JS 26 | APP DOWNLOAD & REFERRAL SYSTEM | START */
     window.openReferralModal = () => {
         const uid = localStorage.getItem('uid') || "UnknownUID";
         const baseUrl = "https://tcmnft.github.io/TCM-/Signup.html";
@@ -10370,7 +12073,8 @@ window.scheduleDashboardSocketReconnect = () => {
         window.showToast("Opening Package Installer...");
     };
 
-    /* === MODULE 30: ASSET ANALYTICS & RADAR CHARTS === */
+    /* JS 26 | APP DOWNLOAD & REFERRAL SYSTEM | END */
+/* JS 27 | ASSET ANALYTICS & RADAR CHARTS | START */
     window.myChartInstance = null;
     window.teamChartInstance = null;
 
@@ -10394,32 +12098,77 @@ window.scheduleDashboardSocketReconnect = () => {
     };
 
     window.verifySmartWallet = () => {
+        const inputEl = document.getElementById('verifyWalletInput');
+        const resBox = document.getElementById('verifyResult');
+        if (!inputEl || !resBox) return;
+        const input = inputEl.value.trim();
+        const show = (message, valid = false) => {
+            resBox.textContent = message;
+            resBox.style.color = valid ? 'var(--success)' : 'var(--error)';
+            resBox.style.border = '1px dashed ' + (valid ? 'var(--success)' : 'var(--error)');
+            resBox.style.display = 'block';
+        };
+        if (!input) { resBox.style.display = 'none'; return; }
+        const lib = window.ethers;
+        if (!lib || typeof lib.getAddress !== 'function' || typeof lib.sha256 !== 'function') {
+            show('Verifier unavailable. Reload the page and try again.');
+            return;
+        }
+        const addressKey = (network, value) => {
+            if (typeof value !== 'string') return null;
+            const address = value.trim();
+            try {
+                if (network === 'BEP20') {
+                    if (!/^0x[0-9a-fA-F]{40}$/.test(address)) return null;
+                    return lib.getAddress(address);
+                }
+                if (!/^T[1-9A-HJ-NP-Za-km-z]{33}$/.test(address)) return null;
+                const alphabet = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+                let decoded = 0n;
+                for (const character of address) {
+                    decoded = decoded * 58n + BigInt(alphabet.indexOf(character));
+                }
+                const hex = decoded.toString(16);
+                if (hex.length !== 50 || !hex.startsWith('41')) return null;
+                const checksum = lib.sha256(lib.sha256('0x' + hex.slice(0, 42))).slice(2, 10);
+                return checksum === hex.slice(42) ? address : null;
+            } catch (_) { return null; }
+        };
+        const network = input.startsWith('0x') ? 'BEP20' : 'TRC20';
+        const inputKey = addressKey(network, input);
+        if (!inputKey) {
+            show('INVALID ADDRESS: Check the BEP20 / TRC20 format and checksum.');
+            return;
+        }
+        const boundKey = addressKey(network, window.userWallets?.[network]);
+        if (!boundKey) {
+            show(network + ': No valid bound withdrawal wallet. Open Security Center to bind one.');
+        } else if (inputKey === boundKey) {
+            show(network + ' MATCH: Matches your bound withdrawal address.', true);
+        } else {
+            show(network + ' MISMATCH: Does not match your bound withdrawal address.');
+        }
+    };
+
+    window.getBoundWalletDisplay = (network) => {
+        const canonical = window.userWallets?.[network] || '';
+        const display = window.userWalletDisplay?.[network];
+        if (!canonical || typeof display !== 'string') return canonical;
         try {
-            const input = document.getElementById('verifyWalletInput').value.trim();
-            const resBox = document.getElementById('verifyResult');
-            if (!input) return;
-
-            let bep = window.userWallets ? window.userWallets['BEP20'] : null;
-            let trc = window.userWallets ? window.userWallets['TRC20'] : null;
-
-            if ((bep && input === bep) || (trc && input === trc)) {
-                resBox.innerHTML = '<i class="fas fa-check-circle"></i> SAFE TO WITHDRAW: Matches your bound address.';
-                resBox.style.color = 'var(--success)';
-                resBox.style.border = '1px dashed var(--success)';
-                resBox.style.display = 'block';
-            } else {
-                resBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> MISMATCH WARNING: Does not match any bound wallet!';
-                resBox.style.color = 'var(--error)';
-                resBox.style.border = '1px dashed var(--error)';
-                resBox.style.display = 'block';
+            if (network === 'BEP20' && window.ethers?.getAddress &&
+                /^0x[0-9a-fA-F]{40}$/.test(display) &&
+                window.ethers.getAddress(display) === window.ethers.getAddress(canonical)) {
+                return display;
             }
-        } catch(e) { console.error("Wallet Verifier Error:", e); }
+            if (network === 'TRC20' && display === canonical) return display;
+        } catch (_) {}
+        return canonical;
     };
 
     window.initAssetsUI = () => {
         try {
-            const bep = window.userWallets ? window.userWallets['BEP20'] : '';
-            const trc = window.userWallets ? window.userWallets['TRC20'] : '';
+            const bep = window.getBoundWalletDisplay('BEP20');
+            const trc = window.getBoundWalletDisplay('TRC20');
             const elBep = document.getElementById('assetBep20');
             const elTrc = document.getElementById('assetTrc20');
 
@@ -11094,7 +12843,8 @@ window.scheduleDashboardSocketReconnect = () => {
         } catch (error) { console.error('Team Radar Chart Error:', error); }
     };
 
-    /* === MODULE 31: STAKING UI ENGINE === */
+    /* JS 27 | ASSET ANALYTICS & RADAR CHARTS | END */
+/* JS 28 | STAKING UI ENGINE | START */
     window.openStakingSpeedInfo = () => {
         const container = document.getElementById('dynamicStakingLedgerContainer');
         if(!container) return;
@@ -11407,7 +13157,8 @@ window.scheduleDashboardSocketReconnect = () => {
         });
     }, 1000);
 
-    /* === MODULE 32: ACTIVE CONTRACTS & CARD RENDERER === */
+    /* JS 28 | STAKING UI ENGINE | END */
+/* JS 29 | ACTIVE CONTRACTS & CARD RENDERER | START */
     window.renderActiveStakes = () => {
     let wallet = window.RAM_STATE?.balances || window.lastWalletData;
     const list = document.getElementById('activeStakesList');
@@ -11628,7 +13379,8 @@ window.scheduleDashboardSocketReconnect = () => {
         }
     };
 
-    /* === MODULE 33: CINEMA MODE & HARDWARE ROUTER === */
+    /* JS 29 | ACTIVE CONTRACTS & CARD RENDERER | END */
+/* JS 30 | CINEMA MODE & HARDWARE ROUTER | START */
     window.cinemaProfitInterval = null;
 
     window.namespaceCinemaCardIDs = fullCard => {
@@ -11811,7 +13563,8 @@ window.scheduleDashboardSocketReconnect = () => {
         }, 500);
     };
 
-    /* === MODULE 34: SMART HARDWARE ROUTER === */
+    /* JS 30 | CINEMA MODE & HARDWARE ROUTER | END */
+/* JS 31 | SMART HARDWARE ROUTER | START */
     document.addEventListener("DOMContentLoaded", () => {
         window.history.pushState({ base: true }, "", window.location.href);
 
@@ -11868,7 +13621,8 @@ window.scheduleDashboardSocketReconnect = () => {
         });
     });
 
-    /* === MODULE 35: BACKGROUND LEAK FIX === */
+    /* JS 31 | SMART HARDWARE ROUTER | END */
+/* JS 32 | BACKGROUND LEAK FIX | START */
    // E4: Initial load, visibility return, socket events and committed actions drive sync.
    // No periodic full-dashboard polling while a visible tab sits idle.
 
@@ -11886,6 +13640,8 @@ window.scheduleDashboardSocketReconnect = () => {
        }
    });
 
+/* JS 32 | BACKGROUND LEAK FIX | END */
+/* JS 33 | ACCOUNT SETTINGS AND DELETION | START */
    window.accountDeleteTime = null;
     window.accDeleteInterval = null;
 
@@ -12411,6 +14167,9 @@ window.scheduleDashboardSocketReconnect = () => {
             btn.disabled = false;
         }
     };
+/* JS 33 | ACCOUNT SETTINGS AND DELETION | END */
 </script>
+<!-- Testnet simulation controller removed. -->
 </body>
 </html>
+
