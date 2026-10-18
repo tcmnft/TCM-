@@ -3588,6 +3588,21 @@
 @media(prefers-reduced-motion:reduce){.unread-messages-banner{transition:none}}
 
 </style>
+<style id="luxury-r4-styles">
+/* Message-only preview: no panel, border, counter, icon or reserved empty box. */
+#unreadMessagesBanner{display:block;position:relative;width:100%;padding:0 3px;margin:0 0 13px;border:0;border-radius:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;color:var(--text-main);text-align:left;font-family:inherit;cursor:pointer;min-width:0;}
+#unreadMessagesBanner[hidden]{display:none!important}#unreadMessagesBanner .unread-preview-name{display:block;font-size:.66rem;font-weight:750;color:var(--text-sub);margin-bottom:3px}#unreadMessagesBanner .unread-preview-message{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;overflow-wrap:anywhere;font-size:.79rem;line-height:1.5;font-weight:600;text-shadow:0 2px 9px rgba(0,0,0,.18);}
+#unreadMessagesBanner.preview-enter{animation:unreadPreviewSlide .35s cubic-bezier(.16,1,.3,1) both;will-change:transform,opacity;}
+@keyframes unreadPreviewSlide{from{transform:translateY(7px);opacity:0}to{transform:translateY(0);opacity:1}}
+[data-theme="light"] #unreadMessagesBanner{background:none;border:0;box-shadow:none}[data-theme="light"] #unreadMessagesBanner .unread-preview-message{text-shadow:0 2px 7px rgba(15,23,42,.09)}
+#normal-chat-header.has-verified-anchor{position:relative;padding-bottom:17px;box-sizing:border-box}#dmVerifiedBadge{position:absolute;right:0;bottom:-1px;margin:0;display:inline-flex;width:max-content;max-width:100%;padding:3px 7px;border:1px solid rgba(255,255,255,.15);border-radius:9px;color:var(--text-main);background:linear-gradient(135deg,rgba(255,255,255,.15),rgba(255,255,255,.035));box-shadow:inset 0 1px 0 rgba(255,255,255,.17),0 2px 6px rgba(0,0,0,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);font-size:9px;line-height:1.2;}
+.tcm-verified-badge{color:var(--text-main)!important}.tcm-verified-badge svg{fill:#2098d1;stroke:#fff;border-radius:50%;filter:drop-shadow(0 1px 2px rgba(0,0,0,.16))}[data-theme="light"] #dmVerifiedBadge{color:var(--text-main);border-color:rgba(15,23,42,.13);background:linear-gradient(135deg,rgba(255,255,255,.95),rgba(226,232,240,.5));box-shadow:inset 0 1px 0 #fff,0 2px 6px rgba(15,23,42,.08)}
+#chat-window .m15-ticks,#chat-window .m15-ticks[data-status="read"],[data-theme="light"] #chat-window .m15-ticks[data-status="read"]{color:inherit;width:16px;height:14px;margin-left:4px}#chat-window .m15-ticks svg{width:14px;height:14px;stroke-width:2.08}
+.chat-history-control{display:block;margin:4px auto 10px;padding:6px 12px;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);color:var(--text-sub);font:600 .67rem/1.4 sans-serif;cursor:pointer}.chat-history-control:disabled{opacity:.6;cursor:wait}
+.chat-history-feedback{padding:12px;text-align:center;color:var(--text-sub);font-size:.75rem}.chat-history-feedback button{margin:8px auto 0}
+@media(prefers-reduced-motion:reduce){#unreadMessagesBanner.preview-enter{animation:none}}
+
+</style>
 </head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
@@ -11868,46 +11883,7 @@ window.renderNFTBlockchainReference = raw => {
         const chatContent = document.getElementById('chat-content');
         const myUid = localStorage.getItem('uid');
 
-        let cachedMessages = mode === 'global' ? window.localChatCache.global : window.localChatCache.private[targetUid];
-        let loaded = false;
-        const roomToken = localStorage.getItem('token');
-
-        if (cachedMessages && cachedMessages.length > 0) {
-            window.renderChatMessages(cachedMessages);
-            if (mode === 'private') {
-                const result = await window.fetchAPI('/chat/read-private', 'POST', { target: targetUid });
-                loaded = result.success === true;
-                if (!loaded) window.showToast(result.message || 'Unread reset failed.', true);
-            } else loaded = true;
-        } else {
-            chatContent.innerHTML = '<div style="text-align:center; padding:20px; color:var(--text-sub);"><i class="fas fa-spinner fa-spin"></i> Loading messages...</div>';
-            const roomData = await window.fetchAPI(`/chat/messages?mode=${mode}&target=${targetUid}&uid=${myUid}`);
-            if (myUid !== localStorage.getItem('uid') || roomToken !== localStorage.getItem('token')) return;
-            if (roomData.success && roomData.data) {
-                loaded = true;
-                if (mode === 'global') {
-                    const rows = new Map(roomData.data.map(m => [m.id, m]));
-                    for (const m of window.localChatCache.global) rows.set(m.id, m);
-                    window.localChatCache.global = [...rows.values()];
-                } else window.localChatCache.private[targetUid] = roomData.data;
-                if (window.currentChatMode === mode && window.activePrivateUid === targetUid) {
-                    window.renderChatMessages(mode === 'global' ? window.localChatCache.global : roomData.data);
-                }
-            } else window.showToast(roomData.message || 'Could not load chat.', true);
-        }
-
-        if (!loaded || mode !== 'private' || myUid !== localStorage.getItem('uid') ||
-            roomToken !== localStorage.getItem('token')) return;
-        const friendRow = document.getElementById(`friend-row-${targetUid}`);
-        const badge = friendRow?.querySelector('.unread-badge');
-        const unread = Math.max(0, Number(badge?.innerText) || 0);
-        badge?.remove();
-        const headBadge = document.getElementById('chat-head-badge');
-        if (headBadge) {
-            const remaining = Math.max(0, (Number(headBadge.innerText) || 0) - unread);
-            headBadge.innerText = remaining;
-            headBadge.style.display = remaining ? 'flex' : 'none';
-        }
+        await window.ChatHistory.open({mode,target:targetUid,uid:myUid});
     };
 
     window.escapeChatDisplay = value => String(value ?? '').replace(/[&<>"']/g, character => ({
@@ -12478,8 +12454,8 @@ window.renderNFTBlockchainReference = raw => {
     const origShow=window.showChatList,origToggle=window.toggleChatWindow,origOpen=window.openChatRoom;
     const clearSession=window.clearDashboardSession;
     window.clearDashboardSession=()=>{roomVersion++;stopLive();releaseFiles();deleted.clear();window.exitSelectMode();window.localChatCache={global:[],private:{}};window.chat15Friends=[];window.unreadChatCount=0;if($('chat-content'))$('chat-content').replaceChildren();return clearSession?.();};
-    window.showChatList=()=>{roomVersion++;stopLive();releaseFiles();window.exitSelectMode();origShow();};
-    window.toggleChatWindow=()=>{const closing=$('chat-window')?.style.display==='flex';if(closing){roomVersion++;stopLive();window.exitSelectMode();releaseFiles();}origToggle();};
+    window.showChatList=()=>{window.ChatHistory?.invalidate();roomVersion++;stopLive();releaseFiles();window.exitSelectMode();origShow();};
+    window.toggleChatWindow=()=>{const closing=$('chat-window')?.style.display==='flex';if(closing){window.ChatHistory?.invalidate();roomVersion++;stopLive();window.exitSelectMode();releaseFiles();}origToggle();};
     window.openChatRoom=async(mode,name,avatar='',target='')=>{
         if(!['global','private'].includes(mode)||(mode==='private'&&!valid(target)))return;
         const version=++roomVersion,s=current();stopLive();releaseFiles();window.exitSelectMode();presence={online:false,lastActive:0};
@@ -12506,7 +12482,7 @@ window.renderNFTBlockchainReference = raw => {
         const bubble=$('typing-bubble');if(bubble)bubble.style.display=typing?'flex':'none';
     }
     function watch(){if(window.currentChatMode==='private'&&$('chat-window')?.style.display==='flex'&&!document.hidden)window.socket?.emit('chat_v15_watch',{target:window.activePrivateUid});}
-    async function readRoom(){const s=current();if(s.mode!=='private'||!live(s)||document.hidden||$('chat-window')?.style.display!=='flex'||$('active-chat-view')?.style.display==='none')return;try{const result=await window.fetchAPI('/chat/v15/read','POST',{mode:'private',target:s.target});if(result.success&&same(s)){const f=(window.chat15Friends||[]).find(f=>f.uid===s.target);if(f){window.unreadChatCount=Math.max(0,(window.unreadChatCount||0)-(Number(f.unreadCount)||0));f.unreadCount=0;window.updateSuperBadge();}}}catch(_){} }
+    async function readRoom(){return window.ChatHistory?.markVisible();}
     const fallbackAvatar='data:image/svg+xml;base64,'+btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#152b3d"/><circle cx="24" cy="17" r="8" fill="#55dff5"/><path d="M8 44c0-18 32-18 32 0" fill="#55dff5"/></svg>');
     document.addEventListener('error',event=>{const img=event.target;if(img?.tagName==='IMG'&&img.closest('#chat-window')&&img.src!==fallbackAvatar)img.src=fallbackAvatar;},true);
     window.renderChatMessages=messages=>{
@@ -12606,7 +12582,7 @@ window.renderNFTBlockchainReference = raw => {
         window.socket.on('chat_v15_typing',notice=>{if(notice?.uid!==current().target||current().mode!=='private'||!live(current()))return;typing=notice.typing===true;clearTimeout(typingTimer);renderPresence();typingTimer=setTimeout(()=>{typing=false;renderPresence();},3500);});
         window.socket.on('chat_v15_read',notice=>{const s=current();if(!live(s)||!valid(notice?.uid)||!Array.isArray(notice.ids))return;const scope={...s,mode:'private',target:notice.uid};setRows(scope,rows(scope).map(m=>notice.ids.includes(m.id)?{...m,status:'read'}:m));if(same(scope))window.renderChatMessages(rows(scope));});
         window.socket.on('chat_v15_private_sent',()=>window.friendScheduleRefresh());
-        window.socket.on('connect',()=>{watch();if(window.currentChatMode==='private')void readRoom();});
+        window.socket.on('connect',()=>{watch();});
         window.socket.on('disconnect',()=>{stopLive();presence.online=false;statusWord='';renderPresence();});
         window.socket.on('session_error',()=>{roomVersion++;stopLive();releaseFiles();window.exitSelectMode();window.localChatCache={global:[],private:{}};if($('chat-content'))$('chat-content').replaceChildren();});
     }
@@ -15085,14 +15061,14 @@ window.renderNFTBlockchainReference = raw => {
     };
     const originalOpen=window.openChatRoom;
     window.openChatRoom=async(mode,name,avatar='',id='')=>{
-        const version=++profileEpoch,s=context();let fresh=null;liveTypingUntil=0;clearTimeout(statusStop);if($('dmAbdarCapsule'))setCapsule($('dmAbdarCapsule'),'');if($('h-status-svg-container')){const el=$('h-status-svg-container');el.dataset.lastOnline='false';delete el.dataset.lastActive;delete el.dataset.statusLabel;}
+        const version=++profileEpoch,s=context();window.ChatHistory?.invalidate();const navigationEpoch=window.ChatHistory?.generation;let fresh=null;liveTypingUntil=0;clearTimeout(statusStop);if($('dmAbdarCapsule'))setCapsule($('dmAbdarCapsule'),'');if($('h-status-svg-container')){const el=$('h-status-svg-container');el.dataset.lastOnline='false';delete el.dataset.lastActive;delete el.dataset.statusLabel;}
         if(mode==='private'){
             const cached=store.get(id);if(cached){name=cached.name;avatar=cached.avatar;}
-            const profile=await fetchProfile(id).catch(()=>null);fresh=profile;if(version!==profileEpoch||!live(s))return;
+            const profile=await fetchProfile(id).catch(()=>null);fresh=profile;if(version!==profileEpoch||!live(s)||navigationEpoch!==window.ChatHistory?.generation)return;
             if(profile){const resolved=store.get(id)||profile;name=resolved.name;avatar=resolved.avatar;}
         }
-        if(version!==profileEpoch)return;await originalOpen(mode,name,avatar,id);
-        if(version!==profileEpoch||!live(s))return;if(mode==='private'){const p=store.get(id);if(p&&fresh)applyProfile(p);else setCapsule($('dmAbdarCapsule'),'');paintStatus({uid:id});}
+        if(version!==profileEpoch||navigationEpoch!==window.ChatHistory?.generation)return;await originalOpen(mode,name,avatar,id);
+        if(version!==profileEpoch||!live(s)||window.currentChatMode!==mode||(mode==='private'&&window.activePrivateUid!==id))return;if(mode==='private'){const p=store.get(id);if(p&&fresh)applyProfile(p);else setCapsule($('dmAbdarCapsule'),'');paintStatus({uid:id});}
     };
     function restore(id){const state=pending.get(id);if(!state)return;clearTimeout(state.timer);pending.delete(id);state.area.replaceWith(...state.nodes);state.card.classList.remove('friend-card-collapsing');}
     async function commitRemoval(id,state){
@@ -15234,9 +15210,10 @@ window.renderNFTBlockchainReference = raw => {
     const proofs=new Map(),flights=new Map();let epoch=0,requestVersion=0,openVersion=0,unreadFlight=null;
     function proof(id){const p=proofs.get(id);return p&&Date.now()-p.checked<60000?p:null;}
     function setBadge(el,verified){el.hidden=verified!==true;}
+    function headerBadgeHost(){const host=$('normal-chat-header');host?.classList.add('has-verified-anchor');return host||$('active-chat-title').parentElement;}
     function headerBadge(id){
         const parent=$('active-chat-title')?.parentElement;if(!parent)return;
-        let el=$('dmVerifiedBadge');if(!el){el=document.createElement('span');el.id='dmVerifiedBadge';el.className='tcm-verified-badge';el.innerHTML=badgeSVG+'TCM Verified';parent.appendChild(el);}
+        let el=$('dmVerifiedBadge');if(!el){el=document.createElement('span');el.id='dmVerifiedBadge';el.className='tcm-verified-badge';el.innerHTML=badgeSVG+'Verified';headerBadgeHost().appendChild(el);}
         setBadge(el,window.currentChatMode==='private'&&proof(id)?.verified===true);
     }
     async function verifiedProfile(id){
@@ -15256,7 +15233,7 @@ window.renderNFTBlockchainReference = raw => {
         const queue=ids.map((id,i)=>({id,card:cards[i]}));
         // Bounded four-request concurrency, existing request list and directory pagination preserved.
         async function drain(){while(queue.length&&generation===requestVersion){const {id,card}=queue.shift();if(!card||!valid(id))continue;
-            const el=document.createElement('span');el.className='tcm-verified-badge';el.hidden=true;el.innerHTML=badgeSVG+'TCM Verified';card.firstElementChild?.appendChild(el);
+            const el=document.createElement('span');el.className='tcm-verified-badge';el.hidden=true;el.innerHTML=badgeSVG+'Verified';card.firstElementChild?.appendChild(el);
             const p=await verifiedProfile(id);if(generation===requestVersion&&el.isConnected)setBadge(el,p?.verified);
         }}for(let i=0;i<4;i++)void drain();
     };
@@ -15271,8 +15248,8 @@ window.renderNFTBlockchainReference = raw => {
     const peers=new Map();
     function ingestFriends(rows){peers.clear();for(const f of rows||[])if(valid(f.uid))peers.set(f.uid,{...f,unreadCount:Math.max(0,Math.trunc(Number(f.unreadCount)||0))});}
     function banner(){
-        const el=$('unreadMessagesBanner');if(!el)return;const count=live(session())?Math.max(0,Math.trunc(Number(window.unreadChatCount)||0)):0;
-        el.hidden=!count;$('unreadMessagesTotal').textContent=String(count);el.setAttribute('aria-label',count+' unread messages. Open latest unread conversation.');
+        const count=live(session())?Math.max(0,Math.trunc(Number(window.unreadChatCount)||0)):0;
+        window.ChatHistory?.preview([...peers.values()],count);
     }
     const update=window.updateSuperBadge;window.updateSuperBadge=()=>{update();banner();};
     const renderFriends=window.chat15RenderFriends;window.chat15RenderFriends=rows=>{ingestFriends(rows);renderFriends(rows);banner();};
@@ -15316,16 +15293,17 @@ window.renderNFTBlockchainReference = raw => {
         }
         return changed;
     }
-    function clearUnread(target){
+    function clearUnread(target,remaining=0){
         if(!valid(target))return;const f=(window.chat15Friends||[]).find(f=>f.uid===target),p=peers.get(target),amount=Math.max(0,Number(f?.unreadCount??p?.unreadCount)||0);
-        if(f)f.unreadCount=0;if(p)p.unreadCount=0;window.unreadChatCount=Math.max(0,(Number(window.unreadChatCount)||0)-amount);window.updateSuperBadge();
+        remaining=Math.max(0,Number(remaining)||0);if(f)f.unreadCount=remaining;if(p)p.unreadCount=remaining;window.unreadChatCount=Math.max(0,(Number(window.unreadChatCount)||0)-amount+remaining);window.updateSuperBadge();
     }
+    window.applyChatUnread=clearUnread;
     if(window.socket){
         window.socket.on('receive_new_message',m=>{recordIncoming(m);acknowledge(m,m?.senderUid);});
         window.socket.on('chat_v15_message',m=>{if(m?.mode==='private'){recordIncoming(m);acknowledge(m,m.senderUid);}});
         window.socket.on('chat_v15_delivered',notice=>receiptNotice(notice,'delivered'));
         window.socket.on('chat_v15_read',notice=>receiptNotice(notice,'read'));
-        window.socket.on('chat_v15_unread_cleared',notice=>{if(live(session()))clearUnread(notice?.target);});
+        window.socket.on('chat_v15_unread_cleared',notice=>{if(live(session()))clearUnread(notice?.target,notice?.unreadCount);});
         window.socket.on('EVT_USER_PROFILE_UPDATED',p=>{if(!live(session())||!valid(p?.uid))return;proofs.set(p.uid,{verified:p.verifiedAdmin===true,checked:Date.now()});while(proofs.size>500)proofs.delete(proofs.keys().next().value);if(window.activePrivateUid===p.uid)headerBadge(p.uid);window.renderFriendRequests();});
         window.socket.on('disconnect',()=>{const el=$('h-status-svg-container');if(el){el.dataset.lastOnline='false';delete el.dataset.lastActive;delete el.dataset.statusLabel;}window.refreshChatPresence?.();});
         window.socket.on('connect',()=>{void refreshUnread();if(window.currentChatMode==='private'){const id=window.activePrivateUid;proofs.delete(id);void verifiedProfile(id).then(()=>{if(window.activePrivateUid===id)headerBadge(id);});}});
@@ -15340,6 +15318,103 @@ window.renderNFTBlockchainReference = raw => {
     ingestFriends(window.chat15Friends);banner();if(live(session()))void refreshUnread();
 })();
 /* LUXURY R3 END */
+/* LUXURY R4 START */
+(() => {
+    'use strict';
+    const $=id=>document.getElementById(id),valid=id=>typeof id==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(id);
+    const session=()=>({uid:localStorage.getItem('uid'),token:localStorage.getItem('token')});
+    const live=s=>s.uid&&s.token&&s.uid===localStorage.getItem('uid')&&s.token===localStorage.getItem('token')&&!window.dashboardSession?.closed&&!window.dashboardSession?.blocked;
+    let epoch=0,state=null,readTimer=null,previewEpoch=0,previewTarget=null;
+    const previews=new Map(),previewFlights=new Map();
+    const current=s=>s===state&&s.epoch===epoch&&live(s)&&window.currentChatMode===s.mode&&(window.activePrivateUid||'')===s.target;
+    const visible=s=>current(s)&&!document.hidden&&$('chat-window')?.style.display==='flex'&&$('active-chat-view')?.style.display!=='none';
+    const rows=s=>s.mode==='global'?window.localChatCache.global:window.localChatCache.private[s.target]||[];
+    function save(s,value){if(s.mode==='global')window.localChatCache.global=value;else window.localChatCache.private[s.target]=value;}
+    function merge(s,incoming){
+        const ranks={sent:0,delivered:1,read:2},map=new Map(rows(s).map(m=>[m.id,m]));
+        for(const m of incoming||[]){if(!m||!valid(m.id))continue;const old=map.get(m.id);map.set(m.id,{...old,...m,status:(ranks[old?.status]??-1)>(ranks[m.status]??-1)?old.status:m.status});}
+        save(s,[...map.values()].sort((a,b)=>window.chatTimestamp(a.timestamp)-window.chatTimestamp(b.timestamp)));
+    }
+    function invalidate(){epoch++;state=null;clearTimeout(readTimer);readTimer=null;$('chat-history-older')?.remove();$('chat-history-feedback')?.remove();}
+    function control(s){
+        $('chat-history-older')?.remove();$('chat-history-feedback')?.remove();const box=$('chat-content');if(!box||!current(s))return;
+        if(s.error){const info=document.createElement('div');info.id='chat-history-feedback';info.className='chat-history-feedback';info.setAttribute('role','status');info.textContent=s.error;
+            const retry=document.createElement('button');retry.type='button';retry.className='chat-history-control';retry.textContent='Retry loading messages';retry.onclick=()=>void load(s,false);info.appendChild(retry);box.prepend(info);}
+        if(s.hasMore){const button=document.createElement('button');button.id='chat-history-older';button.type='button';button.className='chat-history-control';button.textContent=s.loadingOlder?'Loading…':'Load older messages';button.disabled=s.loadingOlder;button.onclick=()=>void load(s,true);box.prepend(button);}
+    }
+    function render(s){if(current(s)){window.renderChatMessages(rows(s));control(s);}}
+    function scheduleRead(){clearTimeout(readTimer);readTimer=setTimeout(()=>{readTimer=null;void markVisible();},90);}
+    async function load(s,older=false){
+        if(!current(s)||older&&(!s.hasMore||s.loadingOlder)||!older&&s.syncing)return;
+        if(older)s.loadingOlder=true;else{s.syncing=true;s.loaded=false;}s.error='';control(s);
+        const box=$('chat-content'),height=box.scrollHeight,top=box.scrollTop;
+        try{
+            const endpoint='/chat/v15/history?mode='+encodeURIComponent(s.mode)+'&target='+encodeURIComponent(s.target)+(older?'&before='+encodeURIComponent(s.cursor):'');
+            const result=await window.fetchAPI(endpoint);if(!current(s))return;
+            if(!result.success||!Array.isArray(result.data))throw Error(result.message||'Messages could not load. Please retry.');
+            merge(s,result.data);s.loaded=true;s.syncing=false;s.loadingOlder=false;
+            if(!older&&!s.paged||older){s.hasMore=result.hasMore===true;s.cursor=typeof result.nextCursor==='string'?result.nextCursor:'';}
+            if(older)s.paged=true;render(s);
+            if(older)box.scrollTop=top+(box.scrollHeight-height);else if(!s.paged)box.scrollTop=box.scrollHeight;
+            scheduleRead();
+        }catch(error){if(current(s)){s.syncing=false;s.loadingOlder=false;s.error=error.message||'Messages could not load. Please retry.';control(s);}}
+    }
+    async function open({mode,target='',uid}){
+        invalidate();const identity=session();if(!live(identity)||identity.uid!==uid)return;
+        const s={...identity,epoch,mode,target,loaded:false,syncing:false,hasMore:false,cursor:'',paged:false,loadingOlder:false,error:'',reading:new Set(),examined:new Set()};state=s;
+        const box=$('chat-content');box.dataset.renderedChat='';
+        if(rows(s).length)render(s);else{box.replaceChildren();const el=document.createElement('p');el.className='chat-history-feedback';el.textContent='Loading messages…';box.appendChild(el);}
+        await load(s,false);
+    }
+    async function markVisible(){
+        const s=state;if(!s||!visible(s)||!s.loaded||s.syncing||s.mode!=='private'||window.socket?.connected===false)return;
+        const box=$('chat-content'),bounds=box.getBoundingClientRect();if(bounds.height<=0||bounds.width<=0)return;
+        const ids=rows(s).filter(m=>{if(m.senderUid!==s.target||m.status==='read'||s.reading.has(m.id)||s.examined.has(m.id)||(m.deletedFor||[]).includes(s.uid))return false;
+            const node=$('msg-'+m.id);if(!node||node.classList.contains('message-fade-collapse'))return false;const rect=node.getBoundingClientRect();return rect.height>0&&rect.bottom>bounds.top&&rect.top<bounds.bottom;
+        }).slice(0,50).map(m=>m.id);if(!ids.length)return;for(const id of ids)s.reading.add(id);
+        try{const result=await window.fetchAPI('/chat/v15/read','POST',{mode:'private',target:s.target,msgIds:ids});if(!current(s)||!result.success)return;
+            for(const id of ids)s.examined.add(id);const read=new Set(result.confirmedIds||result.ids||[]);for(const m of rows(s))if(read.has(m.id))m.status='read';
+            window.applyChatUnread?.(s.target,result.unreadCount);render(s);
+        }catch(_){}finally{for(const id of ids)s.reading.delete(id);}
+    }
+    function recover(){const s=state;if(s&&visible(s))void load(s,false);}
+    const originalRender=window.renderChatMessages;window.renderChatMessages=messages=>{const value=originalRender(messages);if(state&&current(state)){control(state);if(state.loaded&&!state.syncing)scheduleRead();}return value;};
+    const box=$('chat-content');box?.addEventListener('scroll',()=>{scheduleRead();if(box.scrollTop<30&&state?.hasMore)void load(state,true);},{passive:true});box?.addEventListener('load',scheduleRead,true);
+    const banner=$('unreadMessagesBanner');if(banner){banner.replaceChildren();const name=document.createElement('span');name.className='unread-preview-name';const text=document.createElement('span');text.className='unread-preview-message';banner.append(name,text);banner.hidden=true;
+        banner.onclick=async()=>{const target=previewTarget,s=session();if(!target||!live(s)||banner.disabled)return;banner.disabled=true;
+            try{$('chat-window').style.display='flex';await window.openChatRoom('private',target.name,target.avatar,target.uid);}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}finally{banner.disabled=false;}};
+    }
+    function showPreview(friend,m,generation){
+        if(generation!==previewEpoch||!banner)return;const text=m?.fileId?(m.fileType?.startsWith('image/')?'Sent a photo':m.fileName||'Sent an attachment'):m?.message;
+        if(typeof text!=='string'||!text.trim()){banner.hidden=true;previewTarget=null;return;}
+        const signature=friend.uid+':'+m.id+':'+text,changed=banner.dataset.preview!==signature;
+        banner.dataset.preview=signature;banner.querySelector('.unread-preview-name').textContent=window.usersStore?.get(friend.uid)?.name||friend.name||'TCM member';banner.querySelector('.unread-preview-message').textContent=text;
+        banner.setAttribute('aria-label','Open unread message from '+(friend.name||'TCM member'));banner.hidden=false;previewTarget=friend;
+        if(changed){banner.classList.remove('preview-enter');requestAnimationFrame(()=>{if(generation===previewEpoch)banner.classList.add('preview-enter');});}
+    }
+    async function preview(friends,count){
+        const generation=++previewEpoch,s=session();if(!banner||!live(s)||!count){if(banner)banner.hidden=true;previewTarget=null;return;}
+        const candidates=(friends||[]).filter(f=>valid(f.uid)&&Number(f.unreadCount)>0).sort((a,b)=>window.chatTimestamp(b.lastMsgTime)-window.chatTimestamp(a.lastMsgTime));
+        if(!candidates.length){banner.hidden=true;previewTarget=null;return;}const friend=candidates[0];
+        const local=(window.localChatCache.private[friend.uid]||[]).filter(m=>m.senderUid===friend.uid&&m.status!=='read'&&!(m.deletedFor||[]).includes(s.uid)).sort((a,b)=>window.chatTimestamp(b.timestamp)-window.chatTimestamp(a.timestamp))[0];
+        if(local&&window.chatTimestamp(local.timestamp)>=window.chatTimestamp(friend.lastMsgTime)){showPreview(friend,local,generation);return;}
+        const key=friend.uid+':'+friend.unreadCount+':'+window.chatTimestamp(friend.lastMsgTime),cached=previews.get(key);
+        if(cached&&Date.now()-cached.at<15000){showPreview(friend,cached.message,generation);return;}
+        try{
+            let flight=previewFlights.get(key);if(!flight){flight=window.fetchAPI('/chat/v15/preview?target='+encodeURIComponent(friend.uid));previewFlights.set(key,flight);}
+            const result=await flight;if(!live(s)||generation!==previewEpoch)return;
+            if(!result.success)throw Error();previews.set(key,{message:result.data,at:Date.now()});while(previews.size>100)previews.delete(previews.keys().next().value);showPreview(friend,result.data,generation);
+        }catch(_){if(generation===previewEpoch){banner.hidden=true;previewTarget=null;}}finally{previewFlights.delete(key);}
+    }
+    function dispose(){invalidate();previewEpoch++;previews.clear();previewFlights.clear();previewTarget=null;if(banner)banner.hidden=true;}
+    window.ChatHistory=Object.freeze({open,invalidate,markVisible,preview,recover,get generation(){return epoch;}});
+    if(window.socket){window.socket.on('connect',recover);window.socket.on('disconnect',()=>{if(state){state.loaded=false;state.syncing=false;}});window.socket.on('session_error',dispose);}
+    document.addEventListener('visibilitychange',()=>{if(!document.hidden)recover();});window.addEventListener('pageshow',recover);window.addEventListener('pagehide',dispose);window.addEventListener('storage',e=>{if(e.key==='uid'||e.key==='token')dispose();});
+    const clearSession=window.clearDashboardSession;window.clearDashboardSession=()=>{dispose();return clearSession();};
+    window.updateSuperBadge();
+})();
+/* LUXURY R4 END */
+
 
 
 </script>
