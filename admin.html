@@ -315,13 +315,13 @@
                     <h3 class="text-sm font-bold text-white">Import &amp; Publish Minted NFT</h3>
                     <span class="text-xs font-bold text-emerald-400">BSC MAINNET · CHAIN 56</span>
                 </div>
-                <p class="text-xs text-slate-400 mb-4">Import the Gallery candidate exported after minting. Choose Level and reservation price, verify, then approve the preview. No terminal or per-NFT deployment is needed.</p>
+                <p class="text-xs text-slate-400 mb-4">Import the Gallery candidate exported after minting. Choose the initial Level and reservation price, verify, then approve the preview. Existing grown prices are preserved. No terminal or per-NFT deployment is needed.</p>
                 <label class="block text-xs text-slate-300 mb-4">1. Gallery candidate JSON (maximum 32 KB)
                     <input data-nft-import="file" type="file" accept=".json,application/json" class="block w-full mt-2 text-xs">
                 </label>
                 <p data-nft-import="identity" class="text-xs text-slate-300 break-words mb-4">No candidate imported.</p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label class="text-xs text-slate-300">2. Reservation level
+                    <label class="text-xs text-slate-300">2. Initial reservation level
                         <select data-nft-import="level" class="block w-full bg-slate-900 text-white rounded border border-slate-600 p-2 mt-2">
                             <option value="">Choose level</option><option value="1">Level 1 · 50–500 USDT</option>
                             <option value="2">Level 2 · 500–2,000 USDT</option><option value="3">Level 3 · 2,000–5,000 USDT</option>
@@ -329,7 +329,7 @@
                             <option value="6">Level 6 · 20,000+ USDT</option>
                         </select>
                     </label>
-                    <label class="text-xs text-slate-300">Reservation price (USDT)
+                    <label class="text-xs text-slate-300">Initial reservation price (USDT)
                         <input data-nft-import="price" type="text" inputmode="decimal" autocomplete="off" maxlength="17" placeholder="Example: 2001" class="block w-full bg-slate-900 text-white rounded border border-slate-600 p-2 mt-2">
                     </label>
                 </div>
@@ -3328,7 +3328,7 @@ window.addEventListener('storage', event => {
                     reviewId: saved.data.reviewId, planSHA256: saved.data.planSHA256 });
                 const expected = 'BSC_56_' + contract.slice(2) + '_' + a.tokenId;
                 if (!currentSession() || data?.id !== expected || data.assetId !== a.assetId || typeof data.status !== 'string') throw Error('Unexpected publication response. Check the same listing before retrying.');
-                status((data.alreadyPublished ? 'Already published' : 'Published') + ' | ' + a.assetId + ' | Level ' + saved.level + ' | ' + saved.price +
+                status((data.alreadyPublished ? 'Already published' : 'Published') + ' | ' + a.assetId + ' | Level ' + (data.currentLevel ?? saved.level) + ' | ' + (data.currentPrice ?? saved.price) +
                     ' USDT | Current status: ' + data.status + '. No mint, ownership transfer or financial credit occurred.');
                 el('approve').checked = false;
             } catch (err) { status('Publication not confirmed: ' + err.message + ' Keep this candidate. Retry the same preview if the response was interrupted; do not mint again.'); }
@@ -3481,8 +3481,8 @@ window.addEventListener('storage', event => {
             busy = true; controls();
             try {
                 const { result } = await request('/api/admin/nft-mainnet/publish', 'POST', { assetId: asset.assetId, level: asset.level, price: String(asset.price) });
-                status((result.data.alreadyPublished ? 'Already published' : 'Published') + ' | ' + asset.assetId + ' | Level ' + asset.level +
-                    ' | ' + asset.price + ' USDT | Current status: ' + result.data.status + '. No mint, ownership transfer or financial credit occurred.');
+                status((result.data.alreadyPublished ? 'Already published' : 'Published') + ' | ' + asset.assetId + ' | Level ' + (result.data.currentLevel ?? asset.level) +
+                    ' | ' + (result.data.currentPrice ?? asset.price) + ' USDT | Current status: ' + result.data.status + '. No mint, ownership transfer or financial credit occurred.');
             } catch (error) { status('Publication not confirmed: ' + error.message + ' Verify and retry the same listing if the response was interrupted.'); }
             finally { busy = false; controls(); }
         });

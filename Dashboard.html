@@ -7904,6 +7904,10 @@ window.scheduleDashboardSocketReconnect = () => {
         return money(raw.Balance_Old) + ' → ' + money(raw.Balance_New);
     };
     const savedProfit = raw => {
+        if (raw && [raw.Gross_micro,raw.Fee_micro,raw.Net_micro].every(v=>typeof v==='string'&&/^\d{1,16}$/.test(v))) {
+            const g=BigInt(raw.Gross_micro), f=BigInt(raw.Fee_micro), n=BigInt(raw.Net_micro);
+            if(g-f===n)return {gross:Number(g)/1e6,fee:Number(f)/1e6,net:Number(n)/1e6};
+        }
         if (typeof raw?.Details !== 'string') return null;
         const m = raw.Details.match(/^Gross:\s*(\d+(?:\.\d+)?)\s*\|\s*Fee:\s*-?(\d+(?:\.\d+)?)\s*\|\s*Net:\s*\+?(\d+(?:\.\d+)?)\s*$/);
         return m ? {gross:m[1],fee:m[2],net:m[3]} : null;
@@ -7921,6 +7925,18 @@ window.scheduleDashboardSocketReconnect = () => {
         let html = `<div class="tcm-detail-hero">${image(info.image,info.nft,'tcm-detail-art')}<div><h4>${esc(info.nft)}</h4><span>${level === undefined ? 'Level not recorded' : 'Level '+esc(level)}</span><br><strong>${esc(status)}</strong></div></div>`;
         html += section('Platform order',row('Order ID',info.order || 'Not recorded') + `<button type="button" class="tcm-copy-button" data-tcm-copy="${esc(info.order || '')}">Copy order ID</button>` + row('Reserved',stamp(reserve?.timestamp || reserve?.Date || (info.active ? info.reservedAt : info.kind === 'reserve' ? raw.timestamp || raw.Date : null))) + (settled ? row('Settled',stamp(sale?.timestamp || sale?.Date || raw.timestamp || raw.Date)) : '') + '<p class="tcm-detail-note">Times shown in India Standard Time (IST).</p>');
         html += section(settled ? 'Settlement breakdown' : 'Reservation details',row('Principal',principal) + (settled ? row('Gross profit',money(profit?.gross)) + row('Trading fee (21%)',money(profit?.fee)) + row('Net profit',money(profit?.net)) + row('Total credited',money(sale?.Amount ?? raw.Amount),'tcm-total-row') : info.active ? row('Est. net profit',money(info.estimated)) + '<p class="tcm-detail-note">Estimate only. The completed settlement record determines the final amount.</p>' : ''));
+        const growth = sale?.Price_Growth || (info.kind === 'sale' ? raw.Price_Growth : null);
+        if (growth?.Version === 1 && growth.Policy_Version === 2 &&
+            [growth.Price_Before_micro,growth.Price_After_micro,growth.Growth_micro].every(v=>typeof v==='string'&&/^\d{1,31}$/.test(v))) {
+            html += section('Next platform reservation price',row('Price before',microMoney(growth.Price_Before_micro)) +
+                row('Growth allocation (3% of gross)',microMoney(growth.Growth_micro)) + row('Next price',microMoney(growth.Price_After_micro)) +
+                row('Level','Level '+growth.Level_Before+' → Level '+growth.Level_After) +
+                '<p class="tcm-detail-note">This changes the next off-chain reservation quote. It is not an on-chain sale, market appraisal or an extra credit to your wallet.</p>');
+        }
+        if (snapshot?.Price_Policy?.Version === 2 || sale?.Price_Policy?.Version === 2) {
+            html += section('Saved fee allocation',row('Of gross profit','A 9% · B 6% · C 3% · Price growth 3%') +
+                '<p class="tcm-detail-note">Total fee 21%. Exact amounts are stored in micro-units. Missing team shares are recorded in the system allocation ledger.</p>');
+        }
         html += section('Main Balance movement',row('Reservation',balance(reserve || (info.kind === 'reserve' ? raw : null))) + (settled ? row('Settlement',balance(sale || raw)) : '') + '<p class="tcm-detail-note">Only saved Main Balance snapshots are displayed. Missing snapshots are not reconstructed from your current balance.</p>');
         if (isChain(ref)) {
             const metadata = metadataLink(ref);
@@ -7974,7 +7990,19 @@ window.scheduleDashboardSocketReconnect = () => {
 })();
 /* NFT PRESENTATION END */
 
- window.closeScanAndGoToCollection = () => {
+ window.nftPolicyNetEstimate = function(nft) {
+    if (nft?.Price_Policy?.Version !== 2) {
+        const gross=nft.price*(window.LEVEL_PROFIT_RATES[nft.level||1]||0);return (gross*.79).toFixed(2);
+    }
+    try {
+        const text=String(nft.price);if(!/^\d+(?:\.\d{1,6})?$/.test(text))return '—';
+        const [w,f='']=text.split('.'), p=BigInt(w)*1000000n+BigInt(f.padEnd(6,'0'));
+        const rates=[0n,130n,180n,230n,280n,330n,380n], rate=rates[nft.level];
+        if(!rate)return '—';const gross=((p*rate+50000000n)/100000000n)*10000n;
+        return (Number(gross*79n/100n)/1e6).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:6,useGrouping:false});
+    }catch{return '—';}
+};
+window.closeScanAndGoToCollection = () => {
     window.closeModal("nftScanModal");
     if(!window.reservedNFT) return;
 
@@ -7985,7 +8013,7 @@ window.scheduleDashboardSocketReconnect = () => {
 
         let nftObj = window.reservedNFT;
         let estGross = nftObj.price * (window.LEVEL_PROFIT_RATES[nftObj.level || 1] || 0);
-        let estNet = (estGross - (estGross * 0.21)).toFixed(2);
+        let estNet = window.nftPolicyNetEstimate(nftObj);
         let docDateObj = new Date(nftObj.timestamp);
         let dateBadgeStr = `<div style="margin-top: 6px;"><span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.55rem; color: #f59e0b;">Date: ${docDateObj.getFullYear()}-${String(docDateObj.getMonth()+1).padStart(2,'0')}-${String(docDateObj.getDate()).padStart(2,'0')}</span></div>`;
 
@@ -8388,6 +8416,7 @@ window.renderNFTBlockchainReference = raw => {
                      orderId: data.Order_ID,
                      docId: data.docId || data.id || "",
                      Blockchain: data.Blockchain || null,
+                     Price_Policy: data.Reservation?.Price_Policy || data.Price_Policy || null,
                      level: parseInt(data.NFT_Level || window.getSafeUserData().Rank || 1),
                      timestamp: window.parseSafeTimestamp(data.timestamp || data.Date) || Date.now()
                  };
@@ -8397,7 +8426,7 @@ window.renderNFTBlockchainReference = raw => {
                  activeCount++;
 
                  let estGross = nftObj.price * (window.LEVEL_PROFIT_RATES[nftObj.level || 1] || 0);
-                 let estNet = (estGross - (estGross * 0.21)).toFixed(2);
+                 let estNet = window.nftPolicyNetEstimate(nftObj);
                  let docDateObj = new Date(nftObj.timestamp);
                  let dateBadgeStr = (docDateObj < boundaryTime) ? `<div style="margin-top: 6px;"><span style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 6px; padding: 2px 6px; font-size: 0.55rem; color: #f59e0b;">Date: ${docDateObj.getFullYear()}-${String(docDateObj.getMonth()+1).padStart(2,'0')}-${String(docDateObj.getDate()).padStart(2,'0')}</span></div>` : '';
 
