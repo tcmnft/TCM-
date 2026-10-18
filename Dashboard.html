@@ -3621,6 +3621,35 @@
 @media(prefers-reduced-motion:reduce){#unreadMessagesBanner .preview-message-layer,#dashboardPreviewSheet,#dashboardPreviewSheet .preview-sheet-panel{transition:none}}
 
 </style>
+<style id="luxury-r6-styles">
+/* Private/global conversation header: back, identity and one trailing menu. */
+#normal-chat-header{gap:8px!important;align-items:flex-start!important;min-width:0}
+#chat-header-main{min-width:0;gap:8px!important;align-items:flex-start!important;overflow:visible;flex:1 1 0!important}
+#chat-header-main>.fa-arrow-left{margin-top:7px}#chat-header-main>#header-avatar-crater{margin-top:1px}
+#chat-header-main>.name-wrapper,#chat-header-main .name-wrapper{min-width:0;max-width:none!important;white-space:normal;overflow:visible!important}
+#active-chat-title{display:block!important;white-space:normal!important;overflow-wrap:anywhere;word-break:break-word;line-height:1.3;max-width:100%;width:auto!important;text-overflow:clip!important;animation:none!important;transform:none!important}
+#chat-header-actions{margin-left:auto;flex:0 0 28px;justify-content:flex-end;align-self:flex-start;gap:0;min-width:28px}
+#chat-header-actions #unfriend-btn{display:none!important;pointer-events:none}
+#chat-header-actions #dashboardPreviewMenuButton{width:28px;height:36px;padding:0;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0;flex:0 0 28px}
+#chat-header-actions #dashboardPreviewMenuButton[hidden]{display:none!important}
+/* Menu-only Unfriend retains the existing authenticated confirmation flow. */
+#dashboardPreviewSheet .preview-sheet-panel{width:min(100%,340px);padding:18px;border-radius:20px}
+#dashboardPreviewSheet h3{font-size:.92rem;margin:0 0 5px}#dashboardPreviewSheetPeer{margin:0 0 12px;font-size:.72rem;overflow-wrap:anywhere;color:var(--text-main)}
+#dashboardPreviewSheet .dashboard-preview-toggle{font-size:.77rem;margin-top:10px}#dashboardPreviewSheetHelp{font-size:.63rem;margin-top:8px}
+#dashboardPreviewMenuRemove{width:100%;display:block;margin:14px 0 0;padding:9px 12px;border-radius:11px;border:1px solid rgba(239,68,68,.22);background:rgba(239,68,68,.09);color:#ef4444;text-align:left;font:700 .77rem/1.4 sans-serif;cursor:pointer}
+#dashboardPreviewSheet button[data-preview-close]{margin-top:8px;padding:8px;font-size:.76rem}
+/* Shrink the input before compressing attachment/send hit areas. */
+#chat-composer{box-sizing:border-box;align-items:center;gap:8px!important;padding:10px 12px!important;min-width:0;width:100%}
+#chat-composer #chat-input{flex:1 1 0%!important;width:0;min-width:0;box-sizing:border-box;max-width:100%;padding:10px 12px!important}
+#chat-composer #chat-file-upload-btn{flex:0 0 28px;width:28px;padding:4px;box-sizing:border-box}
+#chat-composer #chat-send-button{flex:0 0 38px;width:38px;height:38px;min-width:38px;padding:8px!important;margin:0;box-sizing:border-box;justify-content:center;align-items:center;border-radius:50%}
+#chat-send-button .fa-paper-plane{display:block;width:20px;height:20px;font-size:20px;line-height:20px;text-align:center;flex-shrink:0}
+/* Hide dashboard scroll indicators while preserving touch, wheel and keyboard scrolling. */
+html,body,.main-container,.app-view{scrollbar-width:none;-ms-overflow-style:none}
+html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollbar,.app-view::-webkit-scrollbar{width:0;height:0;display:none}
+@media(max-width:360px){#chat-header-main{gap:6px!important}#header-avatar-crater{width:38px!important;height:38px!important}#active-chat-title{font-size:.88rem!important}#chat-composer{gap:7px!important;padding-right:11px!important}}
+
+</style>
 </head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
@@ -5386,7 +5415,7 @@
 
         <div id="active-chat-view" style="display: none; flex-direction: column; height: 100%; position: relative; overflow: hidden;">
             <div style="padding: 12px 15px; background: var(--bg-main); border-bottom: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; gap: 10px; z-index: 20; position: relative;">
-                <div style="display:flex; align-items:center; gap:10px; flex: 1; min-width: 0; overflow: hidden;">
+                <div id="chat-header-main" style="display:flex; align-items:center; gap:10px; flex: 1; min-width: 0;">
                     <i class="fas fa-arrow-left" onclick="window.showChatList()" style="cursor: pointer; color: var(--primary); font-size: 1.1rem; flex-shrink: 0; padding: 5px;"></i>
                     <div id="header-avatar-crater" class="chat-crater" style="width: 38px; height: 38px; display: none; flex-shrink: 0;">
                         <div class="chat-dp" style="width: 28px; height: 28px;">
@@ -5403,9 +5432,9 @@
                         </div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 12px; align-items: center; flex-shrink: 0;">
-                    <i class="fas fa-user-minus" id="unfriend-btn" style="cursor: pointer; color: var(--error); font-size: 1.1rem; display: none; padding: 5px;" title="Unfriend User"></i>
-                    <i class="fas fa-times" onclick="window.toggleChatWindow()" style="cursor: pointer; color: var(--text-sub); font-size: 1.2rem; padding: 5px;"></i>
+                <div id="chat-header-actions" style="display: flex; align-items: center; flex-shrink: 0;">
+                    <i hidden aria-hidden="true" class="fas fa-user-minus" id="unfriend-btn" style="cursor: pointer; color: var(--error); font-size: 1.1rem; display: none; padding: 5px;" title="Unfriend User"></i>
+                    
                 </div>
             </div>
 
@@ -5415,9 +5444,9 @@
             <div id="chat-content" style="flex: 1; overflow-y: auto !important; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; padding: 15px; display: flex; flex-direction: column; gap: 8px; position: relative; z-index: 1;">
             </div>
 
-            <div style="padding: 10px 15px; display: flex; gap: 10px; border-top: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; z-index: 20; position: relative;">
+            <div id="chat-composer" style="padding: 10px 15px; display: flex; gap: 10px; border-top: 1px solid var(--border); background: var(--bg-card); flex-shrink: 0; z-index: 20; position: relative;">
                 <input type="text" id="chat-input" placeholder="Aa..." style="flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid var(--border); background: var(--bg-main); color: var(--text-main); font-size: 0.9rem !important; outline: none;">
-                <button onclick="window.handleSendMessageAction()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; padding: 5px;"><i class="fas fa-paper-plane"></i></button>
+                <button type="button" id="chat-send-button" aria-label="Send message" onclick="window.handleSendMessageAction()" style="background: none; border: none; color: var(--primary); cursor: pointer; font-size: 1.2rem; display: flex; align-items: center; padding: 5px;"><i class="fas fa-paper-plane"></i></button>
             </div>
         </div>
     </div>
@@ -15470,7 +15499,7 @@ window.renderNFTBlockchainReference = raw => {
     function syncControls(){
         for(const input of document.querySelectorAll('[data-preview-global]')){input.checked=pendingChoice?.kind==='global'?pendingChoice.enabled:prefs.enabled;input.disabled=!ready||busy;}
         for(const input of document.querySelectorAll('[data-preview-peer]')){input.checked=pendingChoice?.kind==='peer'&&pendingChoice.target===sheetPeer?pendingChoice.enabled:prefs.peers.includes(sheetPeer);input.disabled=!ready||busy||!valid(sheetPeer);}
-        const help=$('dashboardPreviewSheetHelp');if(help)help.textContent=settingsError||(!ready?'Loading preferences…':prefs.enabled?'Only enabled contacts appear on your dashboard.':'Dashboard preview is off. You can still choose contacts below.');
+        const help=$('dashboardPreviewSheetHelp');if(help)help.textContent=settingsError||(!ready?'Loading preferences…':prefs.enabled?'Selected contacts only.':'Dashboard preview is off.');
         const menu=$('dashboardPreviewMenuButton');if(menu)menu.hidden=window.currentChatMode!=='private'||!valid(window.activePrivateUid);
     }
     function applySettings(raw){
@@ -15492,12 +15521,13 @@ window.renderNFTBlockchainReference = raw => {
     function checkbox(label,attr,callback){const row=document.createElement('label');row.className='dashboard-preview-toggle';const text=document.createElement('span');text.textContent=label;const input=document.createElement('input');input.type='checkbox';input.setAttribute('role','switch');input.setAttribute(attr,'');input.disabled=true;input.onchange=()=>callback(input.checked);row.append(text,input);return row;}
     const profile=$('normalProfileBack');if(profile){const area=document.createElement('section');area.id='dashboardPreviewAccountSettings';area.className='luxury-profile-editor';area.appendChild(checkbox('Dashboard message preview','data-preview-global',value=>void save('global',value)));const help=document.createElement('small');help.className='dashboard-preview-help';help.textContent='Off by default. Choose contacts from their direct-chat menu.';area.appendChild(help);profile.insertBefore(area,profile.lastElementChild);}
     function closeSheet(){if(!sheet)return;sheet.classList.remove('is-open');sheet.setAttribute('aria-hidden','true');sheet.inert=true;window.releaseModalScroll?.('dashboard-preview-settings');if(sheetFocus?.isConnected)sheetFocus.focus();render();if(wanted.size&&!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
-    function ensureSheet(){if(sheet)return;sheet=document.createElement('div');sheet.id='dashboardPreviewSheet';sheet.inert=true;sheet.setAttribute('aria-hidden','true');sheet.innerHTML='<section class="preview-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="dashboardPreviewSheetTitle"><h3 id="dashboardPreviewSheetTitle">Dashboard message preview</h3><p id="dashboardPreviewSheetPeer" class="dashboard-preview-help"></p><div id="dashboardPreviewSheetControls"></div><small id="dashboardPreviewSheetHelp" class="dashboard-preview-help" role="status"></small><button type="button" data-preview-close>Done</button></section>';document.body.appendChild(sheet);
-        const controls=$('dashboardPreviewSheetControls');controls.append(checkbox('Dashboard message preview','data-preview-global',value=>void save('global',value)),checkbox('Show this contact on dashboard','data-preview-peer',value=>void save('peer',value,sheetPeer)));
+    function ensureSheet(){if(sheet)return;sheet=document.createElement('div');sheet.id='dashboardPreviewSheet';sheet.inert=true;sheet.setAttribute('aria-hidden','true');sheet.innerHTML='<section class="preview-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="dashboardPreviewSheetTitle"><h3 id="dashboardPreviewSheetTitle">Chat options</h3><p id="dashboardPreviewSheetPeer" class="dashboard-preview-help"></p><div id="dashboardPreviewSheetControls"></div><small id="dashboardPreviewSheetHelp" class="dashboard-preview-help" role="status"></small><button type="button" data-preview-close>Done</button></section>';document.body.appendChild(sheet);
+        const controls=$('dashboardPreviewSheetControls');controls.append(checkbox('Dashboard preview','data-preview-global',value=>void save('global',value)),checkbox('This contact','data-preview-peer',value=>void save('peer',value,sheetPeer)));
+        const remove=document.createElement('button');remove.id='dashboardPreviewMenuRemove';remove.type='button';remove.className='preview-menu-danger';remove.textContent='Unfriend';remove.onclick=()=>{const target=sheetPeer;closeSheet();if(window.currentChatMode==='private'&&window.activePrivateUid===target)void window.unfriendUser(target);};sheet.querySelector('.preview-sheet-panel').insertBefore(remove,sheet.querySelector('[data-preview-close]'));
         sheet.querySelector('[data-preview-close]').onclick=closeSheet;sheet.onclick=e=>{if(e.target===sheet)closeSheet();};sheet.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeSheet();}else if(e.key==='Tab'){const focus=[...sheet.querySelectorAll('input,button')].filter(el=>!el.disabled);if(!focus.length)return;if(e.shiftKey&&document.activeElement===focus[0]){e.preventDefault();focus.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===focus.at(-1)){e.preventDefault();focus[0].focus();}}});
     }
-    async function openSheet(){if(window.currentChatMode!=='private'||!valid(window.activePrivateUid))return;sheetPeer=window.activePrivateUid;ensureSheet();sheetFocus=document.activeElement;$('dashboardPreviewSheetPeer').textContent='Contact: '+(window.activePrivateName||sheetPeer);sheet.inert=false;sheet.classList.add('is-open');sheet.setAttribute('aria-hidden','false');window.acquireModalScroll?.('dashboard-preview-settings');hide();syncControls();sheet.querySelector('[data-preview-close]').focus();await loadSettings();syncControls();}
-    const unfriend=$('unfriend-btn');if(unfriend){const button=document.createElement('button');button.id='dashboardPreviewMenuButton';button.type='button';button.hidden=true;button.textContent='⋮';button.title='Dashboard preview settings';button.setAttribute('aria-label','Dashboard preview settings');button.onclick=()=>void openSheet();unfriend.parentElement.insertBefore(button,unfriend);}
+    async function openSheet(){if(window.currentChatMode!=='private'||!valid(window.activePrivateUid))return;sheetPeer=window.activePrivateUid;ensureSheet();sheetFocus=document.activeElement;$('dashboardPreviewSheetPeer').textContent=window.activePrivateName||sheetPeer;sheet.inert=false;sheet.classList.add('is-open');sheet.setAttribute('aria-hidden','false');window.acquireModalScroll?.('dashboard-preview-settings');hide();syncControls();sheet.querySelector('[data-preview-close]').focus();await loadSettings();syncControls();}
+    const unfriend=$('unfriend-btn');if(unfriend){const button=document.createElement('button');button.id='dashboardPreviewMenuButton';button.type='button';button.hidden=true;button.textContent='⋮';button.title='Chat options';button.setAttribute('aria-label','Chat options');button.onclick=()=>void openSheet();unfriend.parentElement.insertBefore(button,unfriend);}
     const openRoom=window.openChatRoom;window.openChatRoom=async(...args)=>{hide();const value=await openRoom(...args);syncControls();return value;};
     const account=window.openAccountSettingsModal;window.openAccountSettingsModal=()=>{account();void loadSettings();syncControls();};
     if(banner){banner.replaceChildren();banner.hidden=true;banner.onclick=async()=>{const item=queue().find(m=>m.key===currentKey),s=identity();if(!item||!live(s)||!showAllowed())return;const friend=roster.get(item.peer);hide();$('chat-window').style.display='flex';try{await window.openChatRoom('private',friend.name||'TCM member',friend.avatar||'',item.peer);}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}};}
