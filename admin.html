@@ -315,20 +315,26 @@
                     <h3 class="text-sm font-bold text-white">Mainnet NFT Gallery</h3>
                     <span class="text-xs font-bold text-emerald-400">BSC MAINNET · CHAIN 56</span>
                 </div>
-                <p class="text-xs text-slate-400 mb-4">TCM NFT 001 · Token 1 · Platform custody. App reservations and settlement remain off-chain.</p>
-                <p class="text-xs text-slate-300 break-all">Contract: 0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673</p>
-                <p class="text-xs text-slate-300 mt-2">Reviewed listing: <strong>Level 2 · 501 USDT</strong></p>
+                <p class="text-xs text-slate-400 mb-4">Platform custody. App reservations and settlement remain off-chain.</p>
+                <button type="button" data-mainnet-gallery="load" class="cyber-btn bg-slate-700 text-slate-200 px-3 py-2 rounded text-xs">Load reviewed NFT list</button>
+                <label class="block text-xs text-slate-300 my-4">Reviewed NFT
+                    <select data-mainnet-gallery="asset" class="block mt-2 w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2"><option value="TCM-001">TCM-001 · Level 2 · 501 USDT</option></select>
+                </label>
+                <p data-mainnet-gallery="identity" class="text-xs text-slate-300 break-all">TCM NFT 001 · Token 1 · Level 2 · 501 USDT</p>
+                <p class="text-xs text-slate-300 break-all mt-2">Contract: 0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673</p>
                 <p class="text-xs text-slate-400 mt-2">Mint verification does not establish user ownership, a matched buyer, market value or funding for platform returns. BscScan source verification is tracked separately.</p>
                 <div class="flex flex-wrap gap-3 mt-4 text-xs">
-                    <a href="https://bscscan.com/token/0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673?a=1" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet token</a>
-                    <a href="https://bscscan.com/tx/0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet mint</a>
+                    <a data-mainnet-gallery="token-link" href="https://bscscan.com/token/0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673?a=1" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet token</a>
+                    <a data-mainnet-gallery="mint-link" href="https://bscscan.com/tx/0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet mint</a>
+                    <a href="http://127.0.0.1:5188/multi" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Open local multi-asset minting tool</a>
                 </div>
-                <label class="block text-xs text-slate-300 my-4">Import tcm-mainnet-gallery-candidate.json (preview only)
+                <label class="block text-xs text-slate-300 my-4">Import a verified Gallery candidate (preview only)
                     <input type="file" accept=".json,application/json" data-mainnet-gallery="file" class="block mt-2 w-full text-xs">
                 </label>
-                <img data-mainnet-gallery="image" hidden width="220" height="220" alt="TCM NFT 001" referrerpolicy="no-referrer" class="my-4 max-w-full rounded-lg">
-                <div class="flex flex-wrap gap-3">
-                    <button type="button" data-mainnet-gallery="verify" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded text-xs">Verify Mainnet mint and custody</button>
+                <p class="text-xs text-slate-400">An unregistered candidate needs mint/metadata review and a registry deployment before it can be selected here. Import alone creates no server record.</p>
+                <img data-mainnet-gallery="image" hidden width="220" height="220" alt="Selected NFT" referrerpolicy="no-referrer" class="my-4 max-w-full rounded-lg">
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button type="button" data-mainnet-gallery="verify" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded text-xs">Verify selected mint and custody</button>
                     <button type="button" data-mainnet-gallery="publish" disabled class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded text-xs disabled:opacity-50">Publish TCM-001 · Level 2 · 501 USDT</button>
                 </div>
                 <p data-mainnet-gallery="status" role="status" aria-live="polite" class="text-xs text-slate-400 mt-4">No Mainnet verification requested this session. No automatic publication.</p>
@@ -3149,22 +3155,37 @@ window.addEventListener('storage', event => {
         const node = name => root.querySelector('[data-mainnet-gallery="' + name + '"]');
         const contract = '0xc617c917bb594bb14f2a7ead2d9b650dd3754673';
         const custody = '0x1e7d9aa6922eb5cc6e91d289a4bb5b45212ca2f3';
-        const mintHash = '0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e';
-        const metadataURI = 'ipfs://bafkreicclrukvzu4b3xffcjmiusg3tfdllgmzphndxqcth5ghsjwjtgcrm';
-        const imageURI = 'ipfs://bafkreifqldbwckt7rtkztrub62p3sqc3lo3pcvpb4maacs6lizo6vr77ky';
-        let busy = false, verification = null, verifiedSession = null, verifiedToken = null;
-        const same = (value, expected) => typeof value === 'string' && value.toLowerCase() === expected;
+        const same = (a, b) => typeof a === 'string' && typeof b === 'string' && a.toLowerCase() === b.toLowerCase();
+        const rawURI = value => typeof value === 'string' && /^ipfs:\/\/b[a-z2-7]{58}$/.test(value);
+        const hash = value => typeof value === 'string' && /^0x[0-9a-fA-F]{64}$/.test(value);
+        const first = Object.freeze({ assetId: 'TCM-001', name: 'TCM NFT 001', tokenId: '1', chainId: 56,
+            contract, custody, level: 2, price: 501, priceMicro: '501000000',
+            assetKey: '0xfe1ad57fdad70fa70a481b4420a526f02bfa2be619ab9ba91bfbacaf9a47001b',
+            mintHash: '0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e',
+            metadataURI: 'ipfs://bafkreicclrukvzu4b3xffcjmiusg3tfdllgmzphndxqcth5ghsjwjtgcrm',
+            imageURI: 'ipfs://bafkreifqldbwckt7rtkztrub62p3sqc3lo3pcvpb4maacs6lizo6vr77ky' });
+        let assets = new Map([[first.assetId, first]]), selected = first;
+        let busy = false, verification = null, verifiedSession = null, verifiedToken = null, generation = 0;
         const status = message => { node('status').textContent = message; };
+        function invalidate() { generation++; verification = null; verifiedSession = null; verifiedToken = null; }
         function controls() {
-            node('verify').disabled = busy;
+            for (const name of ['load', 'asset', 'file', 'verify']) node(name).disabled = busy;
             node('publish').disabled = busy || !verification || !adminAuthState.ready ||
                 verifiedSession !== adminAuthState.generation || verifiedToken !== localStorage.getItem('token');
         }
-        function showImage() {
+        function showSelection() {
+            node('asset').value = selected.assetId;
+            node('identity').textContent = selected.name + ' · Token ' + selected.tokenId + ' · Level ' + selected.level + ' · ' + selected.price + ' USDT';
+            node('publish').textContent = 'Publish ' + selected.assetId + ' · Level ' + selected.level + ' · ' + selected.price + ' USDT';
+            node('token-link').href = 'https://bscscan.com/token/' + contract + '?a=' + selected.tokenId;
+            node('mint-link').href = 'https://bscscan.com/tx/' + selected.mintHash;
+            node('image').hidden = true;
+        }
+        function showImage(asset) {
             const image = node('image'); image.hidden = true;
-            image.onload = () => { image.hidden = false; };
-            image.onerror = () => { image.hidden = true; status('Image unavailable. Mint verification and image availability are separate.'); };
-            image.src = 'https://gateway.pinata.cloud/ipfs/' + imageURI.slice(7);
+            image.onload = () => { if (selected.assetId === asset.assetId) image.hidden = false; };
+            image.onerror = () => { image.hidden = true; };
+            image.src = 'https://gateway.pinata.cloud/ipfs/' + asset.imageURI.slice(7);
         }
         async function request(path, method = 'GET', body) {
             const token = localStorage.getItem('token'), session = adminAuthState.generation;
@@ -3183,56 +3204,97 @@ window.addEventListener('storage', event => {
                 return { result, token, session };
             } finally { clearTimeout(timer); }
         }
+        function validateAsset(a) {
+            if (!a || a.chainId !== 56 || !same(a.contract, contract) || !same(a.custody, custody) ||
+                typeof a.assetId !== 'string' || !/^TCM-[A-Z0-9-]{1,48}$/.test(a.assetId) || a.assetId.startsWith('TCM-TEST-') ||
+                typeof a.name !== 'string' || !a.name.trim() || a.name.length > 120 || /[\x00-\x1f<>]/.test(a.name) ||
+                typeof a.tokenId !== 'string' || !/^[1-9]\d{0,3}$/.test(a.tokenId) || BigInt(a.tokenId) > 1000n ||
+                !hash(a.assetKey) || !hash(a.mintHash) || !rawURI(a.metadataURI) || !rawURI(a.imageURI) ||
+                !Number.isInteger(a.level) || a.level < 1 || a.level > 6 ||
+                typeof a.priceMicro !== 'string' || !/^[1-9]\d{0,15}$/.test(a.priceMicro) ||
+                BigInt(a.priceMicro) > BigInt(Number.MAX_SAFE_INTEGER) || Number(BigInt(a.priceMicro)) / 1000000 !== a.price) throw new Error('Invalid reviewed NFT list from backend.');
+            return Object.freeze({ ...a });
+        }
+        node('load').addEventListener('click', async () => {
+            if (busy) return; busy = true; invalidate(); controls();
+            try {
+                const { result } = await request('/api/admin/nft-mainnet/assets');
+                if (!Array.isArray(result.data) || !result.data.length || result.data.length > 1000) throw new Error('Invalid reviewed NFT list.');
+                const next = new Map(), tokens = new Set();
+                for (const row of result.data) {
+                    const a = validateAsset(row);
+                    if (next.has(a.assetId) || tokens.has(a.tokenId)) throw new Error('Duplicate reviewed asset or token.');
+                    next.set(a.assetId, a); tokens.add(a.tokenId);
+                }
+                const original = next.get(first.assetId);
+                if (!original || original.tokenId !== first.tokenId || !same(original.mintHash, first.mintHash) || original.metadataURI !== first.metadataURI) throw new Error('Original collection identity changed.');
+                assets = next; selected = assets.get(selected.assetId) || assets.values().next().value;
+                node('asset').replaceChildren();
+                for (const asset of assets.values()) {
+                    const option = document.createElement('option'); option.value = asset.assetId;
+                    option.textContent = asset.assetId + ' · Level ' + asset.level + ' · ' + asset.price + ' USDT'; node('asset').append(option);
+                }
+                showSelection(); status('Reviewed NFT list loaded. Select an asset and verify its mint before publishing. No publication occurred.');
+            } catch (error) { status('List not loaded: ' + error.message); }
+            finally { busy = false; controls(); }
+        });
+        node('asset').addEventListener('change', () => {
+            invalidate(); const asset = assets.get(node('asset').value);
+            if (asset) { selected = asset; showSelection(); status('Selected ' + asset.assetId + '. Verify its own mint and custody.'); }
+            controls();
+        });
         node('file').addEventListener('change', async event => {
+            if (busy) return; busy = true; invalidate(); controls();
             try {
                 const file = event.target.files?.[0]; if (!file) return;
                 if (file.size > 32768) throw new Error('Candidate must be at most 32 KB.');
                 const data = JSON.parse(await file.text()), chain = data.Blockchain;
-                if (data.kind !== 'Gallery_Candidate_Only' || data.readyForProduction !== false ||
-                    data.Name !== 'TCM NFT 001' || data.Asset_ID !== 'TCM-001' || data.Image_URI !== imageURI ||
-                    chain?.Chain_ID !== 56 || !same(chain.Contract_Address, contract) || chain.Token_ID !== '1' ||
-                    chain.Metadata_URI !== metadataURI || !same(chain.Mint_TxHash, mintHash)) {
-                    throw new Error('Candidate does not match the reviewed Mainnet asset.');
-                }
-                showImage(); status('Mainnet candidate matched. Import changed no server records. Verify custody before publishing.');
+                if (data.kind !== 'Gallery_Candidate_Only' || data.readyForProduction !== false || chain?.Chain_ID !== 56 ||
+                    !same(chain.Contract_Address, contract) || typeof data.Asset_ID !== 'string' || data.Asset_ID.startsWith('TCM-TEST-')) throw new Error('Candidate does not match the Mainnet collection.');
+                const a = assets.get(data.Asset_ID);
+                if (!a) throw new Error('Candidate is not in the reviewed registry. Review its mint, metadata, Level and price, deploy the updated registry, then load the reviewed NFT list.');
+                if (data.Name !== a.name || data.Image_URI !== a.imageURI || chain.Token_ID !== a.tokenId ||
+                    chain.Metadata_URI !== a.metadataURI || !same(chain.Mint_TxHash, a.mintHash)) throw new Error('Candidate does not match its reviewed NFT.');
+                selected = a; showSelection(); showImage(a);
+                status('Mainnet candidate matched. Import changed no server records. Verify custody before publishing.');
             } catch (error) { status(error.message); }
+            finally { busy = false; controls(); }
         });
         node('verify').addEventListener('click', async () => {
-            if (busy) return; busy = true; verification = null; controls();
+            if (busy) return; busy = true; invalidate(); const version = generation, asset = selected; controls();
             try {
-                status('Checking the Mainnet deployment, mint receipt and platform custody...');
-                const { result, token, session } = await request('/api/admin/nft-mainnet/status');
+                status('Checking the selected Mainnet deployment, mint receipt and custody...');
+                const { result, token, session } = await request('/api/admin/nft-mainnet/status?assetId=' + encodeURIComponent(asset.assetId));
                 const data = result.data;
-                if (data?.status !== 'Verified_Mainnet_Snapshot' || data.chainId !== '56' ||
-                    !same(data.contract, contract) || data.tokenId !== '1' || !same(data.owner, custody) ||
-                    !same(data.hash, mintHash) || data.metadataURI !== metadataURI ||
-                    !Number.isSafeInteger(data.confirmations) || data.confirmations < 3 || !Number.isFinite(Date.parse(data.checkedAt))) {
-                    throw new Error('Unexpected Mainnet verification identity.');
-                }
-                verification = data; verifiedToken = token; verifiedSession = session; showImage();
-                status('PASS | Mainnet mint and platform custody snapshot: ' + data.checkedAt +
-                    ' | ' + data.confirmations + ' confirmations | ' + result.source +
-                    '. BscScan source verification not checked. No publication yet.');
+                if (version !== generation || selected.assetId !== asset.assetId || data?.status !== 'Verified_Mainnet_Snapshot' ||
+                    data.chainId !== '56' || !same(data.contract, contract) || data.assetId !== asset.assetId || data.tokenId !== asset.tokenId ||
+                    !same(data.assetKey, asset.assetKey) || !same(data.owner, custody) || !same(data.hash, asset.mintHash) || data.metadataURI !== asset.metadataURI ||
+                    !Number.isSafeInteger(data.confirmations) || data.confirmations < 3 || !Number.isFinite(Date.parse(data.checkedAt))) throw new Error('Unexpected Mainnet verification identity or changed selection.');
+                verification = data; verifiedToken = token; verifiedSession = session; showImage(asset);
+                status('PASS | ' + asset.assetId + ' mint and platform custody snapshot: ' + data.checkedAt + ' | ' + data.confirmations +
+                    ' confirmations | ' + result.source + '. BscScan source verification not checked. No publication yet.');
             } catch (error) { status('Not verified: ' + error.message); }
             finally { busy = false; controls(); }
         });
         node('publish').addEventListener('click', async () => {
             if (busy || !verification) return;
             if (!adminAuthState.ready || verifiedSession !== adminAuthState.generation || verifiedToken !== localStorage.getItem('token')) {
-                verification = null; controls(); status('Session changed. Verify again.'); return;
+                invalidate(); controls(); status('Session changed. Verify again.'); return;
             }
-            if (!window.confirm('Publish TCM NFT 001 to the platform Gallery at Level 2, 501 USDT? The backend will re-verify Mainnet custody. This creates an off-chain listing only; it does not mint, transfer an NFT or credit money. Existing reservations and returns remain platform records.')) return;
+            const asset = selected, version = generation;
+            if (!window.confirm('Publish ' + asset.name + ' (Token ' + asset.tokenId + ') at Level ' + asset.level + ', ' + asset.price + ' USDT? The backend re-verifies Mainnet custody. This creates an off-chain listing only; no mint, ownership transfer or financial credit.')) return;
+            if (version !== generation || asset.assetId !== selected.assetId || verifiedSession !== adminAuthState.generation || verifiedToken !== localStorage.getItem('token')) {
+                invalidate(); controls(); status('Selection or session changed. Verify again.'); return;
+            }
             busy = true; controls();
             try {
-                status('Re-verifying Mainnet custody and publishing the reviewed Gallery listing...');
-                const { result } = await request('/api/admin/nft-mainnet/publish', 'POST', { assetId: 'TCM-001', level: 2, price: '501' });
-                status((result.data.alreadyPublished ? 'Already published' : 'Published') +
-                    ' | TCM-001 | Level 2 | 501 USDT | Current status: ' + result.data.status +
-                    '. No mint, ownership transfer or financial credit occurred.');
-            } catch (error) { status('Publication not confirmed: ' + error.message + ' If the response was interrupted, verify and use Publish again; the same listing is idempotent.'); }
+                const { result } = await request('/api/admin/nft-mainnet/publish', 'POST', { assetId: asset.assetId, level: asset.level, price: String(asset.price) });
+                status((result.data.alreadyPublished ? 'Already published' : 'Published') + ' | ' + asset.assetId + ' | Level ' + asset.level +
+                    ' | ' + asset.price + ' USDT | Current status: ' + result.data.status + '. No mint, ownership transfer or financial credit occurred.');
+            } catch (error) { status('Publication not confirmed: ' + error.message + ' Verify and retry the same listing if the response was interrupted.'); }
             finally { busy = false; controls(); }
         });
-        controls();
+        showSelection(); controls();
     })();
     </script>
 
