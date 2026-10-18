@@ -1,0 +1,260 @@
+
+
+    /* Layout & Scroll Fixes */
+
+    #chat-window { background: linear-gradient(135deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.02)) !important; backdrop-filter: blur(25px) saturate(200%) !important; -webkit-backdrop-filter: blur(25px) saturate(200%) !important; border: 1px solid rgba(255, 255, 255, 0.25) !important; box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important; border-radius: 20px !important; overflow: hidden !important; transition: opacity 0.3s ease, transform 0.3s ease !important; }
+
+    #chat-content { overflow-x: hidden !important; touch-action: pan-y !important; } 
+
+    .chat-header-glass { background: rgba(255, 255, 255, 0.08) !important; backdrop-filter: blur(35px) saturate(220%) !important; -webkit-backdrop-filter: blur(35px) saturate(220%) !important; border-bottom: 1px solid rgba(255, 255, 255, 0.15) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.1); position: relative; }
+
+    .file-bubble { background: rgba(0, 245, 255, 0.1); border: 1px solid rgba(0, 245, 255, 0.3); padding: 8px 12px; border-radius: 12px; display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+
+    /* 🔥 3D Floating Bubbles (Light Mode High Contrast & Compact Font) */
+
+    .msg-bubble-content { padding: 6px 12px 6px 14px; font-size: 0.8rem; line-height: 1.45; word-wrap: break-word; transition: all 0.3s ease; position: relative; }
+
+    /* ME (Black Floating Bubble) */
+
+    .msg-bubble-me { border-radius: 16px 16px 4px 16px; background: linear-gradient(135deg, #2a2d34, #0b0c10); color: #ffffff; border: 1px solid #374151; box-shadow: 0 8px 16px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.1); padding-bottom: 4px; }
+
+    .msg-bubble-me .time-tick-wrap { color: rgba(255,255,255,0.7) !important; }
+
+    /* THEM (Soft Pearl Floating Bubble for Private Chat) */
+
+    .msg-bubble-them { background: linear-gradient(135deg, #ffffff, #f9fafb); color: #1f2937; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 6px 12px rgba(0,0,0,0.08), inset 0 2px 4px rgba(255,255,255,1); border-radius: 4px 16px 16px 16px; padding-bottom: 4px; }
+
+    .msg-bubble-them .time-tick-wrap { color: rgba(0,0,0,0.5) !important; }
+
+
+
+    /* 🔥 THE DEEP CRESCENT HUG (Pixel-Perfect Mathematical Masking for Global Chat) */
+
+    .global-crescent-bubble {
+
+        border-radius: 4px 18px 18px 18px !important;
+
+        margin-left: -14px !important; /* Pulls bubble inside DP's orbit */
+
+        padding: 8px 12px 6px 24px !important; /* 24px protects text from the 23px deep cut */
+
+        min-height: 42px; /* Locks minimum height to match DP size, preserving the perfect curve */
+
+        display: flex; flex-direction: column; justify-content: center; /* Centers short text */
+
+        -webkit-mask-image: radial-gradient(circle at -7px 21px, transparent 23px, black 24px);
+
+        mask-image: radial-gradient(circle at -7px 21px, transparent 23px, black 24px);
+
+        z-index: 1; /* Sits under the DP */
+
+    }
+
+
+
+    /* 🔥 3D Luxury Typography for Global Chat User Names */
+
+    .sender-name-3d {
+
+        background: linear-gradient(145deg, #7a0c16, #360207); /* Light Mode: Dark Maroon Glossy */
+
+        -webkit-background-clip: text;
+
+        -webkit-text-fill-color: transparent;
+
+        filter: drop-shadow(1px 1px 1px rgba(0, 0, 0, 0.15)) drop-shadow(-1px -1px 1px rgba(255, 255, 255, 0.8));
+
+        font-weight: 800;
+
+        font-size: 0.75rem;
+
+        letter-spacing: 0.3px;
+
+        text-transform: capitalize;
+
+    }
+
+
+
+    /* 🔥 Dark Mode Override for Bubbles (The Cyan Glass Effect) */
+
+    [data-theme="dark"] .msg-bubble-me { background: linear-gradient(135deg, rgba(0, 245, 255, 0.2), rgba(0, 245, 255, 0.05)); border: 1px solid rgba(0, 245, 255, 0.4); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+    [data-theme="dark"] .msg-bubble-me .time-tick-wrap { color: var(--text-sub) !important; }
+
+    [data-theme="dark"] .msg-bubble-them { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+
+    [data-theme="dark"] .msg-bubble-them .time-tick-wrap { color: var(--text-sub) !important; }
+
+    /* Dark Mode: Black & Grey Steel Name Typography */
+
+    [data-theme="dark"] .sender-name-3d {
+
+        background: linear-gradient(145deg, #f3f4f6, #9ca3af); /* Bright steel to dark steel */
+
+        -webkit-background-clip: text;
+
+        -webkit-text-fill-color: transparent;
+
+        filter: drop-shadow(1px 2px 2px rgba(0,0,0,0.8)) drop-shadow(-1px -1px 1px rgba(255,255,255,0.15));
+
+    }
+
+
+
+    /* 🔥 Redesigned Context Menu */
+
+    .chat-context-menu { position: fixed; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.15); border-radius: 16px; padding: 6px; z-index: 99999; display: flex; flex-direction: column; min-width: 140px; transform: scale(0.9); opacity: 0; pointer-events: none; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s; }
+
+    .chat-context-menu.active { transform: scale(1); opacity: 1; pointer-events: auto; }
+
+    .ctx-item { padding: 10px 12px; color: var(--text-main); font-size: 0.75rem; font-weight: 600; cursor: pointer; border-radius: 10px; display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+
+    .ctx-item:hover { background: rgba(0,0,0,0.05); }
+
+    .ctx-item.danger { color: var(--error); }
+
+    .ctx-item.danger:hover { background: rgba(244, 63, 94, 0.1); }
+
+    .no-select { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+
+    [data-theme="dark"] .chat-context-menu { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+
+    [data-theme="dark"] .ctx-item:hover { background: rgba(255,255,255,0.1); }
+
+    [data-theme="dark"] .ctx-item.danger:hover { background: rgba(244, 63, 94, 0.15); }
+
+
+
+    /* 🔥 Select Mode CSS (Mini Circle) */
+
+    .select-circle { width: 0; height: 18px; border-radius: 50%; border: 2px solid rgba(0,0,0,0.2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); opacity: 0; margin: 0; flex-shrink: 0; overflow: hidden; pointer-events: none; }
+
+    [data-theme="dark"] .select-circle { border-color: rgba(255,255,255,0.2); }
+
+    .select-mode-active .select-circle { width: 18px; opacity: 1; pointer-events: auto; }
+
+    .select-mode-active .is-me .select-circle { margin-left: 8px; }
+
+    .select-mode-active .not-me .select-circle { margin-right: 8px; }
+
+    /* 3D Glossy Effect for Selected Circle */
+
+    .select-circle.selected { background: linear-gradient(145deg, #9b111e, #4a040b); border-color: #380207; box-shadow: inset 2px 2px 5px rgba(255, 120, 130, 0.4), inset -2px -2px 5px rgba(0, 0, 0, 0.7), 0 4px 8px rgba(0, 0, 0, 0.25); transform: scale(1.15); }
+
+    /* Dark Mode: 3D Dark Green Glossy Effect for Selected Circle */
+
+[data-theme="dark"] .select-circle.selected { 
+
+    background: linear-gradient(145deg, #059669, #022c22); 
+
+    border-color: #065f46; 
+
+    box-shadow: inset 2px 2px 5px rgba(16, 185, 129, 0.5), inset -2px -2px 5px rgba(0, 0, 0, 0.8), 0 4px 8px rgba(0, 0, 0, 0.4); 
+
+    transform: scale(1.15); 
+
+}
+
+
+
+    /* 3D Select All Button */
+
+    .btn-3d-select { background: linear-gradient(145deg, rgba(0, 245, 255, 0.2), rgba(255, 255, 255, 0.8)); border: 1px solid rgba(0, 245, 255, 0.3); border-radius: 20px; padding: 5px 12px; color: var(--primary); font-size: 0.75rem; font-weight: 700; box-shadow: inset 1px 1px 3px rgba(255,255,255,1), inset -1px -1px 3px rgba(0,0,0,0.1), 0 4px 8px rgba(0,0,0,0.1); transition: all 0.15s ease; cursor: pointer; display: flex; align-items: center; justify-content: center; outline: none; }
+
+    .btn-3d-select:active { transform: translateY(2px) scale(0.95); box-shadow: inset 2px 2px 5px rgba(0,0,0,0.1), inset -1px -1px 2px rgba(255,255,255,1), 0 1px 2px rgba(0,0,0,0.1); }
+
+    [data-theme="dark"] .btn-3d-select { background: linear-gradient(145deg, rgba(0, 245, 255, 0.15), rgba(0, 245, 255, 0.02)); box-shadow: inset 1px 1px 3px rgba(255, 255, 255, 0.2), inset -1px -1px 3px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2); }
+
+    [data-theme="dark"] .btn-3d-select:active { box-shadow: inset 2px 2px 5px rgba(0, 0, 0, 0.4), inset -1px -1px 2px rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.2); }
+
+
+
+    /* Bulk Delete Dual Options Popup */
+
+    .bulk-delete-popup { position: fixed; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 1px solid rgba(0,0,0,0.1); box-shadow: 0 10px 40px rgba(0,0,0,0.15); border-radius: 12px; padding: 6px; display: flex; flex-direction: column; min-width: 160px; transform: translateY(10px) scale(0.9); opacity: 0; pointer-events: none; transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 100000; }
+
+    .bulk-delete-popup.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+
+    .del-opt { padding: 10px 12px; color: var(--text-main); font-size: 0.75rem; font-weight: 600; cursor: pointer; border-radius: 8px; display: flex; align-items: center; gap: 10px; transition: 0.2s; }
+
+    .del-opt:hover { background: rgba(0,0,0,0.05); }
+
+    .del-opt.danger { color: var(--error); }
+
+    .del-opt.danger:hover { background: rgba(244, 63, 94, 0.1); }
+
+    [data-theme="dark"] .bulk-delete-popup { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(255,255,255,0.15); box-shadow: 0 10px 40px rgba(0,0,0,0.6); }
+
+    [data-theme="dark"] .del-opt:hover { background: rgba(255,255,255,0.1); }
+
+    [data-theme="dark"] .del-opt.danger:hover { background: rgba(244, 63, 94, 0.15); }
+
+
+
+    /* Cute Copied Toast Popup */
+
+    .copy-toast { position: fixed; bottom: 80px; left: 50%; transform: translate(-50%, 20px) scale(0.9); opacity: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(0,0,0,0.1); color: var(--text-main); padding: 8px 16px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: flex; align-items: center; gap: 8px; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 100000; pointer-events: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+    .copy-toast.show { transform: translate(-50%, 0) scale(1); opacity: 1; }
+
+    [data-theme="dark"] .copy-toast { background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(0, 245, 255, 0.3); box-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+
+
+
+    /* Flying Vanish Delete Animation */
+
+    @keyframes flyAwayDelete {
+
+        0% { transform: translate(0, 0) scale(1); opacity: 1; filter: blur(0); }
+
+        40% { opacity: 0.8; }
+
+        100% { transform: translate(120px, -30px) scale(0.6) rotate(8deg); opacity: 0; filter: blur(4px); }
+
+    }
+
+    .msg-vanish { animation: flyAwayDelete 0.6s ease-in forwards !important; pointer-events: none; }
+
+
+
+    /* Floating Badge Triangle */
+
+    .status-vanish { transform: translate(-50%, -40px) scaleX(0.3) !important; opacity: 0 !important; pointer-events: none; }
+
+    #status-bar { overflow: visible !important; }
+
+    #status-bar::before { content: ''; position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); border-width: 6px; border-style: solid; border-color: transparent transparent rgba(15, 23, 42, 0.95) transparent; }
+
+
+
+    /* Perfect 3D DP */
+
+    .chat-crater { position: relative; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,0.02); box-shadow: 3px 3px 6px rgba(0,0,0,0.15), -3px -3px 6px rgba(255,255,255,0.05); margin-top: 0 !important; z-index: 2; } /* z-index 2 keeps DP above bubble */
+
+    [data-theme="dark"] .chat-crater { background: rgba(0,0,0,0.15); box-shadow: 3px 3px 8px rgba(0,0,0,0.6), -2px -2px 5px rgba(255,255,255,0.02); }
+
+    .chat-dp { position: relative; border-radius: 50%; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; box-shadow: inset 3px 3px 6px rgba(0,0,0,0.25), inset -2px -2px 5px rgba(255,255,255,0.05); overflow: hidden; background: transparent; }
+
+    [data-theme="dark"] .chat-dp { box-shadow: inset 3px 3px 8px rgba(0,0,0,0.8), inset -2px -2px 5px rgba(255,255,255,0.02); }
+
+    .chat-dp img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; border: none; outline: none; transform: scale(1.15); } 
+
+    /* Typing Indicator Dots */
+
+    .typing-dots { display: inline-flex; align-items: center; gap: 4px; margin-left: 5px; }
+
+    .typing-dots span { width: 5px; height: 5px; background: var(--primary); border-radius: 50%; animation: typeBounce 1.4s infinite ease-in-out both; }
+
+    .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
+
+    .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typeBounce { 0%, 80%, 100% { transform: scale(0); opacity: 0.3; } 40% { transform: scale(1); opacity: 1; } }
+
+    @keyframes revealChar { to { opacity: 1; } }
+
+    @keyframes drawChar { to { stroke-dashoffset: 0; } }
+
+    @keyframes fillChar { to { fill: currentColor; stroke-width: 0.3; } }
+
