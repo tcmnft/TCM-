@@ -3603,6 +3603,24 @@
 @media(prefers-reduced-motion:reduce){#unreadMessagesBanner.preview-enter{animation:none}}
 
 </style>
+<style id="luxury-r5-styles">
+#settingsWipeArea{position:relative}
+#settingsWipeArea #unreadMessagesBanner{position:absolute;top:14px;right:20px;width:min(40%,180px);height:48px;max-height:48px;min-height:0;overflow:hidden;contain:layout paint;padding:0;margin:0;border:0;border-radius:0;background:none;box-shadow:none;animation:none;transition:none;z-index:1;text-align:left;}
+#unreadMessagesBanner .preview-message-layer{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0;overflow:hidden;opacity:0;transform:translateY(8px);transition:transform .32s cubic-bezier(.16,1,.3,1),opacity .32s ease;will-change:transform,opacity;}
+#unreadMessagesBanner .preview-message-layer.is-current{opacity:1;transform:translateY(0)}#unreadMessagesBanner .preview-message-layer.is-leaving{opacity:0;transform:translateY(-8px)}
+#unreadMessagesBanner .unread-preview-name{display:block;min-width:0;margin:0;line-height:12px;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text-sub);font-weight:700}
+#unreadMessagesBanner .unread-preview-message{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;max-height:28px;overflow:hidden;overflow-wrap:anywhere;line-height:14px;font-size:11px;font-weight:600;color:var(--text-main);text-shadow:0 2px 7px rgba(0,0,0,.15)}
+.dashboard-preview-toggle{display:flex;gap:12px;justify-content:space-between;align-items:center;min-width:0;font-size:.8rem;line-height:1.5;color:var(--text-main)}.dashboard-preview-toggle input{width:34px;height:20px;min-width:34px;accent-color:#0891b2;cursor:pointer;flex-shrink:0}.dashboard-preview-toggle input:disabled{opacity:.5;cursor:wait}.dashboard-preview-help{display:block;color:var(--text-sub);font-size:.67rem;line-height:1.5;margin-top:5px}
+.dashboard-preview-toggle input{appearance:none;-webkit-appearance:none;position:relative;border:1px solid var(--border);border-radius:999px;background:rgba(148,163,184,.35);margin:0}.dashboard-preview-toggle input::before{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transform:translateX(0);transition:transform .2s ease}.dashboard-preview-toggle input:checked{background:#0891b2;border-color:#0891b2}.dashboard-preview-toggle input:checked::before{transform:translateX(14px)}.dashboard-preview-toggle input:focus-visible{outline:2px solid #38bdf8;outline-offset:3px}
+#dashboardPreviewMenuButton{width:24px;height:28px;padding:0;border:0;background:none;color:var(--text-sub);font:800 22px/1 sans-serif;cursor:pointer;flex-shrink:0}#dashboardPreviewMenuButton[hidden]{display:none!important}
+#dashboardPreviewSheet{position:fixed;inset:0;z-index:26000;display:flex;align-items:flex-end;justify-content:center;padding:16px;background:rgba(0,0,0,.24);opacity:0;pointer-events:none;transition:opacity .25s ease;box-sizing:border-box}
+#dashboardPreviewSheet.is-open{opacity:1;pointer-events:auto}#dashboardPreviewSheet .preview-sheet-panel{width:min(100%,390px);max-height:min(80dvh,540px);overflow:auto;box-sizing:border-box;padding:22px;border-radius:24px;border:1px solid rgba(255,255,255,.16);background:rgba(15,23,42,.92);color:var(--text-main);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 15px 50px rgba(0,0,0,.25);transform:translateY(35px);transition:transform .3s cubic-bezier(.32,.72,0,1)}
+#dashboardPreviewSheet.is-open .preview-sheet-panel{transform:translateY(0)}#dashboardPreviewSheet h3{font-size:1rem;margin:0 0 15px}#dashboardPreviewSheet .dashboard-preview-toggle{margin-top:15px}#dashboardPreviewSheet button[data-preview-close]{width:100%;border:1px solid var(--border);border-radius:12px;background:var(--bg-card);color:var(--text-main);padding:10px;margin-top:18px;cursor:pointer}
+[data-theme="light"] #dashboardPreviewSheet .preview-sheet-panel{background:rgba(248,250,252,.94);border-color:rgba(15,23,42,.12);box-shadow:inset 0 1px 0 #fff,0 15px 50px rgba(15,23,42,.14)}
+@media(max-width:360px){#settingsWipeArea #unreadMessagesBanner{right:16px;width:39%;top:14px}#unreadMessagesBanner .unread-preview-message{font-size:10.5px}}
+@media(prefers-reduced-motion:reduce){#unreadMessagesBanner .preview-message-layer,#dashboardPreviewSheet,#dashboardPreviewSheet .preview-sheet-panel{transition:none}}
+
+</style>
 </head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
@@ -15392,20 +15410,7 @@ window.renderNFTBlockchainReference = raw => {
         banner.setAttribute('aria-label','Open unread message from '+(friend.name||'TCM member'));banner.hidden=false;previewTarget=friend;
         if(changed){banner.classList.remove('preview-enter');requestAnimationFrame(()=>{if(generation===previewEpoch)banner.classList.add('preview-enter');});}
     }
-    async function preview(friends,count){
-        const generation=++previewEpoch,s=session();if(!banner||!live(s)||!count){if(banner)banner.hidden=true;previewTarget=null;return;}
-        const candidates=(friends||[]).filter(f=>valid(f.uid)&&Number(f.unreadCount)>0).sort((a,b)=>window.chatTimestamp(b.lastMsgTime)-window.chatTimestamp(a.lastMsgTime));
-        if(!candidates.length){banner.hidden=true;previewTarget=null;return;}const friend=candidates[0];
-        const local=(window.localChatCache.private[friend.uid]||[]).filter(m=>m.senderUid===friend.uid&&m.status!=='read'&&!(m.deletedFor||[]).includes(s.uid)).sort((a,b)=>window.chatTimestamp(b.timestamp)-window.chatTimestamp(a.timestamp))[0];
-        if(local&&window.chatTimestamp(local.timestamp)>=window.chatTimestamp(friend.lastMsgTime)){showPreview(friend,local,generation);return;}
-        const key=friend.uid+':'+friend.unreadCount+':'+window.chatTimestamp(friend.lastMsgTime),cached=previews.get(key);
-        if(cached&&Date.now()-cached.at<15000){showPreview(friend,cached.message,generation);return;}
-        try{
-            let flight=previewFlights.get(key);if(!flight){flight=window.fetchAPI('/chat/v15/preview?target='+encodeURIComponent(friend.uid));previewFlights.set(key,flight);}
-            const result=await flight;if(!live(s)||generation!==previewEpoch)return;
-            if(!result.success)throw Error();previews.set(key,{message:result.data,at:Date.now()});while(previews.size>100)previews.delete(previews.keys().next().value);showPreview(friend,result.data,generation);
-        }catch(_){if(generation===previewEpoch){banner.hidden=true;previewTarget=null;}}finally{previewFlights.delete(key);}
-    }
+    function preview(friends,count){window.DashboardPreview?.syncFriends(friends,count);}
     function dispose(){invalidate();previewEpoch++;previews.clear();previewFlights.clear();previewTarget=null;if(banner)banner.hidden=true;}
     window.ChatHistory=Object.freeze({open,invalidate,markVisible,preview,recover,get generation(){return epoch;}});
     if(window.socket){window.socket.on('connect',recover);window.socket.on('disconnect',()=>{if(state){state.loaded=false;state.syncing=false;}});window.socket.on('session_error',dispose);}
@@ -15414,6 +15419,104 @@ window.renderNFTBlockchainReference = raw => {
     window.updateSuperBadge();
 })();
 /* LUXURY R4 END */
+/* LUXURY R5 START */
+(() => {
+    'use strict';
+    const $=id=>document.getElementById(id),valid=id=>typeof id==='string'&&/^[A-Za-z0-9_-]{1,128}$/.test(id);
+    const identity=()=>({uid:localStorage.getItem('uid'),token:localStorage.getItem('token')});
+    const live=s=>s.uid&&s.token&&s.uid===localStorage.getItem('uid')&&s.token===localStorage.getItem('token')&&!window.dashboardSession?.closed&&!window.dashboardSession?.blocked;
+    const banner=$('unreadMessagesBanner'),roster=new Map(),messages=new Map(),signatures=new Map(),versions=new Map(),flights=new Map(),wanted=new Set();
+    let prefs={enabled:false,peers:[],revision:-1},ready=false,epoch=0,settingsFlight=null,busy=false,pendingChoice=null,fetchTimer=null,animationTimer=null,animationEpoch=0,clockActive=false,nextAt=0,currentKey='',sheet=null,sheetPeer='',sheetFocus=null,settingsError='';
+    function homeVisible(){return live(identity())&&!document.hidden&&$('view-my')?.classList.contains('active')&&getComputedStyle($('view-my')).display!=='none'&&(!$('chat-window')||getComputedStyle($('chat-window')).display==='none')&&!sheet?.classList.contains('is-open');}
+    function allowed(id){return ready&&prefs.peers.includes(id)&&roster.has(id)&&!(pendingChoice?.kind==='peer'&&!pendingChoice.enabled&&pendingChoice.target===id);}
+    function showAllowed(){return ready&&prefs.enabled&&!(pendingChoice?.kind==='global'&&!pendingChoice.enabled)&&homeVisible();}
+    function stopClock(){if(clockActive){window.MasterClockDispatcher.unregister('dashboardPreviewCarousel');clockActive=false;}}
+    function hide(){stopClock();clearTimeout(animationTimer);animationEpoch++;if(banner){banner.hidden=true;banner.replaceChildren();}currentKey='';}
+    function queue(){const out=[];for(const [peer,map]of messages){if(!allowed(peer)||!(Number(roster.get(peer)?.unreadCount)>0))continue;const cached=new Map((window.localChatCache?.private?.[peer]||[]).map(m=>[m.id,m]));for(const m of map.values())if(cached.get(m.id)?.status!=='read'&&!(cached.get(m.id)?.deletedFor||[]).includes(identity().uid))out.push({...m,peer,key:peer+':'+m.id});}return out.sort((a,b)=>window.chatTimestamp(a.timestamp)-window.chatTimestamp(b.timestamp)||a.key.localeCompare(b.key)).slice(-200);}
+    function maintainClock(count){if(showAllowed()&&count>1){if(!clockActive){clockActive=true;window.MasterClockDispatcher.register('dashboardPreviewCarousel',()=>{if(!showAllowed()){hide();return;}if(Date.now()>=nextAt)advance();});}}else stopClock();}
+    function display(item,count){
+        if(!banner||!showAllowed()){hide();return;}if(currentKey===item.key&&!banner.hidden){maintainClock(count);return;}
+        const text=item.fileId?(String(item.fileType).startsWith('image/')?'Sent a photo':item.fileName||'Sent an attachment'):item.message;if(typeof text!=='string'||!text.trim())return;
+        const previous=banner.querySelector('.preview-message-layer.is-current'),layer=document.createElement('span');layer.className='preview-message-layer';layer.dataset.previewKey=item.key;
+        const name=document.createElement('span');name.className='unread-preview-name';name.textContent=window.usersStore?.get(item.peer)?.name||roster.get(item.peer)?.name||'TCM member';
+        const content=document.createElement('span');content.className='unread-preview-message';content.textContent=text;layer.append(name,content);
+        clearTimeout(animationTimer);const generation=++animationEpoch;banner.replaceChildren(...(previous?[previous]:[]),layer);if(previous){previous.classList.remove('is-current');previous.classList.add('is-leaving');}
+        currentKey=item.key;nextAt=Date.now()+4000;banner.hidden=false;banner.dataset.previewKey=item.key;banner.setAttribute('aria-label','Open unread message from '+name.textContent);
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{if(generation===animationEpoch&&showAllowed()&&layer.isConnected)layer.classList.add('is-current');}));
+        animationTimer=setTimeout(()=>{if(generation===animationEpoch)previous?.remove();},380);maintainClock(count);
+    }
+    function render(){if(!showAllowed()){hide();return;}const items=queue();if(!items.length){hide();return;}display(items.find(m=>m.key===currentKey)||items[0],items.length);}
+    function advance(){const items=queue();if(!showAllowed()||!items.length){hide();return;}const index=items.findIndex(m=>m.key===currentKey);display(items[(index+1)%items.length],items.length);}
+    function trim(){let total=[...messages.values()].reduce((sum,map)=>sum+map.size,0);if(total<=200)return;const all=[...messages].flatMap(([peer,map])=>[...map.values()].map(m=>({peer,id:m.id,time:window.chatTimestamp(m.timestamp)}))).sort((a,b)=>a.time-b.time);for(const m of all){if(total--<=200)break;messages.get(m.peer)?.delete(m.id);}}
+    function accept(peer,m){if(!valid(peer)||!valid(m?.id)||m.senderUid!==peer||m.status==='read'||(!m.fileId&&(typeof m.message!=='string'||!m.message.trim()))||(m.deletedFor||[]).includes(identity().uid))return;let map=messages.get(peer);if(!map){map=new Map();messages.set(peer,map);}map.set(m.id,m);trim();}
+    async function fetchPeer(peer){
+        if(flights.has(peer)||!showAllowed()||!allowed(peer))return;const s=identity(),generation=epoch,version=versions.get(peer)||0,prior=new Set(messages.get(peer)?.keys()||[]);
+        const task=(async()=>{try{
+            const result=await window.fetchAPI('/chat/v15/preview-messages?target='+encodeURIComponent(peer));if(!live(s)||generation!==epoch||version!==(versions.get(peer)||0)||!prefs.enabled||!allowed(peer))return;
+            if(!result.success||!Array.isArray(result.data))throw Error();const arrived=[...(messages.get(peer)?.values()||[])].filter(m=>!prior.has(m.id));messages.set(peer,new Map());for(const m of [...result.data,...arrived])accept(peer,m);render();
+        }catch(_){if(live(s)&&generation===epoch&&version===(versions.get(peer)||0)){messages.delete(peer);render();}}finally{if(flights.get(peer)===task)flights.delete(peer);}})();flights.set(peer,task);return task;
+    }
+    async function drain(){fetchTimer=null;if(!showAllowed())return;const list=[...wanted];wanted.clear();let offset=0;async function worker(){while(offset<list.length&&showAllowed()){const peer=list[offset++];await fetchPeer(peer);}}await Promise.all([worker(),worker(),worker()]);}
+    function requestFetch(peer,force=false){if(!valid(peer)||!allowed(peer))return;if(force){versions.set(peer,(versions.get(peer)||0)+1);flights.delete(peer);}wanted.add(peer);if(!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
+    function syncFriends(rows){
+        const present=new Set();for(const f of rows||[])if(valid(f.uid)){present.add(f.uid);roster.set(f.uid,{...f});}
+        for(const id of [...roster.keys()])if(!present.has(id)){roster.delete(id);messages.delete(id);signatures.delete(id);wanted.delete(id);versions.set(id,(versions.get(id)||0)+1);}
+        for(const [peer,f]of roster){
+            if(!allowed(peer)||!(Number(f.unreadCount)>0)){messages.delete(peer);signatures.delete(peer);wanted.delete(peer);continue;}
+            for(const m of window.localChatCache?.private?.[peer]||[])accept(peer,m);
+            const signature=f.unreadCount+':'+window.chatTimestamp(f.lastMsgTime);if(signatures.get(peer)!==signature){signatures.set(peer,signature);requestFetch(peer);}
+        }render();
+    }
+    function syncControls(){
+        for(const input of document.querySelectorAll('[data-preview-global]')){input.checked=pendingChoice?.kind==='global'?pendingChoice.enabled:prefs.enabled;input.disabled=!ready||busy;}
+        for(const input of document.querySelectorAll('[data-preview-peer]')){input.checked=pendingChoice?.kind==='peer'&&pendingChoice.target===sheetPeer?pendingChoice.enabled:prefs.peers.includes(sheetPeer);input.disabled=!ready||busy||!valid(sheetPeer);}
+        const help=$('dashboardPreviewSheetHelp');if(help)help.textContent=settingsError||(!ready?'Loading preferences…':prefs.enabled?'Only enabled contacts appear on your dashboard.':'Dashboard preview is off. You can still choose contacts below.');
+        const menu=$('dashboardPreviewMenuButton');if(menu)menu.hidden=window.currentChatMode!=='private'||!valid(window.activePrivateUid);
+    }
+    function applySettings(raw){
+        if(!raw||typeof raw.enabled!=='boolean'||!Array.isArray(raw.peers)||!Number.isSafeInteger(raw.revision)||raw.revision<prefs.revision)return;
+        const old=prefs;prefs={enabled:raw.enabled,peers:[...new Set(raw.peers.filter(valid))].slice(0,200),revision:raw.revision};ready=true;settingsError='';
+        for(const peer of [...messages.keys()])if(!prefs.peers.includes(peer))messages.delete(peer);
+        if(!prefs.enabled)hide();syncControls();syncFriends(window.chat15Friends||[]);
+        if(prefs.enabled)for(const [peer,f]of roster)if(prefs.peers.includes(peer)&&Number(f.unreadCount)>0&&(!old.enabled||!old.peers.includes(peer)))requestFetch(peer,true);
+    }
+    async function loadSettings(){
+        if(settingsFlight)return settingsFlight;const s=identity(),generation=epoch;if(!live(s))return;
+        const task=(async()=>{try{const result=await window.fetchAPI('/chat/v15/preview-settings');if(!live(s)||generation!==epoch)return;if(!result.success||typeof result.data?.enabled!=='boolean'||!Array.isArray(result.data?.peers)||!Number.isSafeInteger(result.data?.revision))throw Error(result.message||'Preview preferences are unavailable.');applySettings(result.data);}catch(error){if(live(s)&&generation===epoch){settingsError=error.message;syncControls();}}finally{if(settingsFlight===task)settingsFlight=null;}})();settingsFlight=task;return task;
+    }
+    async function save(kind,enabled,target=''){
+        if(busy||!ready)return;const s=identity(),generation=epoch;busy=true;pendingChoice={kind,enabled,target};settingsError='';if(!enabled)hide();syncControls();
+        try{const result=await window.fetchAPI('/chat/v15/preview-settings','POST',{kind,enabled,...(kind==='peer'?{target}:{})});if(!live(s)||generation!==epoch)return;if(!result.success)throw Error(result.message||'Preference could not save.');applySettings(result.data);}
+        catch(error){if(live(s)&&generation===epoch){settingsError=error.message;window.showToast(error.message,true);}}finally{if(generation===epoch){busy=false;pendingChoice=null;syncControls();render();}}
+    }
+    function checkbox(label,attr,callback){const row=document.createElement('label');row.className='dashboard-preview-toggle';const text=document.createElement('span');text.textContent=label;const input=document.createElement('input');input.type='checkbox';input.setAttribute('role','switch');input.setAttribute(attr,'');input.disabled=true;input.onchange=()=>callback(input.checked);row.append(text,input);return row;}
+    const profile=$('normalProfileBack');if(profile){const area=document.createElement('section');area.id='dashboardPreviewAccountSettings';area.className='luxury-profile-editor';area.appendChild(checkbox('Dashboard message preview','data-preview-global',value=>void save('global',value)));const help=document.createElement('small');help.className='dashboard-preview-help';help.textContent='Off by default. Choose contacts from their direct-chat menu.';area.appendChild(help);profile.insertBefore(area,profile.lastElementChild);}
+    function closeSheet(){if(!sheet)return;sheet.classList.remove('is-open');sheet.setAttribute('aria-hidden','true');sheet.inert=true;window.releaseModalScroll?.('dashboard-preview-settings');if(sheetFocus?.isConnected)sheetFocus.focus();render();if(wanted.size&&!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
+    function ensureSheet(){if(sheet)return;sheet=document.createElement('div');sheet.id='dashboardPreviewSheet';sheet.inert=true;sheet.setAttribute('aria-hidden','true');sheet.innerHTML='<section class="preview-sheet-panel" role="dialog" aria-modal="true" aria-labelledby="dashboardPreviewSheetTitle"><h3 id="dashboardPreviewSheetTitle">Dashboard message preview</h3><p id="dashboardPreviewSheetPeer" class="dashboard-preview-help"></p><div id="dashboardPreviewSheetControls"></div><small id="dashboardPreviewSheetHelp" class="dashboard-preview-help" role="status"></small><button type="button" data-preview-close>Done</button></section>';document.body.appendChild(sheet);
+        const controls=$('dashboardPreviewSheetControls');controls.append(checkbox('Dashboard message preview','data-preview-global',value=>void save('global',value)),checkbox('Show this contact on dashboard','data-preview-peer',value=>void save('peer',value,sheetPeer)));
+        sheet.querySelector('[data-preview-close]').onclick=closeSheet;sheet.onclick=e=>{if(e.target===sheet)closeSheet();};sheet.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeSheet();}else if(e.key==='Tab'){const focus=[...sheet.querySelectorAll('input,button')].filter(el=>!el.disabled);if(!focus.length)return;if(e.shiftKey&&document.activeElement===focus[0]){e.preventDefault();focus.at(-1).focus();}else if(!e.shiftKey&&document.activeElement===focus.at(-1)){e.preventDefault();focus[0].focus();}}});
+    }
+    async function openSheet(){if(window.currentChatMode!=='private'||!valid(window.activePrivateUid))return;sheetPeer=window.activePrivateUid;ensureSheet();sheetFocus=document.activeElement;$('dashboardPreviewSheetPeer').textContent='Contact: '+(window.activePrivateName||sheetPeer);sheet.inert=false;sheet.classList.add('is-open');sheet.setAttribute('aria-hidden','false');window.acquireModalScroll?.('dashboard-preview-settings');hide();syncControls();sheet.querySelector('[data-preview-close]').focus();await loadSettings();syncControls();}
+    const unfriend=$('unfriend-btn');if(unfriend){const button=document.createElement('button');button.id='dashboardPreviewMenuButton';button.type='button';button.hidden=true;button.textContent='⋮';button.title='Dashboard preview settings';button.setAttribute('aria-label','Dashboard preview settings');button.onclick=()=>void openSheet();unfriend.parentElement.insertBefore(button,unfriend);}
+    const openRoom=window.openChatRoom;window.openChatRoom=async(...args)=>{hide();const value=await openRoom(...args);syncControls();return value;};
+    const account=window.openAccountSettingsModal;window.openAccountSettingsModal=()=>{account();void loadSettings();syncControls();};
+    if(banner){banner.replaceChildren();banner.hidden=true;banner.onclick=async()=>{const item=queue().find(m=>m.key===currentKey),s=identity();if(!item||!live(s)||!showAllowed())return;const friend=roster.get(item.peer);hide();$('chat-window').style.display='flex';try{await window.openChatRoom('private',friend.name||'TCM member',friend.avatar||'',item.peer);}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}};}
+    function resume(){if(!homeVisible()){hide();return;}render();for(const [peer,f]of roster)if(allowed(peer)&&Number(f.unreadCount)>0&&!messages.get(peer)?.size)requestFetch(peer);if(wanted.size&&!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
+    const observer=new MutationObserver(()=>{resume();syncControls();});if($('chat-window'))observer.observe($('chat-window'),{attributes:true,attributeFilter:['style','class']});if($('view-my'))observer.observe($('view-my'),{attributes:true,attributeFilter:['style','class']});
+    if(window.socket){
+        const incoming=m=>{if(!live(identity())||!prefs.enabled||!allowed(m?.senderUid))return;accept(m.senderUid,m);render();};window.socket.on('receive_new_message',incoming);window.socket.on('chat_v15_message',m=>{if(m?.mode==='private')incoming(m);});
+        window.socket.on('chat_preview_preferences',notice=>{if(live(identity())&&notice?.uid===identity().uid)applySettings(notice);});
+        window.socket.on('chat_v15_unread_cleared',notice=>{const peer=notice?.target;if(!live(identity())||!valid(peer))return;messages.delete(peer);versions.set(peer,(versions.get(peer)||0)+1);flights.delete(peer);if(Number(notice.unreadCount)>0)requestFetch(peer);render();});
+        window.socket.on('chat_v15_deleted',notice=>{if(!live(identity())||notice?.mode!=='private'||!Array.isArray(notice.ids))return;const peer=notice.sender===identity().uid?notice.target:notice.sender;for(const id of notice.ids)messages.get(peer)?.delete(id);render();});
+        window.socket.on('connect',()=>{void loadSettings();});window.socket.on('session_error',()=>dispose());
+    }
+    function dispose(){epoch++;ready=false;prefs={enabled:false,peers:[],revision:-1};settingsFlight=null;busy=false;pendingChoice=null;clearTimeout(fetchTimer);fetchTimer=null;wanted.clear();roster.clear();messages.clear();signatures.clear();versions.clear();flights.clear();hide();closeSheet();sheetPeer='';settingsError='';syncControls();}
+    const clearSession=window.clearDashboardSession;window.clearDashboardSession=()=>{dispose();return clearSession();};
+    document.addEventListener('visibilitychange',resume);window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',()=>{void loadSettings();resume();});window.addEventListener('storage',e=>{if(e.key==='uid'||e.key==='token')dispose();});
+    window.DashboardPreview=Object.freeze({syncFriends});syncFriends(window.chat15Friends||[]);syncControls();if(live(identity()))void loadSettings();
+})();
+/* LUXURY R5 END */
+
 
 
 
