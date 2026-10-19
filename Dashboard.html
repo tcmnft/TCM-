@@ -5844,11 +5844,15 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
 
     // M2: Staking countdowns and maturity buttons are owned by the shared display scheduler.
 
+    window.stakeClaimFlights = new Set();
     window.executeClaimStake = async (stakeId, principalAmt) => {
-        const uid = localStorage.getItem('uid');
+        const uid = localStorage.getItem('uid'), sessionToken = localStorage.getItem('token');
+        const flightKey = uid + ':' + stakeId;
+        if (window.stakeClaimFlights.has(flightKey)) return;
         const claimButtonBox = document.getElementById(`claim_box_${stakeId}`);
         const btn = claimButtonBox ? claimButtonBox.querySelector('button') : null;
         if (btn && btn.disabled) return;
+        window.stakeClaimFlights.add(flightKey);
         if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
         const animateClaimAmount = (targetAmount) => {
@@ -5879,6 +5883,7 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
 
         try {
             const result = await window.fetchAPI('/finance/claim-stake', 'POST', { uid, stakeId });
+            if (uid !== localStorage.getItem('uid') || sessionToken !== localStorage.getItem('token') || window.dashboardSession?.closed || window.dashboardSession?.blocked) return;
             if (result.success) {
                 const balances = window.RAM_STATE && window.RAM_STATE.balances ? window.RAM_STATE.balances : null;
 
@@ -5893,14 +5898,13 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
                     if (typeof window.vaultCarouselIndex !== 'undefined') window.vaultCarouselIndex = 0;
                 }, 1);
 
-                                const claimBox = document.getElementById(`claim_box_${stakeId}`);
-                const stakeCard = claimBox ? (claimBox.closest('[data-stake-card]') || claimBox.closest('.final-unlock-card') || claimBox.closest('.clean-tx-card') || claimBox.parentElement) : null;
-                if (stakeCard) {
-                    stakeCard.style.transition = "all 0.4s ease";
-                    stakeCard.style.transform = "scale(0.8) translateY(-20px)";
-                    stakeCard.style.opacity = "0";
-                    setTimeout(() => stakeCard.remove(), 400);
-                }
+                document.querySelectorAll('[data-stake-card]').forEach(card => {
+                    if (card.dataset.stakeCard !== String(stakeId)) return;
+                    card.style.transition = 'transform .4s ease, opacity .4s ease';
+                    card.style.transform = 'scale(.8) translateY(-20px)';
+                    card.style.opacity = '0';
+                    setTimeout(() => card.remove(), 400);
+                });
 
                 const popProfit = document.getElementById('popClaimProfit');
                 const popOldBal = document.getElementById('popOldBal');
@@ -5910,7 +5914,7 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
 
                 const currentMainBal = parseFloat(window.RAM_STATE?.balances?.Main_Balance || 0);
                 const lockedBal = parseFloat(window.RAM_STATE?.balances?.Locked_Balance || result.updatedBalances?.Locked_Balance || 0);
-                const principal = parseFloat(principalAmt || 0);
+                const principal = Number(result.injectionData?.Amount ?? principalAmt ?? 0);
 
                 if (popProfit) {
                     popProfit.innerHTML = '<i class="fas fa-satellite-dish"></i> 30 Mins Cooling Lock Activated';
@@ -5946,8 +5950,11 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
                 if(btn) { btn.innerHTML = 'Claim'; btn.disabled = false; }
             }
         } catch (e) {
+            if (uid !== localStorage.getItem('uid') || sessionToken !== localStorage.getItem('token')) return;
             window.showToast("Error claiming stake: " + e.message, true);
             if(btn) { btn.innerHTML = 'Claim'; btn.disabled = false; }
+        } finally {
+            window.stakeClaimFlights.delete(flightKey);
         }
     };
 
@@ -5955,7 +5962,7 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
         const popup = document.getElementById('claimPopup');
         if (popup) {
             popup.classList.remove('show');
-            popup.style.display = 'none';
+            window.closeModal('claimPopup');
         }
     };
 
@@ -6468,6 +6475,9 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
     window.allTransactions = [];
     window.TX_CACHE = [];
     window.hasMoreTxInDB = true;
+    window.historyNextId = '';
+    window.historyPageVersion = 0;
+    window.dashboardHistoryMonth = row => { const date = new Date(window.parseSafeTimestamp(row.timestamp || row.Date)); return date.getFullYear() + '-' + String(date.getMonth()+1).padStart(2,'0'); };
     window.isFetchingMoreTx = false;
     window.txHistoryData = [];
     window.txRenderLimit = 4;
@@ -6648,12 +6658,23 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
                 <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 1.05rem;">No Records Found</h3>
                 <p style="color: var(--text-sub); font-size: 0.8rem; max-width: 250px; margin: 0 auto; line-height: 1.4;">There are no transactions available for <strong style="color: var(--primary);">${monthName}</strong>.</p>
             </div>`;
+            window.updateHistoryPagingControl();
             return;
         }
 
         window.renderTxChunk();
         window.txRenderLimit = 4;
         tb.scrollTop = previousScroll;
+    };
+
+    // A mint reference is the artwork creation record, never the profit payment.
+    window.dashboardMintTransactionURL = tx => {
+        const ref = tx && tx.Type === 'NFT Profit' ? tx.Blockchain : null;
+        if (!ref || ref.Chain_ID !== 56 || ref.Verification_Status !== 'Verified_Mainnet_Snapshot' ||
+            !/^0x[0-9a-fA-F]{40}$/.test(ref.Contract_Address || '') ||
+            !/^[1-9][0-9]{0,77}$/.test(ref.Token_ID || '') ||
+            !/^0x[0-9a-fA-F]{64}$/.test(ref.Mint_TxHash || '')) return '';
+        return 'https://bscscan.com/tx/' + ref.Mint_TxHash.toLowerCase();
     };
 
     window.buildDashboardHistoryRowHTML = tx => {
@@ -6710,6 +6731,10 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             let amountSign = ledgerStyle ? ledgerStyle.sign : '';
             let displayTitle = (isP2P && extractedName) ? extractedName : tType;
             let displayTypeRight = (isP2P && extractedName) ? tType : '';
+            const mintURL = window.dashboardMintTransactionURL(tx);
+            const hand = /^Team Bonus \(([ABC]-Hand)\)$/.exec(tType);
+            if (hand) { displayTitle = 'Team Bonus'; displayTypeRight = hand[1]; }
+            if (tType === 'Staking Reward') displayTypeRight = 'ROI Received';
             const escapeText = window.escapeDashboardLedgerText;
             const formatMoney = window.formatDashboardMoneyMicro;
             const breakdown = window.getDashboardDepositBreakdown(tx);
@@ -6808,7 +6833,8 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
                     </div>
                     <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; align-self: stretch; gap: 4px; flex-shrink: 0; padding-left: 10px;">
                         <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
-                            ${displayTypeRight ? `<span style="font-size: 0.8rem; font-weight: 700; color: var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
+                            ${mintURL ? `<a class="tx-mint-reference" href="${mintURL}" target="_blank" rel="noopener noreferrer" aria-label="View this NFT's mint transaction on BscScan" title="NFT creation record; not the profit payment" onclick="event.stopPropagation()" style="font-size:0.65rem; font-weight:500; color:var(--text-sub); text-decoration:none; white-space:nowrap; padding:3px 0;">Mint Transaction ↗</a>` : ''}
+                            ${displayTypeRight ? `<span style="font-size: ${hand || tType === 'Staking Reward' ? '0.65rem' : '0.8rem'}; font-weight: ${hand || tType === 'Staking Reward' ? '500' : '700'}; color: var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
                             <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
                                 ${displayMicro === null ? '' : amountSign}${displayAmount} ₮
                             </div>
@@ -6860,13 +6886,14 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
                     <i class="fas fa-angle-double-down fa-fade" style="color: var(--primary);"></i> Scroll down to load more
                 </div>
             `);
-        } else {
+        } else if (!window.hasMoreTxInDB) {
             tb.insertAdjacentHTML('beforeend', `
                 <div style="text-align:center; padding: 15px 0; font-size: 0.7rem; color: var(--text-sub); border-top: 1px dashed rgba(255,255,255,0.05); margin-top: 10px;">
                     End of transactions
                 </div>
             `);
         }
+        window.updateHistoryPagingControl();
     };
 
     /* 3D Audit Tray Controller & Auto-Close on Scroll */
@@ -6917,76 +6944,47 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
     };
 
     /* History Scroll Listener */
-    window.attachHistoryScrollListener = () => {
-        const tb = document.getElementById('txHistoryBox');
-        if (!tb) return;
-        tb.removeEventListener('scroll', window.handleHistoryScroll);
-        window.handleHistoryScroll = async () => {
-            if (window.collapseAllTxBreakdowns) {
-                window.collapseAllTxBreakdowns();
-            }
-            if (tb.scrollTop + tb.clientHeight >= tb.scrollHeight - 20) {
-                if (window.currentRenderedCount < window.txHistoryData.length) {
-                    window.renderTxChunk();
-                } else if (window.hasMoreTxInDB && !window.isFetchingMoreTx) {
-                    window.isFetchingMoreTx = true;
-                    const ind = document.getElementById('txLoadMoreIndicator');
-                    if (ind) ind.innerHTML = `<i class="fas fa-spinner fa-spin" style="color: var(--primary);"></i> Syncing older records...`;
-
-                    try {
-                        let lastTx = window.allTransactions[window.allTransactions.length - 1];
-                        let lastTs = lastTx ? (lastTx.timestamp || lastTx.Date) : Date.now();
-                        if (typeof lastTs !== 'number') lastTs = window.parseSafeTimestamp(lastTs);
-
-                        const uid = localStorage.getItem('uid');
-                        const res = await window.fetchAPI(`/finance/transactions/more?uid=${uid}&lastTimestamp=${lastTs}`);
-
-                        if (res.success && res.data && res.data.length > 0) {
-                            const receivedCount = res.data.length;
-                            const seenIds = new Set((window.allTransactions || []).map(record => record.id));
-                            window.mergeDashboardHistory(res.data);
-                            res.data = res.data.filter(record => !seenIds.has(record.id));
-                            if (receivedCount < 20) window.hasMoreTxInDB = false;
-
-                            const selectedMonthValue = document.getElementById('txMonthYear') ? document.getElementById('txMonthYear').value : '';
-                            let newFiltered = res.data.filter(tx => {
-                                if (!window.isDashboardLedgerType(tx.Type)) return false;
-                                if (selectedMonthValue) {
-                                    const [targetYear, targetMonth] = selectedMonthValue.split('-');
-                                    let txDateObj;
-                                    if (tx.timestamp && typeof tx.timestamp.toDate === 'function') txDateObj = tx.timestamp.toDate();
-                                    else if (tx.timestamp && tx.timestamp.seconds) txDateObj = new Date(tx.timestamp.seconds * 1000);
-                                    else if (tx.Date) {
-                                        let p = String(tx.Date).split(' ')[0].split(/[-/]/);
-                                        if (p.length === 3 && p[0].length <= 2) txDateObj = new Date(`${p[2]}-${p[1].padStart(2, '0')}-${p[0].padStart(2, '0')}T00:00:00`);
-                                        else txDateObj = new Date(tx.Date);
-                                    }
-                                    if (!txDateObj || isNaN(txDateObj)) txDateObj = new Date(0);
-                                    if (txDateObj.getFullYear().toString() !== targetYear || (txDateObj.getMonth() + 1).toString().padStart(2, '0') !== targetMonth) return false;
-                                }
-                                return true;
-                            });
-
-                            window.txHistoryData = [...window.txHistoryData, ...newFiltered];
-                            if (ind) ind.remove();
-                            window.renderTxChunk();
-                        } else {
-                            window.hasMoreTxInDB = false;
-                            if (ind) ind.remove();
-                            window.renderTxChunk();
-                        }
-                    } catch (e) {
-                        console.error("Failed to load more txs", e);
-                        if (ind) ind.innerHTML = `Error syncing records`;
-                    } finally {
-                        window.isFetchingMoreTx = false;
-                    }
-                }
-            }
-        };
-        tb.addEventListener('scroll', window.handleHistoryScroll);
+    window.updateHistoryPagingControl = () => {
+        document.getElementById('txServerPageButton')?.remove();
+        const box=document.getElementById('txHistoryBox');
+        if(!box||!window.hasMoreTxInDB||window.currentRenderedCount<window.txHistoryData.length)return;
+        const button=document.createElement('button');button.id='txServerPageButton';button.type='button';
+        button.className='act-btn';button.style.cssText='width:100%;margin-top:12px;padding:10px;font-size:.72rem;color:var(--text-sub);border:1px dashed var(--border);border-radius:10px;background:transparent';
+        button.disabled=window.isFetchingMoreTx;button.textContent=button.disabled?'Loading…':'Load older records';button.onclick=()=>void window.loadMoreDashboardHistory();box.appendChild(button);
     };
-    setTimeout(window.attachHistoryScrollListener, 1000);
+    window.loadMoreDashboardHistory = async () => {
+        if(!window.hasMoreTxInDB||window.isFetchingMoreTx)return;
+        const uid=localStorage.getItem('uid'),token=localStorage.getItem('token'),version=window.historyPageVersion||0;
+        const active=()=>uid===localStorage.getItem('uid')&&token===localStorage.getItem('token')&&version===(window.historyPageVersion||0)&&!window.dashboardSession?.closed&&!window.dashboardSession?.blocked;
+        const last=window.allTransactions.at(-1),cursor=window.historyNextId||last?.id||'',lastTs=window.parseSafeTimestamp(last?.timestamp||last?.Date)||0;
+        if(!cursor&&!lastTs)return;
+        window.isFetchingMoreTx=true;window.updateHistoryPagingControl();
+        try{
+            const result=await window.fetchAPI('/finance/transactions/more?uid='+encodeURIComponent(uid)+'&lastTimestamp='+lastTs+(cursor?'&lastId='+encodeURIComponent(cursor):''));
+            if(!active())return;
+            if(!result.success||!Array.isArray(result.data))throw Error(result.message||'History could not load. Please retry.');
+            const seen=new Set((window.txHistoryData||[]).map(row=>row.id));window.mergeDashboardHistory(result.data);
+            window.historyNextId=result.nextCursor||result.data.at(-1)?.id||cursor;
+            window.hasMoreTxInDB=typeof result.hasMore==='boolean'?result.hasMore:result.data.length>=20;
+            const selected=document.getElementById('txMonthYear')?.value||'';
+            const extra=result.data.filter(row=>!seen.has(row.id)&&window.isDashboardLedgerType(row.Type)&&(!selected||window.dashboardHistoryMonth(row)===selected));
+            window.txHistoryData.push(...extra);document.getElementById('txLoadMoreIndicator')?.remove();
+            if(window.currentRenderedCount<window.txHistoryData.length)window.renderTxChunk();
+        }catch(error){if(active())window.showToast(error.message||'History could not load. Please retry.',true);}
+        finally{if(uid===localStorage.getItem('uid')&&token===localStorage.getItem('token')){window.isFetchingMoreTx=false;window.updateHistoryPagingControl();}}
+    };
+    window.attachHistoryScrollListener = () => {
+        const box=document.getElementById('txHistoryBox');if(!box)return;
+        if(window.handleHistoryScroll)box.removeEventListener('scroll',window.handleHistoryScroll);
+        window.handleHistoryScroll=()=>{
+            window.collapseAllTxBreakdowns?.();
+            if(box.scrollTop+box.clientHeight<box.scrollHeight-20)return;
+            if(window.currentRenderedCount<window.txHistoryData.length)window.renderTxChunk();
+            else void window.loadMoreDashboardHistory();
+        };
+        box.addEventListener('scroll',window.handleHistoryScroll,{passive:true});
+    };
+    setTimeout(window.attachHistoryScrollListener,1000);
 
     /* Manual Cache Invalidation */
     window.invalidateRecentHistoryCache = () => {
@@ -7083,6 +7081,10 @@ window.dashboardSync = {
 
 window.clearDashboardSession = () => {
     window.resetTxIconState();
+    window.historyPageVersion = (window.historyPageVersion || 0) + 1;
+    window.historyNextId = '';
+    window.isFetchingMoreTx = false;
+    if (window.stakingDeadlineState) { clearTimeout(window.stakingDeadlineState.timer); window.stakingDeadlineState.timer = null; window.stakingDeadlineState.signature = null; window.stakingDeadlineState.deferred = false; }
     // Never clear unrelated preferences, drafts or operation request IDs.
     for (const key of ['token', 'uid', 'tcm_userData', 'tcm_static_user', 'tcm_user_dp']) {
         localStorage.removeItem(key);
@@ -7797,7 +7799,11 @@ window.applyDashboardSnapshot = data => {
     }
     window.dashboardSync.historyStatus = data.historyStatus || 'ready';
     if (!data.isUpToDate) window.mergeDashboardHistory(data.transactions || []);
-    window.hasMoreTxInDB = (data.transactions || []).length >= 20 || (data.isUpToDate && window.hasMoreTxInDB === true);
+    if (!data.isUpToDate && data.historyStatus !== 'stale') {
+        window.historyPageVersion++;
+        window.historyNextId = data.historyCursor || (data.transactions || []).at(-1)?.id || '';
+        window.hasMoreTxInDB = typeof data.historyHasMore === 'boolean' ? data.historyHasMore : (data.transactions || []).length >= 20;
+    }
     window.dashboardSession.verified = true;
     window.renderWalletData(wallet);
     if (window.refreshStakingOverview) window.refreshStakingOverview(wallet);
@@ -11090,7 +11096,7 @@ window.renderNFTBlockchainReference = raw => {
                     </div>
                 </div>
                 <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                    <span style="font-size: 0.72rem; font-weight: 700; color: var(--primary); background: rgba(0,245,255,0.1); padding: 2px 6px; border-radius: 6px;">${escape(handInfo)}</span>
+                    <span style="font-size: 0.65rem; font-weight: 500; color: var(--text-sub);">${escape(handInfo)}</span>
                     <div style="color:var(--success); font-size: 0.95rem; font-weight: 700;">+${parseFloat(tx.Amount).toFixed(2)} ₮</div>
                 </div>
             </div>`;
@@ -13873,6 +13879,7 @@ window.renderNFTBlockchainReference = raw => {
         window.openModal('stakingSpeedInfoModal');
     };
 
+    window.stakeSubmitFlights = new Set();
     window.executeStake = async (days, roi, inputId, cardId) => {
         const amtInput = document.getElementById(inputId);
         const amount = parseFloat(amtInput.value);
@@ -13883,6 +13890,9 @@ window.renderNFTBlockchainReference = raw => {
         if (!amount || amount < 10) return window.showToast("Minimum stake is 10 USDT!", true);
         if (days === 15 && amount < 50) return window.showToast("Gold Vault requires Min 50 USDT!", true);
         if (days === 30 && amount < 100) return window.showToast("Platinum Node requires Min 100 USDT!", true);
+        const submitKey = uid + ':' + cardId, sessionToken = localStorage.getItem('token');
+        if (window.stakeSubmitFlights.has(submitKey)) return;
+        window.stakeSubmitFlights.add(submitKey);
 
         const loader = document.getElementById('loader');
         if (loader) {
@@ -13900,6 +13910,7 @@ window.renderNFTBlockchainReference = raw => {
                 cardNumber: cardNumber
             });
 
+            if (uid !== localStorage.getItem('uid') || sessionToken !== localStorage.getItem('token') || window.dashboardSession?.closed || window.dashboardSession?.blocked) return;
             if (result.success) {
                 window.showToast(`Successfully Staked ${amount} ₮ for ${days} Days!`);
                 amtInput.value = '';
@@ -13912,6 +13923,7 @@ window.renderNFTBlockchainReference = raw => {
         } catch (error) {
             window.showToast("Failed to process staking.", true);
         } finally {
+            window.stakeSubmitFlights.delete(submitKey);
             if (loader) loader.style.display = 'none';
         }
     };
@@ -14038,9 +14050,11 @@ window.renderNFTBlockchainReference = raw => {
             .filter(stake => stake && stake.status === 'Active')
             .map(stake => Number(stake.unlockTime)).filter(time => Number.isFinite(time) && time > now);
         if (deadlines.length === 0) return;
+        const ownerUid = localStorage.getItem('uid'), ownerToken = localStorage.getItem('token');
         const delay = Math.min(2147483647, Math.max(1, Math.min(...deadlines) - now));
         state.timer = setTimeout(() => {
             state.timer = null;
+            if (!ownerUid || !ownerToken || ownerUid !== localStorage.getItem('uid') || ownerToken !== localStorage.getItem('token') || window.dashboardSession?.closed || window.dashboardSession?.blocked) return;
             if (document.visibilityState !== 'visible') { state.deferred = true; return; }
             const current = window.RAM_STATE?.balances || window.lastWalletData || {};
             window.refreshStakingOverview(current);
@@ -14109,11 +14123,12 @@ window.renderNFTBlockchainReference = raw => {
             if (!node.getClientRects().length) return;
             const unlock = Number(node.getAttribute('data-unlock'));
             if (!Number.isFinite(unlock) || unlock <= 0) return;
-            const seconds = Math.max(0, Math.floor((unlock - now) / 1000));
+            const seconds = Math.max(0, Math.ceil((unlock - now) / 1000));
             const value = [Math.floor(seconds / 3600), Math.floor(seconds % 3600 / 60), seconds % 60]
                 .map(part => String(part).padStart(2, '0')).join(':');
             if (node.textContent !== value) node.textContent = value;
         });
+        window.refreshMaturedStakingButtons();
     }, 1000);
 
     /* JS 28 | STAKING UI ENGINE | END */
@@ -14186,7 +14201,9 @@ window.renderNFTBlockchainReference = raw => {
 
     // 🚀 THE FIX: Loop over ALL stakes to populate the card backs, but filter the bottom list safely!
     sortedStakes.forEach(stk => {
-        const stakeStatus = String(stk.status || 'Active');
+        const recordedStatus = String(stk.status || 'Active');
+        const releaseTime = Number(stk.unlockTime);
+        const stakeStatus = recordedStatus === 'Active' && Number.isFinite(releaseTime) && releaseTime > 0 && releaseTime <= now ? 'Matured' : recordedStatus;
         const isActiveOrMatured = ['Active', 'Matured'].includes(stakeStatus);
         const stakeId = stk.id || stk.Order_ID || stk.orderId;
         const principal = parseFloat(stk.amount || 0);
@@ -14273,7 +14290,7 @@ window.renderNFTBlockchainReference = raw => {
         let statusBadge = stakeStatus === 'Active' ? `<span style="font-size:0.6rem; color:#f59e0b; font-weight:800; text-transform:uppercase; background: rgba(245,158,11,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(245,158,11,0.3);">● ACTIVE</span>` : stakeStatus === 'Matured' ? `<span style="font-size:0.6rem; color:#22d3ee; font-weight:800; text-transform:uppercase; background: rgba(34,211,238,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(34,211,238,0.3);">● MATURED</span>` : `<span style="font-size:0.6rem; color:#10b981; font-weight:800; text-transform:uppercase; background: rgba(16,185,129,0.1); padding: 2px 6px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.3);">● CLAIMED</span>`;
 
         let itemHtml = `
-        <div class="clean-tx-card" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 14px;">
+        <div class="clean-tx-card" data-stake-card="${stakeId}" style="flex-direction: column; align-items: stretch; gap: 10px; padding: 14px;">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.05); padding-bottom: 8px;">
                 <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${displayTx}</span></span>
                 ${statusBadge}
@@ -14334,7 +14351,7 @@ window.renderNFTBlockchainReference = raw => {
         const popup = document.getElementById('claimPopup');
         if (popup) {
             popup.classList.remove('show');
-            popup.style.display = 'none';
+            window.closeModal('claimPopup');
         }
     };
 
@@ -14477,11 +14494,16 @@ window.renderNFTBlockchainReference = raw => {
             window.cinemaProfitInterval = window.MasterClockDispatcher.register('cinemaProfitInterval', () => {
                 let currentLiveProfit = 0;
                 let now = Date.now();
-                targetStakes.forEach(stk => {
+                const currentStakes = (window.RAM_STATE?.balances || window.lastWalletData)?.Active_Stakes || [];
+                const liveStakes = currentStakes.filter(stake => stake && Number(stake.duration) === Number(days) && ['Active','Matured'].includes(stake.status));
+                const principalNode = document.getElementById('cinemaPrincipal');
+                if (principalNode) principalNode.innerText = liveStakes.reduce((sum, stake) => sum + (Number(stake.amount) || 0), 0).toFixed(2) + ' ₮';
+                liveStakes.forEach(stk => {
                     let amt = parseFloat(stk.amount);
                     let dailyProfit = amt * (parseFloat(stk.dailyRoi) / 100);
                     let profitPerMs = dailyProfit / (24 * 60 * 60 * 1000);
-                    let elapsedMs = now - (stk.startTime || Date.now());
+                    const start = Number(stk.startTime), unlock = Number(stk.unlockTime);
+                    let elapsedMs = Number.isFinite(start) && Number.isFinite(unlock) && start > 0 && unlock > start ? Math.max(0, Math.min(now, unlock) - start) : 0;
                    if (elapsedMs > 0) currentLiveProfit += (elapsedMs * profitPerMs);
                });
                let profitStr = currentLiveProfit.toFixed(8);
