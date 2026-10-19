@@ -3713,6 +3713,14 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 @media(max-height:500px){#dashboardPreviewSheet{padding-bottom:calc(80px + env(safe-area-inset-bottom,0px))}#dashboardPreviewSheet .preview-sheet-panel{max-height:calc(100dvh - 108px)}}
 @media(prefers-reduced-motion:reduce){#chat-content .chat-target-message .msg-wrapper::after{animation:none;opacity:.75}}
 </style>
+<style id="announcements-user-style">
+/* R4 announcement styles are scoped to announcements only. */
+.announcement-header-button{position:relative;flex:0 0 36px;width:36px;height:36px;margin-right:10px;border:1px solid var(--border,#334155);border-radius:11px;background:var(--bg-card,#0f172a);color:var(--primary,#38bdf8);cursor:pointer;font-size:17px}.announcement-unread{position:absolute;top:-5px;right:-5px;min-width:17px;border-radius:10px;padding:2px 4px;background:#ef4444;color:white;font:700 9px sans-serif}.announcement-unread[hidden]{display:none}.ann-popup{position:fixed;top:calc(env(safe-area-inset-top,0px) + 75px);right:18px;width:min(345px,calc(100vw - 28px));padding:16px;border:1px solid #1683a9;border-radius:16px;background:rgba(8,23,39,.97);box-shadow:0 15px 60px #0009;backdrop-filter:blur(16px);z-index:2147483000;color:#e2e8f0;animation:ann-enter .18s ease-out}.ann-popup[hidden]{display:none!important}.ann-popup-head{display:flex;justify-content:space-between;align-items:center;font-size:9px;letter-spacing:.1em;color:#67e8f9}.ann-popup strong{display:block;margin:10px 0 6px;font-size:14px;line-height:1.5;overflow-wrap:anywhere}.ann-popup>p{margin:0 0 10px;font-size:12px;line-height:1.6;overflow-wrap:anywhere}.ann-popup-close{border:0;background:none;color:#94a3b8;font-size:22px;cursor:pointer;padding:0 5px}.ann-button{padding:8px 11px;border:1px solid #28516c;background:#102f46;color:#bae6fd;border-radius:8px;font:600 11px sans-serif;cursor:pointer}.ann-button:disabled{opacity:.5;cursor:wait}.ann-notice{font-size:11px;color:var(--text-sub,#94a3b8);line-height:1.6;margin:6px 0 12px}.ann-card{border:1px solid var(--border,#24354b);padding:14px;border-radius:12px;margin-bottom:12px;background:rgba(148,163,184,.05);overflow-wrap:anywhere}.ann-unread{border-left:3px solid #22d3ee;background:rgba(14,165,233,.08)}.ann-card small{font-size:10px;color:#7f96af;display:block;margin-bottom:8px}.ann-title{display:block;text-align:left;padding:0;border:0;background:none;color:var(--text-main,#e2e8f0);font-weight:700;font-size:14px;cursor:pointer}.ann-card h3{font-size:15px;margin:8px 0;color:var(--text-main,#e2e8f0)}.ann-card p{font-size:12px;line-height:1.8;margin:9px 0 0;color:var(--text-main,#e2e8f0)}.ann-full{white-space:pre-wrap;overflow-wrap:anywhere}.ann-empty{font-size:12px;color:var(--text-sub,#94a3b8);padding:25px 0;text-align:center}#messageModal .msg-modal-box{max-width:560px}#messageModal .msg-header h3{font-size:1rem}#messageModal .btn-clear-all{padding:7px 9px;font-size:10px}#messageModal .msg-body{min-height:100px}#messageModal .ann-list{min-width:0}
+@keyframes ann-enter{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}
+@media(max-width:480px){.ann-popup{right:12px}#messageModal{padding:12px}#messageModal .msg-modal-box{padding:16px;border-radius:17px}#messageModal .msg-header{gap:7px}#messageModal .msg-header h3{font-size:.9rem}.announcement-header-button{margin-right:7px;flex-basis:32px;width:32px;height:32px}}
+@media(prefers-reduced-motion:reduce){.ann-popup{animation:none}}
+
+</style>
 </head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
@@ -3786,9 +3794,9 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 <div id="messageModal" class="modal">
     <div class="msg-modal-box">
         <div class="msg-header">
-            <h3><i class="fas fa-bell" style="color:var(--primary);"></i> Notifications</h3>
+            <h3><i class="fas fa-bell" style="color:var(--primary);"></i> Announcements</h3>
             <div style="display:flex; gap:10px; align-items:center;">
-                <button class="btn-clear-all" onclick="clearAllMessages()"><i class="fas fa-trash-alt"></i> Clear All</button>
+                <button class="btn-clear-all" onclick="clearAllMessages()"><i class="fas fa-check-double"></i> Mark loaded read</button>
                 <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeMessageModal()"></i>
             </div>
         </div>
@@ -4826,6 +4834,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
             <div class="t-item">BNB <span style="color:var(--success)">$580.40</span></div>
         </div>
     </div>
+    <button id="announcementButton" class="announcement-header-button" type="button" onclick="openMessageModal()" aria-label="Announcements"><i class="fas fa-bell" aria-hidden="true"></i><span id="announcementUnread" class="announcement-unread" hidden>0</span></button>
     <div class="header-actions" onclick="toggleSidebar(true)">
         <i class="fas fa-bars-staggered" style="font-size:1.3rem;"></i>
         <div class="h-badge" id="headerBadge">0</div>
@@ -4848,6 +4857,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
     <div class="sb-item" onclick="toggleTheme()">
         <i class="fas fa-moon" id="themeIcon"></i> <span id="themeText">Dark Mode</span>
     </div>
+    <a href="javascript:void(0)" class="sb-item" id="sidebarAnnouncements" onclick="openMessageModal(); toggleSidebar(false);"><i class="fas fa-bullhorn"></i> Announcements</a>
     <a href="javascript:void(0)" class="sb-item" id="sidebarMsgBox" onclick="openSupportChat(); toggleSidebar(false);">
         <i class="far fa-envelope" id="msgIcon"></i> Message Box
     </a>
@@ -7080,6 +7090,7 @@ window.dashboardSync = {
 };
 
 window.clearDashboardSession = () => {
+    window.TCMAnnouncements?.dispose();
     window.resetTxIconState();
     window.historyPageVersion = (window.historyPageVersion || 0) + 1;
     window.historyNextId = '';
@@ -7107,6 +7118,7 @@ window.handleDashboardAccess = (status, message, code) => {
         const accountBlocked = code === 'ACCOUNT_BLOCKED' || message === 'Account access is blocked.';
         if (accountBlocked) {
             window.dashboardSession.blocked = true;
+            window.TCMAnnouncements?.dispose();
             window.dashboardSession.verified = false;
             window.dashboardSession.epoch += 1;
             if (window.socket) window.socket.disconnect();
@@ -7805,6 +7817,7 @@ window.applyDashboardSnapshot = data => {
         window.hasMoreTxInDB = typeof data.historyHasMore === 'boolean' ? data.historyHasMore : (data.transactions || []).length >= 20;
     }
     window.dashboardSession.verified = true;
+    window.dispatchEvent(new Event('tcm:dashboard-ready'));
     window.renderWalletData(wallet);
     if (window.refreshStakingOverview) window.refreshStakingOverview(wallet);
     if (window.initAssetsUI) window.initAssetsUI();
@@ -15812,6 +15825,60 @@ window.renderNFTBlockchainReference = raw => {
 
 </script>
 <!-- Testnet simulation controller removed. -->
+<script>
+/* R4 announcements: durable inbox, server-owned read state and one popup claim per user. */
+(() => {
+ 'use strict';
+ const $=s=>document.querySelector(s),modal=$('#messageModal'),body=$('#msgBodyContent');if(!modal||!body)return;
+ const node=(tag,attrs={},text)=>{const el=document.createElement(tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(text!==undefined)el.textContent=String(text);return el;};
+ const button=(text,fn,cls='ann-button')=>{const el=node('button',{type:'button',class:cls},text);el.addEventListener('click',fn);return el;};
+ const time=t=>t?new Date(t).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Published announcement';
+ let identity=null,version=0,queue=[],active=null,timer=null,pumping=false,fetching=false,dirty=false,morePending=false,stopped=false,inboxVersion=0,inboxController=null,inboxCursor=null,inboxRows=new Map(),popupController=null;
+ let unreadCurrent=0,readRevision=0;const locallyRead=new Set();
+ const notice=node('p',{class:'ann-notice',role:'status'}),rows=node('div',{class:'ann-list'}),more=button('Load older announcements',()=>loadInbox(true));body.replaceChildren(notice,rows,more);more.hidden=true;
+ const popup=node('section',{id:'announcementPopup',class:'ann-popup',role:'status','aria-live':'polite',hidden:''}),popupHead=node('div',{class:'ann-popup-head'}),popupTitle=node('strong'),popupBody=node('p'),popupOpen=button('Read full message',()=>readPopup()),popupClose=button('×',()=>dismissPopup(true),'ann-popup-close');popupClose.setAttribute('aria-label','Dismiss announcement popup');popupHead.append(node('span',{},'TCM ANNOUNCEMENT'),popupClose);popup.append(popupHead,popupTitle,popupBody,popupOpen);document.body.append(popup);
+ const identityNow=()=>{const uid=localStorage.getItem('uid'),token=localStorage.getItem('token'),s=window.dashboardSession;return uid&&token&&s&&!s.closed&&!s.blocked&&s.verified?{uid,token,epoch:s.epoch}:null;};
+ const same=(a,b)=>!!a&&!!b&&a.uid===b.uid&&a.token===b.token&&a.epoch===b.epoch;
+ const live=()=>!stopped&&same(identity,identityNow());
+ async function request(path,method='GET',payload=null,signal){
+  const ctx=identity,epoch=version;if(!ctx||!live())throw new Error('Sign in to view announcements.');
+  const abort=new AbortController(),stop=()=>abort.abort(),timeout=setTimeout(stop,25000);if(signal?.aborted)stop();signal?.addEventListener('abort',stop,{once:true});
+  try{const response=await fetch(API_BASE_URL+'/announcements'+path,{method,cache:'no-store',signal:abort.signal,headers:{Authorization:'Bearer '+ctx.token,Accept:'application/json',...(payload?{'Content-Type':'application/json'}:{})},...(payload?{body:JSON.stringify(payload)}:{})});if(!(response.headers.get('content-type')||'').includes('application/json'))throw new Error('Announcement service returned an invalid response.');const result=await response.json();if(!same(ctx,identity)||epoch!==version||!live())throw Object.assign(new Error('Session changed.'),{name:'AbortError'});if(response.status===401||response.status===403)window.handleDashboardAccess?.(response.status,result.message,result.code);if(!response.ok||!result.success)throw Object.assign(new Error(result.message||'Announcement service unavailable.'),{status:response.status});return result;}
+  finally{clearTimeout(timeout);signal?.removeEventListener('abort',stop);}
+ }
+ function badge(count){unreadCurrent=count;const el=$('#announcementUnread');if(!el)return;el.textContent=count>99?'99+':String(count);el.hidden=count===0;$('#announcementButton')?.setAttribute('aria-label','Announcements, '+count+' unread');}
+ function dismissPopup(next=false){clearTimeout(timer);timer=null;popup.hidden=true;active=null;if(next)queueMicrotask(()=>pump());}
+ function dispose(){++version;++inboxVersion;stopped=true;fetching=false;pumping=false;readRevision=0;locallyRead.clear();popupController?.abort();inboxController?.abort();queue=[];dirty=false;morePending=false;dismissPopup();identity=null;inboxRows.clear();inboxCursor=null;badge(0);rows.replaceChildren();notice.textContent='Sign in to view announcements.';if(modal.style.display==='flex'||modal.classList.contains('show'))window.closeModal?.('messageModal');}
+ function start(force=false){const next=identityNow();if(!next){if(identity)dispose();return;}if(!same(identity,next)){dispose();stopped=false;identity=next;}if(!force&&fetching)return;dirty=true;if(queue.length&&!active)void pump();else void pending();}
+ async function pending(){if(!live()||document.hidden)return;if(fetching){dirty=true;return;}if(queue.length||active){dirty=true;return;}fetching=true;dirty=false;const epoch=version,revision=readRevision;popupController=new AbortController();try{const r=await request('/pending','GET',null,popupController.signal);if(epoch!==version||!live())return;if(revision===readRevision)badge(r.unread);queue=r.items;morePending=r.hasMore;}
+  catch(e){if(e.name!=='AbortError'&&live())notice.textContent='Announcements will sync when the connection is available.';}
+  finally{if(epoch===version){fetching=false;if(live())void pump();}}
+ }
+ async function pump(){if(pumping||active||!live()||document.hidden)return;pumping=true;const epoch=version;try{while(queue.length&&live()&&!document.hidden){const candidate=queue.shift();const result=await request('/claim','POST',{id:candidate.id});if(epoch!==version||!live())return;if(!result.claimed)continue;active=result.item||candidate;popupTitle.textContent=active.title;popupBody.textContent=active.message.length>180?active.message.slice(0,180)+'…':active.message;popup.hidden=false;timer=setTimeout(()=>dismissPopup(true),3000);return;}}
+  catch(e){if(epoch===version&&live()){queue=[];morePending=false;dirty=false;notice.textContent='Popup sync paused. Your messages remain in the inbox.';}}
+  finally{if(epoch===version){pumping=false;if(!active&&!queue.length&&live()&&!document.hidden&&(morePending||dirty)){morePending=false;queueMicrotask(()=>pending());}}}
+ }
+ function renderInbox(){rows.replaceChildren();for(const item of inboxRows.values()){const card=node('article',{class:'ann-card'+(item.read?'':' ann-unread'),'data-announcement-id':item.id}),head=button(item.title,()=>expand(item,card),'ann-title');card.append(node('small',{},time(item.createdAt)+(item.read?'':' · Unread')),head,node('p',{class:'ann-excerpt'},item.message.length>150?item.message.slice(0,150)+'…':item.message));rows.append(card);}if(!inboxRows.size)rows.append(node('p',{class:'ann-empty'},'No announcements yet.'));more.hidden=!inboxCursor;}
+ async function markRead(ids){const result=await request('/read','POST',{ids});readRevision++;for(const key of result.readIds){locallyRead.add(key);const item=inboxRows.get(key);if(item)item.read=true;}badge(result.unread);if(modal.style.display==='flex')notice.textContent=unreadCurrent+' unread. Announcement history is retained.';return result;}
+ function expand(item,card){const epoch=version,view=inboxVersion;card.replaceChildren(node('small',{},time(item.createdAt)),node('h3',{},item.title),node('p',{class:'ann-full'},item.message));if(!item.read)void markRead([item.id]).then(()=>{if(epoch===version&&view===inboxVersion)card.classList.remove('ann-unread');}).catch(e=>{if(epoch===version&&view===inboxVersion)notice.textContent='Message opened. Read status could not sync; open it again to retry.';});}
+ async function loadInbox(append=false){if(!live())start();if(!live())return;if(append&&!inboxCursor)return;inboxController?.abort();inboxController=new AbortController();const view=++inboxVersion,epoch=version,revision=readRevision;if(!append){inboxRows.clear();inboxCursor=null;rows.replaceChildren();}notice.textContent='Loading announcements…';more.disabled=true;try{const r=await request('/inbox'+(append?'?before='+encodeURIComponent(inboxCursor):''),'GET',null,inboxController.signal);if(view!==inboxVersion||epoch!==version)return;for(const item of r.items)inboxRows.set(item.id,{...item,read:item.read||locallyRead.has(item.id)});inboxCursor=r.nextCursor;if(revision===readRevision)badge(r.unread);renderInbox();notice.textContent=unreadCurrent+' unread · '+r.total+' published. Open a message to mark it read.';}catch(e){if(e.name!=='AbortError'&&view===inboxVersion)notice.textContent=e.message;}finally{more.disabled=false;}}
+ function closeInbox(){++inboxVersion;inboxController?.abort();window.closeModal?.('messageModal');}
+ window.openMessageModal=()=>{if(!live())start();window.openModal?.('messageModal');void loadInbox();};
+ window.closeMessageModal=closeInbox;
+ window.clearAllMessages=async()=>{const ids=[...inboxRows.values()].filter(r=>!r.read).map(r=>r.id);const epoch=version,view=inboxVersion;try{for(let i=0;i<ids.length;i+=20){if(epoch!==version||view!==inboxVersion||!live())return;await markRead(ids.slice(i,i+20));}if(epoch===version&&view===inboxVersion){renderInbox();notice.textContent='Loaded announcements marked read. History is retained.';}}catch(e){if(epoch===version&&view===inboxVersion)notice.textContent=e.message;}};
+ function readPopup(){if(!active)return;const item=active;dismissPopup();window.openModal?.('messageModal');inboxController?.abort();++inboxVersion;inboxRows.clear();inboxCursor=null;inboxRows.set(item.id,{...item,read:false});rows.replaceChildren();const card=node('article',{class:'ann-card ann-unread','data-announcement-id':item.id});rows.append(card);notice.textContent='Full announcement';more.hidden=true;expand(inboxRows.get(item.id),card);void pump();}
+ // The existing modal manager also handles outside-click and Escape closure.
+ const originalClose=window.closeModal;window.closeModal=function(id,...args){if(id==='messageModal'){++inboxVersion;inboxController?.abort();}return originalClose?.call(this,id,...args);};
+ window.TCMAnnouncements={start,dispose};
+ window.addEventListener('tcm:dashboard-ready',()=>{if(!same(identity,identityNow()))start();});
+ window.addEventListener('storage',e=>{if(e.key===null||['uid','token'].includes(e.key)){dispose();if(identityNow())start();}});
+ window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',e=>{if(e.persisted)start(true);});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)dismissPopup();else start(true);});
+ if(window.socket){window.socket.on('connect',()=>start(true));window.socket.on('system_announcement_published',()=>start(true));window.socket.on('session_error',data=>{if([401,403].includes(data?.status))dispose();});}
+ start();
+})();
+
+</script>
 </body>
 </html>
 

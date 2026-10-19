@@ -167,6 +167,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;color:inherit}h1
 @media(max-width:767px){.r3-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.r3-dialog-body{padding:12px}.r3-shell,.r3-card{padding:12px}.r3-dialog{max-height:95dvh}.r3-filters{gap:8px}}
 
 </style>
+<style id="announcements-admin-style">
+.ann-admin-button{padding:9px 13px;border:1px solid #28516b;border-radius:8px;background:#103148;color:#bae6fd;font:600 12px sans-serif;cursor:pointer}.ann-admin-button:disabled{opacity:.45;cursor:wait}.ann-admin-notice{font-size:12px;color:#94a3b8;line-height:1.8;overflow-wrap:anywhere;margin:10px 0 17px}.ann-admin-toolbar{display:flex;gap:12px;margin-bottom:15px}.ann-admin-toolbar input{flex:1;min-width:0}.ann-admin-card{padding:20px;border:1px solid #24364c;background:#0b1727;border-radius:13px;margin-bottom:15px}.ann-admin-card small{color:#7e96b1;font-size:10px;display:block;overflow-wrap:anywhere}.ann-admin-card h3{color:#e2e8f0;font-size:16px;margin:12px 0}.ann-admin-card p{color:#cbd5e1;font-size:12px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere}.ann-admin-card button{margin-top:12px}.ann-admin-dialog{width:min(590px,calc(100vw - 24px));max-height:86dvh;border:1px solid #334155;border-radius:15px;background:#0b1728;color:#e2e8f0;padding:20px;overflow:auto}.ann-admin-dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}.ann-admin-head{display:flex;justify-content:space-between;gap:12px;align-items:center}.ann-admin-head h3{font-size:17px}.ann-admin-body h4{font-size:17px;overflow-wrap:anywhere}.ann-admin-full{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.9;font-size:13px}.ann-admin-dialog>button{margin-top:12px}
+
+</style>
 </head>
 <body class="flex h-screen w-full relative">
 
@@ -205,10 +209,10 @@ button,input,select,textarea{font:inherit}button{cursor:pointer;color:inherit}h1
     <main class="flex-1 h-screen overflow-y-auto p-4 md:p-6 z-10 relative" id="consoleMain" tabindex="-1">
         
         <!-- TOP HEADER -->
-        <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5"><button type="button" id="consoleMenuButton" class="console-menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="consoleSidebar" onclick="consoleSetMenu(true)">☰</button><div><p id="consoleBreadcrumb" class="console-breadcrumb">Dashboard</p><h2 id="section-title">Overview</h2><p id="section-subtitle">Requests, summaries and shortcuts</p></div><span class="console-phase">Transactions &amp; Tracking · R3</span></header>
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5"><button type="button" id="consoleMenuButton" class="console-menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="consoleSidebar" onclick="consoleSetMenu(true)">☰</button><div><p id="consoleBreadcrumb" class="console-breadcrumb">Dashboard</p><h2 id="section-title">Overview</h2><p id="section-subtitle">Requests, summaries and shortcuts</p></div><span class="console-phase">Communication · R4</span></header>
 
         <!-- DASHBOARD -->
-        <div id="section-dashboard" class="admin-section fade-in"><div class="console-note" role="note">Transactions and Order Tracking are available from their menus. The new announcement archive and inbox are still in development.</div>
+        <div id="section-dashboard" class="admin-section fade-in"><div class="console-note" role="note">Transactions and Order Tracking are available from their menus. Announcements now have a persistent archive and user inbox.</div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                 <div class="glass-card p-4 border-t-2 border-t-sky-500">
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Members</p>
@@ -3949,6 +3953,48 @@ window.addEventListener('storage', event => {
  window.adminRecordsEnter=page=>{if(states.has(page)){renderMode(states.get(page));void loadList(page);return true;}return false;};
  document.addEventListener('tcm:admin-page-leave',()=>{for(const s of states.values()){s.sequence++;s.controller?.abort();}lookupSequence++;lookupController?.abort();closeDetails();});
  window.addEventListener('load',()=>{if(adminAuthState.ready)window.adminRecordsEnter(consoleCurrentPage);});
+})();
+
+</script>
+<script>
+/* R4 admin composer and immutable announcement history. */
+(() => {
+ 'use strict';
+ const page=document.getElementById('section-broadcast'),historyPage=document.getElementById('section-announcements');if(!page||!historyPage)return;
+ const node=(tag,attrs={},text)=>{const el=document.createElement(tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(text!==undefined)el.textContent=String(text);return el;};
+ const button=(text,fn,cls='ann-admin-button')=>{const b=node('button',{type:'button',class:cls},text);b.addEventListener('click',fn);return b;};
+ const title=document.getElementById('bcTitle'),message=document.getElementById('bcMessage');let draft=null,sending=false,view=0,controller=null,cursor=null,historyRows=new Map(),fullVersion=0;
+ // Retain existing input IDs and entry points; all sends now require this preview.
+ const explanation=page.querySelector('.console-note');if(explanation)explanation.textContent='Preview the exact title and message before publishing. Online users receive a three-second popup; the announcement remains in their inbox.';
+ const status=node('p',{class:'ann-admin-notice',role:'status','aria-live':'polite'});page.prepend(status);
+ const publishButton=[...page.querySelectorAll('button')].find(b=>b.getAttribute('onclick')==='submitGlobalBroadcast()');if(publishButton)publishButton.textContent='Preview announcement';
+ const quickButton=document.querySelector('button[onclick="saveQuickBroadcast()"]');if(quickButton)quickButton.textContent='Preview';
+ document.getElementById('quickBroadcastInput').placeholder='Write announcement text to preview...';
+ const dialog=node('dialog',{id:'announcementAdminPreview',class:'ann-admin-dialog','aria-labelledby':'ann-admin-preview-title'}),head=node('div',{class:'ann-admin-head'}),previewBody=node('div',{class:'ann-admin-body'}),send=button('Send announcement',()=>publish()),cancel=button('Close',()=>closePreview());head.append(node('h3',{id:'ann-admin-preview-title'},'Announcement preview'),cancel);dialog.append(head,previewBody,send);document.body.append(dialog);
+ function closePreview(){draft=null;++fullVersion;if(dialog.open)dialog.close();}
+ dialog.addEventListener('cancel',e=>{e.preventDefault();closePreview();});dialog.addEventListener('click',e=>{if(e.target===dialog)closePreview();});
+ function intentKey(){requireAdminSession();return 'tcm_announcement_send_'+adminAuthState.actorUid;}
+ function savedIntent(){const raw=sessionStorage.getItem(intentKey());return raw?JSON.parse(raw):null;}
+ function preview(currentTitle,currentMessage){requireAdminSession();if(sending)return;const saved=savedIntent();draft=saved?.payload||{title:currentTitle.trim(),message:currentMessage.trim()};if(!draft.title||draft.title.length>200||!draft.message||draft.message.length>4000||/[\x00-\x08\x0b\x0c\x0e-\x1f]/.test(draft.title+draft.message)){status.textContent='Enter a title (up to 200 characters) and message (up to 4000 characters), without unsupported control characters.';draft=null;return;}
+  ++fullVersion;previewBody.replaceChildren(node('h4',{},draft.title),node('p',{class:'ann-admin-full'},draft.message),node('p',{class:'ann-admin-notice'},saved?'A previous send has an unconfirmed result. Retry returns that same announcement; the current form will not replace its contents.':'Online popup: three seconds. Clicking opens the full message. Inbox history remains available after the popup closes.'));send.textContent=saved?'Retry the same send':'Send announcement';send.hidden=false;send.disabled=false;if(!dialog.open)dialog.showModal();
+ }
+ window.submitGlobalBroadcast=()=>preview(title.value,message.value);
+ window.saveQuickBroadcast=()=>preview('System Alert',document.getElementById('quickBroadcastInput').value);
+ async function publish(){if(sending||!draft)return;requireAdminSession();const epoch=consolePageEpoch,generation=adminAuthState.generation,previewVersion=fullVersion,storageKey=intentKey();let intent;
+  try{intent=savedIntent();if(!intent){intent={requestId:crypto.randomUUID(),payload:{...draft}};sessionStorage.setItem(intentKey(),JSON.stringify(intent));}sending=true;send.disabled=true;status.textContent='Publishing announcement…';const response=await adminApiFetch('/api/admin/broadcast',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...intent.payload,requestId:intent.requestId})}),answer=await response.json();if(!response.ok||!answer.success)throw new Error(answer.message||'Send result is unconfirmed. Retry this same announcement.');sessionStorage.removeItem(storageKey);if(generation!==adminAuthState.generation)return;if(title.value.trim()===intent.payload.title&&message.value.trim()===intent.payload.message){title.value='';message.value='';}if(document.getElementById('quickBroadcastInput').value.trim()===intent.payload.message)document.getElementById('quickBroadcastInput').value='';if(epoch===consolePageEpoch){status.textContent=answer.message+' ID: '+answer.item.id;if(previewVersion===fullVersion)closePreview();}
+  }catch(e){if(epoch===consolePageEpoch&&generation===adminAuthState.generation)status.textContent=e.message+' The saved send is retained.';}
+  finally{sending=false;send.disabled=false;}
+ }
+ historyPage.replaceChildren();delete historyPage.dataset.consoleStatus;
+ const toolbar=node('div',{class:'ann-admin-toolbar'}),filter=node('input',{type:'search',placeholder:'Filter loaded announcements','aria-label':'Filter loaded announcements'}),refresh=button('Refresh',()=>loadHistory(false)),notice=node('p',{class:'ann-admin-notice',role:'status'}),list=node('div'),more=button('Load older announcements',()=>loadHistory(true));toolbar.append(filter,refresh);historyPage.append(toolbar,notice,list,more);more.hidden=true;
+ filter.addEventListener('input',renderHistory);
+ function renderHistory(){list.replaceChildren();const query=filter.value.trim().toLowerCase();let visible=0;for(const item of historyRows.values()){if(query&&!(item.title+' '+item.message+' '+item.id).toLowerCase().includes(query))continue;visible++;const card=node('article',{class:'ann-admin-card'}),time=item.createdAt?new Date(item.createdAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Published';card.append(node('small',{},time+' · '+(item.actorName||item.actor)+' · #'+item.seq),node('h3',{},item.title),node('p',{},item.message.length>180?item.message.slice(0,180)+'…':item.message),node('small',{},'ID: '+item.id),button('View full message',()=>{closePreview();send.hidden=true;previewBody.replaceChildren(node('h4',{},item.title),node('p',{class:'ann-admin-full'},item.message));dialog.showModal();}));list.append(card);}if(!visible)list.append(node('p',{class:'ann-admin-notice'},query?'No match in the loaded announcements. Load older pages to continue searching.':'No announcements published in the new archive yet.'));more.hidden=!cursor;}
+ async function loadHistory(append=false){if(consoleCurrentPage!=='announcements'||!adminAuthState.ready||append&&!cursor)return;controller?.abort();controller=new AbortController();const current=++view;if(!append){historyRows.clear();cursor=null;list.replaceChildren();}notice.textContent='Loading announcement archive…';more.disabled=true;refresh.disabled=true;
+  try{const response=await consoleReadFetch('/api/admin/announcements'+(append?'?before='+encodeURIComponent(cursor):''),{signal:controller.signal}),answer=await response.json();if(!response.ok||!answer.success)throw new Error(answer.message||'Archive unavailable.');if(current!==view||consoleCurrentPage!=='announcements')return;for(const item of answer.items)historyRows.set(item.id,item);cursor=answer.nextCursor;renderHistory();notice.textContent=historyRows.size+' announcements loaded · 20 per page. Published means saved in the archive; per-user delivery totals are not recorded.';
+  }catch(e){if(e.name!=='AbortError'&&current===view)notice.textContent=e.message;}finally{if(current===view){more.disabled=false;refresh.disabled=false;}}
+ }
+ const previousEnter=window.adminRecordsEnter;window.adminRecordsEnter=function(id){if(id==='announcements'){void loadHistory();return true;}return previousEnter?.(id)||false;};
+ document.addEventListener('tcm:admin-page-leave',()=>{++view;controller?.abort();closePreview();});
 })();
 
 </script>
