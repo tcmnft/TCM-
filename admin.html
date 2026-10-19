@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
+<html lang="en"><head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TCM Admin - NextGen Core</title>
+    <title>TCM Admin | Console</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -142,11 +141,37 @@
         #toast.show { visibility: visible; opacity: 1; transform: translateY(0); }
         #toast.error { border-color: #f43f5e; box-shadow: 0 10px 25px rgba(244, 63, 94, 0.25); }
     </style>
+<style id="console-r2-style">
+/* TCM ADMIN MENU R2: navigation and page separation */
+/* Critical layout fallback; existing unlayered Tailwind utilities take priority. */
+@layer console-fallback {
+button,input,select,textarea{font:inherit}button{cursor:pointer;color:inherit}h1,h2,h3,h4,p{margin:0}table{border-collapse:collapse;width:100%;text-align:left}th,td{padding:14px}.flex{display:flex}.grid{display:grid}.inline-flex{display:inline-flex}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.flex-1{flex:1;min-width:0}.items-center{align-items:center}.items-start{align-items:flex-start}.justify-between{justify-content:space-between}.justify-center{justify-content:center}.justify-end{justify-content:flex-end}.gap-1{gap:4px}.gap-2{gap:8px}.gap-3{gap:12px}.gap-4{gap:16px}.gap-6{gap:24px}.p-3{padding:12px}.p-4{padding:16px}.p-5{padding:20px}.p-6{padding:24px}.px-4{padding-left:16px;padding-right:16px}.py-3{padding-top:12px;padding-bottom:12px}.py-2{padding-top:8px;padding-bottom:8px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mb-6{margin-bottom:24px}.mt-2{margin-top:8px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-6{margin-top:24px}.w-full{width:100%}.w-1\/3{width:33.333%}.h-full{height:100%}.overflow-hidden{overflow:hidden}.overflow-auto{overflow:auto}.overflow-y-auto{overflow-y:auto}.overflow-x-auto{overflow-x:auto}.grid-cols-2{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.text-white{color:#f8fafc}.text-sky-400{color:#38bdf8}.text-emerald-400{color:#34d399}.text-rose-400{color:#fb7185}.text-amber-400{color:#fbbf24}.text-fuchsia-400{color:#e879f9}.text-purple-400{color:#c084fc}.text-slate-300{color:#cbd5e1}.text-slate-400{color:#94a3b8}.text-slate-500{color:#64748b}.text-xs{font-size:12px}.text-sm{font-size:14px}.text-base{font-size:16px}.text-lg{font-size:18px}.text-2xl{font-size:24px}[class~="text-[9px]"]{font-size:9px}[class~="text-[10px]"]{font-size:10px}[class~="text-[11px]"]{font-size:11px}.font-bold{font-weight:700}.font-semibold{font-weight:600}.font-mono{font-family:monospace}.text-center{text-align:center}.text-right{text-align:right}.rounded,.rounded-lg{border-radius:8px}.border{border:1px solid #334155}.border-t,.border-b{border-color:#334155}.truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.break-all{word-break:break-all}.break-words{overflow-wrap:anywhere}.max-w-2xl{max-width:672px}.max-w-3xl{max-width:768px}.cyber-btn{padding:9px 13px;border:1px solid #29415a;border-radius:8px;background:#0c263a;color:#bae6fd}.cyber-btn:disabled{opacity:.4;cursor:not-allowed}#section-support>.glass-card{display:flex;height:580px}.space-y-4>*+*{margin-top:16px}.space-y-3>*+*{margin-top:12px}
+@media(min-width:768px){.md\:grid-cols-3{grid-template-columns:repeat(3,minmax(0,1fr))}.md\:grid-cols-7{grid-template-columns:repeat(7,minmax(0,1fr))}.md\:col-span-2{grid-column:span 2}}
+@media(min-width:1024px){.lg\:grid-cols-6{grid-template-columns:repeat(6,minmax(0,1fr))}}
+}
+:root{color-scheme:dark;--console-line:rgba(148,163,184,.14)}
+*{box-sizing:border-box}body{display:flex;height:100dvh;width:100%;overflow:hidden}.hidden{display:none}
+#consoleSidebar{width:252px;flex:0 0 252px;display:flex;flex-direction:column;height:calc(100dvh - 24px);margin:12px 0 12px 12px;border-radius:18px;border:1px solid var(--console-line);background:rgba(10,18,32,.94);overflow:hidden;z-index:40}
+#consoleSidebar nav{flex:1;min-height:0;overflow:auto;padding:12px 10px}#consoleSidebar .nav-item{width:100%;min-height:40px;font-family:inherit;font-size:12px;line-height:1.4;text-align:left;cursor:pointer;padding:10px 12px;border-top:0;border-right:0;border-bottom:0;background:transparent;text-decoration:none;border-radius:8px;margin:2px 0;justify-content:space-between}
+#consoleSidebar .nav-item.active{background:rgba(14,165,233,.12);color:#7dd3fc;border-left-color:#38bdf8}.console-group{margin-bottom:7px}.console-group-title{display:flex;align-items:center;gap:9px;width:100%;padding:11px 9px;background:transparent;border:0;color:#94a3b8;font-family:inherit;font-size:11px;font-weight:600;cursor:pointer;text-align:left}.console-group-title .console-chevron{margin-left:auto;font-size:9px}.console-group-title[aria-expanded=false] .console-chevron{transform:rotate(-90deg)}.console-group-links{padding-left:12px}.console-group-title:hover{color:white}.console-group-count{margin-left:auto;font-size:9px;color:#64748b}
+#consoleMain:focus{outline:none}#consoleMain{flex:1;min-width:0;height:100dvh;overflow:auto;padding:25px 28px 48px}#consoleMain>header>div{flex:1;min-width:0}#consoleMain>header{position:sticky;top:-25px;background:rgba(3,7,18,.94);backdrop-filter:blur(16px);z-index:25;padding:18px 0;display:flex;gap:14px;align-items:center;border-bottom:1px solid var(--console-line);margin-bottom:24px}#section-title{font-size:24px;line-height:1.25;margin:4px 0}#section-subtitle{font-size:12px;line-height:1.5;color:#94a3b8}.console-breadcrumb{font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:#38bdf8}.console-phase{font-size:10px;padding:7px 10px;border:1px solid #334155;border-radius:30px;color:#94a3b8;white-space:nowrap}.console-menu-button{display:none;background:#0f172a;border:1px solid #334155;border-radius:9px;color:white;padding:9px;cursor:pointer}#consoleBackdrop{display:none}
+.console-note{padding:16px 18px;border:1px solid var(--console-line);border-left:3px solid #38bdf8;background:rgba(14,165,233,.045);border-radius:12px;margin-bottom:20px;font-size:12px;line-height:1.8;color:#94a3b8}.console-note strong{color:#e2e8f0}.console-planned{padding:30px;max-width:820px}.console-planned h3{font-size:20px;color:#f1f5f9;margin:14px 0 10px}.console-planned p{font-size:13px;color:#94a3b8;line-height:1.9;max-width:650px}.console-status{display:inline-flex;align-items:center;gap:6px;border:1px solid #6d5523;border-radius:24px;padding:5px 10px;color:#fbbf24;font-size:10px}.console-link{display:inline-flex;gap:8px;align-items:center;text-decoration:none;background:#0c2436;border:1px solid #155173;border-radius:9px;padding:10px 14px;color:#7dd3fc;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;margin-top:12px}.console-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:20px 0}.console-action{display:flex;flex-direction:column;gap:8px;text-align:left;padding:18px;border:1px solid var(--console-line);border-radius:12px;background:rgba(15,23,42,.7);color:#e2e8f0;cursor:pointer;font:inherit}.console-action span{font-size:11px;line-height:1.6;color:#94a3b8}.console-action:hover{border-color:#0ea5e9}.console-action b{font-size:13px}.console-page-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}.console-page-head h3{margin:0;color:#e2e8f0;font-size:16px}.console-page-head button{margin:0}.admin-section{min-width:0}.admin-section table{min-width:650px}.admin-section .glass-card{margin-top:0;margin-bottom:20px}.console-table-scroll{overflow-x:auto;max-width:100%}.console-mobile-close{display:none}.console-dividend-card{padding:24px}.console-dividend-card p{font-size:12px;line-height:1.8;color:#94a3b8}.console-finance-message{font-size:12px;color:#94a3b8;line-height:1.7;margin:15px 0}.console-summary-caption{font-size:11px;color:#64748b;margin-bottom:20px}.console-warning{border-left-color:#f59e0b;background:rgba(245,158,11,.045)}
+@media(min-width:768px){#consoleMain>header>div:first-of-type{flex:1}}
+@media(max-width:1100px){#consoleMain{padding:20px}.console-actions{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:767px){#consoleSidebar{position:fixed;left:0;top:0;width:min(290px,86vw);height:100dvh;margin:0;transform:translateX(-105%);transition:transform .2s;border-radius:0 18px 18px 0}body.console-menu-open #consoleSidebar{transform:none}body.console-menu-open #consoleBackdrop{display:block;position:fixed;inset:0;background:#000a;backdrop-filter:blur(3px);border:0;z-index:35}#consoleMain{width:100%;padding:14px 12px 35px}#consoleMain>header{top:-14px;padding:14px 0;gap:10px}.console-menu-button,.console-mobile-close{display:inline-flex}.console-phase{display:none}#section-title{font-size:19px}.console-actions{grid-template-columns:1fr 1fr;gap:9px}.console-action{padding:13px}.console-action b{font-size:12px}.console-planned{padding:20px}.console-note{padding:12px}.admin-section [class*=w-72]{max-width:100%;width:100%}.admin-section input,.admin-section select,.admin-section textarea{min-width:0;max-width:100%}#section-support>.glass-card{height:calc(100dvh - 180px);min-height:440px}#section-support .w-1\/3{width:38%}#section-support #supportChatMessages{padding:12px}.console-page-head{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style><style id="admin-records-style">
+/* R3 records panels; independent of third-party CSS availability. */
+.r3-shell,.r3-card{margin:0 0 20px;padding:18px;border:1px solid #263448;border-radius:14px;background:rgba(11,20,34,.8)}
+.r3-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:15px}.r3-button{border:1px solid #29435a;background:#0d263b;color:#bae6fd;padding:10px 13px;border-radius:8px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer}.r3-button:hover,.r3-button[aria-pressed=true]{background:#075985;color:white;border-color:#38bdf8}.r3-button:disabled{opacity:.45;cursor:wait}.r3-small{padding:7px 11px;white-space:nowrap}.r3-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 15px}.r3-filters input,.r3-filters select{width:auto;flex:1 1 130px;min-width:0}.r3-filters input[type=text]{flex:2 1 220px}.r3-notice{font-size:11px;color:#94a3b8;line-height:1.8;margin:12px 0;overflow-wrap:anywhere}.r3-table-wrap{overflow:auto;width:100%;margin:14px 0}.r3-table{border-collapse:collapse;min-width:760px;width:100%;font-size:12px}.r3-table th{color:#94a3b8;font-size:10px;text-transform:uppercase;letter-spacing:.05em;background:#090f1c;text-align:left}.r3-table th,.r3-table td{padding:13px;border-bottom:1px solid #203044;vertical-align:top;max-width:290px;overflow-wrap:anywhere}.r3-table td div,.r3-table td small,.r3-table td strong{display:block;margin:3px 0;line-height:1.6}.r3-table td strong{color:#e2e8f0}.r3-status{color:#7dd3fc;border:1px solid #254963;border-radius:6px;padding:4px 7px;display:inline-block;font-size:11px}.r3-empty{text-align:center;padding:30px!important}.r3-card h3,.r3-detail-section h3{font-size:15px;color:#e2e8f0;margin:0 0 12px}.r3-dialog{width:min(1050px,calc(100vw - 24px));max-height:90dvh;padding:0;border:1px solid #334155;border-radius:16px;background:#0b1322;color:#cbd5e1;box-shadow:0 30px 90px #000a}.r3-dialog::backdrop{background:#000b;backdrop-filter:blur(5px)}.r3-dialog-head{display:flex;justify-content:space-between;align-items:center;padding:17px 20px;position:sticky;top:0;background:#0c1728;border-bottom:1px solid #263448;z-index:2}.r3-dialog-head h2{font-size:18px;margin:0;color:#f1f5f9}.r3-dialog-body{padding:20px}.r3-detail-section{margin-bottom:24px;padding-bottom:20px;border-bottom:1px solid #223047}.r3-detail-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px;margin:12px 0}.r3-detail-grid>div{padding:10px;border-radius:8px;background:#111d2e;min-width:0}.r3-detail-grid dt{font-size:10px;color:#7f92ab;margin-bottom:7px}.r3-detail-grid dd{font-size:12px;color:#dbe7f8;overflow-wrap:anywhere;margin:0;line-height:1.6}.r3-review{display:grid;gap:10px}.r3-review textarea,.r3-review select{width:100%}.r3-detail-section a{color:#7dd3fc}.r3-dialog [hidden],[data-r3-legacy][hidden]{display:none!important}
+@media(max-width:767px){.r3-detail-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.r3-dialog-body{padding:12px}.r3-shell,.r3-card{padding:12px}.r3-dialog{max-height:95dvh}.r3-filters{gap:8px}}
+
+</style>
 </head>
 <body class="flex h-screen w-full relative">
 
     <!-- 📱 High-Tech Sidebar -->
-    <aside class="w-64 glass-card m-3 flex flex-col hidden md:flex z-20 overflow-hidden border border-white/5">
+    <aside class="glass-card" id="consoleSidebar" aria-label="Admin navigation">
         <div class="p-5 border-b border-white/5 flex items-center justify-between bg-white/5">
             <div class="flex items-center gap-3">
                 <div class="w-9 h-9 rounded-lg bg-sky-500/20 flex items-center justify-center border border-sky-500/50 shadow-[0_0_15px_rgba(14,165,233,0.3)]">
@@ -157,57 +182,14 @@
                     <p class="text-[9px] text-sky-400/70 tracking-widest uppercase font-semibold">Admin Terminal</p>
                 </div>
             </div>
-        </div>
+        <button type="button" class="console-menu-button console-mobile-close" aria-label="Close navigation" onclick="consoleSetMenu(false)">✕</button></div>
 
         <div class="px-5 py-2.5 border-b border-white/5 bg-black/20 flex items-center justify-between text-[10px] text-slate-400">
             <span><i class="fa-regular fa-clock text-sky-400 mr-1"></i> IST CLOCK</span>
             <span id="systemClock" class="font-mono text-slate-300 font-bold">--:--:--</span>
         </div>
         
-        <nav class="flex-1 py-3 overflow-y-auto px-2">
-            <a href="#" onclick="switchTab('dashboard', this)" class="nav-item active"><i class="fa-solid fa-chart-pie w-5"></i> Dashboard</a>
-            
-            <!-- Live Data -->
-            <div class="mt-2">
-                <div onclick="toggleMenu('menu-data', 'icon-data')" class="px-3 pt-3 pb-1.5 flex justify-between items-center cursor-pointer group">
-                    <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold group-hover:text-sky-400 transition">Transactions</span>
-                    <i id="icon-data" class="fa-solid fa-chevron-up text-slate-600 text-[10px] transition-transform duration-300"></i>
-                </div>
-                <div id="menu-data" class="submenu space-y-0.5">
-                    <a href="#" onclick="switchTab('deposits', this)" class="nav-item justify-between">
-                        <div class="flex items-center gap-3"><i class="fa-solid fa-arrow-down w-5 text-emerald-400"></i> Deposits</div>
-                        <span id="dep-badge" class="bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded hidden">0</span>
-                    </a>
-                    <a href="#" onclick="switchTab('withdrawals', this)" class="nav-item justify-between">
-                        <div class="flex items-center gap-3"><i class="fa-solid fa-arrow-up w-5 text-rose-400"></i> Withdrawals</div>
-                        <span id="wd-badge" class="bg-rose-500/20 border border-rose-500/40 text-[10px] font-bold text-rose-400 px-2 py-0.5 rounded hidden">0</span>
-                    </a>
-                    <a href="#" onclick="switchTab('rejected', this)" class="nav-item justify-between">
-                        <div class="flex items-center gap-3"><i class="fa-solid fa-history w-5 text-amber-400"></i> Rejections Log</div>
-                        <span id="rej-badge" class="bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-400 px-2 py-0.5 rounded hidden">0</span>
-                    </a>
-                </div>
-            </div>
-
-            <!-- Admin Tools -->
-            <div class="mt-2">
-                <div onclick="toggleMenu('menu-tools', 'icon-tools')" class="px-3 pt-3 pb-1.5 flex justify-between items-center cursor-pointer group">
-                    <span class="text-[10px] uppercase tracking-widest text-slate-500 font-bold group-hover:text-sky-400 transition">Management</span>
-                    <i id="icon-tools" class="fa-solid fa-chevron-up text-slate-600 text-[10px] transition-transform duration-300"></i>
-                </div>
-                <div id="menu-tools" class="submenu space-y-0.5">
-                    <a href="#" onclick="switchTab('members', this)" class="nav-item"><i class="fa-solid fa-users-gear w-5 text-sky-400"></i> Users & Vault</a>
-                    <a href="#" onclick="switchTab('lifecycle', this)" class="nav-item"><i class="fa-solid fa-user-clock w-5 text-amber-400"></i> Account Lifecycle</a>
-                    <a href="#" onclick="switchTab('airdrop', this)" class="nav-item"><i class="fa-solid fa-parachute-box w-5 text-fuchsia-400"></i> Airdrop Engine</a>
-                    <a href="#" onclick="switchTab('account', this)" class="nav-item"><i class="fa-solid fa-ban w-5 text-amber-500"></i> Access Control</a>
-                    <a href="#" onclick="switchTab('broadcast', this)" class="nav-item"><i class="fa-solid fa-satellite-dish w-5 text-pink-400"></i> Broadcast</a>
-                    <a href="#" onclick="switchTab('support', this)" class="nav-item justify-between">
-                        <div class="flex items-center gap-3"><i class="fa-solid fa-envelope-open-text w-5 text-blue-400"></i> Support Inbox</div>
-                        <span class="bg-blue-500/20 border border-blue-500/40 text-[10px] font-bold text-blue-400 px-2 rounded">Live</span>
-                    </a>
-                </div>
-            </div>
-        </nav>
+        <nav class="flex-1 py-3 overflow-y-auto px-2" aria-label="Admin pages"><div class="console-group" data-console-group="Dashboard"><div id="console-group-0" class=""><a href="#dashboard" data-console-route="dashboard" class="nav-item active" onclick="event.preventDefault();switchTab('dashboard',this)" aria-current="page"><span>Overview</span></a></div></div><div class="console-group" data-console-group="Order Tracking"><div id="console-group-1" class=""><a href="#tracking" data-console-route="tracking" class="nav-item" onclick="event.preventDefault();switchTab('tracking',this)"><span>Track an Order</span></a></div></div><div class="console-group" data-console-group="Transactions"><button type="button" class="console-group-title" aria-expanded="true" aria-controls="menu-data" onclick="consoleToggleGroup(this)"><i class="fa-solid fa-money-bill-transfer" aria-hidden="true"></i><span>Transactions</span><i id="icon-data" class="fa-solid fa-chevron-down console-chevron" aria-hidden="true"></i></button><div id="menu-data" class="console-group-links"><a href="#deposits" data-console-route="deposits" class="nav-item" onclick="event.preventDefault();switchTab('deposits',this)"><span>Deposits</span><span id="dep-badge" class="bg-emerald-500/20 border border-emerald-500/40 text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded hidden">0</span></a><a href="#withdrawals" data-console-route="withdrawals" class="nav-item" onclick="event.preventDefault();switchTab('withdrawals',this)"><span>Withdrawals</span><span id="wd-badge" class="bg-rose-500/20 border border-rose-500/40 text-[10px] font-bold text-rose-400 px-2 py-0.5 rounded hidden">0</span></a><a href="#p2p" data-console-route="p2p" class="nav-item" onclick="event.preventDefault();switchTab('p2p',this)"><span>P2P Transfers</span></a><a href="#rejected" data-console-route="rejected" class="nav-item" onclick="event.preventDefault();switchTab('rejected',this)"><span>Rejected / Cancelled / Locked</span><span id="rej-badge" class="bg-amber-500/20 border border-amber-500/40 text-[10px] font-bold text-amber-400 px-2 py-0.5 rounded hidden">0</span></a></div></div><div class="console-group" data-console-group="NFT Management"><button type="button" class="console-group-title" aria-expanded="true" aria-controls="console-group-3" onclick="consoleToggleGroup(this)"><i class="fa-solid fa-cubes" aria-hidden="true"></i><span>NFT Management</span><i class="fa-solid fa-chevron-down console-chevron" aria-hidden="true"></i></button><div id="console-group-3" class="console-group-links"><a href="#mainnet" data-console-route="mainnet" class="nav-item" onclick="event.preventDefault();switchTab('mainnet',this)"><span>Mainnet Gallery</span></a><a href="#import" data-console-route="import" class="nav-item" onclick="event.preventDefault();switchTab('import',this)"><span>Import &amp; Publish</span></a><a href="#reservations" data-console-route="reservations" class="nav-item" onclick="event.preventDefault();switchTab('reservations',this)"><span>Reservations</span></a><a href="#settlements" data-console-route="settlements" class="nav-item" onclick="event.preventDefault();switchTab('settlements',this)"><span>Settlement History</span></a></div></div><div class="console-group" data-console-group="User Management"><button type="button" class="console-group-title" aria-expanded="true" aria-controls="menu-tools" onclick="consoleToggleGroup(this)"><i class="fa-solid fa-users" aria-hidden="true"></i><span>User Management</span><i id="icon-tools" class="fa-solid fa-chevron-down console-chevron" aria-hidden="true"></i></button><div id="menu-tools" class="console-group-links"><a href="#members" data-console-route="members" class="nav-item" onclick="event.preventDefault();switchTab('members',this)"><span>Users</span></a><a href="#vault" data-console-route="vault" class="nav-item" onclick="event.preventDefault();switchTab('vault',this)"><span>Wallet &amp; Vault</span></a><a href="#lifecycle" data-console-route="lifecycle" class="nav-item" onclick="event.preventDefault();switchTab('lifecycle',this)"><span>Account Lifecycle</span></a><a href="#account" data-console-route="account" class="nav-item" onclick="event.preventDefault();switchTab('account',this)"><span>Access Control</span></a><a href="#kyc" data-console-route="kyc" class="nav-item" onclick="event.preventDefault();switchTab('kyc',this)"><span>KYC</span></a></div></div><div class="console-group" data-console-group="Finance"><button type="button" class="console-group-title" aria-expanded="true" aria-controls="console-group-5" onclick="consoleToggleGroup(this)"><i class="fa-solid fa-building-columns" aria-hidden="true"></i><span>Finance</span><i class="fa-solid fa-chevron-down console-chevron" aria-hidden="true"></i></button><div id="console-group-5" class="console-group-links"><a href="#treasury" data-console-route="treasury" class="nav-item" onclick="event.preventDefault();switchTab('treasury',this)"><span>Treasury</span></a><a href="#fees" data-console-route="fees" class="nav-item" onclick="event.preventDefault();switchTab('fees',this)"><span>Transaction Fees</span></a><a href="#dividends" data-console-route="dividends" class="nav-item" onclick="event.preventDefault();switchTab('dividends',this)"><span>Dividends</span></a><a href="#reconciliation" data-console-route="reconciliation" class="nav-item" onclick="event.preventDefault();switchTab('reconciliation',this)"><span>Balance Reconciliation</span></a><a href="#airdrop" data-console-route="airdrop" class="nav-item" onclick="event.preventDefault();switchTab('airdrop',this)"><span>Airdrop Engine</span></a></div></div><div class="console-group" data-console-group="Communication"><button type="button" class="console-group-title" aria-expanded="true" aria-controls="console-group-6" onclick="consoleToggleGroup(this)"><i class="fa-solid fa-comments" aria-hidden="true"></i><span>Communication</span><i class="fa-solid fa-chevron-down console-chevron" aria-hidden="true"></i></button><div id="console-group-6" class="console-group-links"><a href="#broadcast" data-console-route="broadcast" class="nav-item" onclick="event.preventDefault();switchTab('broadcast',this)"><span>Send Announcement</span></a><a href="#announcements" data-console-route="announcements" class="nav-item" onclick="event.preventDefault();switchTab('announcements',this)"><span>Announcement History</span></a><a href="#support" data-console-route="support" class="nav-item" onclick="event.preventDefault();switchTab('support',this)"><span>Support Inbox</span></a><a href="#email" data-console-route="email" class="nav-item" onclick="event.preventDefault();switchTab('email',this)"><span>Email Delivery</span></a></div></div><div class="console-group" data-console-group="System"><button type="button" class="console-group-title" aria-expanded="true" aria-controls="console-group-7" onclick="consoleToggleGroup(this)"><i class="fa-solid fa-gear" aria-hidden="true"></i><span>System</span><i class="fa-solid fa-chevron-down console-chevron" aria-hidden="true"></i></button><div id="console-group-7" class="console-group-links"><a href="#recovery" data-console-route="recovery" class="nav-item" onclick="event.preventDefault();switchTab('recovery',this)"><span>Settlement Recovery</span></a><a href="#jobs" data-console-route="jobs" class="nav-item" onclick="event.preventDefault();switchTab('jobs',this)"><span>Failed Jobs</span></a><a href="#audit" data-console-route="audit" class="nav-item" onclick="event.preventDefault();switchTab('audit',this)"><span>Admin Audit Logs</span></a><a href="#testnet" data-console-route="testnet" class="nav-item" onclick="event.preventDefault();switchTab('testnet',this)"><span>Testnet Preview</span></a></div></div></nav>
 
         <div class="p-3 border-t border-white/5 bg-black/20 flex flex-col gap-2">
             <button onclick="window.location.reload()" class="cyber-btn w-full bg-white/5 hover:bg-white/10 text-slate-300 py-2 rounded-lg border border-white/10">
@@ -217,30 +199,16 @@
                 <i class="fa-solid fa-power-off"></i> Exit Console
             </button>
         </div>
-    </aside>
+    </aside><button id="consoleBackdrop" type="button" tabindex="-1" aria-label="Close navigation" onclick="consoleSetMenu(false)"></button>
 
     <!-- 🖥️ Main Workspace -->
-    <main class="flex-1 h-screen overflow-y-auto p-4 md:p-6 z-10 relative">
+    <main class="flex-1 h-screen overflow-y-auto p-4 md:p-6 z-10 relative" id="consoleMain" tabindex="-1">
         
         <!-- TOP HEADER -->
-        <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5">
-            <div>
-                <h2 id="section-title" class="text-2xl font-bold text-white tracking-wide">Command Center</h2>
-                <p id="section-subtitle" class="text-xs text-slate-500 mt-0.5">Realtime Financial & User Management Architecture</p>
-            </div>
-            <div class="flex items-center gap-4">
-                <div class="hidden sm:flex flex-col text-right">
-                    <span class="text-xs font-bold text-white">Super Administrator</span>
-                    <span class="text-[10px] text-emerald-400 font-mono">● Core Active</span>
-                </div>
-                <div class="w-10 h-10 rounded-full border border-sky-500/40 p-0.5 bg-sky-500/10 flex items-center justify-center">
-                    <i class="fa-solid fa-shield-halved text-sky-400"></i>
-                </div>
-            </div>
-        </header>
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5"><button type="button" id="consoleMenuButton" class="console-menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="consoleSidebar" onclick="consoleSetMenu(true)">☰</button><div><p id="consoleBreadcrumb" class="console-breadcrumb">Dashboard</p><h2 id="section-title">Overview</h2><p id="section-subtitle">Requests, summaries and shortcuts</p></div><span class="console-phase">Transactions &amp; Tracking · R3</span></header>
 
         <!-- DASHBOARD -->
-        <div id="section-dashboard" class="admin-section fade-in">
+        <div id="section-dashboard" class="admin-section fade-in"><div class="console-note" role="note">Transactions and Order Tracking are available from their menus. The new announcement archive and inbox are still in development.</div>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                 <div class="glass-card p-4 border-t-2 border-t-sky-500">
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Members</p>
@@ -269,338 +237,34 @@
             </div>
 
             <!-- Quick Access Panels -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="glass-card p-5">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-bolt text-amber-400"></i> Fast Processing Engine
-                        </h3>
-                    </div>
-                    <p class="text-xs text-slate-400 mb-4">Quickly navigate to active requests or execute instant bulk audits.</p>
-                    <div class="grid grid-cols-2 gap-3">
-                        <button onclick="switchTab('deposits', document.querySelector('[onclick*=\'deposits\']'))" class="cyber-btn bg-emerald-500/15 hover:bg-emerald-500 text-emerald-400 hover:text-black py-3 rounded-lg border border-emerald-500/30">
-                            <i class="fa-solid fa-arrow-down"></i> Review Deposits
-                        </button>
-                        <button onclick="switchTab('withdrawals', document.querySelector('[onclick*=\'withdrawals\']'))" class="cyber-btn bg-rose-500/15 hover:bg-rose-500 text-rose-400 hover:text-white py-3 rounded-lg border border-rose-500/30">
-                            <i class="fa-solid fa-arrow-up"></i> Review Withdrawals
-                        </button>
-                    </div>
-                </div>
-
-                <div class="glass-card p-5">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
-                        <i class="fa-solid fa-bullhorn text-sky-400"></i> Quick Announcement
-                    </h3>
-                    <div class="flex gap-2">
-                        <input type="text" id="quickBroadcastInput" placeholder="Send immediate banner text to all users..." class="flex-1 text-xs">
-                        <button onclick="saveQuickBroadcast()" class="cyber-btn bg-sky-500 hover:bg-sky-400 text-white px-5 rounded-lg">
-                            <i class="fa-solid fa-paper-plane"></i> Send
-                        </button>
-                    </div>
-                </div>
-            </div>
+            
 
             <!-- E5: On-demand system settlement recovery -->
-            <div class="glass-card p-4 mt-6 border-l-4 border-l-amber-500">
-                <h3 class="text-sm font-bold text-white mb-2">System Settlement Recovery</h3>
-                <p class="text-xs text-slate-400 mb-3">Reconcile today's daily counters and due staking settlements.</p>
-                <button id="adminRecoveryButton" type="button"
-                    class="btn btn-warning cyber-btn bg-amber-500/20 text-amber-400 border border-amber-500/40 px-4 py-2 rounded-lg"
-                    onclick="window.triggerAdminRecovery()">🔄 Run Daily Reset &amp; Settlement Recovery</button>
-            </div>
+            
 
             <!-- NFT ADMIN IMPORT START: explicit verification and publication -->
-            <section id="tcmNFTImport" class="glass-card p-5 mt-6 border border-sky-500/30">
-                <div class="flex flex-wrap justify-between items-center gap-3 mb-3">
-                    <h3 class="text-sm font-bold text-white">Import &amp; Publish Minted NFT</h3>
-                    <span class="text-xs font-bold text-emerald-400">BSC MAINNET · CHAIN 56</span>
-                </div>
-                <p class="text-xs text-slate-400 mb-4">Import the Gallery candidate exported after minting. Choose the initial Level and reservation price, verify, then approve the preview. Existing grown prices are preserved. No terminal or per-NFT deployment is needed.</p>
-                <label class="block text-xs text-slate-300 mb-4">1. Gallery candidate JSON (maximum 32 KB)
-                    <input data-nft-import="file" type="file" accept=".json,application/json" class="block w-full mt-2 text-xs">
-                </label>
-                <p data-nft-import="identity" class="text-xs text-slate-300 break-words mb-4">No candidate imported.</p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <label class="text-xs text-slate-300">2. Initial reservation level
-                        <select data-nft-import="level" class="block w-full bg-slate-900 text-white rounded border border-slate-600 p-2 mt-2">
-                            <option value="">Choose level</option><option value="1">Level 1 · 50–500 USDT</option>
-                            <option value="2">Level 2 · 500–2,000 USDT</option><option value="3">Level 3 · 2,000–5,000 USDT</option>
-                            <option value="4">Level 4 · 5,000–10,000 USDT</option><option value="5">Level 5 · 10,000–20,000 USDT</option>
-                            <option value="6">Level 6 · 20,000+ USDT</option>
-                        </select>
-                    </label>
-                    <label class="text-xs text-slate-300">Initial reservation price (USDT)
-                        <input data-nft-import="price" type="text" inputmode="decimal" autocomplete="off" maxlength="17" placeholder="Example: 2001" class="block w-full bg-slate-900 text-white rounded border border-slate-600 p-2 mt-2">
-                    </label>
-                </div>
-                <button data-nft-import="verify" type="button" disabled class="cyber-btn bg-sky-500/20 text-sky-400 rounded px-4 py-2 mt-4 text-xs disabled:opacity-50">3. Verify &amp; Preview</button>
-                <div data-nft-import="preview" hidden class="mt-4 p-4 rounded-lg border border-slate-600 bg-slate-900/60">
-                    <div class="flex flex-wrap gap-4 items-start">
-                        <img data-nft-import="image" hidden width="144" height="144" alt="Verified NFT artwork" referrerpolicy="no-referrer" style="width:144px;height:144px;object-fit:contain;max-width:100%;border-radius:12px">
-                        <div class="flex-1 min-w-0">
-                            <h4 data-nft-import="name" class="font-bold text-white text-sm"></h4>
-                            <p data-nft-import="summary" class="text-sm text-sky-300 mt-2"></p>
-                            <p data-nft-import="proof" class="text-xs text-slate-400 mt-2 break-words"></p>
-                            <div class="flex flex-wrap gap-3 text-xs mt-3">
-                                <a data-nft-import="token-link" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet token</a>
-                                <a data-nft-import="mint-link" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View mint transaction</a>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-xs text-slate-400 mt-3">Metadata CID integrity is verified. Image rights, image byte integrity, long-term pinning and BscScan source verification are not established here. NFT remains in platform custody; app reservations and settlement are off-chain.</p>
-                    <label class="flex items-start gap-2 text-xs text-slate-300 mt-4">
-                        <input data-nft-import="approve" type="checkbox" class="mt-1">
-                        <span>I checked this NFT, Level and price. Approve this configuration and publish its Gallery listing.</span>
-                    </label>
-                    <button data-nft-import="publish" type="button" disabled class="cyber-btn bg-emerald-500/20 text-emerald-400 rounded px-4 py-2 mt-4 text-xs disabled:opacity-50">4. Approve &amp; Publish</button>
-                </div>
-                <p data-nft-import="status" role="status" aria-live="polite" class="text-xs text-slate-300 mt-4 break-words">Importing a file creates no listing. Verify saves an administrator preview for 15 minutes. Publish rechecks Mainnet and saves the approved NFT and listing together. No mint, gas or financial credit.</p>
-            </section>
+            
             <!-- NFT ADMIN IMPORT END -->
 
             <!-- TCM MAINNET GALLERY START: verified custody and explicit publication -->
-            <section id="tcmMainnetGallery" class="glass-card p-5 mt-6 border border-emerald-500/30">
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-                    <h3 class="text-sm font-bold text-white">Mainnet NFT Gallery</h3>
-                    <span class="text-xs font-bold text-emerald-400">BSC MAINNET · CHAIN 56</span>
-                </div>
-                <p class="text-xs text-slate-400 mb-4">Platform custody. App reservations and settlement remain off-chain.</p>
-                <button type="button" data-mainnet-gallery="load" class="cyber-btn bg-slate-700 text-slate-200 px-3 py-2 rounded text-xs">Load reviewed NFT list</button>
-                <label class="block text-xs text-slate-300 my-4">Reviewed NFT
-                    <select data-mainnet-gallery="asset" class="block mt-2 w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2"><option value="TCM-001">TCM-001 · Level 2 · 501 USDT</option></select>
-                </label>
-                <p data-mainnet-gallery="identity" class="text-xs text-slate-300 break-all">TCM NFT 001 · Token 1 · Level 2 · 501 USDT</p>
-                <p class="text-xs text-slate-300 break-all mt-2">Contract: 0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673</p>
-                <p class="text-xs text-slate-400 mt-2">Mint verification does not establish user ownership, a matched buyer, market value or funding for platform returns. BscScan source verification is tracked separately.</p>
-                <div class="flex flex-wrap gap-3 mt-4 text-xs">
-                    <a data-mainnet-gallery="token-link" href="https://bscscan.com/token/0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673?a=1" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet token</a>
-                    <a data-mainnet-gallery="mint-link" href="https://bscscan.com/tx/0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet mint</a>
-                    <a href="http://127.0.0.1:5188/multi" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Open local multi-asset minting tool</a>
-                </div>
-                <label class="block text-xs text-slate-300 my-4">Select an existing reviewed NFT from JSON (optional)
-                    <input type="file" accept=".json,application/json" data-mainnet-gallery="file" class="block mt-2 w-full text-xs">
-                </label>
-                <p class="text-xs text-slate-400">For a new NFT, use Import & Publish Minted NFT above. This section verifies existing approved NFTs. No per-NFT registry deployment is required.</p>
-                <img data-mainnet-gallery="image" hidden width="220" height="220" alt="Selected NFT" referrerpolicy="no-referrer" class="my-4 max-w-full rounded-lg">
-                <div class="flex flex-wrap gap-3 mt-4">
-                    <button type="button" data-mainnet-gallery="verify" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded text-xs">Verify selected mint and custody</button>
-                    <button type="button" data-mainnet-gallery="publish" disabled class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded text-xs disabled:opacity-50">Publish TCM-001 · Level 2 · 501 USDT</button>
-                </div>
-                <p data-mainnet-gallery="status" role="status" aria-live="polite" class="text-xs text-slate-400 mt-4">No Mainnet verification requested this session. No automatic publication.</p>
-            </section>
+            
             <!-- TCM MAINNET GALLERY END -->
 
             <!-- TCM TESTNET GALLERY START: isolated local snapshot preview -->
-            <section id="tcmTestGallery" class="glass-card p-5 mt-6 border border-sky-500/30">
-                <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
-                    <h3 class="text-sm font-bold text-white">
-                        Testnet NFT Gallery Preview
-                    </h3>
-                    <span class="text-xs font-bold text-amber-400">
-                        BSC TESTNET · CHAIN 97
-                    </span>
-                </div>
-
-                <p class="text-xs text-slate-400 mb-4">
-                    Isolated test token. No production listing, reservation, sale,
-                    financial credit or app-user ownership transfer.
-                </p>
-
-                <dl class="text-xs text-slate-300 space-y-2 break-all">
-                    <div>
-                        <dt class="text-slate-400">Collection</dt>
-                        <dd>0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673</dd>
-                    </div>
-                    <div>
-                        <dt class="text-slate-400">Token / Asset</dt>
-                        <dd>1 / TCM-TEST-001</dd>
-                    </div>
-                    <div>
-                        <dt class="text-slate-400">Platform Custody</dt>
-                        <dd>0x1E7d9Aa6922eb5CC6e91d289a4Bb5b45212cA2f3</dd>
-                    </div>
-                    <div>
-                        <dt class="text-slate-400">Metadata URI</dt>
-                        <dd>ipfs://bafkreicl7pdm74lzxguy6ncdfplfffn7viqnmactcq4fshzvs67at2xmta</dd>
-                    </div>
-                </dl>
-
-                <div class="flex flex-wrap gap-3 mt-4 text-xs">
-                    <a href="https://testnet.bscscan.com/token/0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673?a=1"
-                       target="_blank" rel="noopener noreferrer"
-                       class="text-sky-400 underline">
-                        View Token on TESTNET BscScan
-                    </a>
-                    <a href="http://127.0.0.1:5187/"
-                       target="_blank" rel="noopener noreferrer"
-                       class="text-sky-400 underline">
-                        Open Local Pilot for Live Verification
-                    </a>
-                </div>
-
-                <p class="text-xs text-slate-400 mt-2">
-                    Local pilot requires npm start on this computer.
-                    It opens separately and receives no admin credentials.
-                </p>
-
-                <div class="mt-4">
-                    <label class="block text-xs text-slate-300 mb-2">
-                        Import tcm-test-gallery-preview.json
-                        <input type="file" accept=".json,application/json"
-                               data-test-gallery="file"
-                               class="block mt-2 w-full text-xs">
-                    </label>
-
-                    <button type="button" data-test-gallery="verify-live"
-                            class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">
-                        Verify Testnet Token
-                    </button>
-                    <p data-test-gallery="live-status" role="status" aria-live="polite"
-                       class="text-xs text-slate-400 my-3">
-                        Backend verification has not been requested this session.
-                    </p>
-
-                    <button type="button" data-test-gallery="load-image"
-                            class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded text-xs">
-                        Load Recorded IPFS Image
-                    </button>
-                </div>
-
-                <p data-test-gallery="status" role="status" aria-live="polite"
-                   class="text-xs text-slate-400 mt-3">
-                    Recorded test token. No live verification performed here.
-                </p>
-
-                <div data-test-gallery="result" hidden
-                     class="mt-4 p-3 rounded-lg bg-white/5 text-xs text-slate-300 space-y-2">
-                    <p data-test-gallery="snapshot"></p>
-                    <p data-test-gallery="preference"></p>
-                    <p class="text-slate-400">Imported local note:</p>
-                    <p data-test-gallery="note" class="whitespace-pre-wrap break-words"></p>
-                </div>
-
-                <img data-test-gallery="image" hidden
-                     alt="TCM Test NFT 001"
-                     width="240" height="240"
-                     class="mt-4 max-w-full rounded-lg">
-
-                <p class="text-xs font-bold text-amber-400 mt-4">
-                    Production eligible: NO
-                </p>
-            </section>
+            
             <!-- TCM TESTNET GALLERY END -->
 
             <!-- MEMO TCM-ADM-014-S4-A: Treasury and Dividend -->
-            <div class="glass-card overflow-hidden mt-6">
-                <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-white/5">
-                    <h3 class="text-sm font-bold text-white">Corporate Treasury &amp; Dividends</h3>
-                    <button type="button" onclick="refreshAdminTreasury()" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded">Refresh</button>
-                </div>
+            
 
-                <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <p class="text-xs text-slate-400">Withdrawal Fees</p>
-                        <p class="text-sm font-bold text-white" data-treasury="Withdrawal_Fee_Wallet">—</p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <p class="text-xs text-slate-400">P2P Fees</p>
-                        <p class="text-sm font-bold text-white" data-treasury="P2P_Fee_Wallet">—</p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <p class="text-xs text-slate-400">Pending Withdrawal Reserve</p>
-                        <p class="text-sm font-bold text-amber-400" data-treasury="Withdrawal_Pending_Fees">—</p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <p class="text-xs text-slate-400">Dividend Pool</p>
-                        <p class="text-sm font-bold text-emerald-400" data-treasury="Dividend_Pool_Wallet">—</p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <p class="text-xs text-slate-400">Total Revenue</p>
-                        <p class="text-sm font-bold text-white" data-treasury="Total_Revenue">—</p>
-                    </div>
-                    <div class="bg-white/5 rounded-lg p-3">
-                        <p class="text-xs text-slate-400">Breakage Profit</p>
-                        <p class="text-sm font-bold text-white" data-treasury="Total_Breakage_Profit">—</p>
-                    </div>
-                </div>
-
-                <div class="px-4 pb-4">
-                    <p class="text-xs text-slate-400 mb-3">
-                        Spendable withdrawal fees:
-                        <span class="text-emerald-400" data-treasury="available">—</span>
-                    </p>
-                    <div class="flex flex-wrap items-center gap-3">
-                        <select data-treasury="source" class="bg-slate-900 text-white border border-white/10 rounded p-2 text-xs">
-                            <option value="Withdrawal_Fee_Wallet">Withdrawal Fees</option>
-                            <option value="P2P_Fee_Wallet">P2P Fees</option>
-                            <option value="Total_Breakage_Profit">Breakage Profit</option>
-                        </select>
-                        <input data-treasury="amount" type="text" inputmode="decimal" placeholder="Amount in USDT" class="bg-slate-900 text-white border border-white/10 rounded p-2 text-xs">
-                        <button type="button" disabled data-treasury="transfer" onclick="transferTreasuryToPool()" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">Move to Dividend Pool</button>
-                        <button type="button" disabled data-treasury="dividend" onclick="openTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Distribute Dividend</button>
-                    </div>
-                    <p data-treasury="message" role="status" aria-live="polite" class="text-xs text-slate-400 mt-3">Refresh treasury to load balances.</p>
-                    <div class="mt-4 border-t border-white/10 pt-4">
-                        <h4 class="text-sm font-bold text-white mb-3">Transaction Fee Settings</h4>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                            <label class="text-xs">BEP-20 withdrawal %<input id="feeBEP20" type="number" min="0.01" max="99.99" step="0.01" disabled></label>
-                            <label class="text-xs">TRC-20 withdrawal %<input id="feeTRC20" type="number" min="0.01" max="99.99" step="0.01" disabled></label>
-                            <label class="text-xs">P2P transfer %<input id="feeP2P" type="number" min="0.01" max="99.99" step="0.01" disabled></label>
-                        </div>
-                        <button id="saveFeeConfig" type="button" disabled onclick="saveAdminFeeConfig()" class="cyber-btn mt-3 bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">Update Fee Rates</button>
-                        <p id="feeConfigMessage" role="status" class="text-xs text-slate-400 mt-2">Refresh treasury to load fee rates. Pending orders keep their saved fees.</p>
-                    </div>
-                </div>
-            </div>
-
-            <dialog data-treasury="modal" class="glass-card bg-slate-950 text-white rounded-xl p-0 w-[min(95vw,700px)] max-h-[90vh] overflow-auto backdrop:bg-black/70">
-                <div class="p-4 border-b border-white/5">
-                    <h3 class="font-bold">Dividend Distribution Preview</h3>
-                    <p class="text-xs text-slate-400 mt-1">
-                        Full pool: <span data-treasury="preview-total"></span>
-                    </p>
-                </div>
-                <table class="w-full text-left">
-                    <thead class="text-xs text-slate-400">
-                        <tr>
-                            <th class="p-3">Shareholder UID</th>
-                            <th class="p-3">Share</th>
-                            <th class="p-3">Wallet Credit</th>
-                        </tr>
-                    </thead>
-                    <tbody data-treasury="rows"></tbody>
-                </table>
-                <div class="p-4 flex flex-wrap gap-3 border-t border-white/5">
-                    <button type="button" data-treasury="confirm" onclick="confirmTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Confirm Distribution</button>
-                    <button type="button" data-treasury="close" onclick="closeTreasuryDividend()" class="cyber-btn bg-white/5 text-slate-300 px-3 py-2 rounded">Close</button>
-                </div>
-            </dialog>
+            
 
             <!-- MEMO TCM-ADM-014-S3-A: Admin Audit Feed -->
-            <div class="glass-card overflow-hidden mt-6" data-admin-audit-feed>
-                <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-white/5">
-                    <div>
-                        <h3 class="text-sm font-bold text-white">Admin Audit Feed</h3>
-                        <p class="text-xs text-slate-400 mt-1" data-admin-audit-message role="status">Loading audit records...</p>
-                    </div>
-                    <button type="button" onclick="loadAdminAuditLogs(true)" data-admin-audit-refresh class="cyber-btn bg-sky-500/15 hover:bg-sky-500 text-sky-400 hover:text-white px-4 py-2 rounded-lg border border-sky-500/30">Refresh</button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm">
-                        <thead class="bg-black/30 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/5">
-                            <tr><th class="p-4">Time & ID</th><th class="p-4">Administrator</th><th class="p-4">Action</th><th class="p-4">Target UID</th><th class="p-4">Details</th></tr>
-                        </thead>
-                        <tbody data-admin-audit-body class="divide-y divide-white/5"></tbody>
-                    </table>
-                </div>
-                <div class="p-4 border-t border-white/5 flex justify-end">
-                    <button type="button" onclick="loadAdminAuditLogs(false)" data-admin-audit-more disabled class="cyber-btn bg-sky-500/15 hover:bg-sky-500 text-sky-400 hover:text-white px-4 py-2 rounded-lg border border-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed">Load More</button>
-                </div>
-            </div>
-        </div>
+            
+        <p class="console-summary-caption">Summary totals follow the existing ledger rules. Withdrawal approval does not establish blockchain delivery.</p><div class="console-actions"><button class="console-action" type="button" onclick="switchTab('deposits')"><b>Review Deposits</b><span>Open the pending deposit queue</span></button><button class="console-action" type="button" onclick="switchTab('withdrawals')"><b>Review Withdrawals</b><span>Review requests and saved fees</span></button><button class="console-action" type="button" onclick="switchTab('support')"><b>Support Inbox</b><span>Read conversations and reply</span></button><button class="console-action" type="button" onclick="switchTab('mainnet')"><b>Mainnet NFTs</b><span>Inspect reviewed assets and custody</span></button><button class="console-action" type="button" onclick="switchTab('audit')"><b>Admin Audit Logs</b><span>Review recorded administrator actions</span></button><button class="console-action" type="button" onclick="switchTab('treasury')"><b>Treasury</b><span>Open balances, fees and funding</span></button></div></div>
 
         <!-- DEPOSITS -->
-        <div id="section-deposits" class="admin-section hidden fade-in">
+        <div id="section-deposits" class="admin-section hidden fade-in"><div class="console-note" role="note">Pending deposit queue. Use the status tabs for completed and rejected records.</div>
             <div class="glass-card p-4 mb-4 flex flex-wrap justify-between items-center gap-3 border-l-4 border-l-emerald-500">
                 <div>
                     <h3 class="text-sm font-bold text-white">Pending Deposits Management</h3>
@@ -614,17 +278,17 @@
             </div>
 
             <div class="glass-card overflow-hidden">
-                <table class="w-full text-left text-sm">
+                <div class="console-table-scroll"><table class="w-full text-left text-sm">
                     <thead class="bg-black/30 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/5">
-                        <tr><th class="p-4">Time & ID</th><th class="p-4">User</th><th class="p-4">Amount</th><th class="p-4">TxID / Proof</th><th class="p-4 text-right">Actions</th></tr>
+                        <tr><th class="p-4">Time &amp; ID</th><th class="p-4">User</th><th class="p-4">Amount</th><th class="p-4">TxID / Proof</th><th class="p-4 text-right">Actions</th></tr>
                     </thead>
                     <tbody id="deposit-tbody" class="divide-y divide-white/5"></tbody>
-                </table>
+                </table></div>
             </div>
         </div>
 
         <!-- WITHDRAWALS -->
-        <div id="section-withdrawals" class="admin-section hidden fade-in">
+        <div id="section-withdrawals" class="admin-section hidden fade-in"><div class="console-note console-warning" role="note">Pending withdrawal queue. Approval currently records Success but does not send USDT. Use the status tabs for history. Verified blockchain payout is not enabled.</div>
             <div class="glass-card p-4 mb-4 flex flex-wrap justify-between items-center gap-3 border-l-4 border-l-rose-500">
                 <div>
                     <h3 class="text-sm font-bold text-white">Pending Withdrawals Management</h3>
@@ -641,23 +305,23 @@
             </div>
 
             <div class="glass-card overflow-hidden">
-                <table class="w-full text-left text-sm">
+                <div class="console-table-scroll"><table class="w-full text-left text-sm">
                     <thead class="bg-black/30 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/5">
                         <tr>
-                            <th class="p-4">Time & ID</th>
+                            <th class="p-4">Time &amp; ID</th>
                             <th class="p-4">User</th>
                             <th class="p-4">Amount</th>
-                            <th class="p-4">Address & Network</th>
+                            <th class="p-4">Address &amp; Network</th>
                             <th class="p-4 text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="withdrawal-tbody" class="divide-y divide-white/5"></tbody>
-                </table>
+                </table></div>
             </div>
         </div>
 
         <!-- REJECTED & CANCELLED LOG -->
-        <div id="section-rejected" class="admin-section hidden fade-in">
+        <div id="section-rejected" class="admin-section hidden fade-in"><div class="console-note" role="note">Archive hides eligible entries from this list while retaining the financial record and archive audit. It does not resolve or delete an order.</div>
             <div class="glass-card p-4 mb-4 flex flex-wrap justify-between items-center gap-3 border-l-4 border-l-amber-500">
                 <div>
                     <h3 class="text-sm font-bold text-white">Rejected / Cancelled Audit Trail</h3>
@@ -669,61 +333,25 @@
             </div>
 
             <div class="glass-card overflow-hidden">
-                <table class="w-full text-left text-sm">
+                <div class="console-table-scroll"><table class="w-full text-left text-sm">
                     <thead class="bg-black/30 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/5">
                         <tr>
-                            <th class="p-4">Time & Order ID</th>
+                            <th class="p-4">Time &amp; Order ID</th>
                             <th class="p-4">User ID</th>
                             <th class="p-4">Type</th>
                             <th class="p-4">Amount</th>
-                            <th class="p-4">Status & Remarks</th>
+                            <th class="p-4">Status &amp; Remarks</th>
                             <th class="p-4 text-right">Action</th>
                         </tr>
                     </thead>
                     <tbody id="rejected-tbody" class="divide-y divide-white/5"></tbody>
-                </table>
+                </table></div>
             </div>
         </div>
 
         <!-- USER MANAGEMENT & VAULT -->
         <div id="section-members" class="admin-section hidden fade-in">
-            <div class="glass-card p-5 mb-6 border border-emerald-500/30">
-                <div class="flex justify-between items-center mb-3">
-                    <h3 class="text-base font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-vault text-emerald-400"></i> Institutional Vault Control Center
-                    </h3>
-                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">AUTOMATED RULES</span>
-                </div>
-                <p class="text-xs text-slate-400 mb-4">Set percentage-based vault locking rules. Deficit balances are tracked as pending system debt.</p>
-
-                <div class="grid grid-cols-1 md:grid-cols-7 gap-3 mb-4">
-                    <div class="md:col-span-2">
-                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Target Lock Fund (USDT)</label>
-                        <input type="number" id="vPoolAmt" placeholder="e.g. 1000" class="text-sm">
-                    </div>
-                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 1 (%)</label><input type="number" id="vLvl1" placeholder="0" class="text-center"></div>
-                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 2 (%)</label><input type="number" id="vLvl2" placeholder="0" class="text-center"></div>
-                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 3 (%)</label><input type="number" id="vLvl3" placeholder="0" class="text-center"></div>
-                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 4 (%)</label><input type="number" id="vLvl4" placeholder="0" class="text-center"></div>
-                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 5-6 (%)</label><input type="number" id="vLvl5" placeholder="0" class="text-center"></div>
-                </div>
-
-                <div class="flex flex-wrap gap-2 justify-between items-center pt-3 border-t border-white/5">
-                    <button onclick="openConfirmModal('vaultMassLock')" class="cyber-btn bg-emerald-500 hover:bg-emerald-400 text-black px-5 py-2.5 rounded-lg shadow-lg shadow-emerald-500/20">
-                        <i class="fa-solid fa-lock"></i> Execute Auto-Lock Pool
-                    </button>
-                    
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        <span class="text-[10px] uppercase font-bold text-slate-500 mr-1">Mass Unlock:</span>
-                        <button onclick="openConfirmModal('vaultMassUnlock', 1)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 1</button>
-                        <button onclick="openConfirmModal('vaultMassUnlock', 2)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 2</button>
-                        <button onclick="openConfirmModal('vaultMassUnlock', 3)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 3</button>
-                        <button onclick="openConfirmModal('vaultMassUnlock', 4)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 4</button>
-                        <button onclick="openConfirmModal('vaultMassUnlock', 5)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 5</button>
-                        <button onclick="openConfirmModal('vaultMassUnlock', 6)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 6</button>
-                    </div>
-                </div>
-            </div>
+            
 
             <!-- Members Table Card -->
             <div class="glass-card p-5">
@@ -782,7 +410,7 @@
                         <tbody id="l4-body"></tbody>
                     </table>
                 </div>
-                <button id="l4-more" type="button" disabled onclick="l4Load(true)" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded mt-4 disabled:opacity-40">Load More</button>
+                <button id="l4-more" type="button" disabled="" onclick="l4Load(true)" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded mt-4 disabled:opacity-40">Load More</button>
             </div>
         </div>
 
@@ -883,7 +511,7 @@
         </div>
 
         <!-- BROADCAST -->
-        <div id="section-broadcast" class="admin-section hidden fade-in max-w-3xl">
+        <div id="section-broadcast" class="admin-section hidden fade-in max-w-3xl"><div class="console-note console-warning" role="note">Existing broadcast sender. The announcement archive, offline inbox, read state and three-second popup will be added in the Communication stage.</div>
             <div class="glass-card p-6">
                 <h3 class="text-lg font-bold text-white mb-2">Global System Broadcast</h3>
                 <p class="text-xs text-slate-400 mb-6">Publish alerts displayed on user mobile dashboards in real time.</p>
@@ -895,7 +523,17 @@
                     </button>
                 </div>
             </div>
-        </div>
+        <details class="glass-card p-5"><summary>Quick banner — existing sender</summary><div class="glass-card p-5">
+                    <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-3">
+                        <i class="fa-solid fa-bullhorn text-sky-400"></i> Quick Announcement
+                    </h3>
+                    <div class="flex gap-2">
+                        <input type="text" id="quickBroadcastInput" placeholder="Send immediate banner text to all users..." class="flex-1 text-xs">
+                        <button onclick="saveQuickBroadcast()" class="cyber-btn bg-sky-500 hover:bg-sky-400 text-white px-5 rounded-lg">
+                            <i class="fa-solid fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                </div></details></div>
 
         <!-- SUPPORT INBOX -->
         <div id="section-support" class="admin-section hidden fade-in">
@@ -911,7 +549,7 @@
                 <div class="flex-1 flex flex-col bg-black/20">
                     <div class="p-4 border-b border-white/5 font-bold text-white text-sm flex justify-between items-center">
                         <span id="supportChatHeader">Support Terminal</span>
-                        <span class="text-[10px] text-slate-500 font-mono">ENCRYPTED</span>
+                        <span class="text-[10px] text-slate-500 font-mono">Authenticated support</span>
                     </div>
                     <div id="supportChatMessages" class="flex-1 p-6 overflow-y-auto space-y-3">
                         <div class="text-center text-xs text-slate-600 mt-20">Select a conversation thread to view inquiries.</div>
@@ -926,7 +564,281 @@
             </div>
         </div>
 
-    </main>
+    <div id="section-tracking" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Order tracking is scheduled for the next stage.</h3><p>Search by Order ID, UID or transaction hash, then review the saved record and audit timeline. No financial records will be deleted.</p><button type="button" class="console-link" onclick="switchTab('deposits')">Open deposit queue</button></div></div><div id="section-p2p" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Admin P2P history is scheduled for the next stage.</h3><p>Sender, receiver, amount, fee and internal ledger references will be shown from saved records.</p></div></div><div id="section-mainnet" class="admin-section hidden fade-in"><section id="tcmMainnetGallery" class="glass-card p-5 mt-6 border border-emerald-500/30">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                    <h3 class="text-sm font-bold text-white">Mainnet NFT Gallery</h3>
+                    <span class="text-xs font-bold text-emerald-400">BSC MAINNET · CHAIN 56</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Platform custody. App reservations and settlement remain off-chain.</p>
+                <button type="button" data-mainnet-gallery="load" class="cyber-btn bg-slate-700 text-slate-200 px-3 py-2 rounded text-xs">Load reviewed NFT list</button>
+                <label class="block text-xs text-slate-300 my-4">Reviewed NFT
+                    <select data-mainnet-gallery="asset" class="block mt-2 w-full bg-slate-900 text-slate-200 border border-slate-600 rounded p-2"><option value="TCM-001">TCM-001 · Level 2 · 501 USDT</option></select>
+                </label>
+                <p data-mainnet-gallery="identity" class="text-xs text-slate-300 break-all">TCM NFT 001 · Token 1 · Level 2 · 501 USDT</p>
+                <p class="text-xs text-slate-300 break-all mt-2">Contract: 0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673</p>
+                <p class="text-xs text-slate-400 mt-2">Mint verification does not establish user ownership, a matched buyer, market value or funding for platform returns. BscScan source verification is tracked separately.</p>
+                <div class="flex flex-wrap gap-3 mt-4 text-xs">
+                    <a data-mainnet-gallery="token-link" href="https://bscscan.com/token/0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673?a=1" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet token</a>
+                    <a data-mainnet-gallery="mint-link" href="https://bscscan.com/tx/0x94b6d876bebaffa28848bb3190d86551bddc4bc8925ace7c0ec3dba637e6416e" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet mint</a>
+                    <a href="http://127.0.0.1:5188/multi" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">Open local multi-asset minting tool</a>
+                </div>
+                <label class="block text-xs text-slate-300 my-4">Select an existing reviewed NFT from JSON (optional)
+                    <input type="file" accept=".json,application/json" data-mainnet-gallery="file" class="block mt-2 w-full text-xs">
+                </label>
+                <p class="text-xs text-slate-400">For a new NFT, use Import &amp; Publish Minted NFT above. This section verifies existing approved NFTs. No per-NFT registry deployment is required.</p>
+                <img data-mainnet-gallery="image" hidden="" width="220" height="220" alt="Selected NFT" referrerpolicy="no-referrer" class="my-4 max-w-full rounded-lg">
+                <div class="flex flex-wrap gap-3 mt-4">
+                    <button type="button" data-mainnet-gallery="verify" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded text-xs">Verify selected mint and custody</button>
+                    <button type="button" data-mainnet-gallery="publish" disabled="" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded text-xs disabled:opacity-50">Publish TCM-001 · Level 2 · 501 USDT</button>
+                </div>
+                <p data-mainnet-gallery="status" role="status" aria-live="polite" class="text-xs text-slate-400 mt-4">No Mainnet verification requested this session. No automatic publication.</p>
+            </section></div><div id="section-import" class="admin-section hidden fade-in"><section id="tcmNFTImport" class="glass-card p-5 mt-6 border border-sky-500/30">
+                <div class="flex flex-wrap justify-between items-center gap-3 mb-3">
+                    <h3 class="text-sm font-bold text-white">Import &amp; Publish Minted NFT</h3>
+                    <span class="text-xs font-bold text-emerald-400">BSC MAINNET · CHAIN 56</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Import the Gallery candidate exported after minting. Choose the initial Level and reservation price, verify, then approve the preview. Existing grown prices are preserved. No terminal or per-NFT deployment is needed.</p>
+                <label class="block text-xs text-slate-300 mb-4">1. Gallery candidate JSON (maximum 32 KB)
+                    <input data-nft-import="file" type="file" accept=".json,application/json" class="block w-full mt-2 text-xs">
+                </label>
+                <p data-nft-import="identity" class="text-xs text-slate-300 break-words mb-4">No candidate imported.</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <label class="text-xs text-slate-300">2. Initial reservation level
+                        <select data-nft-import="level" class="block w-full bg-slate-900 text-white rounded border border-slate-600 p-2 mt-2">
+                            <option value="">Choose level</option><option value="1">Level 1 · 50–500 USDT</option>
+                            <option value="2">Level 2 · 500–2,000 USDT</option><option value="3">Level 3 · 2,000–5,000 USDT</option>
+                            <option value="4">Level 4 · 5,000–10,000 USDT</option><option value="5">Level 5 · 10,000–20,000 USDT</option>
+                            <option value="6">Level 6 · 20,000+ USDT</option>
+                        </select>
+                    </label>
+                    <label class="text-xs text-slate-300">Initial reservation price (USDT)
+                        <input data-nft-import="price" type="text" inputmode="decimal" autocomplete="off" maxlength="17" placeholder="Example: 2001" class="block w-full bg-slate-900 text-white rounded border border-slate-600 p-2 mt-2">
+                    </label>
+                </div>
+                <button data-nft-import="verify" type="button" disabled="" class="cyber-btn bg-sky-500/20 text-sky-400 rounded px-4 py-2 mt-4 text-xs disabled:opacity-50">3. Verify &amp; Preview</button>
+                <div data-nft-import="preview" hidden="" class="mt-4 p-4 rounded-lg border border-slate-600 bg-slate-900/60">
+                    <div class="flex flex-wrap gap-4 items-start">
+                        <img data-nft-import="image" hidden="" width="144" height="144" alt="Verified NFT artwork" referrerpolicy="no-referrer" style="width:144px;height:144px;object-fit:contain;max-width:100%;border-radius:12px">
+                        <div class="flex-1 min-w-0">
+                            <h4 data-nft-import="name" class="font-bold text-white text-sm"></h4>
+                            <p data-nft-import="summary" class="text-sm text-sky-300 mt-2"></p>
+                            <p data-nft-import="proof" class="text-xs text-slate-400 mt-2 break-words"></p>
+                            <div class="flex flex-wrap gap-3 text-xs mt-3">
+                                <a data-nft-import="token-link" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View Mainnet token</a>
+                                <a data-nft-import="mint-link" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">View mint transaction</a>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-3">Metadata CID integrity is verified. Image rights, image byte integrity, long-term pinning and BscScan source verification are not established here. NFT remains in platform custody; app reservations and settlement are off-chain.</p>
+                    <label class="flex items-start gap-2 text-xs text-slate-300 mt-4">
+                        <input data-nft-import="approve" type="checkbox" class="mt-1">
+                        <span>I checked this NFT, Level and price. Approve this configuration and publish its Gallery listing.</span>
+                    </label>
+                    <button data-nft-import="publish" type="button" disabled="" class="cyber-btn bg-emerald-500/20 text-emerald-400 rounded px-4 py-2 mt-4 text-xs disabled:opacity-50">4. Approve &amp; Publish</button>
+                </div>
+                <p data-nft-import="status" role="status" aria-live="polite" class="text-xs text-slate-300 mt-4 break-words">Importing a file creates no listing. Verify saves an administrator preview for 15 minutes. Publish rechecks Mainnet and saves the approved NFT and listing together. No mint, gas or financial credit.</p>
+            </section></div><div id="section-reservations" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Reservation management is scheduled for the next stage.</h3><p>Existing user reservations continue to use the current backend. This admin page does not cancel, settle or modify reservations.</p><button type="button" class="console-link" onclick="switchTab('mainnet')">Open Mainnet Gallery</button></div></div><div id="section-settlements" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Settlement history is scheduled for the next stage.</h3><p>Saved reservation, principal and profit records will be linked here. Recovery rules for stuck NFT sales are not enabled.</p><button type="button" class="console-link" onclick="switchTab('audit')">Open existing audit logs</button></div></div><div id="section-vault" class="admin-section hidden fade-in"><div class="glass-card p-5 mb-6 border border-emerald-500/30">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                        <i class="fa-solid fa-vault text-emerald-400"></i> Institutional Vault Control Center
+                    </h3>
+                    <span class="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded font-mono">AUTOMATED RULES</span>
+                </div>
+                <p class="text-xs text-slate-400 mb-4">Set percentage-based vault locking rules. Deficit balances are tracked as pending system debt.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-7 gap-3 mb-4">
+                    <div class="md:col-span-2">
+                        <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Target Lock Fund (USDT)</label>
+                        <input type="number" id="vPoolAmt" placeholder="e.g. 1000" class="text-sm">
+                    </div>
+                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 1 (%)</label><input type="number" id="vLvl1" placeholder="0" class="text-center"></div>
+                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 2 (%)</label><input type="number" id="vLvl2" placeholder="0" class="text-center"></div>
+                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 3 (%)</label><input type="number" id="vLvl3" placeholder="0" class="text-center"></div>
+                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 4 (%)</label><input type="number" id="vLvl4" placeholder="0" class="text-center"></div>
+                    <div><label class="block text-[10px] uppercase font-bold text-sky-400 mb-1">LV 5-6 (%)</label><input type="number" id="vLvl5" placeholder="0" class="text-center"></div>
+                </div>
+
+                <div class="flex flex-wrap gap-2 justify-between items-center pt-3 border-t border-white/5">
+                    <button onclick="openConfirmModal('vaultMassLock')" class="cyber-btn bg-emerald-500 hover:bg-emerald-400 text-black px-5 py-2.5 rounded-lg shadow-lg shadow-emerald-500/20">
+                        <i class="fa-solid fa-lock"></i> Execute Auto-Lock Pool
+                    </button>
+                    
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[10px] uppercase font-bold text-slate-500 mr-1">Mass Unlock:</span>
+                        <button onclick="openConfirmModal('vaultMassUnlock', 1)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 1</button>
+                        <button onclick="openConfirmModal('vaultMassUnlock', 2)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 2</button>
+                        <button onclick="openConfirmModal('vaultMassUnlock', 3)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 3</button>
+                        <button onclick="openConfirmModal('vaultMassUnlock', 4)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 4</button>
+                        <button onclick="openConfirmModal('vaultMassUnlock', 5)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 5</button>
+                        <button onclick="openConfirmModal('vaultMassUnlock', 6)" class="cyber-btn bg-white/5 hover:bg-white/10 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded">LV 6</button>
+                    </div>
+                </div>
+            </div><button type="button" class="console-link" onclick="switchTab('members')">Open Users for individual wallet controls</button></div><div id="section-kyc" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Not enabled</span><h3>KYC is not enabled.</h3><p>The verification workflow, required documents and access rules have not been defined. No documents are collected by this page.</p></div></div><div id="section-treasury" class="admin-section hidden fade-in"><div class="glass-card overflow-hidden mt-6">
+                <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-white/5">
+                    <h3 class="text-sm font-bold text-white">Corporate Treasury &amp; Dividends</h3>
+                    <button type="button" onclick="refreshAdminTreasury()" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded">Refresh</button>
+                </div>
+
+                <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div class="bg-white/5 rounded-lg p-3">
+                        <p class="text-xs text-slate-400">Withdrawal Fees</p>
+                        <p class="text-sm font-bold text-white" data-treasury="Withdrawal_Fee_Wallet">—</p>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3">
+                        <p class="text-xs text-slate-400">P2P Fees</p>
+                        <p class="text-sm font-bold text-white" data-treasury="P2P_Fee_Wallet">—</p>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3">
+                        <p class="text-xs text-slate-400">Pending Withdrawal Reserve</p>
+                        <p class="text-sm font-bold text-amber-400" data-treasury="Withdrawal_Pending_Fees">—</p>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3">
+                        <p class="text-xs text-slate-400">Dividend Pool</p>
+                        <p class="text-sm font-bold text-emerald-400" data-treasury="Dividend_Pool_Wallet">—</p>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3">
+                        <p class="text-xs text-slate-400">Total Revenue</p>
+                        <p class="text-sm font-bold text-white" data-treasury="Total_Revenue">—</p>
+                    </div>
+                    <div class="bg-white/5 rounded-lg p-3">
+                        <p class="text-xs text-slate-400">Breakage Profit</p>
+                        <p class="text-sm font-bold text-white" data-treasury="Total_Breakage_Profit">—</p>
+                    </div>
+                </div>
+
+                <div class="px-4 pb-4">
+                    <p class="text-xs text-slate-400 mb-3">
+                        Spendable withdrawal fees:
+                        <span class="text-emerald-400" data-treasury="available">—</span>
+                    </p>
+                    <div class="flex flex-wrap items-center gap-3">
+                        <select data-treasury="source" class="bg-slate-900 text-white border border-white/10 rounded p-2 text-xs">
+                            <option value="Withdrawal_Fee_Wallet">Withdrawal Fees</option>
+                            <option value="P2P_Fee_Wallet">P2P Fees</option>
+                            <option value="Total_Breakage_Profit">Breakage Profit</option>
+                        </select>
+                        <input data-treasury="amount" type="text" inputmode="decimal" placeholder="Amount in USDT" class="bg-slate-900 text-white border border-white/10 rounded p-2 text-xs">
+                        <button type="button" disabled="" data-treasury="transfer" onclick="transferTreasuryToPool()" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">Move to Dividend Pool</button>
+                        
+                    </div>
+                    <p data-treasury="message" role="status" aria-live="polite" class="text-xs text-slate-400 mt-3">Refresh treasury to load balances.</p>
+                    
+                </div>
+            </div></div><div id="section-fees" class="admin-section hidden fade-in"><div class="console-page-head"><h3>Transaction Fee Settings</h3><button type="button" class="console-link" onclick="refreshAdminTreasury()">Refresh fee rates</button></div><div class="mt-4 border-t border-white/10 pt-4 glass-card p-5">
+                        <h4 class="text-sm font-bold text-white mb-3">Transaction Fee Settings</h4>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <label class="text-xs">BEP-20 withdrawal %<input id="feeBEP20" type="number" min="0.01" max="99.99" step="0.01" disabled=""></label>
+                            <label class="text-xs">TRC-20 withdrawal %<input id="feeTRC20" type="number" min="0.01" max="99.99" step="0.01" disabled=""></label>
+                            <label class="text-xs">P2P transfer %<input id="feeP2P" type="number" min="0.01" max="99.99" step="0.01" disabled=""></label>
+                        </div>
+                        <button id="saveFeeConfig" type="button" disabled="" onclick="saveAdminFeeConfig()" class="cyber-btn mt-3 bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">Update Fee Rates</button>
+                        <p id="feeConfigMessage" role="status" class="text-xs text-slate-400 mt-2">Refresh treasury to load fee rates. Pending orders keep their saved fees.</p>
+                    </div><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite"></p></div><div id="section-dividends" class="admin-section hidden fade-in"><div class="glass-card console-dividend-card"><h3>Dividend Distribution</h3><p>Review the current pool and configured shareholder roster before confirming a distribution. Funding transfers stay on the Treasury page.</p><button type="button" class="console-link" onclick="refreshAdminTreasury()">Refresh treasury &amp; eligibility</button><button type="button" disabled="" data-treasury="dividend" onclick="openTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Distribute Dividend</button><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite">Refresh treasury to load eligibility.</p></div></div><div id="section-reconciliation" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Balance reconciliation is scheduled for a later stage.</h3><p>Historical values must come from saved records. Missing snapshots will be labelled Not recorded; current balances will not be used to invent old amounts.</p><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button></div></div><div id="section-announcements" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Announcement archive is scheduled for the Communication stage.</h3><p>The current broadcast updates one system document. The new archive, user inbox, unread state and three-second popup are not enabled by this menu update.</p><button type="button" class="console-link" onclick="switchTab('broadcast')">Open existing announcement form</button></div></div><div id="section-email" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Email delivery history is scheduled for a later stage.</h3><p>The existing withdrawal approval email queue is unchanged. Approval is separate from verified blockchain payout.</p><button type="button" class="console-link" onclick="switchTab('withdrawals')">Open withdrawal queue</button></div></div><div id="section-recovery" class="admin-section hidden fade-in"><div class="console-note console-warning" role="note">Existing daily-counter and staking settlement recovery only. Recovery for stuck NFT sales is not included.</div><div class="glass-card p-4 mt-6 border-l-4 border-l-amber-500">
+                <h3 class="text-sm font-bold text-white mb-2">System Settlement Recovery</h3>
+                <p class="text-xs text-slate-400 mb-3">Reconcile today's daily counters and due staking settlements.</p>
+                <button id="adminRecoveryButton" type="button" class="btn btn-warning cyber-btn bg-amber-500/20 text-amber-400 border border-amber-500/40 px-4 py-2 rounded-lg" onclick="window.triggerAdminRecovery()">🔄 Run Daily Reset &amp; Settlement Recovery</button>
+            </div></div><div id="section-jobs" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Failed-job monitoring is scheduled for a later stage.</h3><p>No automatic retries or financial recovery actions are started by this page.</p><button type="button" class="console-link" onclick="switchTab('recovery')">Open existing settlement recovery</button></div></div><div id="section-audit" class="admin-section hidden fade-in"><div class="glass-card overflow-hidden mt-6" data-admin-audit-feed="">
+                <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-white/5">
+                    <div>
+                        <h3 class="text-sm font-bold text-white">Admin Audit Feed</h3>
+                        <p class="text-xs text-slate-400 mt-1" data-admin-audit-message="" role="status">Loading audit records...</p>
+                    </div>
+                    <button type="button" onclick="loadAdminAuditLogs(true)" data-admin-audit-refresh="" class="cyber-btn bg-sky-500/15 hover:bg-sky-500 text-sky-400 hover:text-white px-4 py-2 rounded-lg border border-sky-500/30">Refresh</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-black/30 text-slate-400 text-[11px] uppercase tracking-wider border-b border-white/5">
+                            <tr><th class="p-4">Time &amp; ID</th><th class="p-4">Administrator</th><th class="p-4">Action</th><th class="p-4">Target UID</th><th class="p-4">Details</th></tr>
+                        </thead>
+                        <tbody data-admin-audit-body="" class="divide-y divide-white/5"></tbody>
+                    </table>
+                </div>
+                <div class="p-4 border-t border-white/5 flex justify-end">
+                    <button type="button" onclick="loadAdminAuditLogs(false)" data-admin-audit-more="" disabled="" class="cyber-btn bg-sky-500/15 hover:bg-sky-500 text-sky-400 hover:text-white px-4 py-2 rounded-lg border border-sky-500/30 disabled:opacity-50 disabled:cursor-not-allowed">Load More</button>
+                </div>
+            </div></div><div id="section-testnet" class="admin-section hidden fade-in"><div class="console-note" role="note">TEST ENVIRONMENT · BSC TESTNET, CHAIN 97. This preview is separate from production Mainnet assets.</div><section id="tcmTestGallery" class="glass-card p-5 mt-6 border border-sky-500/30">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+                    <h3 class="text-sm font-bold text-white">
+                        Testnet NFT Gallery Preview
+                    </h3>
+                    <span class="text-xs font-bold text-amber-400">
+                        BSC TESTNET · CHAIN 97
+                    </span>
+                </div>
+
+                <p class="text-xs text-slate-400 mb-4">
+                    Isolated test token. No production listing, reservation, sale,
+                    financial credit or app-user ownership transfer.
+                </p>
+
+                <dl class="text-xs text-slate-300 space-y-2 break-all">
+                    <div>
+                        <dt class="text-slate-400">Collection</dt>
+                        <dd>0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-400">Token / Asset</dt>
+                        <dd>1 / TCM-TEST-001</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-400">Platform Custody</dt>
+                        <dd>0x1E7d9Aa6922eb5CC6e91d289a4Bb5b45212cA2f3</dd>
+                    </div>
+                    <div>
+                        <dt class="text-slate-400">Metadata URI</dt>
+                        <dd>ipfs://bafkreicl7pdm74lzxguy6ncdfplfffn7viqnmactcq4fshzvs67at2xmta</dd>
+                    </div>
+                </dl>
+
+                <div class="flex flex-wrap gap-3 mt-4 text-xs">
+                    <a href="https://testnet.bscscan.com/token/0xc617c917bb594bB14F2A7EaD2d9b650Dd3754673?a=1" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">
+                        View Token on TESTNET BscScan
+                    </a>
+                    <a href="http://127.0.0.1:5187/" target="_blank" rel="noopener noreferrer" class="text-sky-400 underline">
+                        Open Local Pilot for Live Verification
+                    </a>
+                </div>
+
+                <p class="text-xs text-slate-400 mt-2">
+                    Local pilot requires npm start on this computer.
+                    It opens separately and receives no admin credentials.
+                </p>
+
+                <div class="mt-4">
+                    <label class="block text-xs text-slate-300 mb-2">
+                        Import tcm-test-gallery-preview.json
+                        <input type="file" accept=".json,application/json" data-test-gallery="file" class="block mt-2 w-full text-xs">
+                    </label>
+
+                    <button type="button" data-test-gallery="verify-live" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">
+                        Verify Testnet Token
+                    </button>
+                    <p data-test-gallery="live-status" role="status" aria-live="polite" class="text-xs text-slate-400 my-3">
+                        Backend verification has not been requested this session.
+                    </p>
+
+                    <button type="button" data-test-gallery="load-image" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded text-xs">
+                        Load Recorded IPFS Image
+                    </button>
+                </div>
+
+                <p data-test-gallery="status" role="status" aria-live="polite" class="text-xs text-slate-400 mt-3">
+                    Recorded test token. No live verification performed here.
+                </p>
+
+                <div data-test-gallery="result" hidden="" class="mt-4 p-3 rounded-lg bg-white/5 text-xs text-slate-300 space-y-2">
+                    <p data-test-gallery="snapshot"></p>
+                    <p data-test-gallery="preference"></p>
+                    <p class="text-slate-400">Imported local note:</p>
+                    <p data-test-gallery="note" class="whitespace-pre-wrap break-words"></p>
+                </div>
+
+                <img data-test-gallery="image" hidden="" alt="TCM Test NFT 001" width="240" height="240" class="mt-4 max-w-full rounded-lg">
+
+                <p class="text-xs font-bold text-amber-400 mt-4">
+                    Production eligible: NO
+                </p>
+            </section></div></main>
 
     <!-- MODAL: Action Confirmation -->
     <div class="custom-modal-overlay" id="customConfirmModal">
@@ -950,7 +862,7 @@
         <div class="custom-modal-box">
             <i class="fa-solid fa-vault text-4xl text-sky-400 mb-3 block"></i>
             <h3 class="text-base font-bold text-white mb-1">User Vault Management</h3>
-            <p class="text-xs text-slate-400 mb-4" id="vaultModalSub">Adjust Main Balance & Vault Lock.</p>
+            <p class="text-xs text-slate-400 mb-4" id="vaultModalSub">Adjust Main Balance &amp; Vault Lock.</p>
             <input type="number" id="vaultModalAmount" placeholder="Amount (USDT)..." class="text-center text-base font-bold mb-4">
             <div class="grid grid-cols-2 gap-3 mb-3">
                 <button onclick="executeSingleVault('lock')" class="cyber-btn bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-black py-2.5 rounded-lg border border-amber-500/40">
@@ -1028,6 +940,8 @@ function ensureAdminAuthDialog() {
 }
 
 function pauseAdminSession(message = 'Please sign in to continue.', clearToken = false) {
+    consoleSetMenu(false);
+    consoleClosePageUI();
     m1StopReadStream();
     a0StopSupport();
     adminAuthState.ready = false;
@@ -1094,11 +1008,8 @@ async function resumeAdminSession(session) {
     m1Terminal.members.sequence += 1;
     m1Terminal.members.cursor = null;
     m1StartReadStream();
-    await Promise.allSettled([
-        loadAdminAuditLogs(true),
-        refreshAdminTreasury(),
-        refreshAdminMemberDirectory()
-    ]);
+    consoleEnterPage();
+    consoleSetMenu(false);
 }
 
 async function validateInlineAdminSession() {
@@ -1227,6 +1138,7 @@ async function adminApiFetch
 
 let adminRecoveryPending = false;
 window.triggerAdminRecovery = async function () {
+    const consoleView = consolePageEpoch;
     if (adminRecoveryPending) return;
     const button = document.getElementById('adminRecoveryButton');
     const originalText = button ? button.textContent : '';
@@ -1254,10 +1166,10 @@ window.triggerAdminRecovery = async function () {
         if (!response.ok || result.success !== true) {
             throw new Error((result.message || 'Settlement recovery did not complete.') + counts);
         }
-        alert(result.message + counts + (result.roiDeferred
+        consoleRecoveryAlert(consoleView, result.message + counts + (result.roiDeferred
             ? " Today's ROI is not due until 05:30 IST." : ''));
     } catch (error) {
-        alert(error.message || 'Recovery response unavailable. Check server logs before retrying.');
+        consoleRecoveryAlert(consoleView, error.message || 'Recovery response unavailable. Check server logs before retrying.');
     } finally {
         adminRecoveryPending = false;
         if (button) {
@@ -1320,33 +1232,148 @@ window.addEventListener('storage', event => {
         updateClock();
 
         // 🧭 UI TAB ROUTING
-        function switchTab(sectionId, element) {
-            document.querySelectorAll('.admin-section').forEach(el => el.classList.add('hidden'));
-            const target = document.getElementById('section-' + sectionId);
-            if (target) target.classList.remove('hidden');
-            if (sectionId === 'lifecycle') void l4Load(false, false);
+        const consolePages = {"dashboard":["Overview","Dashboard"],"tracking":["Track an Order","Order Tracking"],"deposits":["Deposits","Transactions"],"withdrawals":["Withdrawals","Transactions"],"p2p":["P2P Transfers","Transactions"],"rejected":["Rejected / Cancelled / Locked","Transactions"],"mainnet":["Mainnet Gallery","NFT Management"],"import":["Import & Publish","NFT Management"],"reservations":["Reservations","NFT Management"],"settlements":["Settlement History","NFT Management"],"members":["Users","User Management"],"vault":["Wallet & Vault","User Management"],"lifecycle":["Account Lifecycle","User Management"],"account":["Access Control","User Management"],"kyc":["KYC","User Management"],"treasury":["Treasury","Finance"],"fees":["Transaction Fees","Finance"],"dividends":["Dividends","Finance"],"reconciliation":["Balance Reconciliation","Finance"],"airdrop":["Airdrop Engine","Finance"],"broadcast":["Send Announcement","Communication"],"announcements":["Announcement History","Communication"],"support":["Support Inbox","Communication"],"email":["Email Delivery","Communication"],"recovery":["Settlement Recovery","System"],"jobs":["Failed Jobs","System"],"audit":["Admin Audit Logs","System"],"testnet":["Testnet Preview","System"]};
+        let consoleCurrentPage = 'dashboard';
 
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            if (element) element.classList.add('active');
-
-            const titleMap = {
-                'dashboard': ['Command Center', 'Realtime Financial & User Management Architecture'],
-                'deposits': ['Pending Deposits', 'Audit and verify incoming wallet deposits'],
-                'withdrawals': ['Pending Withdrawals', 'Review ecosystem health scores and process payouts'],
-                'rejected': ['Audit History', 'Cancelled, rejected, and archived transaction traces'],
-                'members': ['User Management & Vault', 'Direct balance modifications, access controls, and vault limits'],
-                'lifecycle': ['Account Lifecycle', 'Deletion status, retained profiles and cleanup tracking'],
-                'airdrop': ['Airdrop Engine', 'Direct rewards disbursement and level-pool configurations'],
-                'account': ['Access Governance', 'System-wide account locks and permissions'],
-                'broadcast': ['Global Broadcast', 'Deploy network notifications to active user dashboards'],
-                'support': ['Support Console', 'Direct message management with user inquiries']
+        // R2.1: a page owns its views and read requests, never a committed mutation.
+        let consolePageEpoch = 0;
+        let consoleDocumentActive = true;
+        let consoleToastTimer = null;
+        let consoleDialogEpoch = 0;
+        const consolePageReads = new Set();
+        function consoleAbortError() { return new DOMException('Page closed.', 'AbortError'); }
+        function consoleViewCurrent(epoch) { return consoleDocumentActive && epoch === consolePageEpoch && adminAuthState.ready; }
+        async function consoleReadFetch(input, options = {}, fetcher = adminApiFetch) {
+            const epoch = consolePageEpoch, session = adminAuthState.generation;
+            const controller = new AbortController();
+            const stop = () => controller.abort();
+            if (options.signal?.aborted) stop();
+            options.signal?.addEventListener('abort', stop, { once: true });
+            consolePageReads.add(controller);
+            let released = false;
+            const release = () => {
+                if (released) return; released = true;
+                consolePageReads.delete(controller);
+                options.signal?.removeEventListener('abort', stop);
             };
-
-            if (titleMap[sectionId]) {
-                document.getElementById('section-title').innerText = titleMap[sectionId][0];
-                document.getElementById('section-subtitle').innerText = titleMap[sectionId][1];
-            }
+            const valid = () => !controller.signal.aborted && epoch === consolePageEpoch && session === adminAuthState.generation;
+            try {
+                const response = await fetcher(input, { ...options, signal: controller.signal });
+                if (!valid()) throw consoleAbortError();
+                const json = response.json.bind(response);
+                response.json = async () => {
+                    try {
+                        const result = await json();
+                        if (!valid()) throw consoleAbortError();
+                        return result;
+                    } finally { release(); }
+                };
+                return response;
+            } catch (error) { release(); throw error; }
         }
+        function consoleRecoveryAlert(epoch, text) { if (consoleViewCurrent(epoch)) alert(text); }
+        function consoleToastFor(epoch, text, isError = false) {
+            if (consoleViewCurrent(epoch)) showToast(text, isError);
+        }
+        function consoleClosePageUI() {
+            const previousPage = consoleCurrentPage;
+            ++consolePageEpoch; ++consoleDialogEpoch;
+            for (const controller of consolePageReads) controller.abort();
+            consolePageReads.clear();
+            closeConfirmModal(); closeVaultModal();
+            for (const dialog of document.querySelectorAll('dialog[open]')) {
+                if (dialog.id !== 'tcm-inline-admin-auth') dialog.close('navigation');
+            }
+            adminTreasuryState.preview = null;
+            clearTimeout(consoleToastTimer); consoleToastTimer = null;
+            document.getElementById('toast').className = '';
+            clearTimeout(m1Terminal.searchTimer); m1Terminal.searchTimer = null;
+            for (const state of Object.values(m1Terminal.pages)) state.reload = false;
+            if (previousPage === 'support') {
+                ++a0SupportGeneration;
+                activeSupportUid = null; a0SupportMessages.clear();
+                document.getElementById('supportChatMessages').replaceChildren();
+                document.getElementById('supportChatHeader').textContent = 'Support Terminal';
+                document.getElementById('supportReplyInput').value = '';
+            }
+            document.dispatchEvent(new CustomEvent('tcm:admin-page-leave', { detail: { page: previousPage } }));
+        }
+        function consoleEnterPage() {
+            if (!adminAuthState.ready) return;
+            const page = consoleCurrentPage;
+            if (window.adminRecordsEnter && window.adminRecordsEnter(page)) return;
+            if (page === 'deposits') void m1LoadTerminalPage('deposit');
+            else if (page === 'withdrawals') void m1LoadTerminalPage('withdraw');
+            else if (page === 'rejected') void m1LoadTerminalPage('archive');
+            else if (page === 'members') void refreshAdminMemberDirectory();
+            else if (page === 'audit') void checkAdminAuditHead();
+            else if (page === 'lifecycle') void l4Load(false, false);
+            else if (page === 'support') void initAdminSupportInbox();
+            else if (['treasury', 'fees', 'dividends'].includes(page)) void refreshAdminTreasury();
+        }
+        window.addEventListener('pagehide', () => { consoleDocumentActive = false; consoleClosePageUI(); });
+        window.addEventListener('pageshow', event => { if (event.persisted) { consoleDocumentActive = true; consoleEnterPage(); m1StartReadStream(); } });
+        window.addEventListener('keydown', event => {
+            if (event.key !== 'Escape') return;
+            if (document.getElementById('customConfirmModal').style.display === 'flex') closeConfirmModal();
+            if (document.getElementById('vaultModal').style.display === 'flex') closeVaultModal();
+        });
+        for (const id of ['customConfirmModal', 'vaultModal']) {
+            document.getElementById(id).addEventListener('click', event => {
+                if (event.target.id === id) (id === 'vaultModal' ? closeVaultModal : closeConfirmModal)();
+            });
+        }
+
+        function consoleSetMenu(open) {
+            const mobile = window.matchMedia('(max-width: 767px)').matches;
+            document.body.classList.toggle('console-menu-open', !!open && mobile);
+            document.getElementById('consoleMenuButton').setAttribute('aria-expanded', String(!!open && mobile));
+            const sidebar = document.getElementById('consoleSidebar');
+            sidebar.inert = mobile && !open;
+            if (open && mobile) sidebar.querySelector('[aria-current="page"]')?.focus();
+            else if (mobile) document.getElementById('consoleMenuButton').focus();
+        }
+        function consoleToggleGroup(button) {
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            button.setAttribute('aria-expanded', String(!expanded));
+            document.getElementById(button.getAttribute('aria-controls')).classList.toggle('hidden', expanded);
+        }
+        function switchTab(sectionId, element) {
+            if (!Object.prototype.hasOwnProperty.call(consolePages, sectionId)) return;
+            const target = document.getElementById('section-' + sectionId);
+            if (!target) return;
+            const changedPage = sectionId !== consoleCurrentPage;
+            if (changedPage) consoleClosePageUI();
+            document.querySelectorAll('.admin-section').forEach(node => node.classList.toggle('hidden', node !== target));
+            document.querySelectorAll('[data-console-route]').forEach(node => {
+                const active = node.dataset.consoleRoute === sectionId;
+                node.classList.toggle('active', active);
+                if (active) {
+                    node.setAttribute('aria-current', 'page');
+                    const group = node.closest('.console-group');
+                    const button = group.querySelector('.console-group-title');
+                    if (button) {
+                        button.setAttribute('aria-expanded', 'true');
+                        document.getElementById(button.getAttribute('aria-controls')).classList.remove('hidden');
+                    }
+                } else node.removeAttribute('aria-current');
+            });
+            consoleCurrentPage = sectionId;
+            document.getElementById('section-title').textContent = consolePages[sectionId][0];
+            document.getElementById('section-subtitle').textContent = sectionId === 'dashboard' ? 'Requests, summaries and shortcuts' : consolePages[sectionId][1];
+            document.getElementById('consoleBreadcrumb').textContent = consolePages[sectionId][1];
+            document.title = consolePages[sectionId][0] + ' | TCM Admin';
+            if (location.hash !== '#' + sectionId) history.pushState(null, '', '#' + sectionId);
+            document.getElementById('consoleMain').scrollTop = 0;
+            const hadMenu = document.body.classList.contains('console-menu-open');
+            consoleSetMenu(false);
+            if (!hadMenu) document.getElementById('consoleMain').focus({ preventScroll: true });
+            if (changedPage) consoleEnterPage();
+        }
+        window.addEventListener('hashchange', () => switchTab(consolePages[location.hash.slice(1)] ? location.hash.slice(1) : 'dashboard'));
+        window.addEventListener('load', () => switchTab(consolePages[location.hash.slice(1)] ? location.hash.slice(1) : 'dashboard'));
+        window.addEventListener('keydown', event => { if (event.key === 'Escape' && document.body.classList.contains('console-menu-open')) consoleSetMenu(false); });
+        window.matchMedia('(max-width: 767px)').addEventListener('change', () => consoleSetMenu(false));
 
         function toggleMenu(menuId, iconId) {
             const menu = document.getElementById(menuId);
@@ -1357,9 +1384,11 @@ window.addEventListener('storage', event => {
 
         function showToast(msg, isError = false) {
             const toast = document.getElementById("toast");
-            toast.innerHTML = (isError ? '<i class="fa-solid fa-circle-xmark text-rose-400 mr-2"></i>' : '<i class="fa-solid fa-circle-check text-emerald-400 mr-2"></i>') + msg;
+            toast.textContent = String(msg);
             toast.className = isError ? "show error" : "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", "").trim(); }, 3500);
+            clearTimeout(consoleToastTimer);
+            const epoch = consolePageEpoch;
+            consoleToastTimer = setTimeout(() => { if (epoch === consolePageEpoch) toast.className = ''; }, 3500);
         }
 
         // 🟢 REAL-TIME LISTENERS (CASE-SENSITIVITY & ERROR-PROOF PARSER)
@@ -1379,9 +1408,9 @@ window.addEventListener('storage', event => {
         async function fetchAdminAuditPage(cursor = null) {
             const token = localStorage.getItem('token');
             requireAdminSession();
-            const params = new URLSearchParams({ limit: '25' });
+            const params = new URLSearchParams({ limit: '20' });
             if (cursor) params.set('cursor', JSON.stringify(cursor));
-            const response = await fetch('/api/admin/logs?' + params.toString(), {
+            const response = await consoleReadFetch('/api/admin/logs?' + params.toString(), {
                 headers: { Authorization: `Bearer ${token}` }, cache: 'no-store'
             });
             const result = await response.json();
@@ -1446,7 +1475,8 @@ window.addEventListener('storage', event => {
                 : 'No timestamped audit records found.');
         }
         async function loadAdminAuditLogs(reset = false) {
-            if (!adminAuthState.ready) return;
+            if (consoleCurrentPage === 'audit' && adminAuditState.busy) { adminAuditState.reload = true; return; }
+            if (!adminAuthState.ready || consoleCurrentPage !== 'audit') return;
             if (adminAuditState.busy) return;
             if (!reset && adminAuditState.loaded && !adminAuditState.cursor) return;
             reset = reset || !adminAuditState.loaded;
@@ -1456,16 +1486,19 @@ window.addEventListener('storage', event => {
                 const result = await fetchAdminAuditPage(reset ? null : adminAuditState.cursor);
                 adminAuditApplyPage(result, reset);
             } catch (error) {
+                if (error.name === 'AbortError') return;
                 console.error('Admin audit page failed:', error);
                 adminAuditMessage(error.message);
             } finally {
                 adminAuditState.busy = false;
                 adminAuditButtons();
+                if (adminAuditState.reload) { adminAuditState.reload = false; void checkAdminAuditHead(); }
             }
         }
         async function checkAdminAuditHead() {
+            if (consoleCurrentPage === 'audit' && adminAuditState.busy) { adminAuditState.reload = true; return; }
             if (!adminAuthState.ready) return;
-            const section = document.getElementById('section-dashboard');
+            const section = document.getElementById('section-audit');
             if (document.visibilityState !== 'visible' || !section || section.classList.contains('hidden') || adminAuditState.busy) return;
             if (!adminAuditState.loaded) return loadAdminAuditLogs(true);
             adminAuditState.busy = true;
@@ -1494,11 +1527,13 @@ window.addEventListener('storage', event => {
                 if (result.items.length) adminAuditState.headId = result.items[0].id;
                 adminAuditMessage(`${adminAuditState.seen.size} records loaded. Times shown in IST.`);
             } catch (error) {
+                if (error.name === 'AbortError') return;
                 console.error('Admin audit head refresh failed:', error);
                 adminAuditMessage(error.message);
             } finally {
                 adminAuditState.busy = false;
                 adminAuditButtons();
+                if (adminAuditState.reload) { adminAuditState.reload = false; void checkAdminAuditHead(); }
             }
         }
         // Initial audit load is owned by resumeAdminSession; later loads are on demand.
@@ -1515,6 +1550,7 @@ window.addEventListener('storage', event => {
 
         function treasuryMessage(text) {
             treasuryNode('message').textContent = text;
+            document.querySelectorAll('[data-console-treasury-message]').forEach(node => { node.textContent = text; });
         }
 
         function treasuryMoney(value) {
@@ -1607,7 +1643,7 @@ window.addEventListener('storage', event => {
             if (!token) throw new Error('Administrator login required.');
 
             const targetUrl = new URL(path, BACKEND_URL).href;
-            const response = await _nativeFetch(targetUrl, {
+            const response = await (payload ? _nativeFetch : (input, options) => consoleReadFetch(input, options, _nativeFetch))(targetUrl, {
                 method: payload ? 'POST' : 'GET',
                 cache: 'no-store',
                 headers: {
@@ -1663,8 +1699,8 @@ window.addEventListener('storage', event => {
         }
 
         async function refreshAdminTreasury() {
-            if (!adminAuthState.ready) return;
-            if (adminTreasuryState.busy || adminTreasuryState.refreshing) return;
+            if (!adminAuthState.ready || !['treasury', 'fees', 'dividends'].includes(consoleCurrentPage)) return;
+            if (adminTreasuryState.busy || adminTreasuryState.refreshing) { adminTreasuryState.reload = true; return; }
 
             adminTreasuryState.refreshing = true;
             treasuryControls();
@@ -1690,11 +1726,13 @@ window.addEventListener('storage', event => {
                     treasuryMessage(data.configurationError);
                 }
             } catch (error) {
+                if (error.name === 'AbortError') return;
                 adminTreasuryState.fresh = false;
                 treasuryMessage('Refresh failed: ' + error.message);
             } finally {
                 adminTreasuryState.refreshing = false;
                 treasuryControls();
+                if (adminTreasuryState.reload) { adminTreasuryState.reload = false; void refreshAdminTreasury(); }
             }
         }
 
@@ -1850,13 +1888,16 @@ window.addEventListener('storage', event => {
         }
 
         function closeTreasuryDividend() {
-            if (!adminTreasuryState.busy) treasuryNode('modal').close();
+            ++consoleDialogEpoch;
+            treasuryNode('modal').close();
+            adminTreasuryState.preview = null;
         }
 
         async function confirmTreasuryDividend() {
             if (adminTreasuryState.busy || adminTreasuryState.refreshing ||
                 !adminTreasuryState.preview) return;
 
+            const dialogEpoch = consoleDialogEpoch;
             try {
                 let intent = treasuryIntent('dividend');
 
@@ -1876,7 +1917,7 @@ window.addEventListener('storage', event => {
                 adminTreasuryState.busy = true;
                 treasuryControls();
                 await treasuryCommit('dividend', intent);
-                treasuryNode('modal').close();
+                if (dialogEpoch === consoleDialogEpoch) treasuryNode('modal').close();
             } catch (error) {
                 treasuryMessage(error.message);
             } finally {
@@ -1890,7 +1931,8 @@ window.addEventListener('storage', event => {
         window.addEventListener('load', () => {
             treasuryControls();
             treasuryNode('modal').addEventListener('cancel', event => {
-                if (adminTreasuryState.busy) event.preventDefault();
+                adminTreasuryState.preview = null;
+                ++consoleDialogEpoch;
             });
         });
 
@@ -1929,7 +1971,7 @@ window.addEventListener('storage', event => {
         }
 
         async function m1Read(path) {
-            const response = await adminApiFetch(path, { cache: 'no-store' });
+            const response = await (path.startsWith('/api/admin/terminal-summary') ? adminApiFetch(path, { cache: 'no-store' }) : consoleReadFetch(path, { cache: 'no-store' }));
             const result = await response.json();
             if (!response.ok || result.success !== true) {
                 throw new Error(result.message || 'Administrator read failed.');
@@ -1945,7 +1987,7 @@ window.addEventListener('storage', event => {
             controls.className = 'flex flex-wrap items-center justify-end gap-3 px-4 py-3 text-xs text-slate-400';
             const notice = document.createElement('span');
             notice.id = 'm1-' + key + '-notice';
-            notice.textContent = '25 records per page';
+            notice.textContent = '20 records per page';
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'cyber-btn bg-sky-500/10 text-sky-400 px-3 py-1.5 rounded';
@@ -2015,6 +2057,7 @@ window.addEventListener('storage', event => {
                     <td class="p-4 text-right space-x-2">${reverse}<button onclick="archiveTx(decodeURIComponent('${docId}'))" class="text-slate-500 hover:text-rose-400 transition" title="Hide Archive Entry"><i class="fa-solid fa-xmark"></i></button></td>`;
             }
             tr.dataset.m1Signature = JSON.stringify(row);
+            if (window.adminRecordDetailsButton) tr.lastElementChild.appendChild(window.adminRecordDetailsButton(row));
             return tr;
         }
 
@@ -2047,7 +2090,8 @@ window.addEventListener('storage', event => {
         }
 
         async function m1LoadTerminalPage(kind, append = false, force = false) {
-            if (!adminAuthState.ready || document.visibilityState !== 'visible') return;
+            if (window.adminRecordsPendingVisible && !window.adminRecordsPendingVisible(kind)) return;
+            if (!adminAuthState.ready || ({ deposit: 'deposits', withdraw: 'withdrawals', archive: 'rejected' })[kind] !== consoleCurrentPage || document.visibilityState !== 'visible') return;
             const page = m1Terminal.pages[kind];
             if (page.busy) { if (!append) page.reload = true; return; }
             if (append && !page.cursor) return;
@@ -2058,7 +2102,7 @@ window.addEventListener('storage', event => {
             if (more) more.disabled = true;
             try {
                 const cursor = append ? page.cursor : '';
-                const result = await m1Read('/api/admin/terminal-page?kind=' + kind + '&limit=25' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '') + (force ? '&refresh=1' : ''));
+                const result = await m1Read('/api/admin/terminal-page?kind=' + kind + '&limit=20' + (cursor ? '&cursor=' + encodeURIComponent(cursor) : '') + (force ? '&refresh=1' : ''));
                 if (!adminAuthState.ready || generation !== adminAuthState.generation || sequence !== page.sequence) return;
                 if (!append) page.items.clear();
                 for (const row of result.items) page.items.set(row.id, row);
@@ -2066,6 +2110,7 @@ window.addEventListener('storage', event => {
                 // The event stream owns global counters; a delayed page cannot roll them back.
                 m1RenderTransactions(kind);
             } catch (error) {
+                if (error.name === 'AbortError') return;
                 if (generation === adminAuthState.generation && adminAuthState.ready) {
                     document.getElementById('m1-' + kind + '-notice').textContent = 'Read unavailable • previous data retained';
                     console.warn('M1 terminal page failed:', error.message);
@@ -2127,7 +2172,7 @@ window.addEventListener('storage', event => {
         }
 
         async function m1StartReadStream() {
-            if (!adminAuthState.ready || document.visibilityState !== 'visible' || m1Terminal.stream) return;
+            if (!consoleDocumentActive || !adminAuthState.ready || document.visibilityState !== 'visible' || m1Terminal.stream) return;
             const controller = new AbortController();
             m1Terminal.stream = controller;
             const generation = adminAuthState.generation;
@@ -2236,7 +2281,7 @@ window.addEventListener('storage', event => {
         let adminCommittedRefreshTimer = null;
 
         function refreshAdminMemberDirectory(append = false, force = false) {
-            if (!adminAuthState.ready || document.visibilityState !== 'visible') return Promise.resolve();
+            if (!adminAuthState.ready || consoleCurrentPage !== 'members' || document.visibilityState !== 'visible') return Promise.resolve();
             const state = m1Terminal.members;
             if (adminMemberRefreshPromise) {
                 if (!append) state.reload = true;
@@ -2256,7 +2301,7 @@ window.addEventListener('storage', event => {
             const cursor = append ? state.cursor : '';
             const operation = (async () => {
                 try {
-                    const result = await m1Read('/api/admin/members?limit=25&search=' + encodeURIComponent(query) +
+                    const result = await m1Read('/api/admin/members?limit=20&search=' + encodeURIComponent(query) +
                         (cursor ? '&cursor=' + encodeURIComponent(cursor) : '') + (force ? '&refresh=1' : ''));
                     const currentQuery = (document.getElementById('memberSearchInput').value || '').trim().toLowerCase();
                     if (!adminAuthState.ready || generation !== adminAuthState.generation ||
@@ -2270,6 +2315,7 @@ window.addEventListener('storage', event => {
                     document.getElementById('m1-members-notice').textContent = globalUsers.length + ' loaded • ' +
                         (result.searchComplete ? 'end of directory' : query ? 'search incomplete: Load More scans the next page' : 'more members available');
                 } catch (error) {
+                    if (error.name === 'AbortError') return;
                     console.warn('Admin directory refresh failed:', error.message);
                     if (generation === adminAuthState.generation && adminAuthState.ready) {
                         document.getElementById('m1-members-notice').textContent = 'Directory unavailable • previous data retained';
@@ -2396,7 +2442,7 @@ window.addEventListener('storage', event => {
         }
         const l4Ui = { cursor: null, busy: false, sequence: 0, reload: false, key: '', generation: null };
         async function l4Load(append = false, force = false) {
-            if (!adminAuthState.ready) return;
+            if (!adminAuthState.ready || consoleCurrentPage !== 'lifecycle') return;
             if (l4Ui.busy) {
                 if (!append) { l4Ui.sequence++; l4Ui.reload = true; }
                 return;
@@ -2419,10 +2465,10 @@ window.addEventListener('storage', event => {
                 document.getElementById('l4-body').innerHTML = '';
             }
             try {
-                const query = new URLSearchParams({ limit: '25', state, uid });
+                const query = new URLSearchParams({ limit: '20', state, uid });
                 if (append) query.set('cursor', l4Ui.cursor);
                 if (force) query.set('refresh', '1');
-                const response = await adminApiFetch('/api/admin/lifecycle?' + query);
+                const response = await consoleReadFetch('/api/admin/lifecycle?' + query);
                 const result = await readAdminAuthJson(response);
                 if (!response.ok || result.success !== true) throw new Error(result.message || 'Lifecycle read failed.');
                 if (!adminAuthState.ready || generation !== adminAuthState.generation || sequence !== l4Ui.sequence) return;
@@ -2450,6 +2496,7 @@ window.addEventListener('storage', event => {
                     notice.textContent += ' No matches in the scanned records.';
                 }
             } catch (error) {
+                if (error.name === 'AbortError') return;
                 if (sequence === l4Ui.sequence && generation === adminAuthState.generation) {
                     notice.textContent = 'Read failed; displayed data may be stale. ' + error.message;
                 }
@@ -2492,24 +2539,26 @@ window.addEventListener('storage', event => {
         }
 
         async function approveDep(docId, uid, amount) {
+            const consoleView = consolePageEpoch;
             if (!confirm(`Approve Deposit of ${amount} ₮ for ${uid}?`)) {
                 return false;
             }
 
             try {
                 const result = await adminDepositAction('approve', docId);
-                showToast(result.message);
+                consoleToastFor(consoleView, result.message);
                 return true;
             } catch (error) {
                 console.error('Approve Deposit Error:', error);
-                showToast('Failed to approve deposit: ' + error.message, true);
+                consoleToastFor(consoleView, 'Failed to approve deposit: ' + error.message, true);
                 return false;
             }
         }
 
         async function rejectDep(docId, uid) {
+            const consoleView = consolePageEpoch;
             if (window.adminDepositRejectPending) {
-                showToast('A deposit rejection is already open or processing.', true);
+                consoleToastFor(consoleView, 'A deposit rejection is already open or processing.', true);
                 return false;
             }
             let dialog;
@@ -2551,14 +2600,14 @@ window.addEventListener('storage', event => {
                     document.body.appendChild(dialog);
                     dialog.showModal();
                 });
-                if (reason === null) return false;
+                if (reason === null || !consoleViewCurrent(consoleView)) return false;
                 requireAdminSession();
                 const result = await adminDepositAction('reject', docId, reason);
-                showToast(result.message || 'Deposit rejected.');
+                consoleToastFor(consoleView, result.message || 'Deposit rejected.');
                 return true;
             } catch (error) {
                 console.error('Reject Deposit Error:', error);
-                showToast('Failed to reject deposit: ' + error.message, true);
+                consoleToastFor(consoleView, 'Failed to reject deposit: ' + error.message, true);
                 return false;
             } finally {
                 if (dialog) dialog.remove();
@@ -2567,68 +2616,76 @@ window.addEventListener('storage', event => {
         }
 
         async function approveWd(docId, uid, amount) {
+            const consoleView = consolePageEpoch;
             if (!confirm(`Clear and Approve Withdrawal of ${amount} ₮ for ${uid}?`)) return;
             try {
                 const result = await adminWithdrawalAction('approve', docId);
-                showToast(result.message);
-            } catch (error) { showToast(error.message, true); }
+                consoleToastFor(consoleView, result.message);
+            } catch (error) { consoleToastFor(consoleView, error.message, true); }
         }
 
         async function rejectWd(docId, uid, amount) {
+            const consoleView = consolePageEpoch;
             const reason = prompt('Enter withdrawal rejection reason:', 'Ecosystem Health Too Low');
             if (reason === null) return;
             try {
                 const result = await adminWithdrawalAction('reject', docId, reason);
-                showToast(result.message);
-            } catch (error) { showToast(error.message, true); }
+                consoleToastFor(consoleView, result.message);
+            } catch (error) { consoleToastFor(consoleView, error.message, true); }
         }
 
         async function shortcutVaultLock(docId, uid, amount) {
+            const consoleView = consolePageEpoch;
             if (!confirm(`Intercept & Lock ${amount} ₮ directly to ${uid}'s Locked Vault?`)) return;
             try {
                 const result = await adminWithdrawalAction('vault', docId);
-                showToast(result.message);
-            } catch (error) { showToast(error.message, true); }
+                consoleToastFor(consoleView, result.message);
+            } catch (error) { consoleToastFor(consoleView, error.message, true); }
         }
 
         async function reverseTx(docId) {
+            const consoleView = consolePageEpoch;
             const reason = prompt('Enter reversal reason for audit trail:', 'Administrative Reversal');
             if (reason === null) return;
             try {
                 const result = await adminWithdrawalAction('reverse', docId, reason);
-                showToast(result.message);
-            } catch (error) { showToast(error.message, true); }
+                consoleToastFor(consoleView, result.message);
+            } catch (error) { consoleToastFor(consoleView, error.message, true); }
         }
 
         async function archiveTx(docId) {
+            const consoleView = consolePageEpoch;
             if (!confirm('Hide this entry from the admin archive list? Financial records will be retained.')) return;
             try {
                 const result = await a0AdminRequest('/api/admin/archive-action', { docId });
                 m1LoadTerminalPage('archive', false, true);
-                showToast(result.message);
-            } catch (error) { showToast(error.message, true); }
+                consoleToastFor(consoleView, result.message);
+            } catch (error) { consoleToastFor(consoleView, error.message, true); }
         }
 
         // 🏦 VAULT CONTROL FUNCTIONS
         function openVaultModal(uid, mainBal, lockedBal) {
+            ++consoleDialogEpoch;
             activeVaultUser = uid;
             document.getElementById('vaultModalSub').innerHTML = `UID: <b class="text-sky-400 font-mono">${m1Escape(uid)}</b><br>Main: ${mainBal.toFixed(2)} ₮ | Locked: ${lockedBal.toFixed(2)} ₮`;
             document.getElementById('vaultModalAmount').value = '';
             const m = document.getElementById('vaultModal');
             m.style.display = 'flex';
-            setTimeout(() => m.classList.add('show'), 10);
+            m.classList.add('show');
         }
 
         function closeVaultModal() {
+            ++consoleDialogEpoch;
             const m = document.getElementById('vaultModal');
             m.classList.remove('show');
-            setTimeout(() => m.style.display = 'none', 250);
+            m.style.display = 'none';
             activeVaultUser = null;
         }
 
         // MEMO TCM-ADM-014-S2-B | 2026-10-10 02:40 IST
         const admS2Busy = new Set();
         async function runAdminFinancialOperation(family, payload) {
+            const consoleView = consolePageEpoch;
             const token = localStorage.getItem('token');
             const actorUid = localStorage.getItem('uid');
             requireAdminSession();
@@ -2663,9 +2720,10 @@ window.addEventListener('storage', event => {
                         }
                         throw new Error((result.message || 'Operation interrupted.') + ' Operation ID: ' + saved.requestId);
                     }
+                    if (!result.data.done && !consoleViewCurrent(consoleView)) throw new Error('Page closed. Partial operation retained with its saved request ID; review it before resuming.');
                     if (result.data.done) {
                         sessionStorage.removeItem(key);
-                        showToast(`Applied: ${result.data.applied}; skipped: ${result.data.skipped}. Operation: ${saved.requestId}`, result.data.skipped > 0);
+                        consoleToastFor(consoleView, `Applied: ${result.data.applied}; skipped: ${result.data.skipped}. Operation: ${saved.requestId}`, result.data.skipped > 0);
                         return result.data;
                     }
                 }
@@ -2682,18 +2740,21 @@ window.addEventListener('storage', event => {
             return percentages;
         }
         async function executeSingleVault(action) {
+            const consoleView = consolePageEpoch;
+            const dialogEpoch = consoleDialogEpoch;
             const uid = activeVaultUser;
             if (!uid) return alert('No user selected!');
             const amount = document.getElementById('vaultModalAmount').value.trim();
             try {
                 const result = await runAdminFinancialOperation('vault', { action, uid, amount });
-                if (result.applied > 0) closeVaultModal();
+                if (result.applied > 0 && consoleViewCurrent(consoleView) && dialogEpoch === consoleDialogEpoch && activeVaultUser === uid) closeVaultModal();
             } catch (error) {
                 console.error('Vault adjustment failed:', error);
-                showToast(error.message, true);
+                consoleToastFor(consoleView, error.message, true);
             }
         }
         async function executeVaultMassLock() {
+            const consoleView = consolePageEpoch;
             try {
                 await runAdminFinancialOperation('vault', {
                     action: 'mass-lock',
@@ -2702,18 +2763,20 @@ window.addEventListener('storage', event => {
                 });
             } catch (error) {
                 console.error('Mass vault lock failed:', error);
-                showToast(error.message, true);
+                consoleToastFor(consoleView, error.message, true);
             }
         }
         async function massVaultUnlock(level) {
+            const consoleView = consolePageEpoch;
             try {
                 await runAdminFinancialOperation('vault', { action: 'mass-unlock', level });
             } catch (error) {
                 console.error('Mass vault unlock failed:', error);
-                showToast(error.message, true);
+                consoleToastFor(consoleView, error.message, true);
             }
         }
         async function executeSingleAirdrop() {
+            const consoleView = consolePageEpoch;
             const uid = document.getElementById('adSingleUid').value.trim().toUpperCase();
             const amount = document.getElementById('adSingleAmt').value.trim();
             try {
@@ -2724,10 +2787,11 @@ window.addEventListener('storage', event => {
                 }
             } catch (error) {
                 console.error('Single airdrop failed:', error);
-                showToast(error.message, true);
+                consoleToastFor(consoleView, error.message, true);
             }
         }
         async function executeMassAirdrop() {
+            const consoleView = consolePageEpoch;
             try {
                 await runAdminFinancialOperation('airdrop', {
                     action: 'pool',
@@ -2736,25 +2800,27 @@ window.addEventListener('storage', event => {
                 });
             } catch (error) {
                 console.error('Pool airdrop failed:', error);
-                showToast(error.message, true);
+                consoleToastFor(consoleView, error.message, true);
             }
         }
         async function reverseLevelAirdrop(level) {
+            const consoleView = consolePageEpoch;
             try {
                 await runAdminFinancialOperation('airdrop', { action: 'reverse-level', level });
             } catch (error) {
                 console.error('Airdrop reversal failed:', error);
-                showToast(error.message, true);
+                consoleToastFor(consoleView, error.message, true);
             }
         }
 
         // 🛡️ USER ACCESS & NOTIFICATIONS
         // MEMO TCM-ADM-014-S2-A | 2026-10-10 02:30 IST
         async function toggleUserRole(uid, role) {
+            const consoleView = consolePageEpoch;
             uid = typeof uid === 'string' ? uid.trim() : '';
 
             if (!uid || !['Admin', 'User'].includes(role)) {
-                showToast('Provide a valid UID and role.', true);
+                consoleToastFor(consoleView, 'Provide a valid UID and role.', true);
                 return;
             }
 
@@ -2795,16 +2861,17 @@ window.addEventListener('storage', event => {
                     throw new Error(result.message || 'Role update failed.');
                 }
 
-                showToast(result.message);
+                consoleToastFor(consoleView, result.message);
                 scheduleAdminCommittedRefresh('/api/admin/role-action');
             } catch (error) {
-                showToast('Role update failed: ' + error.message, true);
+                consoleToastFor(consoleView, 'Role update failed: ' + error.message, true);
             } finally {
                 toggleUserRole.pending.delete(uid);
             }
         }
 
         async function toggleUserAccess(status, directUid = null) {
+            const consoleView = consolePageEpoch;
             const uid = (
                 directUid ||
                 document.getElementById('accessUidInput').value ||
@@ -2835,34 +2902,36 @@ window.addEventListener('storage', event => {
                     );
                 }
 
-                showToast(result.message);
+                consoleToastFor(consoleView, result.message);
             } catch (error) {
                 console.error('Access Update Error:', error);
-                showToast('Access update failed: ' + error.message, true);
+                consoleToastFor(consoleView, 'Access update failed: ' + error.message, true);
             }
         }
 
         async function submitGlobalBroadcast() {
+            const consoleView = consolePageEpoch;
             const title = (document.getElementById('bcTitle').value || '').trim();
             const message = (document.getElementById('bcMessage').value || '').trim();
             if (!title || !message) return alert("Enter both title and announcement body!");
 
             try {
                 await a0AdminRequest('/api/admin/broadcast', { title, message });
-                showToast("Global network notification deployed!");
+                consoleToastFor(consoleView, "Global network notification deployed!");
                 document.getElementById('bcTitle').value = '';
                 document.getElementById('bcMessage').value = '';
-            } catch(e) { showToast("Broadcast failed", true); }
+            } catch(e) { consoleToastFor(consoleView, "Broadcast failed", true); }
         }
 
         async function saveQuickBroadcast() {
+            const consoleView = consolePageEpoch;
             const msg = (document.getElementById('quickBroadcastInput').value || '').trim();
             if (!msg) return;
             try {
                 await a0AdminRequest('/api/admin/broadcast', { title: 'System Alert', message: msg });
-                showToast("Quick Alert Sent!");
+                consoleToastFor(consoleView, "Quick Alert Sent!");
                 document.getElementById('quickBroadcastInput').value = '';
-            } catch(e) { showToast("Alert delivery failed", true); }
+            } catch(e) { consoleToastFor(consoleView, "Alert delivery failed", true); }
         }
 
         // 🗂️ MODAL CONFIRMATION DIALOG
@@ -2907,23 +2976,25 @@ window.addEventListener('storage', event => {
             }
 
             modal.style.display = 'flex';
-            setTimeout(() => modal.classList.add('show'), 10);
+            modal.classList.add('show');
         }
 
         function closeConfirmModal() {
             const modal = document.getElementById('customConfirmModal');
             modal.classList.remove('show');
-            setTimeout(() => { modal.style.display = 'none'; pendingActionContext = null; pendingActionExtra = null; }, 250);
+            modal.style.display = 'none';
+            pendingActionContext = null; pendingActionExtra = null;
         }
 
         document.getElementById('modalOkBtn').addEventListener('click', async () => {
+            const consoleView = consolePageEpoch;
             const ctx = pendingActionContext;
             const extra = pendingActionExtra;
             closeConfirmModal();
 
             if (ctx === 'bulkDepositApprove') {
                 if (window.bulkDepositApprovalRunning) {
-                    showToast('Bulk deposit approval is already running.', true);
+                    consoleToastFor(consoleView, 'Bulk deposit approval is already running.', true);
                     return;
                 }
 
@@ -2936,6 +3007,7 @@ window.addEventListener('storage', event => {
                     let failed = 0;
 
                     for (const doc of snap.docs) {
+                        if (!consoleViewCurrent(consoleView)) break;
                         try {
                             await adminDepositAction('approve', doc.id);
                             approved++;
@@ -2949,13 +3021,13 @@ window.addEventListener('storage', event => {
                         }
                     }
 
-                    showToast(
+                    consoleToastFor(consoleView, 
                         `Deposit approvals: ${approved} successful, ${failed} failed.`,
                         failed > 0
                     );
                 } catch (error) {
                     console.error('Bulk Deposit Error:', error);
-                    showToast(
+                    consoleToastFor(consoleView, 
                         'Failed to load pending deposits: ' + error.message,
                         true
                     );
@@ -2967,7 +3039,7 @@ window.addEventListener('storage', event => {
                 const action = ctx === 'bulkWithdrawApprove' ? 'approve' : 'reject';
                 const reason = action === 'reject' && typeof extra === 'string' ? extra : '';
                 if (action === 'reject' && !reason.trim()) {
-                    showToast('A rejection reason is required.', true);
+                    consoleToastFor(consoleView, 'A rejection reason is required.', true);
                     return;
                 }
 
@@ -2985,6 +3057,7 @@ window.addEventListener('storage', event => {
                     unprocessed = snap.docs.length;
 
                     for (const doc of snap.docs) {
+                        if (!consoleViewCurrent(consoleView)) break;
                         if (!adminAuthState.ready ||
                             generation !== adminAuthState.generation ||
                             token !== localStorage.getItem('token')) break;
@@ -3006,7 +3079,7 @@ window.addEventListener('storage', event => {
                         token === localStorage.getItem('token')) {
                         scheduleAdminCommittedRefresh('/api/admin/withdrawal-action');
                     }
-                    showToast(
+                    consoleToastFor(consoleView, 
                         `Withdrawal batch: ${succeeded} successful, ${failed} failed, ` +
                         `${unprocessed} unprocessed.` + (errorMessage ? ' ' + errorMessage : ''),
                         failed > 0 || unprocessed > 0 || !!errorMessage
@@ -3014,7 +3087,7 @@ window.addEventListener('storage', event => {
                 }
             } else if (ctx === 'clearAllArchived') {
                 try { await a0ArchivePage(); }
-                catch (error) { showToast(error.message, true); }
+                catch (error) { consoleToastFor(consoleView, error.message, true); }
             } else if (ctx === 'vaultMassLock') executeVaultMassLock();
             else if (ctx === 'vaultMassUnlock') massVaultUnlock(extra);
             else if (ctx === 'airdropSingle') executeSingleAirdrop();
@@ -3057,7 +3130,7 @@ window.addEventListener('storage', event => {
         }
         async function a0AdminRequest(path, body) {
             requireAdminSession();
-            const response = await fetch(BACKEND_URL + path, {
+            const response = await (body === undefined ? consoleReadFetch : fetch)(BACKEND_URL + path, {
                 method: body === undefined ? 'GET' : 'POST',
                 headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('token') },
                 body: body === undefined ? undefined : JSON.stringify(body)
@@ -3119,7 +3192,7 @@ window.addEventListener('storage', event => {
             a0RenderSupportInbox();
         }
         async function initAdminSupportInbox() {
-            if (!adminAuthState.ready) return;
+            if (!adminAuthState.ready || consoleCurrentPage !== 'support') return;
             const generation = a0SupportGeneration;
             const session = adminAuthState.generation;
             try {
@@ -3130,9 +3203,10 @@ window.addEventListener('storage', event => {
                     if (!current || current.lastTime < row.lastTime) a0SupportRows.set(row.uid, row);
                 }
                 a0RenderSupportInbox();
-            } catch (error) { if (adminAuthState.ready) showToast(error.message, true); }
+            } catch (error) { if (error.name !== 'AbortError' && consoleCurrentPage === 'support' && generation === a0SupportGeneration && adminAuthState.ready) showToast(error.message, true); }
         }
         async function a0LoadSupportMessages(uid) {
+            if (consoleCurrentPage !== 'support') return;
             const generation = a0SupportGeneration;
             const session = adminAuthState.generation;
             try {
@@ -3140,9 +3214,10 @@ window.addEventListener('storage', event => {
                 if (generation !== a0SupportGeneration || session !== adminAuthState.generation || activeSupportUid !== uid || !adminAuthState.ready) return;
                 for (const row of result.items) if (!a0SupportMessages.has(row.id)) a0SupportMessages.set(row.id, row);
                 a0RenderSupportMessages();
-            } catch (error) { if (adminAuthState.ready) showToast(error.message, true); }
+            } catch (error) { if (error.name !== 'AbortError' && consoleCurrentPage === 'support' && generation === a0SupportGeneration && adminAuthState.ready) showToast(error.message, true); }
         }
         async function selectSupportConversation(uid, name) {
+            const consoleView = consolePageEpoch;
             if (a0ReplyBusy) return;
             requireAdminSession();
             if (activeSupportUid !== uid) {
@@ -3155,9 +3230,10 @@ window.addEventListener('storage', event => {
             await a0LoadSupportMessages(uid);
             if (activeSupportUid !== uid || !adminAuthState.ready) return;
             try { await a0AdminRequest('/api/admin/support/read', { uid }); }
-            catch (error) { showToast(error.message, true); }
+            catch (error) { consoleToastFor(consoleView, error.message, true); }
         }
         async function sendSupportReply() {
+            const consoleView = consolePageEpoch;
             if (a0ReplyBusy) return;
             const input = document.getElementById('supportReplyInput');
             const message = input.value.trim();
@@ -3177,14 +3253,16 @@ window.addEventListener('storage', event => {
                 a0ApplySupportChange({ uid, ...result.data });
                 if (input.value.trim() === message) input.value = '';
                 a0ReplyPending = null;
-            } catch (error) { if (adminAuthState.ready) showToast(error.message, true); }
+            } catch (error) { if (adminAuthState.ready) consoleToastFor(consoleView, error.message, true); }
             finally { a0ReplyBusy = false; }
         }
         async function a0ArchivePage() {
+            const consoleView = consolePageEpoch;
             requireAdminSession();
             const session = adminAuthState.generation;
             let count = 0;
             for (let page = 0; page < 5; page++) {
+                if (!consoleViewCurrent(consoleView)) return;
                 const result = await a0AdminRequest('/api/admin/archive-page', { cursor: a0ArchiveCursor });
                 if (session !== adminAuthState.generation || !adminAuthState.ready) return;
                 count += result.count;
@@ -3192,7 +3270,7 @@ window.addEventListener('storage', event => {
                 if (!a0ArchiveCursor) break;
             }
             m1LoadTerminalPage('archive', false, true);
-            showToast(`${count} entries hidden; financial records retained.` + (a0ArchiveCursor ? ' Run again to continue the next bounded pages.' : ''));
+            consoleToastFor(consoleView, `${count} entries hidden; financial records retained.` + (a0ArchiveCursor ? ' Run again to continue the next bounded pages.' : ''));
         }
     </script>
     <script>
@@ -3219,6 +3297,7 @@ window.addEventListener('storage', event => {
             generation++; approved = null; el('approve').checked = false;
             el('preview').hidden = true; el('image').hidden = true; controls();
         }
+        document.addEventListener('tcm:admin-page-leave', event => { if (event.detail.page === 'import') invalidate(); });
         function readCandidate(data) {
             const b = data?.Blockchain;
             if (data?.kind !== 'Gallery_Candidate_Only' || data.readyForProduction !== false || b?.Chain_ID !== 56 ||
@@ -3240,7 +3319,7 @@ window.addEventListener('storage', event => {
             if (!adminAuthState.ready || !token) throw Error('Administrator login required.');
             const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 90000);
             try {
-                const response = await _nativeFetch(new URL(path, BACKEND_URL).href, { method: 'POST', cache: 'no-store',
+                const response = await (path.endsWith('/preview') ? (input, options) => consoleReadFetch(input, options, _nativeFetch) : _nativeFetch)(new URL(path, BACKEND_URL).href, { method: 'POST', cache: 'no-store',
                     headers: { Authorization: 'Bearer ' + token, 'Content-Type': 'application/json' },
                     body: JSON.stringify(body), signal: controller.signal });
                 if (!(response.headers.get('content-type') || '').includes('application/json')) throw Error('Backend returned non-JSON. Check the deployment.');
@@ -3365,6 +3444,7 @@ window.addEventListener('storage', event => {
             node('publish').disabled = busy || !verification || !adminAuthState.ready ||
                 verifiedSession !== adminAuthState.generation || verifiedToken !== localStorage.getItem('token');
         }
+        document.addEventListener('tcm:admin-page-leave', event => { if (event.detail.page === 'mainnet') { invalidate(); controls(); node('image').hidden = true; } });
         function showSelection() {
             node('asset').value = selected.assetId;
             node('identity').textContent = selected.name + ' · Token ' + selected.tokenId + ' · Level ' + selected.level + ' · ' + selected.price + ' USDT';
@@ -3375,7 +3455,7 @@ window.addEventListener('storage', event => {
         }
         function showImage(asset) {
             const image = node('image'); image.hidden = true;
-            image.onload = () => { if (selected.assetId === asset.assetId) image.hidden = false; };
+            image.onload = () => { if (consoleCurrentPage === 'mainnet' && selected.assetId === asset.assetId) image.hidden = false; };
             image.onerror = () => { image.hidden = true; };
             image.src = 'https://gateway.pinata.cloud/ipfs/' + asset.imageURI.slice(7);
         }
@@ -3384,7 +3464,7 @@ window.addEventListener('storage', event => {
             if (!adminAuthState.ready || !token) throw new Error('Administrator login required.');
             const controller = new AbortController(), timer = setTimeout(() => controller.abort(), 45000);
             try {
-                const response = await _nativeFetch(new URL(path, BACKEND_URL).href, {
+                const response = await (method === 'GET' ? (input, options) => consoleReadFetch(input, options, _nativeFetch) : _nativeFetch)(new URL(path, BACKEND_URL).href, {
                     method, cache: 'no-store', signal: controller.signal,
                     headers: { Authorization: 'Bearer ' + token, ...(body ? { 'Content-Type': 'application/json' } : {}) },
                     ...(body ? { body: JSON.stringify(body) } : {})
@@ -3536,7 +3616,7 @@ window.addEventListener('storage', event => {
             const timer = setTimeout(() => controller.abort(), 40000);
 
             try {
-                const response = await _nativeFetch(
+                const response = await consoleReadFetch(
                     new URL(
                         '/api/admin/nft-testnet/status',
                         BACKEND_URL
@@ -3771,6 +3851,105 @@ window.addEventListener('storage', event => {
         });
     })();
     </script>
-</body>
-</html>
 
+
+
+<dialog data-treasury="modal" class="glass-card bg-slate-950 text-white rounded-xl p-0 w-[min(95vw,700px)] max-h-[90vh] overflow-auto backdrop:bg-black/70">
+                <div class="p-4 border-b border-white/5">
+                    <h3 class="font-bold">Dividend Distribution Preview</h3>
+                    <p class="text-xs text-slate-400 mt-1">
+                        Full pool: <span data-treasury="preview-total"></span>
+                    </p>
+                </div>
+                <table class="w-full text-left">
+                    <thead class="text-xs text-slate-400">
+                        <tr>
+                            <th class="p-3">Shareholder UID</th>
+                            <th class="p-3">Share</th>
+                            <th class="p-3">Wallet Credit</th>
+                        </tr>
+                    </thead>
+                    <tbody data-treasury="rows"></tbody>
+                </table>
+                <div class="p-4 flex flex-wrap gap-3 border-t border-white/5">
+                    <button type="button" data-treasury="confirm" onclick="confirmTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Confirm Distribution</button>
+                    <button type="button" data-treasury="close" onclick="closeTreasuryDividend()" class="cyber-btn bg-white/5 text-slate-300 px-3 py-2 rounded">Close</button>
+                </div>
+            </dialog><script>
+/* TCM ADMIN R3: authenticated history, exact order lookup and saved-record details. */
+(() => {
+ 'use strict';
+ const titles={transactions:'Transactions',nft:'NFT History',p2p:'P2P Ledger'};
+ const config={deposits:{kind:'deposit',tabs:[['pending','Pending'],['completed','Completed'],['rejected','Rejected'],['all','All records']]},withdrawals:{kind:'withdraw',tabs:[['pending','Pending'],['approved','Approved / Unverified'],['processing','Processing'],['completed','Verified Completed'],['failed','Failed'],['cancelled','Cancelled'],['rejected','Rejected'],['locked','Locked'],['all','All records']]},p2p:{kind:'p2p',tabs:[['all','All transfers'],['completed','Completed'],['pending','Pending'],['failed','Failed']]},rejected:{kind:'archive',tabs:[['all','All'],['rejected','Rejected'],['cancelled','Cancelled'],['locked','Locked'],['failed','Failed']]}};
+ const states=new Map();let detailSequence=0,detailController=null,currentRecord=null,lookupSequence=0,lookupController=null;
+ const node=(tag,attrs={},text)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs))if(k==='class')e.className=v;else e.setAttribute(k,v);if(text!==undefined)e.textContent=String(text);return e;};
+ const button=(label,handler,cls='r3-button')=>{const b=node('button',{type:'button',class:cls},label);b.addEventListener('click',handler);return b;};
+ const show=v=>v===null||v===undefined||v===''?'Not recorded':String(v);
+ const when=v=>v?new Date(v).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Not recorded';
+ const dollars=v=>v===null||v===undefined?'Not recorded':String(v)+' USDT';
+ const select=(options)=>{const s=node('select');for(const[v,label]of options)s.append(node('option',{value:v},label));return s;};
+ const input=(type,placeholder)=>node('input',{type,placeholder,'aria-label':placeholder});
+ const errorText=e=>e.status===404?'This backend does not have the R3 records API yet. Install and deploy server.js with lib/admin-records.cjs.':e.message;
+ async function read(path,signal){const response=await consoleReadFetch(path,{signal});const result=await response.json();if(!response.ok||!result.success)throw Object.assign(new Error(result.message||'Records could not be loaded.'),{status:response.status});return result;}
+ function detailsButton(record){return button('Details',()=>openDetails(record.source,record.id),'r3-button r3-small');}
+ window.adminRecordDetailsButton=record=>detailsButton({source:'transactions',id:record.id});
+ function table(records){const wrap=node('div',{class:'r3-table-wrap'}),t=node('table',{class:'r3-table'}),thead=node('thead'),head=node('tr');for(const s of ['Time / Order','User / Transfer','Type / Network','Amount / Fee / Net','Status',''])head.append(node('th',{},s));thead.append(head);t.append(thead);const body=node('tbody');
+  for(const r of records){const tr=node('tr'),id=node('td');id.append(node('div',{},when(r.date)),node('strong',{},show(r.orderId)));tr.append(id);const user=node('td');user.append(node('div',{},show(r.name)),node('div',{},show(r.uid)));if(r.sender||r.receiver)user.append(node('small',{},show(r.sender)+' → '+show(r.receiver)));tr.append(user);const type=node('td');type.append(node('div',{},show(r.type)),node('small',{},show(r.network)));tr.append(type);const amounts=node('td');amounts.append(node('strong',{},dollars(r.amount)),node('div',{},'Fee: '+dollars(r.fee)),node('small',{},'Net: '+dollars(r.net)));tr.append(amounts);const status=node('td');status.append(node('span',{class:'r3-status'},show(r.status)));if(r.archived)status.append(node('small',{},'Archived from action list; retained'));tr.append(status);const action=node('td');action.append(detailsButton(r));tr.append(action);body.append(tr);}
+  if(!records.length){const tr=node('tr');tr.append(node('td',{colspan:'6',class:'r3-empty'},'No matching records in this page.'));body.append(tr);}t.append(body);wrap.append(t);return wrap;
+ }
+ function setupList(page,cfg){const section=document.getElementById('section-'+page);if(!section)return;const planned=section.dataset.consoleStatus==='planned';if(planned){section.replaceChildren();delete section.dataset.consoleStatus;}
+  const legacy=node('div',{'data-r3-legacy':page});if(!planned){for(const child of [...section.children])legacy.append(child);section.append(legacy);}
+  const shell=node('div',{class:'r3-shell'}),tabs=node('div',{class:'r3-tabs',role:'group','aria-label':'Transaction statuses'}),filters=node('form',{class:'r3-filters'}),mode=select([['order','Order ID'],['uid','UID'],['hash','Transaction hash']]),q=input('text','Exact search value'),network=select([['','All networks'],['BEP20','BEP20'],['TRC20','TRC20']]),from=input('date','From date (IST)'),to=input('date','To date (IST)'),apply=node('button',{type:'submit',class:'r3-button'},'Search / Refresh'),notice=node('p',{class:'r3-notice',role:'status','aria-live':'polite'}),results=node('div'),more=button('Load more',()=>loadList(page,true));
+  const state={page,cfg,tab:cfg.tabs[0][0],mode,q,network,from,to,legacy,notice,results,more,rows:new Map(),cursor:null,sequence:0,controller:null,forceLegacy:false};states.set(page,state);
+  for(const[value,label]of cfg.tabs){const b=button(label,()=>{state.tab=value;state.forceLegacy=false;renderMode(state);void loadList(page);});b.dataset.r3Status=value;tabs.append(b);}state.tabs=tabs;
+  const clear=button('Clear filters',()=>{q.value='';network.value='';from.value='';to.value='';state.forceLegacy=false;renderMode(state);void loadList(page);});filters.append(mode,q,network,from,to,apply,clear);
+  filters.addEventListener('submit',e=>{e.preventDefault();state.forceLegacy=false;renderMode(state);void loadList(page);});
+  shell.append(tabs,filters,notice,results,more);if(page==='rejected')shell.append(button('Existing archive actions',()=>{state.forceLegacy=true;renderMode(state);void m1LoadTerminalPage('archive');}));
+  section.prepend(shell);state.shell=shell;renderMode(state);
+ }
+ function legacyMode(s){return s.forceLegacy||(['deposits','withdrawals'].includes(s.page)&&s.tab==='pending'&&!s.q.value.trim()&&!s.network.value&&!s.from.value&&!s.to.value);}
+ function renderMode(s){const legacy=legacyMode(s);s.legacy.hidden=!legacy;s.results.hidden=legacy;s.more.hidden=true;s.tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.r3Status===s.tab)));s.notice.textContent=legacy?'Existing pending/action workflow. Search filters show saved records with Details.':'Saved records only. Up to 20 results per page; dates use IST.';}
+ window.adminRecordsPendingVisible=kind=>{const page={deposit:'deposits',withdraw:'withdrawals',archive:'rejected'}[kind],s=states.get(page);return !s||legacyMode(s);};
+ async function loadList(page,append=false){const s=states.get(page);if(!s||consoleCurrentPage!==page)return;s.controller?.abort();const sequence=++s.sequence;s.controller=new AbortController();if(legacyMode(s)){const kind=s.cfg.kind==='archive'?'archive':s.cfg.kind;void m1LoadTerminalPage(kind);return;}
+  if(append&&!s.cursor)return;if(!append){s.rows.clear();s.cursor=null;s.results.replaceChildren();}s.more.disabled=true;s.notice.textContent='Loading saved records…';
+  try{const params=new URLSearchParams({kind:s.cfg.kind,status:s.tab,mode:s.mode.value,q:s.q.value.trim(),network:s.network.value,from:s.from.value,to:s.to.value});if(append)params.set('cursor',s.cursor);const answer=await read('/api/admin/records?'+params,s.controller.signal);if(sequence!==s.sequence||consoleCurrentPage!==page)return;for(const r of answer.items)s.rows.set(r.source+':'+r.id,r);s.cursor=answer.nextCursor;s.results.replaceChildren(table([...s.rows.values()]));s.more.hidden=!s.cursor;s.notice.textContent=`${s.rows.size} loaded. This request inspected ${answer.scanned} records (maximum 60). Document order; Load more continues the selected filters.`;if(page==='withdrawals'&&s.tab==='completed')s.notice.textContent+=' Verified payout completion is not enabled yet; approval alone is excluded.';
+  }catch(e){if(e.name!=='AbortError'&&sequence===s.sequence)s.notice.textContent=errorText(e);}finally{if(sequence===s.sequence)s.more.disabled=false;}
+ }
+ for(const[page,cfg]of Object.entries(config))setupList(page,cfg);
+ // Tracking searches every source once, with independent 20-record pagination.
+ const tracking=document.getElementById('section-tracking');tracking.replaceChildren();delete tracking.dataset.consoleStatus;
+ const searchForm=node('form',{class:'r3-filters r3-card'}),searchMode=select([['order','Order ID'],['uid','UID'],['hash','Transaction hash']]),searchKey=input('text','Enter exact Order ID, UID or hash'),searchButton=node('button',{type:'submit',class:'r3-button'},'Track order'),lookupNotice=node('p',{class:'r3-notice',role:'status'}),lookupResults=node('div');searchForm.append(searchMode,searchKey,searchButton);tracking.append(searchForm,lookupNotice,lookupResults);lookupNotice.textContent='Search Transactions, NFT History and the P2P Ledger. Each source shows up to 20 records.';
+ const lookupGroups=new Map();let savedLookup=null;
+ searchForm.addEventListener('submit',e=>{e.preventDefault();savedLookup={mode:searchMode.value,key:searchKey.value.trim()};lookupGroups.clear();lookupResults.replaceChildren();void lookup('all');});
+ async function lookup(source,cursor=null){if(!savedLookup?.key){lookupNotice.textContent='Enter an exact search value.';return;}lookupController?.abort();lookupController=new AbortController();const sequence=++lookupSequence;lookupNotice.textContent='Searching saved records…';
+  try{const p=new URLSearchParams({...savedLookup,source});if(cursor)p.set('cursor',cursor);const answer=await read('/api/admin/order-search?'+p,lookupController.signal);if(sequence!==lookupSequence||consoleCurrentPage!=='tracking')return;for(const group of answer.groups){const old=cursor?lookupGroups.get(group.source)?.items||[]:[];lookupGroups.set(group.source,{...group,items:[...new Map([...old,...group.items].map(r=>[r.id,r])).values()]});}lookupResults.replaceChildren();for(const group of lookupGroups.values()){const card=node('section',{class:'r3-card'});card.append(node('h3',{},titles[group.source]),table(group.items));if(group.nextCursor)card.append(button('Load more '+titles[group.source],()=>lookup(group.source,group.nextCursor)));lookupResults.append(card);}lookupNotice.textContent='Exact matches. Sources paginate independently. Open Details to inspect linked records and audit.';
+  }catch(e){if(e.name!=='AbortError'&&sequence===lookupSequence)lookupNotice.textContent=errorText(e);}
+ }
+ const dialog=node('dialog',{id:'adminRecordDetails',class:'r3-dialog','aria-labelledby':'r3-detail-title'}),header=node('div',{class:'r3-dialog-head'}),detailBody=node('div',{class:'r3-dialog-body'});header.append(node('h2',{id:'r3-detail-title'},'Order details'),button('Close',closeDetails));dialog.append(header,detailBody);document.body.append(dialog);
+ function closeDetails(){++detailSequence;detailController?.abort();currentRecord=null;if(dialog.open)dialog.close();}
+ dialog.addEventListener('cancel',e=>{e.preventDefault();closeDetails();});dialog.addEventListener('click',e=>{if(e.target===dialog)closeDetails();});dialog.addEventListener('close',()=>{if(!dialog.open){++detailSequence;detailController?.abort();currentRecord=null;}});
+ function grid(rows){const dl=node('dl',{class:'r3-detail-grid'});for(const[label,value]of rows){const cell=node('div');cell.append(node('dt',{},label),node('dd',{},show(value)));dl.append(cell);}return dl;}
+ async function openDetails(source,id){closeDetails();const sequence=++detailSequence,epoch=consolePageEpoch;currentRecord={source,id};detailController=new AbortController();detailBody.replaceChildren(node('p',{},'Loading saved record…'));dialog.showModal();
+  try{const answer=await read('/api/admin/record-detail?'+new URLSearchParams({source,id}),detailController.signal);if(sequence!==detailSequence||epoch!==consolePageEpoch||!dialog.open)return;renderDetails(answer);
+  }catch(e){if(e.name!=='AbortError'&&sequence===detailSequence&&dialog.open)detailBody.replaceChildren(node('p',{role:'alert'},errorText(e)));}
+ }
+ function section(title){const s=node('section',{class:'r3-detail-section'});s.append(node('h3',{},title));return s;}
+ function renderDetails(data){const r=data.record;detailBody.replaceChildren();const summary=section('Saved order record');summary.append(grid([['Order ID',r.orderId],['Record',titles[r.source]+' / '+r.id],['Name',r.name],['UID',r.uid],['Type',r.type],['Status',r.status],['Stored status',r.rawStatus],['Requested',when(r.requestedAt)],['Approved',when(r.approvedAt)],['Rejected',when(r.rejectedAt)],['Settled / payout time',when(r.settledAt)],['Actor',r.actor]]));detailBody.append(summary);
+  const finance=section('Saved financial values');finance.append(grid([['Amount',dollars(r.amount)],['Principal',dollars(r.principal)],['Profit',dollars(r.profit)],['Fee',dollars(r.fee)],['Net amount',dollars(r.net)],['Balance before',dollars(r.oldBalance)],['Balance after',dollars(r.newBalance)],['Snapshot source',r.balanceSource],['Saved fee rate',r.feeRate],['Saved fee version',r.feeVersion],['Refund state',r.refundState],['Refund destination',r.refundDestination],['Refunded at',when(r.refundedAt)],['Deposit wallet credit',dollars(r.depositCredit)],['Debt recovered',dollars(r.debtRecovered)],['Main ledger entry',r.ledgerEntry]]));detailBody.append(finance);
+  const chain=section('Transfer references');chain.append(grid([['Network',r.network],['Wallet / destination',r.wallet],['Saved transaction hash',r.hash],['Confirmations',r.confirmations],['Recorded block',r.blockNumber],['Deposit on-chain verification',r.onchainDepositVerified?'Recorded verified':'Not recorded'],['Sender',r.sender],['Receiver',r.receiver],['NFT ID',r.nftId],['Mint transaction',r.mintHash],['Last error',r.error],['Remarks',r.note]]));if(r.mintHash&&/^0x[0-9a-fA-F]{64}$/.test(r.mintHash)&&[56,'56'].includes(r.mintChain)){const a=node('a',{href:'https://bscscan.com/tx/'+r.mintHash,target:'_blank',rel:'noopener noreferrer'},'Mint Transaction ↗');chain.append(a);}chain.append(node('p',{class:'r3-notice'},'Mint references do not establish a user ownership transfer. Withdrawal approval is separate from blockchain payout.'));detailBody.append(chain);
+  for(const group of data.related){const s=section('Linked '+titles[group.source]);s.append(table(group.items));if(group.hasMore)s.append(node('p',{},'More linked records exist. Search this Order ID in Order Tracking to continue.'));detailBody.append(s);}
+  const audit=section('Admin audit timeline');for(const a of data.audit.audit)audit.append(grid([['Action',a.action],['Actor',a.name||a.actor],['Time',when(a.date)],['Details',a.details]]));for(const a of r.auditTrail||[])audit.append(grid([['Action',a.action],['Time',when(a.date)],['Note',a.note]]));if(!data.audit.audit.length&&!r.auditTrail?.length)audit.append(node('p',{},'Not recorded'));if(data.audit.hasMore)audit.append(node('p',{},'More audit entries exist; use Admin Audit Logs.'));detailBody.append(audit);
+  const email=section('Recorded email delivery');for(const j of data.email.email)email.append(grid([['Email type',j.kind],['State',j.state],['Attempts',j.attempts],['Created',when(j.created)],['Last update',when(j.updated)],['Last error',j.error]]));if(!data.email.email.length)email.append(node('p',{},'Not recorded'));detailBody.append(email);
+  const notes=section('Review notes');for(const n of data.notes.notes)notes.append(grid([['Review',n.action],['Note',n.note],['Actor',n.actor],['Time',when(n.date)]]));if(data.notes.hasMore)notes.append(node('p',{},'More review notes are retained.'));const form=node('form',{class:'r3-review'}),action=select([['note','Add review note'],['resolved','Mark issue resolved']]),note=node('textarea',{maxlength:'2000',rows:'3',required:'','aria-label':'Review note',placeholder:'Describe what was checked or resolved.'}),submit=node('button',{type:'submit',class:'r3-button'},'Save review'),message=node('p',{class:'r3-notice',role:'status'});form.append(action,note,submit,message);notes.append(node('p',{class:'r3-notice'},'Review notes are audited. Marking an issue resolved does not change payment status, move funds or delete history.'),form);detailBody.append(notes);
+  form.addEventListener('submit',async e=>{e.preventDefault();if(!note.value.trim())return;const epoch=consolePageEpoch,sequence=detailSequence,actor=localStorage.getItem('uid'),payload={source:r.source,id:r.id,action:action.value,note:note.value.trim()},key='tcm_order_review_'+actor+'_'+r.source+'_'+r.id;let intent;
+   try{intent=JSON.parse(sessionStorage.getItem(key)||'null');if(intent&&JSON.stringify(intent.payload)!==JSON.stringify(payload))throw new Error('A saved review is awaiting confirmation. Retry its original note before submitting a different one.');if(!intent){intent={payload,requestId:crypto.randomUUID()};sessionStorage.setItem(key,JSON.stringify(intent));}submit.disabled=true;const response=await adminApiFetch('/api/admin/order-note',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...intent.payload,requestId:intent.requestId})}),answer=await response.json();if(!response.ok||!answer.success)throw new Error(answer.message||'Review could not be saved. Keep the original note and retry.');sessionStorage.removeItem(key);if(sequence===detailSequence&&epoch===consolePageEpoch&&dialog.open){message.textContent=answer.message;note.value='';}
+   }catch(error){if(sequence===detailSequence&&epoch===consolePageEpoch&&dialog.open)message.textContent=error.message;}finally{submit.disabled=false;}
+  });
+ }
+ window.adminRecordsEnter=page=>{if(states.has(page)){renderMode(states.get(page));void loadList(page);return true;}return false;};
+ document.addEventListener('tcm:admin-page-leave',()=>{for(const s of states.values()){s.sequence++;s.controller?.abort();}lookupSequence++;lookupController?.abort();closeDetails();});
+ window.addEventListener('load',()=>{if(adminAuthState.ready)window.adminRecordsEnter(consoleCurrentPage);});
+})();
+
+</script>
+</body></html>
