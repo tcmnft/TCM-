@@ -3174,8 +3174,8 @@
         .fuc-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 8px; }
         .fuc-title { font-size: 0.8rem; color: #f59e0b; text-transform: uppercase; font-weight: 900; letter-spacing: 1px; display: flex; align-items: center; gap: 6px; }
         .fuc-id { font-family: monospace; font-size: 0.65rem; color: var(--text-sub); background: rgba(0,0,0,0.3); padding: 3px 8px; border-radius: 6px; }
-        .fuc-body { display: flex; justify-content: space-between; align-items: center; }
-        .fuc-amt-box { display: flex; flex-direction: column; gap: 2px; }
+        .fuc-body { display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:8px; }
+        .fuc-amt-box { display: flex; flex-direction: column; gap: 2px; min-width:0; flex:1 1 140px; }
         .fuc-amt { font-size: 1.4rem; font-weight: 900; color: #ffffff; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
         .fuc-roi { font-size: 0.75rem; color: var(--success); font-weight: 700; }
         .fuc-timer-box { background: rgba(0,0,0,0.4); border: 1px solid rgba(245, 158, 11, 0.2); padding: 8px 12px; border-radius: 10px; text-align: right; min-width: 120px; }
@@ -3731,6 +3731,56 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 #accountDeleteModal{top:var(--del-visible-top,0px)!important;bottom:auto!important;height:var(--del-visible-height,100dvh)!important;box-sizing:border-box;padding:12px!important;overflow:hidden;align-items:center!important;justify-content:center!important}#accountDeleteModal>.modal-box{position:relative;animation:none!important;transform:none!important;width:100%!important;max-width:360px!important;height:min(560px,calc(var(--del-visible-height,100dvh) - 24px));max-height:calc(var(--del-visible-height,100dvh) - 24px)!important;min-height:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto!important;overscroll-behavior:contain;padding:16px!important;text-align:left;scroll-padding:14px}#accountDeleteModal>.modal-box>h2{font-size:16px!important;padding-right:26px}#deleteModalClose{position:sticky;top:0;float:right;margin:0 0 -32px 0;z-index:2;min-width:32px;min-height:32px;border:0;border-radius:8px;color:var(--text-main,#e2e8f0);background:var(--bg-main,#152235);cursor:pointer;font-size:21px;line-height:1}#accountDeleteModal .deletion-clearance{padding:10px;margin-bottom:10px}#accountDeleteModal .deletion-clearance>strong{font-size:12px}#accountDeleteModal #deleteClearanceSummary{font-size:11px;line-height:1.5;margin:6px 0}#accountDeleteModal #deleteClearanceAccount{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;margin:7px 0}#accountDeleteModal #deleteClearanceAccount>div{border:1px solid #64748b33;border-radius:8px;padding:6px;min-width:0;overflow-wrap:anywhere;font-size:11px}#accountDeleteModal #deleteClearanceAccount strong{display:block;font-size:10px;font-weight:500;color:inherit;opacity:.8}#accountDeleteModal #deleteClearanceRows{max-height:160px;overflow:auto;margin:6px 0}#accountDeleteModal #deleteClearanceRows li{padding:7px 0}#accountDeleteModal .deletion-clearance-heading{gap:4px;font-size:11px}#accountDeleteModal #deleteClearanceRows p{font-size:10px;line-height:1.5}#accountDeleteModal #deleteClearanceTime{font-size:9px;margin:6px 0}#accountDeleteModal #btnRefreshDeleteClearance{margin-top:3px;padding:5px 9px;font-size:10px}#accountDeleteModal #deleteConfirmationWidget{margin-top:0;min-height:52px;padding:10px!important}#accountDeleteModal #deleteVerificationHelp{font-size:11px;line-height:1.5;color:var(--text-sub,#a2b3c8);margin:7px 0;max-height:66px;overflow:auto;overflow-wrap:anywhere}#accountDeleteModal #deleteVerificationHelp:empty{display:none}#accountDeleteModal #deleteEmailOTP,#accountDeleteModal #delete2FACode{font-size:16px!important;min-height:42px;scroll-margin:14px}#accountDeleteModal #btnGetDeleteOTP{min-height:42px}#accountDeleteModal #btnConfirmDelete{font-size:12px}#accountDeleteModal details>summary{font-size:11px}#accountDeleteModal .deletion-clearance-badge{font-size:10px}#accountDeleteModal #deleteTurnstileContainer{max-width:100%;overflow:hidden}@media(max-height:430px){#accountDeleteModal{padding:6px!important}#accountDeleteModal>.modal-box{height:calc(var(--del-visible-height,100dvh) - 12px);max-height:calc(var(--del-visible-height,100dvh) - 12px)!important;padding:12px!important}#accountDeleteModal #deleteClearanceRows{max-height:115px}}
 
 </style>
+<style id="announcement-visibility-r41">
+/* Announcement R4.1: paired surfaces/text in both themes; scoped to this inbox and popup. */
+#messageModal,.ann-popup{--ann-surface:#ffffff;--ann-card:#f8fafc;--ann-text:#17243a;--ann-muted:#475569;--ann-border:#cbd5e1;--ann-accent:#087c91;--ann-unread:#eaf7fb;--ann-button:#e8f3f8;--ann-button-text:#15516c;--ann-danger:#a91d39}
+[data-theme="dark"] #messageModal,[data-theme="dark"] .ann-popup{--ann-surface:#111827;--ann-card:#182235;--ann-text:#f1f5f9;--ann-muted:#b3c2d5;--ann-border:#40516a;--ann-accent:#67e8f9;--ann-unread:#152f40;--ann-button:#203b50;--ann-button-text:#d7f1ff;--ann-danger:#fda4af}
+#messageModal{box-sizing:border-box;padding:14px;overflow:hidden}
+#messageModal .msg-modal-box{width:100%;max-width:560px;max-height:calc(100dvh - 28px);min-height:0;padding:20px;background:var(--ann-surface);border:1px solid var(--ann-border);color:var(--ann-text);box-shadow:0 24px 70px #0007;overflow:hidden;transition:transform .2s ease}
+#messageModal .msg-header{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;flex:0 0 auto;align-items:center;border-color:var(--ann-border);margin-bottom:12px;padding-bottom:12px}
+#messageModal .msg-header>div{display:contents!important}
+#messageModal .msg-header h3{grid-column:1;grid-row:1;min-width:0;color:var(--ann-text);font-size:17px;overflow-wrap:anywhere}
+#messageModal .msg-header h3 i{color:var(--ann-accent)!important}
+#messageModal .btn-clear-all{grid-column:1/-1;grid-row:2;justify-self:start;min-height:34px;padding:7px 10px;color:var(--ann-button-text);background:var(--ann-button);border-color:var(--ann-border);font-size:11px;box-shadow:none;transition:none}
+#messageModal .ann-close{grid-column:2;grid-row:1;width:34px;height:34px;display:grid;place-items:center;border:1px solid var(--ann-border);border-radius:10px;background:var(--ann-card);color:var(--ann-text);font-size:23px;line-height:1;cursor:pointer}
+#messageModal .msg-body{min-height:0;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;gap:12px;padding:0 3px 0 0}
+#messageModal .ann-list{min-width:0;flex:0 0 auto}
+#messageModal .ann-card{padding:14px;border:1px solid var(--ann-border);border-left:3px solid var(--ann-accent);border-radius:12px;background:var(--ann-card);color:var(--ann-text);overflow-wrap:anywhere}
+#messageModal .ann-unread{background:var(--ann-unread)}
+#messageModal .ann-title,#messageModal .ann-card h3,#messageModal .ann-card p{color:var(--ann-text);font-size:14px;line-height:1.65;overflow-wrap:anywhere;white-space:pre-wrap;max-width:100%}
+#messageModal .ann-title{cursor:pointer;border-radius:4px}
+#messageModal .ann-card small,#messageModal .ann-notice,#messageModal .ann-empty{color:var(--ann-muted);font-size:12px;line-height:1.6}
+#messageModal .ann-notice{margin:0}
+#messageModal .ann-button,.ann-popup .ann-button{background:var(--ann-button);color:var(--ann-button-text);border-color:var(--ann-border);min-height:36px;white-space:normal}
+#messageModal button:focus-visible,.ann-popup button:focus-visible{outline:2px solid var(--ann-accent);outline-offset:3px}
+.ann-popup{box-sizing:border-box;background:var(--ann-surface);color:var(--ann-text);border-color:var(--ann-border);max-height:calc(100dvh - 105px);overflow-y:auto}
+.ann-popup .ann-popup-head{color:var(--ann-accent)}
+.ann-popup .ann-popup-close{color:var(--ann-muted)}
+.ann-popup strong,.ann-popup>p{color:var(--ann-text)}
+@media(max-width:480px){#messageModal{padding:12px}#messageModal .msg-modal-box{padding:16px;max-height:calc(100dvh - 24px)}#messageModal .msg-header h3{font-size:16px}}
+@media(max-height:430px){#messageModal{padding:6px}#messageModal .msg-modal-box{max-height:calc(100dvh - 12px);padding:12px}}
+
+</style>
+<style id="staking-sync-r2-style">
+/* Staking R2: readable contracts in both themes; no financial calculations. */
+#activeStakesList{--stk-surface:#ffffff;--stk-text:#17243a;--stk-muted:#475569;--stk-accent:#087c91;--stk-good:#08784e;--stk-warn:#925500}
+[data-theme="dark"] #activeStakesList{--stk-surface:#152033;--stk-text:#f1f5f9;--stk-muted:#b3c2d5;--stk-accent:#67e8f9;--stk-good:#6ee7b7;--stk-warn:#fcd34d}
+#activeStakesList>[data-stake-card]{background:var(--stk-surface)!important;color:var(--stk-text);border-color:var(--border)!important}
+#activeStakesList h4,#activeStakesList .fuc-amt{color:var(--stk-text)!important}
+#activeStakesList .fuc-id,#activeStakesList [style*="color: var(--text-sub)"]{color:var(--stk-muted)!important;opacity:1}
+#activeStakesList .atm-live-timer{color:var(--stk-accent)!important}
+#activeStakesList [style*="color: var(--success)"],#activeStakesList .fuc-title{color:var(--stk-good)!important}
+#activeStakesList .fuc-roi{color:var(--stk-warn)!important}
+#activeStakesList .fuc-id{max-width:100%;overflow-wrap:anywhere;white-space:normal}
+#rankSyncStatus{font-size:10px;line-height:1.4;color:var(--text-sub);max-width:180px}
+#levelUpModal .graph-container[hidden],#levelUpModal .bar[hidden]{display:none!important}
+#levelUpModal .graph-container{height:100px;padding-top:18px;margin:14px 0 28px}
+#levelUpModal .bar{width:58px;min-height:2px;transition:height .25s ease}
+#levelUpModal .bar span{width:100px;left:50%;transform:translateX(-50%);top:auto;bottom:-22px;font-size:10px;opacity:1;transition:none}
+#levelUpModal .lv-box{max-height:calc(100dvh - 24px);overflow-y:auto;box-sizing:border-box}
+
+</style>
+<style id="performance-visibility-style">html[data-performance-hidden] *,html[data-performance-hidden] *::before,html[data-performance-hidden] *::after{animation-play-state:paused!important}</style>
 </head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
@@ -3807,7 +3857,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
             <h3><i class="fas fa-bell" style="color:var(--primary);"></i> Announcements</h3>
             <div style="display:flex; gap:10px; align-items:center;">
                 <button class="btn-clear-all" onclick="clearAllMessages()"><i class="fas fa-check-double"></i> Mark loaded read</button>
-                <i class="fas fa-times" style="color:var(--text-sub); cursor:pointer; font-size:1.2rem;" onclick="closeMessageModal()"></i>
+                <button type="button" class="ann-close" aria-label="Close announcements" onclick="closeMessageModal()">&times;</button>
             </div>
         </div>
         <div class="msg-body" id="msgBodyContent"></div>
@@ -4243,7 +4293,8 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
     #mainLedgerModal .t8-scroll { max-height:55vh; min-height:160px; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; }
     #mainLedgerModal .t8-row { padding:14px 10px; margin-bottom:10px; border:1px solid var(--border); border-radius:12px; background:var(--bg-main); text-align:left; }
     #mainLedgerModal .t8-title { display:flex; justify-content:space-between; gap:10px; font-size:.85rem; font-weight:700; }
-    #mainLedgerModal .t8-time { color:var(--text-sub); font-size:.68rem; margin:6px 0 12px; }
+    #mainLedgerModal .t8-title > span { min-width:0; overflow-wrap:anywhere; }
+    #mainLedgerModal .t8-time { color:var(--text-sub); font-size:.68rem; margin:6px 0 12px; max-width:100%; min-width:0; white-space:normal; overflow-wrap:anywhere; line-height:1.5; }
     #mainLedgerModal .t8-balances { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; font-size:.78rem; }
     #mainLedgerModal .t8-balances small { display:block; color:var(--text-sub); font-size:.65rem; margin-bottom:4px; }
     #mainLedgerModal .t8-balances strong { overflow-wrap:anywhere; }
@@ -4921,7 +4972,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                         </div>
                         <div class="level-points-capsule">
                             <div class="capsule-level-section">
-                                <span id="uLevelText">Level 0</span>
+                                <span id="uLevelText">Level 0</span><small id="rankSyncStatus" role="status" hidden></small>
                                 <div class="capsule-progress-track">
                                     <div id="uLevelBarFill" style="width: 15%;"></div>
                                 </div>
@@ -5792,19 +5843,45 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
         }
     };
 
-    window.formatTxDate = t => {
-       if (!t) return "N/A";
-       let dObj = new Date(t);
-       if (isNaN(dObj)) return "N/A";
-       let d = dObj.getDate().toString().padStart(2,'0'),
-           m = (dObj.getMonth()+1).toString().padStart(2,'0'),
-           y = dObj.getFullYear(),
-           hrs = dObj.getHours(),
-           mins = dObj.getMinutes().toString().padStart(2,'0'),
-           ampm = hrs >= 12 ? 'PM' : 'AM';
-       hrs = hrs % 12; hrs = hrs ? hrs : 12;
-       return `${d}-${m}-${y} ${hrs}:${mins} ${ampm}`;
-    };
+    // DATE DISPLAY START: display only; never use this text for storage, IDs or comparisons.
+    (() => {
+        const formats = new Map();
+        window.formatDisplayDate = (value, options = {}) => {
+            const fallback = options.fallback ?? 'Not recorded';
+            if (value === null || value === undefined || value === '' || typeof value === 'boolean') return fallback;
+            let raw = value;
+            try {
+                if (typeof raw === 'object' && !(raw instanceof Date)) {
+                    if (typeof raw.toDate === 'function') raw = raw.toDate();
+                    else if (Number.isFinite(raw.seconds ?? raw._seconds)) {
+                        raw = (raw.seconds ?? raw._seconds) * 1000 + Math.floor((raw.nanoseconds ?? raw._nanoseconds ?? 0) / 1000000);
+                    } else return fallback;
+                }
+                const date = raw instanceof Date ? raw : new Date(raw);
+                if (!Number.isFinite(date.getTime()) || date.getTime() === 0) return fallback;
+                const key = options.timeZone || 'local';
+                let formatter = formats.get(key);
+                if (!formatter) {
+                    formatter = new Intl.DateTimeFormat('en-GB-u-nu-latn', {
+                        ...(options.timeZone ? { timeZone: options.timeZone } : {}),
+                        day: '2-digit', month: '2-digit', year: 'numeric',
+                        hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true
+                    });
+                    formats.set(key, formatter);
+                }
+                const parts = Object.fromEntries(formatter.formatToParts(date).map(part => [part.type, part.value]));
+                const day = parts.day.padStart(2, '0'), month = parts.month.padStart(2, '0');
+                const dayFirst = `${day}-${month}-${parts.year.padStart(4, '0')}`;
+                if (options.dateOnly) return dayFirst;
+                const clock = `${Number(parts.hour)}:${parts.minute}${options.seconds ? ':' + parts.second : ''} ${parts.dayPeriod.toUpperCase()}`;
+                return dayFirst + ', ' + clock + (options.suffix || '');
+            } catch (_) { return fallback; }
+        };
+        // Keep the existing public entry point; all consumers share one implementation.
+        window.formatTxDate = value => window.formatDisplayDate(value, { fallback: 'N/A' });
+    })();
+    // DATE DISPLAY END
+
 
     /* Hyper-Scale Unique Order ID Generator */
     window.generateOrderId = (prefix = 'TX') => {
@@ -5879,29 +5956,23 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
         if(btn) { btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; btn.disabled = true; }
 
         const animateClaimAmount = (targetAmount) => {
-            const popAmt = document.getElementById('popClaimAmt');
-            if (!popAmt) return;
-
-            const target = parseFloat(targetAmount || 0);
-            const duration = 1500;
-            const startedAt = performance.now();
-
-            const tick = (now) => {
-                const progress = Math.min((now - startedAt) / duration, 1);
-                const eased = 1 - Math.pow(1 - progress, 4);
-                const current = target * eased;
-
-                popAmt.innerText = current.toFixed(2) + " ₮";
-
-                if (progress < 1) {
-                    requestAnimationFrame(tick);
-                } else {
-                    popAmt.innerText = target.toFixed(2) + " ₮";
-                }
+            const popAmt=document.getElementById('popClaimAmt');if(!popAmt)return;
+            const target=parseFloat(targetAmount||0),duration=1500,startedAt=performance.now();
+            let frame=0,ended=false;
+            const cleanup=()=>{cancelAnimationFrame(frame);frame=0;document.removeEventListener('visibilitychange',onVisibility);window.removeEventListener('pagehide',finish);};
+            const finish=()=>{if(ended)return;ended=true;cleanup();if(popAmt.isConnected)popAmt.innerText=target.toFixed(2)+' \u20ae';};
+            const onVisibility=()=>{if(document.hidden)finish();};
+            const tick=now=>{
+                frame=0;if(ended)return;
+                if(document.hidden||!popAmt.isConnected||document.getElementById('claimPopup')?.style.display==='none'){finish();return;}
+                const progress=Math.min((now-startedAt)/duration,1),eased=1-Math.pow(1-progress,4);
+                popAmt.innerText=(target*eased).toFixed(2)+' \u20ae';
+                if(progress<1)frame=requestAnimationFrame(tick);else finish();
             };
-
-            popAmt.innerText = "0.00 ₮";
-            requestAnimationFrame(tick);
+            if(document.hidden){finish();return;}
+            document.addEventListener('visibilitychange',onVisibility);
+            window.addEventListener('pagehide',finish);
+            popAmt.innerText='0.00 \u20ae';frame=requestAnimationFrame(tick);
         };
 
         try {
@@ -6056,7 +6127,10 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             let autoBtn = document.querySelector(`[onclick*="('${targetId}'"]`);
             if(autoBtn) autoBtn.classList.add('active');
         }
-        // Keep the current page position; placeholder links must not jump to the top.
+        // Bottom navigation always starts the selected page at the top.
+        if (['stake', 'earn', 'reserve', 'assets', 'my'].includes(targetId)) {
+            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+        }
     };
     window.switchPageView = window.switchTab;
     window.showSection = window.switchTab;
@@ -6451,7 +6525,7 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
         6: { bal: 20000, pts: 600 }
     };
 
-    window.showLevelChange = (newLevel, isUpgrade = true) => {
+    window.showLevelChange = (newLevel, isUpgrade = true, previousLevel = null) => {
         const modal = document.getElementById('levelUpModal');
         if (!modal) return;
 
@@ -6475,15 +6549,26 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             if(lvMsg) { lvMsg.innerText = "⚠️ Maintain higher wallet balance to level up!"; lvMsg.style.color = "var(--error)"; }
         }
 
-        modal.style.display = 'flex';
-        setTimeout(() => {
+        const graph = modal.querySelector('.graph-container');
+        const knownPrevious = Number.isInteger(previousLevel) && previousLevel >= 0 && previousLevel <= 6;
+        if (graph) graph.hidden = !knownPrevious;
+        document.getElementById('bar2').hidden = true;
+        for (const [id, rank, label] of [['bar1', previousLevel, 'Previous'], ['bar3', newLevel, 'Current']]) {
+            const bar = document.getElementById(id);if (!bar) continue;
+            bar.classList.remove('active');bar.style.setProperty('--h', (Math.max(0, Number(rank) || 0) / 6 * 100) + '%');
+            const caption = bar.querySelector('span');if (caption) caption.textContent = label + ': ' + (rank ?? 'Not recorded');
+        }
+        window.openModal('levelUpModal');
+        clearTimeout(window.rankChartTimer);
+        window.rankChartTimer = setTimeout(() => {
+            window.rankChartTimer = null;
+            if (modal.style.display === 'none') return;
             document.getElementById('bar1')?.classList.add('active');
-            document.getElementById('bar2')?.classList.add('active');
             document.getElementById('bar3')?.classList.add('active');
-        }, 300);
+        }, 30);
     };
 
-    window.closeLevelModal = () => { window.closeModal('levelUpModal'); };
+    window.closeLevelModal = () => { clearTimeout(window.rankChartTimer);window.rankChartTimer = null;window.closeModal('levelUpModal'); };
 
     /* Background Automation Sync */
     // MEMO: TCM-DASH-RANK-R1 | 2026-10-10 | Asia/Kolkata
@@ -7016,49 +7101,68 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
 
     /* JS 09 | RECENT HISTORY RENDER ENGINE | END */
 /* JS 10 | GLOBAL PENDING TIMER ENGINE | START */
-    if (window.liveTimerInterval) window.MasterClockDispatcher.unregister(window.liveTimerInterval);
-    if (window.recentHistoryInterval) window.MasterClockDispatcher.unregister(window.recentHistoryInterval);
-
-    window.liveTimerInterval = window.MasterClockDispatcher.register('liveTimerInterval', () => {
-        document.querySelectorAll('.live-timer').forEach(el => {
-            let startTime = parseInt(el.getAttribute('data-time') || el.getAttribute('data-timestamp'));
-            if (!startTime || isNaN(startTime)) return;
-
-            let now = new Date().getTime();
-            let elapsedMs = now - startTime;
-            if (elapsedMs < 0) elapsedMs = 0;
-
-            let isWithdraw = false;
-            let txType = el.getAttribute('data-type');
-            let parentContainer = el.closest('.tx-item') || el.closest('div');
-
-            if ((txType && txType.includes('Withdraw')) || (parentContainer && parentContainer.innerText.includes('Withdraw'))) {
-                isWithdraw = true;
+/* PENDING TRANSACTION CLOCK START */
+(() => {
+    'use strict';
+    const selector = '.live-timer[data-type], .pending-timer[data-type]';
+    const nodes = new WeakMap();
+    let observer = null;
+    const allowed = () => !document.hidden && !window.dashboardSession?.closed && !window.dashboardSession?.blocked;
+    function render(now) {
+        if (!allowed()) return;
+        if (!Number.isFinite(now)) now = Date.now();
+        document.querySelectorAll(selector).forEach(el => {
+            const type = String(el.getAttribute('data-type') || '').trim().toLowerCase();
+            if (type !== 'deposit' && type !== 'withdraw') return;
+            const stamp = Number(el.getAttribute('data-time') || el.getAttribute('data-timestamp'));
+            const valid = Number.isSafeInteger(stamp) && stamp > 0;
+            const elapsed = valid ? Math.max(0, now - stamp) : 0;
+            const remaining = 96 * 60 * 60 * 1000 - elapsed;
+            const expired = valid && type === 'withdraw' && remaining <= 0;
+            const seconds = Math.floor((type === 'withdraw' ? Math.max(0, remaining) : elapsed) / 1000);
+            const parts = [Math.floor(seconds / 3600), Math.floor(seconds % 3600 / 60), seconds % 60]
+                .map(value => String(value).padStart(2, '0'));
+            const value = valid ? parts[0] + 'h ' + parts[1] + 'm ' + parts[2] + 's' : 'Time unavailable';
+            let state = nodes.get(el);
+            if (!state || state.icon.parentNode !== el || state.text.parentNode !== el) {
+                const icon = el.querySelector('i') || document.createElement('i');
+                icon.className = 'far fa-clock gentle-pulse';
+                if (!icon.style.marginRight) icon.style.marginRight = '4px';
+                const text = document.createTextNode(' ' + value);
+                state = { icon, text, baseColor: el.style.color, expired: null };
+                el.replaceChildren(icon, text);
+                nodes.set(el, state);
             }
-
-            if (isWithdraw) {
-                let maxTimeMs = 96 * 60 * 60 * 1000;
-                let remainingMs = maxTimeMs - elapsedMs;
-                if (remainingMs <= 0) remainingMs = 0;
-
-                let diffSec = Math.floor(remainingMs / 1000);
-                let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
-                let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
-                let s = (diffSec % 60).toString().padStart(2, '0');
-
-                el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--error);"></i> ${h}:${m}:${s}`;
-                if(remainingMs <= 0) el.style.color = "var(--error)";
-
-            } else {
-                let diffSec = Math.floor(elapsedMs / 1000);
-                let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
-                let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
-                let s = (diffSec % 60).toString().padStart(2, '0');
-
-                el.innerHTML = `<i class="fas fa-hourglass-half fa-spin" style="font-size: 0.65rem; color: var(--warning);"></i> ${h}:${m}:${s}`;
+            if (state.text.nodeValue !== ' ' + value) state.text.nodeValue = ' ' + value;
+            if (state.expired !== expired) {
+                state.expired = expired;
+                state.icon.classList.toggle('gentle-pulse', !expired);
+                el.style.color = expired ? 'var(--error)' : state.baseColor;
             }
         });
-    }, 1000);
+    }
+    function observe() {
+        observer?.disconnect();
+        const box = document.getElementById('txHistoryBox');
+        if (!box) return;
+        observer = new MutationObserver(records => {
+            if (!allowed()) return;
+            if (records.some(record => [...record.addedNodes].some(node =>
+                node.nodeType === 1 && (node.matches(selector) || node.querySelector(selector))))) render(Date.now());
+        });
+        observer.observe(box, { childList: true, subtree: true });
+    }
+    // Remove former subscriber identities; only this subscriber owns pending transaction text.
+    for (const id of ['liveTimerInterval', 'recentHistoryInterval', 'globalPendingClock', 'pendingTransactionClock']) {
+        window.MasterClockDispatcher.unregister(id);
+    }
+    window.pendingTransactionClock = window.MasterClockDispatcher.register('pendingTransactionClock', render, 1000);
+    observe();
+    render(Date.now());
+    window.addEventListener('pagehide', () => observer?.disconnect());
+    window.addEventListener('pageshow', () => { observe();render(Date.now()); });
+})();
+/* PENDING TRANSACTION CLOCK END */
 
  // =================================================================================
  // 🚀 INITIALIZATION (HYBRID STORAGE & SWR ARCHITECTURE)
@@ -7458,7 +7562,7 @@ window.mergeDashboardHistory = (records, replace = false) => {
         const badge = document.createElement('span'); badge.textContent = row.Status || 'Recorded';
         title.append(name, badge);
         const time = document.createElement('div'); time.className = 't8-time';
-        const date = new Date(row.Date); time.textContent = Number.isFinite(date.getTime()) ? date.toLocaleString() : 'Time not recorded';
+        time.textContent = window.formatDisplayDate(row.Date, { seconds:true, fallback:'Time not recorded' });
         const grid = document.createElement('div'); grid.className = 't8-balances';
         const exact = row.Audit_Version === 2 || row.Balance_Snapshot_Version === 2;
         const before = exact ? BigInt(row.Balance_Old_micro) : micros(row.Balance_Old);
@@ -7840,9 +7944,11 @@ window.applyDashboardSnapshot = data => {
         Promise.resolve(window.loadTodaysHistoryFromAPI(false))
             .catch(() => console.warn('Today history refresh is pending.'));
     }
+    const rankStatus = document.getElementById('rankSyncStatus');
+    if (rankStatus) { rankStatus.hidden = !window.dashboardSync.rankVerificationPending;rankStatus.textContent = rankStatus.hidden ? '' : 'Rank verification pending. Refresh to retry.'; }
     window.dashboardSync.rankSnapshot = { uid, rank };
     if (oldRank !== null && rank !== oldRank && typeof window.showLevelChange === 'function') {
-        window.showLevelChange(rank, rank > oldRank);
+        window.showLevelChange(rank, rank > oldRank, oldRank);
     }
     const badge = document.getElementById('dashSendIcon');
     if (badge) badge.classList.toggle('dash-receive-pulse', !!user.hasUnreadP2P);
@@ -7863,18 +7969,36 @@ window.syncDashboardState = (followUp = false) => {
         if (state.pending > 0) await new Promise(resolve => state.waiters.push(resolve));
         const uid = localStorage.getItem('uid');
         if (!uid) return { success: false, message: 'Sign in required.' };
-        // Verify once on initialization, after local financial activity, or after a five-minute gap.
-        // Capture the read version AFTER this separate operation, never before it.
+        // Server-only rank calculation; failed attempts must not be cached as verified.
+        const rankOwner = { uid, token: localStorage.getItem('token'), epoch: window.dashboardSession.epoch };
+        const rankCurrent = () => rankOwner.uid === localStorage.getItem('uid') &&
+            rankOwner.token === localStorage.getItem('token') && rankOwner.epoch === window.dashboardSession.epoch &&
+            !window.dashboardSession.closed && !window.dashboardSession.blocked;
         if (!followUp && typeof window.evaluateLevelAutomation === 'function' &&
-            (state.lastRankVersion !== state.version || Date.now() >= (state.nextRankCheckAt || 0))) {
-            state.nextRankCheckAt = Date.now() + 300000;
-            state.lastRankVersion = state.version;
-            await window.evaluateLevelAutomation();
+            Date.now() >= (state.rankRetryAt || 0) &&
+            (state.lastRankVersion !== state.version ||
+             state.lastRankInvalidationVersion !== (state.invalidationVersion || 0) ||
+             Date.now() >= (state.nextRankCheckAt || 0))) {
+            const checkedVersion = state.version, checkedInvalidation = state.invalidationVersion || 0;
+            let checked;
+            try { checked = await window.evaluateLevelAutomation(); } catch (_) { checked = { success: false }; }
+            if (!rankCurrent()) return { success: false, status: 409, message: 'Session changed.' };
+            if (checked?.success) {
+                state.lastRankVersion = checkedVersion;state.lastRankInvalidationVersion = checkedInvalidation;
+                state.nextRankCheckAt = Date.now() + 300000;
+                state.freshVersion = (state.freshVersion || 0) + 1;
+                state.rankRetryAt = 0;state.rankVerificationPending = false;
+            } else {
+                state.rankRetryAt = Date.now() + 10000;state.rankVerificationPending = true;
+            }
         }
+        if (!rankCurrent()) return { success: false, status: 409, message: 'Session changed.' };
         if (window.dashboardSession.closed || window.dashboardSession.blocked) {
             return { success: false, message: 'Session unavailable.' };
         }
         const version = state.version;
+        const freshVersion = state.freshVersion || 0;
+        const fresh = !state.wallet || freshVersion !== (state.appliedFreshVersion || 0);
         const invalidationVersion = state.invalidationVersion || 0;
         state.dirty = false;
         const epoch = window.dashboardSession.epoch;
@@ -7883,16 +8007,17 @@ window.syncDashboardState = (followUp = false) => {
         const hasHistory = Array.isArray(window.TX_CACHE) && window.TX_CACHE.some(row => row?.UID === uid);
         const knownCount = hasHistory && Number.isSafeInteger(counter) && counter >= 0 ? counter : -1;
         const result = await window.dashboardRequest('/user/init-data?uid=' + encodeURIComponent(uid) +
-            '&clientTxCount=' + knownCount);
+            '&clientTxCount=' + knownCount + (fresh ? '&fresh=1' : ''));
         if (epoch !== window.dashboardSession.epoch || window.dashboardSession.closed || window.dashboardSession.blocked) {
             return { success: false, status: 409, message: 'Session changed.' };
         }
-        if (version !== state.version || invalidationVersion !== (state.invalidationVersion || 0)) {
+        if (version !== state.version || invalidationVersion !== (state.invalidationVersion || 0) || freshVersion !== (state.freshVersion || 0)) {
             state.dirty = true;
             return { success: false, status: 409, message: 'Newer wallet activity is pending.' };
         }
         if (result.success) {
             window.applyDashboardSnapshot(result.data);
+            state.appliedFreshVersion = freshVersion;
             state.retryAt = 0;
         } else {
             state.dirty = false;
@@ -7910,7 +8035,7 @@ window.syncDashboardState = (followUp = false) => {
             state.followUpTimer = setTimeout(() => {
                 state.followUpTimer = null;
                 if (!document.hidden) window.syncDashboardState(true);
-            }, 5000);
+            }, 250);
         }
     });
     return state.promise;
@@ -7941,6 +8066,7 @@ window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
         }
     }
     // Refresh even when a transport timeout leaves the commit outcome uncertain.
+    state.freshVersion = (state.freshVersion || 0) + 1;
     const refresh = await window.syncDashboardState();
     if (!refresh.success) window.dashboardSession.verified = false;
     if (result.success && !refresh.success) {
@@ -7950,7 +8076,14 @@ window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
     return result;
 };
 
-window.fetchWalletData = () => window.syncDashboardState();
+window.fetchWalletData = (manual = false) => {
+    if (manual === true) {
+        window.dashboardSync.retryAt = 0;window.dashboardSync.rankRetryAt = 0;
+        window.dashboardSync.nextRankCheckAt = 0;
+        window.dashboardSync.freshVersion = (window.dashboardSync.freshVersion || 0) + 1;
+    }
+    return window.syncDashboardState();
+};
 window.syncDashboardData = () => window.syncDashboardState();
 window.addEventListener('storage', event => {
     if (event.key === 'token' || event.key === 'uid' || event.key === null) {
@@ -8270,13 +8403,7 @@ window.scheduleDashboardSocketReconnect = () => {
         const n = BigInt(value), fraction = (n % 1000000n).toString().padStart(6,'0').replace(/0+$/,'');
         return (n / 1000000n).toString() + '.' + (fraction || '00').padEnd(2,'0') + ' USDT';
     };
-    const stamp = value => {
-        if (value === null || value === undefined || value === '') return 'Not recorded';
-        let raw = value;
-        if (typeof raw === 'object') raw = (raw.seconds ?? raw._seconds) * 1000;
-        const d = new Date(raw);
-        return Number.isFinite(d.getTime()) ? d.toLocaleString('en-IN', {timeZone:'Asia/Kolkata', day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:true}) + ' IST' : 'Not recorded';
-    };
+    const stamp = value => window.formatDisplayDate(value, { timeZone:'Asia/Kolkata', suffix:' IST' });
     const art = value => {
         if (typeof value !== 'string' || !value) return '';
         if (/^ipfs:\/\/[A-Za-z0-9]+(?:\/[^\s]*)?$/.test(value)) value = 'https://gateway.pinata.cloud/ipfs/' + value.slice(7);
@@ -8789,7 +8916,7 @@ window.renderNFTBlockchainReference = raw => {
         <div>BSC Mainnet reference · Chain ID 56 · Token ${token}</div>
         <div>Contract: ${address}</div>
         <div>${raw.Verification_Status === 'Verified_Mainnet_Snapshot' && Number.isFinite(Date.parse(raw.Verified_At))
-            ? 'Mint and platform custody checked at ' + new Date(raw.Verified_At).toISOString()
+            ? 'Mint and platform custody checked at ' + window.formatDisplayDate(raw.Verified_At, {timeZone:'UTC',seconds:true,suffix:' UTC'})
             : 'Recorded reference only; mint and current custody not verified here.'}</div>
         <div>No on-chain user ownership transfer is established by this card.</div>
         <a href="https://bscscan.com/token/${address}?a=${token}" target="_blank" rel="noopener noreferrer">View token reference</a>
@@ -9970,59 +10097,7 @@ window.renderNFTBlockchainReference = raw => {
          }
      }
  }, 1000);
- // =================================================================================
- // ⏱️ THE GLOBAL PENDING TIMER ENGINE (96H Withdraw Countdown & Deposit Count-Up)
- // =================================================================================
- if (window.globalPendingClock) window.MasterClockDispatcher.unregister(window.globalPendingClock);
-
- window.globalPendingClock = window.MasterClockDispatcher.register('globalPendingClock', () => {
-     const pendingElements = document.querySelectorAll('.pending-timer, .live-timer, [data-timestamp], [data-time]');
-     const now = Date.now();
-
-     pendingElements.forEach(el => {
-         let txTime = parseInt(el.getAttribute('data-timestamp') || el.getAttribute('data-time'));
-         let txType = el.getAttribute('data-type') || '';
-         let parentContainer = el.closest('.tx-item') || el.closest('div');
-
-         let isWithdraw = false;
-         if ((txType && txType.includes('Withdraw')) || (parentContainer && parentContainer.innerText.includes('Withdraw'))) {
-             isWithdraw = true;
-         }
-
-         if (txTime && !isNaN(txTime)) {
-             let elapsedMs = now - txTime;
-             if (elapsedMs < 0) elapsedMs = 0;
-
-             if (isWithdraw) {
-                 const maxTimeMs = 345600000;
-                 let remainingMs = maxTimeMs - elapsedMs;
-
-                 if (remainingMs <= 0) {
-                     el.innerHTML = `<i class="far fa-clock" style="margin-right:5px;"></i> 00h 00m 00s`;
-                     el.style.color = "var(--error)";
-                     return;
-                 }
-
-                 let diffSec = Math.floor(remainingMs / 1000);
-                 let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
-                 let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
-                 let s = (diffSec % 60).toString().padStart(2, '0');
-
-                 // 🚀 FIX: Premium Gentle Pulse Clock (No Cheap Colors)
-                 el.innerHTML = `<i class="far fa-clock gentle-pulse" style="margin-right:5px;"></i> ${h}h ${m}m ${s}s`;
-
-             } else {
-                 let diffSec = Math.floor(elapsedMs / 1000);
-                 let h = Math.floor(diffSec / 3600).toString().padStart(2, '0');
-                 let m = Math.floor((diffSec % 3600) / 60).toString().padStart(2, '0');
-                 let s = (diffSec % 60).toString().padStart(2, '0');
-
-                 // 🚀 FIX: Premium Gentle Pulse Clock for Deposit
-                 el.innerHTML = `<i class="far fa-clock gentle-pulse" style="margin-right:5px;"></i> ${h}h ${m}m ${s}s`;
-             }
-         }
-     });
- }, 1000);
+ // Pending transaction text is owned exclusively by the Master Clock subscriber in JS 10.
 /* JS 16 | FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer) | END */
 /* JS 17 | P2P TRANSFER & LOOKUP ENGINE | START */
     window.currentWdCount = 0;
@@ -11395,143 +11470,135 @@ window.renderNFTBlockchainReference = raw => {
 
     /* JS 20 | SMART AVATAR UPLOAD & COMPRESSION | END */
 /* JS 21 | GLOBAL LIVE TRANSACTION FEED | START */
-    window.globalLiveTransactions = [];
-    window.currentLiveTxIndex = 0;
-    window.liveFeedInterval = null;
-
-    window.initLiveGlobalFeed = async () => {
-        const feedContainer = document.getElementById('liveFeedContainer');
-        if(!feedContainer) return;
-
-        // 🔥 Inline styles removed! CSS will handle Light/Dark themes dynamically.
-
-        const fetchInitialFeedData = async () => {
-            const result = await window.fetchAPI('/feed/global');
-            if (result.success) {
-                window.globalLiveTransactions = result.data;
-                if(window.globalLiveTransactions.length > 0) {
-                    window.startLiveFeedCarousel();
-                } else {
-                    feedContainer.innerHTML = `<div style="padding: 0 15px; color:var(--text-sub); font-size:0.8rem; text-align:center; display: flex; align-items: center; justify-content: center; height: 100%;">No recent global transactions.</div>`;
-                }
-            }
+/* PERFORMANCE FEED START */
+(() => {
+    'use strict';
+    const job = 'liveFeedInterval';
+    const fallback = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+";
+    let owner = '', epoch = 0, flight = null, lastFetch = 0, socket = null, refs = null;
+    let timer = null, frame = 0, signature = '', copyValue = '', arrivals = [];
+    window.globalLiveTransactions = [];window.currentLiveTxIndex = 0;window.liveFeedInterval = null;
+    const identity = () => JSON.stringify([localStorage.getItem('uid'), localStorage.getItem('token'), window.dashboardSession?.epoch || 0]);
+    const allowed = () => !document.hidden && !!localStorage.getItem('uid') && !!localStorage.getItem('token') &&
+        !window.dashboardSession?.closed && !window.dashboardSession?.blocked;
+    function cancelTransition() {
+        clearTimeout(timer);timer = null;cancelAnimationFrame(frame);frame = 0;
+        if (refs) { refs.track.style.transform = 'translateY(0)';refs.track.style.opacity = '1'; }
+    }
+    function stop() { cancelTransition();window.MasterClockDispatcher.unregister(job);window.liveFeedInterval = null; }
+    function reset() { ++epoch;flight = null;lastFetch = 0;arrivals = [];signature = '';stop();window.globalLiveTransactions = [];window.currentLiveTxIndex = 0; }
+    function ensure() {
+        const container = document.getElementById('liveFeedContainer');if (!container) return null;
+        if (refs?.track.isConnected && refs.track.parentElement.parentElement === container) return refs;
+        container.innerHTML = '<div class="feed-track-wrapper" style="width:100%;height:100%;position:relative;overflow:hidden"><div class="feed-track" style="display:flex;align-items:center;width:100%;height:100%;transition:all .4s cubic-bezier(.34,1.56,.64,1)" id="feedTrack"><div style="display:flex;justify-content:space-between;align-items:center;width:100%"><div style="display:flex;gap:12px;align-items:center;flex:1;min-width:0"><div class="feed-avatar-box"><img data-feed="avatar" alt="" style="width:100%;height:100%;border-radius:50%;object-fit:cover;opacity:.9"></div><div style="display:flex;flex-direction:column;overflow:hidden;gap:2px"><span class="feed-uid-text" data-feed="uid"></span><span style="font-size:.65rem;color:#94a3b8;font-family:monospace;display:flex;align-items:center;gap:6px;white-space:nowrap"><span data-feed="type" style="font-weight:700"></span><span style="opacity:.5">|</span><span data-feed="hash"></span><i data-feed="copy" class="far fa-copy" style="cursor:pointer;color:var(--primary)" title="Copy ID"></i></span></div></div><div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;padding-left:10px"><span data-feed="amount" style="font-size:.95rem;font-weight:800"></span><div style="display:flex;align-items:center;gap:5px;margin-top:4px"><div data-feed="dot" style="width:6px;height:6px;border-radius:50%;animation:blinkRed 1.5s infinite"></div><span data-feed="status" style="font-size:.6rem;font-weight:800;text-transform:uppercase"></span></div></div></div></div></div>';
+        refs = { track: container.querySelector('#feedTrack') };
+        for (const el of container.querySelectorAll('[data-feed]')) refs[el.dataset.feed] = el;
+        refs.copy.onclick = () => window.copyText(copyValue, refs.copy);
+        signature = '';return refs;
+    }
+    const key = tx => String(tx?.id || tx?.Order_ID || tx?.TXID || '');
+    function merge(items) {
+        const result = [], seen = new Set();
+        for (const item of items) {
+            if (!item || typeof item !== 'object') continue;
+            const id = key(item);if (id && seen.has(id)) continue;
+            if (id) seen.add(id);result.push(item);if (result.length === 50) break;
+        }
+        return result;
+    }
+    function next(immediate = false) {
+        if (!allowed() || !window.globalLiveTransactions.length) return;
+        const r = ensure();if (!r) return;
+        if (window.currentLiveTxIndex >= window.globalLiveTransactions.length) window.currentLiveTxIndex = 0;
+        const tx = window.globalLiveTransactions[window.currentLiveTxIndex++],type = String(tx.Type || 'Transaction'),status = String(tx.Status || 'Pending');
+        const raw = String(tx.UID || 'TCM0000'),uid = raw.length >= 6 ? raw.slice(0,4) + 'X' + raw.slice(-2) + 'X' : raw + 'XX';
+        const copy = String(tx.Order_ID || tx.TXID || 'N/A'),hash = copy.length > 10 ? copy.slice(0,10) + '..' : copy;
+        const dep = type.toLowerCase().includes('deposit'),wd = type.toLowerCase().includes('withdraw'),p2p = type.toLowerCase().includes('p2p');
+        const color = dep ? 'var(--success)' : wd ? 'var(--error)' : 'var(--primary)';
+        const statusColor = status.toLowerCase() === 'success' ? 'var(--success)' : status.toLowerCase().includes('reject') ? 'var(--error)' : 'var(--warning)';
+        const amount = ((wd || p2p && type.includes('Sent')) ? '-' : '+') + ' ' + (Number.parseFloat(tx.Amount || 0) || 0).toFixed(2) + ' \u20ae';
+        let avatar = String(tx.Avatar || fallback);if (!/^(https?:\/\/|data:image\/)/i.test(avatar)) avatar = fallback;
+        const sig = JSON.stringify([uid,type,status,copy,amount,avatar]);
+        if (signature === sig) return;
+        cancelTransition();const generation = epoch,identityAtStart = owner;
+        const paint = () => {
+            if (!allowed() || generation !== epoch || identityAtStart !== identity() || !r.track.isConnected) return;
+            r.uid.textContent = uid;r.type.textContent = type;r.hash.textContent = hash;r.amount.textContent = amount;r.status.textContent = status;
+            r.type.style.color = color;r.amount.style.color = color;r.status.style.color = statusColor;r.dot.style.background = statusColor;r.dot.style.boxShadow = '0 0 8px ' + statusColor;
+            if (r.avatar.getAttribute('src') !== avatar) r.avatar.src = avatar;
+            copyValue = copy;signature = sig;
+            if (immediate) return;
+            r.track.style.transform = 'translateY(30px)';
+            frame = requestAnimationFrame(() => { frame = 0;timer = setTimeout(() => {timer=null;if(allowed()&&generation===epoch&&identityAtStart===identity()){r.track.style.transform='translateY(0)';r.track.style.opacity='1';}},50); });
         };
-
-        fetchInitialFeedData();
-
-        if (window.globalFeedApiInterval) {
-            window.MasterClockDispatcher.unregister(window.globalFeedApiInterval);
-            window.globalFeedApiInterval = null;
-        }
-
-        if (window.socket) {
-            window.socket.off("global_transaction");
-            window.socket.on("global_transaction", (tx) => {
-                if (!window.globalLiveTransactions) window.globalLiveTransactions = [];
-                window.globalLiveTransactions.unshift(tx);
-
-                if(window.globalLiveTransactions.length > 50) window.globalLiveTransactions.pop();
-
-                if (!window.liveFeedInterval && window.globalLiveTransactions.length > 0) {
-                    window.startLiveFeedCarousel();
+        if (immediate) paint();
+        else { r.track.style.transform = 'translateY(-30px)';r.track.style.opacity = '0';timer = setTimeout(() => {timer=null;paint();},400); }
+    }
+    function start() {
+        if (!allowed() || !window.globalLiveTransactions.length) return;
+        ensure();if (!signature) next(true);
+        if (!window.liveFeedInterval) window.liveFeedInterval = window.MasterClockDispatcher.register(job, () => next(), 3500);
+    }
+    function receive(tx) {
+        if (!owner || owner !== identity() || window.dashboardSession?.closed || window.dashboardSession?.blocked) return;
+        if (flight) arrivals = merge([tx, ...arrivals]);
+        window.globalLiveTransactions = merge([tx, ...window.globalLiveTransactions]);
+        if (allowed()) start();
+    }
+    function bind() {
+        if (socket === window.socket) return;
+        socket?.off?.('global_transaction', receive);
+        socket = window.socket;socket?.on?.('global_transaction', receive);
+    }
+    window.startLiveFeedCarousel = start;
+    window.initLiveGlobalFeed = () => {
+        if (!allowed() || !document.getElementById('liveFeedContainer')) return Promise.resolve();
+        const nextOwner = identity();if (owner !== nextOwner) { reset();owner = nextOwner; }
+        bind();start();
+        if (flight) return flight;
+        if (lastFetch && Date.now() - lastFetch < 15000) return Promise.resolve();
+        const generation = epoch,ctx = owner;arrivals = [];
+        const pending = (async () => {
+            try {
+                const result = await Promise.resolve().then(() => window.fetchAPI('/feed/global'));
+                if (!allowed() || ctx !== identity() || generation !== epoch) return;
+                if (result.success && Array.isArray(result.data)) {
+                    window.globalLiveTransactions = merge([...arrivals, ...result.data]);lastFetch = Date.now();start();
+                    if (!window.globalLiveTransactions.length) {
+                        stop();const container=document.getElementById('liveFeedContainer');
+                        if(container&&!container.querySelector('[data-feed-empty]'))container.innerHTML='<div data-feed-empty style="padding:0 15px;color:var(--text-sub);font-size:.8rem;text-align:center;display:flex;align-items:center;justify-content:center;height:100%">No recent global transactions.</div>';
+                        refs=null;signature='';
+                    }
                 }
-            });
-        }
+            } catch (_) { /* Keep the last visible feed; retry on an explicit lifecycle event. */ }
+            finally { if (flight === pending) flight = null; }
+        })();
+        flight = pending;return pending;
     };
-
-    window.startLiveFeedCarousel = () => {
-        const container = document.getElementById('liveFeedContainer');
-        if(!container) return;
-
-        container.innerHTML = `<div class="feed-track-wrapper" style="width: 100%; height: 100%; position: relative; overflow: hidden;">
-                                    <div id="feedTrack" class="feed-track" style="display: flex; align-items: center; width: 100%; height: 100%; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                                    </div>
-                               </div>`;
-        const track = document.getElementById('feedTrack');
-
-        const renderNextTx = () => {
-            if(!window.globalLiveTransactions || window.globalLiveTransactions.length === 0) return;
-            if(window.currentLiveTxIndex >= window.globalLiveTransactions.length) window.currentLiveTxIndex = 0;
-
-            const tx = window.globalLiveTransactions[window.currentLiveTxIndex];
-            window.currentLiveTxIndex++;
-
-            let type = tx.Type || "Transaction";
-            let status = tx.Status || "Pending";
-            let amt = parseFloat(tx.Amount || 0).toFixed(2);
-            let rawUid = tx.UID || "TCM0000";
-
-            let uidStr = rawUid.length >= 6 ? rawUid.substring(0, 4) + "X" + rawUid.substring(rawUid.length - 2) + "X" : rawUid + "XX";
-            let txHash = tx.Order_ID || tx.TXID || "N/A";
-            if(txHash.length > 10) txHash = txHash.substring(0,10) + "..";
-
-            let isDep = type.toLowerCase().includes('deposit');
-            let isWd = type.toLowerCase().includes('withdraw');
-            let isP2P = type.toLowerCase().includes('p2p');
-
-            let color = isDep ? 'var(--success)' : (isWd ? 'var(--error)' : 'var(--primary)');
-            let sign = (isWd || (isP2P && type.includes('Sent'))) ? '-' : '+';
-            let statusColor = status.toLowerCase() === 'success' ? 'var(--success)' :
-                              (status.toLowerCase().includes('reject') ? 'var(--error)' : 'var(--warning)');
-
-            let defaultAvatar = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0iIzAwZjVmZiIgb3BhY2l0eT0iMC40IiBkPSJNMTIgMkM5LjI0MyAyIDcgNC4yNDMgNyA3czIuMjQzIDUgNSA1IDUtMi4yNDMgNS01LTIuMjQzLTUtNS01eiIvPjxwYXRoIGZpbGw9IiMwMGY1ZmYiIGQ9Ik0xMiAxNGMtNC40MTggMC04IDMuMTM0LTggN3YxaDE2di0xYzAtMy44NjYtMy41ODItNy04LTd6Ii8+PC9zdmc+";
-
-            let html = `
-                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                    <div style="display: flex; gap: 12px; align-items: center; flex: 1; min-width: 0;">
-                        <div class="feed-avatar-box">
-                            <img src="${tx.Avatar || defaultAvatar}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; opacity: 0.9;">
-                        </div>
-                        <div style="display: flex; flex-direction: column; overflow: hidden; gap: 2px;">
-                            <span class="feed-uid-text">${uidStr}</span>
-                            <span style="font-size: 0.65rem; color: #94a3b8; font-family: monospace; display: flex; align-items: center; gap: 6px; white-space: nowrap;">
-                          <span style="color: ${color}; font-weight: 700;">${type}</span> <span style="opacity: 0.5;">|</span> ${txHash}
-                       <i class="far fa-copy" style="cursor: pointer; color: var(--primary);" onclick="window.copyText('${tx.Order_ID || tx.TXID || "N/A"}', this)" title="Copy ID"></i>
-                      </span>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; flex-shrink: 0; padding-left: 10px;">
-                        <span style="font-size: 0.95rem; font-weight: 800; color: ${color};">${sign} ${amt} ₮</span>
-                        <div style="display: flex; align-items: center; gap: 5px; margin-top: 4px;">
-                            <div style="width: 6px; height: 6px; border-radius: 50%; background: ${statusColor}; box-shadow: 0 0 8px ${statusColor}; animation: blinkRed 1.5s infinite;"></div>
-                            <span style="font-size: 0.6rem; font-weight: 800; color: ${statusColor}; text-transform: uppercase;">${status}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            track.style.transform = 'translateY(-30px)';
-            track.style.opacity = '0';
-            setTimeout(() => {
-                track.innerHTML = html;
-                track.style.transform = 'translateY(30px)';
-                requestAnimationFrame(() => {
-                    setTimeout(() => {
-                        track.style.transform = 'translateY(0)';
-                        track.style.opacity = '1';
-                    }, 50);
-                });
-            }, 400);
-        };
-
-        if (window.liveFeedInterval) {
-            window.MasterClockDispatcher.unregister(window.liveFeedInterval);
-            window.liveFeedInterval = null;
-        }
-
-        renderNextTx();
-        window.liveFeedInterval = window.MasterClockDispatcher.register('liveFeedInterval', renderNextTx, 3500);
-    };
-
-    setTimeout(window.initLiveGlobalFeed, 3500);
-
+    document.addEventListener('visibilitychange', () => { if (document.hidden) cancelTransition(); });
+    window.addEventListener('pagehide', () => { reset();socket?.off?.('global_transaction', receive);socket=null; });
+    window.addEventListener('pageshow', event => { if (event.persisted) void window.initLiveGlobalFeed(); });
+    window.addEventListener('storage', event => { if (event.key === null || ['uid','token'].includes(event.key)) { reset();owner=''; } });
+    setTimeout(() => { void window.initLiveGlobalFeed(); },3500);
+})();
+/* PERFORMANCE FEED END */
     /* JS 21 | GLOBAL LIVE TRANSACTION FEED | END */
 /* JS 22 | NFT ORDERS RENDERING ENGINE | START */
+(() => {
+    'use strict';
+    let ordersVersion=0,ordersTimer=null,reservationVersion=0,reservationTimer=null,ordersOpen=false,ordersOwner='',reservationOwner='',ordersFlight=null;
+    const identity=()=>JSON.stringify([localStorage.getItem('uid'),localStorage.getItem('token'),window.dashboardSession?.epoch||0]);
+    const shown=id=>{const node=document.getElementById(id);return node&&node.style.display!=='none'&&node.style.pointerEvents!=='none';};
+    const permitted=()=>!window.dashboardSession?.closed&&!window.dashboardSession?.blocked;
+    const activeOrders=()=>ordersOpen&&permitted()&&ordersOwner===identity()&&shown('ordersModal');
+    const activeReservation=()=>permitted()&&reservationOwner===identity()&&shown('reservationModal');
+    function cancelOrders(){ordersVersion++;clearTimeout(ordersTimer);ordersTimer=null;window.ordersObserver?.disconnect();window.ordersObserver=null;}
+    function cancelReservation(){reservationVersion++;clearTimeout(reservationTimer);reservationTimer=null;}
     window.ordersPaginationCache = [];
     window.ordersCurrentIndex = 0;
 
     window.openOrdersModal = async () => {
-        window.openModal('ordersModal');
+        window.openModal('ordersModal');ordersOpen=true;ordersOwner=identity();
         const monthFilter = document.getElementById('orderMonthFilter');
         if(monthFilter && !monthFilter.value) {
             const d = new Date();
@@ -11541,7 +11608,7 @@ window.renderNFTBlockchainReference = raw => {
     };
 
     window.openReservationModal = async () => {
-        window.openModal('reservationModal');
+        window.openModal('reservationModal');reservationOwner=identity();
         const monthFilter = document.getElementById('reservationMonthFilter');
         if(monthFilter && !monthFilter.value) {
             const d = new Date();
@@ -11551,6 +11618,8 @@ window.renderNFTBlockchainReference = raw => {
     };
 
     window.renderReservations = async () => {
+        clearTimeout(reservationTimer);const version=++reservationVersion;
+        if(!activeReservation())return;
         const contentBox = document.getElementById('reservationContentBox');
         if(!contentBox) return;
 
@@ -11561,7 +11630,8 @@ window.renderNFTBlockchainReference = raw => {
             </div>
         `;
 
-        setTimeout(() => {
+        reservationTimer=setTimeout(() => {
+            reservationTimer=null;if(version!==reservationVersion||!activeReservation())return;
             contentBox.innerHTML = `
                 <div style="text-align:center; padding: 50px 20px; color: var(--text-sub); font-size: 0.95rem;">
                     <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 10px; color: #475569;"></i><br>
@@ -11571,6 +11641,7 @@ window.renderNFTBlockchainReference = raw => {
     };
 
     window.renderOrders = async () => {
+        cancelOrders();if(!activeOrders())return;const renderVersion=ordersVersion;
         const contentBox = document.getElementById('ordersContentBox');
         if(!contentBox) return;
 
@@ -11625,7 +11696,11 @@ window.renderNFTBlockchainReference = raw => {
             if (cachedData) {
                 allOrders = JSON.parse(cachedData);
             } else {
-                const result = await window.fetchAPI(`/nft/history?uid=${uid}`, 'GET');
+                const ctx=ordersOwner;
+                if(!ordersFlight||ordersFlight.owner!==ctx)ordersFlight={owner:ctx,promise:window.fetchAPI(`/nft/history?uid=${uid}`,'GET')};
+                const request=ordersFlight;let result;
+                try{result=await request.promise;}finally{if(ordersFlight===request)ordersFlight=null;}
+                if(renderVersion!==ordersVersion||!activeOrders())return;
                 if (result && result.success) {
                     allOrders = result.data;
                     localStorage.setItem('tcm_nft_orders_cache', JSON.stringify(allOrders));
@@ -11688,11 +11763,13 @@ window.renderNFTBlockchainReference = raw => {
             window.loadNextOrdersChunk();
 
         } catch (e) {
+            if(renderVersion!==ordersVersion||!activeOrders())return;
             contentBox.innerHTML = `<div style="text-align:center; color:var(--error); padding: 30px;"><i class="fas fa-exclamation-triangle" style="font-size:2rem; margin-bottom:10px;"></i><br>Cache Load Error</div>`;
         }
     };
 
     window.loadNextOrdersChunk = () => {
+        if(!activeOrders())return;
         const container = document.getElementById('ordersListContainer');
         const observerTarget = document.getElementById('orderScrollObserver');
         if (!container || !observerTarget) return;
@@ -11745,10 +11822,12 @@ window.renderNFTBlockchainReference = raw => {
 
         if (window.ordersCurrentIndex < window.ordersPaginationCache.length) {
             observerTarget.innerHTML = `<i class="fas fa-circle-notch fa-spin" style="color: var(--primary); font-size: 1.4rem;"></i>`;
+            const observerVersion=ordersVersion;
             window.ordersObserver = new IntersectionObserver((entries) => {
-                if (entries[0].isIntersecting) {
+                if (entries[0].isIntersecting && observerVersion===ordersVersion && activeOrders()) {
                     window.ordersObserver.disconnect();
-                    setTimeout(() => window.loadNextOrdersChunk(), 250);
+                    const version=ordersVersion;
+                    clearTimeout(ordersTimer);ordersTimer=setTimeout(() => {ordersTimer=null;if(version===ordersVersion&&activeOrders())window.loadNextOrdersChunk();},250);
                 }
             }, { threshold: 0.1 });
             window.ordersObserver.observe(observerTarget);
@@ -11757,6 +11836,22 @@ window.renderNFTBlockchainReference = raw => {
         }
     };
 
+
+    const close=window.closeModal;
+    window.closeModal=function(id,...args){if(id==='ordersModal'){ordersOpen=false;cancelOrders();}if(id==='reservationModal')cancelReservation();return close?.call(this,id,...args);};
+    const observers=[];
+    function attach(){
+        observers.splice(0).forEach(observer=>observer.disconnect());
+        for(const id of ['ordersModal','reservationModal']){
+            const node=document.getElementById(id);if(!node)continue;
+            const observer=new MutationObserver(()=>{if(!shown(id)){if(id==='ordersModal'){ordersOpen=false;cancelOrders();}else cancelReservation();}});
+            observer.observe(node,{attributes:true,attributeFilter:['style','class']});observers.push(observer);
+        }
+    }
+    attach();
+    window.addEventListener('pagehide',()=>{cancelOrders();cancelReservation();observers.splice(0).forEach(observer=>observer.disconnect());});
+    window.addEventListener('pageshow',event=>{attach();if(event.persisted){if(activeOrders())window.renderOrders();if(activeReservation())window.renderReservations();}});
+})();
  /* JS 22 | NFT ORDERS RENDERING ENGINE | END */
 /* CHAT CACHE START */
 (() => {
@@ -11963,6 +12058,7 @@ window.renderNFTBlockchainReference = raw => {
             if (!hint || hint.uid !== localStorage.getItem('uid') ||
                 window.dashboardSession.closed || window.dashboardSession.blocked) return;
             window.dashboardSync.invalidationVersion = (window.dashboardSync.invalidationVersion || 0) + 1;
+            window.dashboardSync.freshVersion = (window.dashboardSync.freshVersion || 0) + 1;
             window.dashboardSync.dirty = true;
             if (document.hidden) {
                 window.dashboardSync.dirty = true;
@@ -11974,7 +12070,7 @@ window.renderNFTBlockchainReference = raw => {
                 if (!document.hidden && !window.dashboardSession.closed && !window.dashboardSession.blocked) {
                     window.syncDashboardState();
                 }
-            }, 5000);
+            }, 250);
         });
 
         window.socket.on('fee_config_updated', data => window.applySystemFees(data));
@@ -12568,14 +12664,14 @@ window.renderNFTBlockchainReference = raw => {
     const setRows=(s,value)=>{if(s.mode==='global')window.localChatCache.global=value;else window.localChatCache.private[s.target]=value;};
     const time=value=>{const raw=window.parseSafeTimestamp?.(value);if(Number.isFinite(raw))return raw;if(value?.seconds)return value.seconds*1000;if(value?._seconds)return value._seconds*1000;return typeof value==='number'?value:Date.parse(value)||0;};
     window.formatTimeShort=ms=>ms?new Date(ms).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',hour12:true}).toLowerCase():'';
-    window.formatChatDividerDate=ms=>{const date=new Date(ms),today=new Date(),yesterday=new Date();yesterday.setDate(today.getDate()-1);return date.toDateString()===today.toDateString()?'Today':date.toDateString()===yesterday.toDateString()?'Yesterday':date.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});};
+    window.formatChatDividerDate=ms=>{const date=new Date(ms),today=new Date(),yesterday=new Date();yesterday.setDate(today.getDate()-1);return date.toDateString()===today.toDateString()?'Today':date.toDateString()===yesterday.toDateString()?'Yesterday':window.formatDisplayDate(ms,{dateOnly:true});};
     window.formatStatusTime=ms=>ms?'last seen '+window.formatChatDividerDate(ms).toLowerCase()+' at '+window.formatTimeShort(ms):'Offline';
-    window.formatChatListTime=ms=>{if(!ms)return '';const d=new Date(ms),today=new Date();const diff=Math.round((new Date(today.getFullYear(),today.getMonth(),today.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);return diff===0?window.formatTimeShort(ms):diff===1?'Yesterday':diff>1&&diff<7?d.toLocaleDateString('en-US',{weekday:'long'}):d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});};
+    window.formatChatListTime=ms=>{if(!ms)return '';const d=new Date(ms),today=new Date();const diff=Math.round((new Date(today.getFullYear(),today.getMonth(),today.getDate())-new Date(d.getFullYear(),d.getMonth(),d.getDate()))/86400000);return diff===0?window.formatTimeShort(ms):diff===1?'Yesterday':diff>1&&diff<7?d.toLocaleDateString('en-US',{weekday:'long'}):window.formatDisplayDate(ms,{dateOnly:true});};
     window.isSelectMode=false;window.selectedMessages=new Set();
     let busy=false,menuId='',longPress=null,typingTimer=null,presence={online:false,lastActive:0},typing=false,roomVersion=0;
     let fileEpoch=0,imageObserver=null,imageBusy=0;const imageQueue=[];
     const urls=new Map(),fileFlights=new Map(),deleted=new Set();
-    function releaseFiles(){fileEpoch++;imageObserver?.disconnect();imageQueue.length=0;for(const url of urls.keys())URL.revokeObjectURL(url);urls.clear();fileFlights.clear();}
+    function releaseFiles(){messageDOM=null;fileEpoch++;imageObserver?.disconnect();imageQueue.length=0;for(const url of urls.keys())URL.revokeObjectURL(url);urls.clear();fileFlights.clear();}
     function drainImages(){while(imageBusy<2&&imageQueue.length){const item=imageQueue.shift();if(item.epoch!==fileEpoch)continue;imageBusy++;openFile(item.id,item.el).finally(()=>{imageBusy--;drainImages();});}}
     function clearMenus(){for(const id of ['tcm-chat-context-menu','tcm-bulk-del-popup'])$(id)?.classList.remove('active');}
     function stopLive(){window.socket?.emit('chat_v15_unwatch');clearTimeout(typingTimer);typing=false;window.cancelLongPress();clearMenus();}
@@ -12666,13 +12762,53 @@ window.renderNFTBlockchainReference = raw => {
     async function readRoom(){return window.ChatHistory?.markVisible();}
     const fallbackAvatar='data:image/svg+xml;base64,'+btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="24" fill="#152b3d"/><circle cx="24" cy="17" r="8" fill="#55dff5"/><path d="M8 44c0-18 32-18 32 0" fill="#55dff5"/></svg>');
     document.addEventListener('error',event=>{const img=event.target;if(img?.tagName==='IMG'&&img.closest('#chat-window')&&!img.closest('.m15-file-preview')&&!img.classList.contains('m15-shared-image')&&img.src!==fallbackAvatar)img.src=fallbackAvatar;},true);
+    // Keep unchanged message rows (and decoded images) across arrivals/receipt updates.
+    let messageDOM = null;
+    function reconcileMessageDOM(box, fragments, identity) {
+        const scope = JSON.stringify([identity.uid, identity.token, identity.mode, identity.target]);
+        const previous = messageDOM?.scope === scope && messageDOM.box === box ? messageDOM.rows : new Map();
+        const wantedKeys = new Set(fragments.map(part => part.key));
+        const retained = new Set([...previous].filter(([key]) => wantedKeys.has(key)).map(([, state]) => state.node));
+        const release = node => { for (const el of node.querySelectorAll?.('[data-file-id]') || []) window.releaseChatMedia?.(el.dataset.fileId, el); };
+        for (const node of [...box.children]) if (!retained.has(node)) { release(node);node.remove(); }
+        const next = new Map();let cursor = box.firstChild;
+        for (const part of fragments) {
+            const old = previous.get(part.key);
+            let node = old?.node?.parentNode === box ? old.node : null;
+            if (!node || old.markup !== part.markup) {
+                const template = document.createElement('template');template.innerHTML = part.markup;
+                const fresh = template.content.firstElementChild;
+                if (!fresh) continue;
+                if (node) {
+                    // A receipt/status update need not reload an already decoded attachment.
+                    for (const button of [...node.querySelectorAll('[data-file-id]')]) {
+                        if (!button.querySelector('.m15-file-preview img')) continue;
+                        const replacement = [...fresh.querySelectorAll('[data-file-id]')].find(el =>
+                            el.dataset.fileId === button.dataset.fileId && el.className === button.className);
+                        if (replacement) {
+                            const width = button.closest('.m15-media-wrapper')?.style.getPropertyValue('--chat-image-width');
+                            replacement.replaceWith(button);
+                            if (width) fresh.querySelector('.m15-media-wrapper')?.style.setProperty('--chat-image-width', width);
+                        }
+                    }
+                    if (cursor === node) cursor = fresh;
+                    release(node);node.replaceWith(fresh);
+                }
+                node = fresh;
+            }
+            if (node !== cursor) box.insertBefore(node, cursor);
+            cursor = node.nextSibling;
+            next.set(part.key, { node, markup: part.markup });
+        }
+        messageDOM = { box, scope, rows: next };
+    }
     window.renderChatMessages=messages=>{
         const box=$('chat-content');if(!box)return;const s=current(),nearBottom=box.scrollHeight-box.clientHeight-box.scrollTop<80,scroll=box.scrollTop;
         const map=new Map();for(const m of messages||[])if(m&&valid(m.id)&&!(m.deletedFor||[]).includes(s.uid)&&!deleted.has([s.uid,s.mode,s.target,m.id].join(':')))map.set(m.id,m);
-        const list=[...map.values()].sort((a,b)=>time(a.timestamp||a.Date)-time(b.timestamp||b.Date));let html='',day='';
+        const list=[...map.values()].sort((a,b)=>time(a.timestamp||a.Date)-time(b.timestamp||b.Date));let html='',day='';const fragments=[];
         for(const m of list){
             const own=m.senderUid===s.uid,pending=/^temp-/.test(m.id),id=esc(m.id),ms=time(m.timestamp||m.Date),date=window.formatChatDividerDate(ms||Date.now());
-            if(date!==day){html+='<div class="m15-date"><span>'+esc(date)+'</span></div>';day=date;}
+            if(date!==day){const markup='<div class="m15-date"><span>'+esc(date)+'</span></div>';html+=markup;fragments.push({key:'day:'+date,markup});day=date;}
             const text=esc(m.message||'').replace(/\n/g,'<br>'),isImage=valid(m.fileId)&&String(m.fileType).startsWith('image/');let content=text?'<div class="m15-message-text">'+text+'</div>':'';
             if(valid(m.fileId))content='<button type="button" class="m15-file-open'+(isImage?' m15-image-open':'')+'" data-file-id="'+esc(m.fileId)+'" aria-label="'+esc(m.fileName||'Attachment')+'" title="'+esc(m.fileName||'Attachment')+'">'+(isImage?'':'<i class="fas fa-file"></i> '+esc(m.fileName||'Attachment'))+'<span class="m15-file-preview"></span></button>'+(isImage&&text?'<div class="m15-image-caption">'+content+'</div>':content);
             const ticks=own&&s.mode==='private'&&!pending?window.renderChatReceipt(m.status):'';
@@ -12682,12 +12818,15 @@ window.renderNFTBlockchainReference = raw => {
             if(isImage){body='<div class="m15-image-bubble"><div class="m15-image-body">'+content+'</div>'+metadata+'</div>';if(!own&&s.mode==='global')body='<div class="chat-crater m15-avatar" data-chat-peer="'+esc(m.senderUid)+'"><div class="chat-dp"><img alt="Member avatar" src="'+esc(window.chatSafeAvatar(m.avatar)||fallbackAvatar)+'"></div></div><div class="m15-global-body"><div class="m15-bubble-heading"><span class="sender-name-3d">'+esc(m.senderName||'TCM Member')+'</span></div>'+body+'</div>';}else if(!own&&s.mode==='global'){
                 body='<div class="chat-crater m15-avatar" data-chat-peer="'+esc(m.senderUid)+'"><div class="chat-dp"><img alt="Member avatar" src="'+esc(window.chatSafeAvatar(m.avatar)||fallbackAvatar)+'"></div></div><div class="m15-global-body"><div class="msg-bubble-content msg-bubble-them global-crescent-bubble"><div class="m15-bubble-heading"><span class="sender-name-3d">'+esc(m.senderName||'TCM Member')+'</span>'+metadata+'</div>'+content+'</div></div>';
             }else body='<div class="msg-bubble-content '+(own?'msg-bubble-me':'msg-bubble-them')+'" style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:flex-end;gap:4px 8px"><div style="flex:1 1 auto;text-align:left;min-width:0">'+content+'</div>'+metadata+'</div>';
-            html+='<div id="msg-'+id+'" data-message-id="'+id+'"'+(pending?' data-pending="true"':'')+' class="no-select chat-msg-row '+(own?'is-me':'not-me')+(s.mode==='global'&&!own?' m15-global-row':'')+'" style="display:flex;justify-content:'+(own?'flex-end':'flex-start')+';align-items:'+(own?'flex-end':'flex-start')+';margin-bottom:12px;transition:transform 0.3s ease;width:100%;cursor:pointer">'+(!own?circle:'')+'<div class="msg-wrapper'+(isImage?' m15-media-wrapper':'')+'" style="display:flex;gap:0;align-items:flex-start;max-width:'+(own?'80%':'85%')+';position:relative;min-width:0">'+body+'</div>'+(own?circle:'')+'</div>';
+            const markup='<div id="msg-'+id+'" data-message-id="'+id+'"'+(pending?' data-pending="true"':'')+' class="no-select chat-msg-row '+(own?'is-me':'not-me')+(s.mode==='global'&&!own?' m15-global-row':'')+'" style="display:flex;justify-content:'+(own?'flex-end':'flex-start')+';align-items:'+(own?'flex-end':'flex-start')+';margin-bottom:12px;transition:transform 0.3s ease;width:100%;cursor:pointer">'+(!own?circle:'')+'<div class="msg-wrapper'+(isImage?' m15-media-wrapper':'')+'" style="display:flex;gap:0;align-items:flex-start;max-width:'+(own?'80%':'85%')+';position:relative;min-width:0">'+body+'</div>'+(own?circle:'')+'</div>';
+            html+=markup;fragments.push({key:'message:'+m.id,markup});
         }
         const visible=new Set(list.map(m=>m.id));for(const id of window.selectedMessages)if(!visible.has(id))window.selectedMessages.delete(id);
         if(!html)html='<div class="m15-empty"><i class="far fa-comments"></i><p>No messages yet. Say hello! 👋</p></div>';
-        html+='<div id="typing-bubble" style="display:'+(typing?'flex':'none')+';padding:10px"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
-        if(box.dataset.renderedChat!==html){box.dataset.renderedChat=html;box.innerHTML=html;box.scrollTop=nearBottom?box.scrollHeight:scroll;}
+        if(!list.length)fragments.push({key:'empty',markup:html});
+        const typingMarkup='<div id="typing-bubble" style="display:'+(typing?'flex':'none')+';padding:10px"><span class="typing-dots"><span></span><span></span><span></span></span></div>';
+        html+=typingMarkup;fragments.push({key:'typing',markup:typingMarkup});
+        if(box.dataset.renderedChat!==html){box.dataset.renderedChat=html;reconcileMessageDOM(box,fragments,s);box.scrollTop=nearBottom?box.scrollHeight:scroll;}
         window.chatRestoreMessageNodes?.();
         window.updateSelectCount();
         imageObserver?.disconnect();
@@ -12790,7 +12929,7 @@ window.renderNFTBlockchainReference = raw => {
 window.TCMSupportKit=(()=>{
  const node=(tag,attrs={},value)=>{const n=document.createElement(tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);if(value!==undefined)n.textContent=String(value);return n;};
  const button=(label,fn,cls='s5-button')=>{const n=node('button',{type:'button',class:cls},label);n.addEventListener('click',fn);return n;};
- const time=t=>t?new Date(t).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Not recorded';
+ const time=t=>window.formatDisplayDate(t,{timeZone:'Asia/Kolkata',seconds:true,suffix:' IST'});
  const safeImage=s=>typeof s==='string'&&s.length<=245800&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(s)?s:'';
  const file=async f=>{if(!f)return '';if(f.size>184320||!['image/png','image/jpeg','image/webp'].includes(f.type))throw new Error('Choose a PNG, JPEG or WebP image up to 180 KB.');return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Image could not be read.'));r.readAsDataURL(f)});};
  const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='admin'?'Support':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));return n;};
@@ -13195,9 +13334,7 @@ window.TCMSupportPending = function(validate) {
             }
             rows.push({ timestamp, micro, category });
         }
-        const formatDate = timestamp => new Intl.DateTimeFormat('en-GB', {
-            timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short', year: 'numeric'
-        }).format(timestamp);
+        const formatDate = timestamp => window.formatDisplayDate(timestamp, {timeZone:'Asia/Kolkata',dateOnly:true});
         const buckets = [];
         const addBucket = (start, end, label) => buckets.push({
             start, end, label, income: 0n, deposit: 0n, withdraw: 0n,
@@ -13350,9 +13487,7 @@ window.TCMSupportPending = function(validate) {
                 const micro = bucket[metric.category];
                 const amount = window.balFormatIndex === 3 ? '****' :
                     (micro > 0n ? metric.sign : '') + window.formatDashboardMoneyMicro(micro);
-                let dateLabel = new Intl.DateTimeFormat('en-GB', {
-                    timeZone: 'Asia/Kolkata', day: '2-digit', month: 'short'
-                }).format(bucket.start);
+                let dateLabel = window.formatDisplayDate(bucket.start, {timeZone:'Asia/Kolkata',dateOnly:true});
                 if (view.timeframe === '1D') {
                     const hour = new Intl.DateTimeFormat('en-GB', {
                         timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false
@@ -13997,7 +14132,10 @@ window.TCMSupportPending = function(validate) {
         const now = Date.now();
         const deadlines = (Array.isArray(wallet.Active_Stakes) ? wallet.Active_Stakes : [])
             .filter(stake => stake && stake.status === 'Active')
-            .map(stake => Number(stake.unlockTime)).filter(time => Number.isFinite(time) && time > now);
+            .map(stake => Number(stake.unlockTime))
+            .filter(time => Number.isFinite(time) && time > 0)
+            .flatMap(time => [time - 24 * 60 * 60 * 1000, time])
+            .filter(time => time > now);
         if (deadlines.length === 0) return;
         const ownerUid = localStorage.getItem('uid'), ownerToken = localStorage.getItem('token');
         const delay = Math.min(2147483647, Math.max(1, Math.min(...deadlines) - now));
@@ -14082,13 +14220,20 @@ window.TCMSupportPending = function(validate) {
 
     /* JS 28 | STAKING UI ENGINE | END */
 /* JS 29 | ACTIVE CONTRACTS & CARD RENDERER | START */
+    // Preserve scroll and countdown nodes when a verified snapshot has unchanged markup.
+    window.updateStakingMarkup = (node, markup) => {
+        if (!node || (node.dataset.stakingMarkup === markup && node.childNodes.length)) return;
+        const positions = [node, ...node.querySelectorAll('.scroll-hide-bar')].map(n => n.scrollTop);
+        node.innerHTML = markup;node.dataset.stakingMarkup = markup;
+        [node, ...node.querySelectorAll('.scroll-hide-bar')].forEach((n, i) => { n.scrollTop = positions[i] || 0; });
+    };
     window.renderActiveStakes = () => {
     let wallet = window.RAM_STATE?.balances || window.lastWalletData;
     const list = document.getElementById('activeStakesList');
     if (!wallet || !wallet.Active_Stakes || !list) return;
 
     let html = '';
-    let hasExpiringContract = false;
+    let hasVisibleContract = false;
     let now = Date.now();
 
     const getCleanCardNumber = (value) => String(value || '').replace(/\s+/g, ' ').trim();
@@ -14118,7 +14263,7 @@ window.TCMSupportPending = function(validate) {
             if (activeCinemaCard.classList.contains('card-platinum')) return 'platinum';
             if (activeCinemaCard.classList.contains('card-diamond')) return 'diamond';
         }
-        return null;
+        return 'silver';
     };
 
     const activeCardKey = detectActiveCard();
@@ -14140,6 +14285,7 @@ window.TCMSupportPending = function(validate) {
         const stakeRoi = Number(stk.dailyRoi || 0);
         const stakeTier = String(stk.cardType || stk.tier || stk.tierTheme || stk.cardTier || stk.vaultType || '').toLowerCase();
 
+        if ([7, 15, 30, 60].includes(stakeDuration)) return stakeDuration === activeCard.duration;
         if (stakeTier && stakeTier.includes(activeCardKey)) return true;
         if (stakeCardNumber && activeCard.cardNumber && stakeCardNumber === activeCard.cardNumber) return true;
         if (stakeDuration === activeCard.duration) return true;
@@ -14160,13 +14306,19 @@ window.TCMSupportPending = function(validate) {
         // Check if this stake should show in the BOTTOM UI list
         const isMatchingActiveView = stakeMatchesActiveCard(stk);
 
-        // Only append to the bottom list IF it matches the active card
-        if(isActiveOrMatured && isMatchingActiveView) {
+        // Alerts only: last 24 hours (inclusive) or matured and not yet claimed.
+        const remaining = releaseTime - now;
+        const alertEligible = ['Active', 'Matured'].includes(String(stk.status)) &&
+            Number.isFinite(releaseTime) && releaseTime > 0 && Number.isFinite(principal) && principal > 0 &&
+            typeof stakeId === 'string' && stakeId.trim() &&
+            ((stakeStatus === 'Matured' && remaining <= 0) ||
+             (stakeStatus === 'Active' && remaining > 0 && remaining <= 24 * 60 * 60 * 1000));
+        if(isActiveOrMatured && isMatchingActiveView && alertEligible) {
+            hasVisibleContract = true;
             let diff = Number(stk.unlockTime || 0) - now;
             let daysLeft = Math.floor(diff / (1000 * 60 * 60 * 24));
 
             if (stakeStatus === 'Matured' || diff <= 0) {
-                hasExpiringContract = true;
                 html += `
                 <div class="final-unlock-card" data-stake-card="${stakeId}" style="border-color:var(--success); background: radial-gradient(circle at top right, rgba(16,185,129,0.12) 0%, rgba(15, 23, 42, 0.92) 70%);">
                     <div class="fuc-header">
@@ -14183,10 +14335,9 @@ window.TCMSupportPending = function(validate) {
                         </div>
                     </div>
                 </div>`;
-            } else if (daysLeft < 1 && diff > 0) {
-                hasExpiringContract = true;
-                let startStr = new Date(stk.startTime || Date.now()).toLocaleDateString('en-US', {month:'short', day:'numeric'});
-                let endStr = new Date(stk.unlockTime).toLocaleDateString('en-US', {month:'short', day:'numeric'});
+            } else if (diff > 0 && diff <= 24 * 60 * 60 * 1000) {
+                let startStr = window.formatDisplayDate(stk.startTime, {dateOnly:true});
+                let endStr = window.formatDisplayDate(stk.unlockTime, {dateOnly:true});
 
                 html += `
                 <div class="final-unlock-card" id="card_${stakeId}" data-stake-card="${stakeId}">
@@ -14197,7 +14348,7 @@ window.TCMSupportPending = function(validate) {
                     <div class="fuc-body">
                         <div class="fuc-amt-box">
                             <span class="fuc-amt">${principal.toFixed(2)} ₮</span>
-                            <span class="fuc-roi">Reserved: ${startStr} - ${endStr}</span>
+                            <span class="fuc-roi" style="white-space:normal;overflow-wrap:anywhere;">Reserved: ${startStr} - ${endStr}</span>
                         </div>
                         <div class="fuc-timer-box" id="claim_box_${stakeId}">
                             <div class="fuc-timer atm-live-timer" data-id="${stakeId}" data-amt="${principal}" data-unlock="${stk.unlockTime}">--:--:--</div>
@@ -14221,16 +14372,10 @@ window.TCMSupportPending = function(validate) {
         }
 
         // 🚀 ALWAYS generate the HTML for the card backs!
-        let startDate = new Date(stk.startTime || Date.now());
-        let unlockDate = new Date(stk.unlockTime);
+        let startDate = stk.startTime;
+        let unlockDate = stk.unlockTime;
 
-        let formatDateTime = (d) => {
-            let day = d.getDate().toString().padStart(2, '0');
-            let month = d.toLocaleString('en-US', { month: 'short' });
-            let year = d.getFullYear().toString().slice(-2);
-            let time = d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-            return `${day}-${month}-${year} <span style="opacity:0.5;">|</span> ${time}`;
-        };
+        const formatDateTime = value => window.formatDisplayDate(value);
 
         let startFmt = formatDateTime(startDate);
         let endFmt = formatDateTime(unlockDate);
@@ -14244,8 +14389,8 @@ window.TCMSupportPending = function(validate) {
                 <span style="font-size: 0.65rem; color: #a1a1aa; font-family: monospace;">ID: <span class="tx-id-badge">${displayTx}</span></span>
                 ${statusBadge}
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                <div style="display: flex; flex-direction: column; gap: 4px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap:wrap; gap:8px;">
+                <div style="display: flex; flex-direction: column; gap: 4px; min-width:0; max-width:100%; overflow-wrap:anywhere;">
                     <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-lock" style="color:var(--warning); margin-right:4px;"></i>Locked: <span style="color:#e2e8f0; margin-left:2px;">${startFmt}</span></span>
                     <span style="font-size: 0.6rem; color: #71717a; font-family: monospace;"><i class="fas fa-unlock-alt" style="color:var(--success); margin-right:4px;"></i>Release: <span style="color:#e2e8f0; margin-left:2px;">${endFmt}</span></span>
                 </div>
@@ -14259,11 +14404,11 @@ window.TCMSupportPending = function(validate) {
         else if (stk.duration == 60) { diamondHtml += itemHtml; dCount++; }
     });
 
-    if (!hasExpiringContract) {
+    if (!hasVisibleContract) {
         const activeLabel = activeCardKey ? activeCardKey.toUpperCase() : 'SELECTED';
-        list.innerHTML = `<div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-box-open"></i><p>No claimable staking contracts for ${activeLabel} card.</p></div>`;
+        window.updateStakingMarkup(list, `<div class="empty-state" style="margin-top: 0; padding: 30px;"><i class="fas fa-box-open"></i><p>No contracts unlocking within 24 hours or awaiting claim for ${activeLabel} card.</p></div>`);
     } else {
-        list.innerHTML = html;
+        window.updateStakingMarkup(list, html);
     }
 
     const sBox = document.getElementById('back_silver_data');
@@ -14273,10 +14418,10 @@ window.TCMSupportPending = function(validate) {
 
     const emptyHtml = `<div style="text-align:center; padding-top:60px; color:#52525b;"><i class="fas fa-ghost" style="font-size:2rem; margin-bottom:10px;"></i><br>No Transactions Yet</div>`;
 
-    if (sBox) { sBox.style.background = "#000000"; sBox.innerHTML = sCount > 0 ? silverHtml + '</div>' : emptyHtml; }
-    if (gBox) { gBox.style.background = "#000000"; gBox.innerHTML = gCount > 0 ? goldHtml + '</div>' : emptyHtml; }
-    if (pBox) { pBox.style.background = "#000000"; pBox.innerHTML = pCount > 0 ? platHtml + '</div>' : emptyHtml; }
-    if (dBox) { dBox.style.background = "#000000"; dBox.innerHTML = dCount > 0 ? diamondHtml + '</div>' : emptyHtml; }
+    if (sBox) { sBox.style.background = "#000000"; window.updateStakingMarkup(sBox, sCount > 0 ? silverHtml + '</div>' : emptyHtml); }
+    if (gBox) { gBox.style.background = "#000000"; window.updateStakingMarkup(gBox, gCount > 0 ? goldHtml + '</div>' : emptyHtml); }
+    if (pBox) { pBox.style.background = "#000000"; window.updateStakingMarkup(pBox, pCount > 0 ? platHtml + '</div>' : emptyHtml); }
+    if (dBox) { dBox.style.background = "#000000"; window.updateStakingMarkup(dBox, dCount > 0 ? diamondHtml + '</div>' : emptyHtml); }
     const cinemaTier = window.currentActiveStakeCard;
     if (document.getElementById('cinemaOverlay') && cinemaTier) {
         const originalBack = document.getElementById('back_' + cinemaTier + '_data');
@@ -14339,6 +14484,7 @@ window.TCMSupportPending = function(validate) {
 
     window.openCinemaMode = (tierTheme, days, roi, cardElement) => {
         window.currentActiveStakeCard = tierTheme;
+        window.renderActiveStakes?.();
         window.location.hash = 'cinema';
 
         let overlay = document.getElementById('cinemaOverlay');
@@ -14394,6 +14540,7 @@ window.TCMSupportPending = function(validate) {
         const cinemaCardInner = document.getElementById('cinema3DCardInner');
         cinemaCardInner.style.transition = "transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)";
 
+        window.renderActiveStakes?.();
         let isFlipping = false;
         let pointerStart = null;
         let suppressFlipUntil = 0;
@@ -14787,7 +14934,7 @@ window.TCMSupportPending = function(validate) {
         }
         const checkedAt = new Date(report.checkedAt);
         timestamp.textContent = Number.isFinite(checkedAt.getTime())
-            ? 'Checked: ' + checkedAt.toLocaleString() + '. This preview does not reserve balances.'
+            ? 'Checked: ' + window.formatDisplayDate(checkedAt, {seconds:true}) + '. This preview does not reserve balances.'
             : 'This preview does not reserve balances.';
     };
 
@@ -15801,7 +15948,7 @@ window.TCMSupportPending = function(validate) {
  const $=s=>document.querySelector(s),modal=$('#messageModal'),body=$('#msgBodyContent');if(!modal||!body)return;
  const node=(tag,attrs={},text)=>{const el=document.createElement(tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);if(text!==undefined)el.textContent=String(text);return el;};
  const button=(text,fn,cls='ann-button')=>{const el=node('button',{type:'button',class:cls},text);el.addEventListener('click',fn);return el;};
- const time=t=>t?new Date(t).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Published announcement';
+ const time=t=>window.formatDisplayDate(t,{timeZone:'Asia/Kolkata',seconds:true,suffix:' IST',fallback:'Published announcement'});
  let identity=null,version=0,queue=[],active=null,timer=null,pumping=false,fetching=false,dirty=false,morePending=false,stopped=false,inboxVersion=0,inboxController=null,inboxCursor=null,inboxRows=new Map(),popupController=null;
  let unreadCurrent=0,readRevision=0;const locallyRead=new Set();
  const notice=node('p',{class:'ann-notice',role:'status'}),rows=node('div',{class:'ann-list'}),more=button('Load older announcements',()=>loadInbox(true));body.replaceChildren(notice,rows,more);more.hidden=true;
@@ -15863,6 +16010,18 @@ window.TCMSupportPending = function(validate) {
  window.addEventListener('pagehide',stop);window.addEventListener('pageshow',sync);sync();
 })();
 
+</script>
+<script>
+/* PERFORMANCE VISIBILITY START */
+(() => {
+    'use strict';
+    const sync = () => document.documentElement.toggleAttribute('data-performance-hidden', document.hidden);
+    document.addEventListener('visibilitychange', sync);
+    window.addEventListener('pagehide', () => document.documentElement.setAttribute('data-performance-hidden', ''));
+    window.addEventListener('pageshow', sync);
+    sync();
+})();
+/* PERFORMANCE VISIBILITY END */
 </script>
 </body>
 </html>
