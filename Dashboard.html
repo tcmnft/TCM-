@@ -3722,8 +3722,13 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 
 </style>
 <style id="support-user-r5-style">
-/* R5 support styles share the Dashboard's existing glass modal. */
-#userSupportModal>div{height:min(680px,90dvh)!important;max-width:520px!important}#userSupportModal #userSupportMessages{min-height:60px;flex:1;display:flex;flex-direction:column;gap:10px}#userSupportModal .s5-user-compose{display:grid!important;grid-template-columns:minmax(0,1fr) auto!important;gap:8px!important}#userSupportModal .s5-user-compose input{min-width:0;width:100%;box-sizing:border-box}#userSupportModal input[type=file],#userSupportModal input[aria-label="Support Order ID reference"]{grid-column:1/-1;font-size:11px;color:#a5c7dd;background:#10243a;border:1px solid #314a63;border-radius:8px;padding:7px}#userSupportModal .s5-notice{font-size:10px;color:#94afc7;line-height:1.5;margin:3px 12px;overflow-wrap:anywhere}#userSupportModal .s5-button{padding:7px 10px;border:1px solid #31516f;border-radius:8px;color:#c4e8ff;background:#15314b;font-size:11px;cursor:pointer}#userSupportModal button[hidden]{display:none!important}#userSupportModal .s5-button:disabled{opacity:.5}#userSupportModal .s5-bubble{max-width:86%;padding:10px 13px;border:1px solid #ffffff12;border-radius:14px;color:#deebf9;background:#203145;overflow-wrap:anywhere;flex-shrink:0}#userSupportModal .s5-bubble p{margin:6px 0;font-size:13px;line-height:1.6;white-space:pre-wrap}#userSupportModal .s5-bubble small{display:block;font-size:9px;color:#a6bfd4}#userSupportModal .s5-own{align-self:flex-end;background:#10496b;border-bottom-right-radius:3px}#userSupportModal .s5-other{align-self:flex-start;border-bottom-left-radius:3px}#userSupportModal .s5-image-open{padding:0;border:0;background:none;display:block;max-width:100%;cursor:zoom-in}#userSupportModal .s5-image{min-width:40px;min-height:40px;max-width:100%;max-height:170px;object-fit:contain;display:block;border-radius:9px;margin:8px 0}.s5-image-dialog{max-width:92vw;max-height:90vh;background:#0c1b2c;border:1px solid #31516f;border-radius:15px;padding:15px}.s5-image-dialog::backdrop{background:#000c}.s5-image-dialog img{display:block;max-width:85vw;max-height:72vh;object-fit:contain;margin-top:10px}.s5-image-dialog button{padding:8px 12px;border:1px solid #31516f;border-radius:8px;color:#d6edff;background:#15314b}@media(max-width:400px){#userSupportModal{padding:8px!important}#userSupportModal .s5-bubble{max-width:94%}}
+/* R5.1: compact support layout with a visible viewport for on-screen keyboards. */
+#userSupportModal{top:var(--s5-visible-top,0px)!important;bottom:auto!important;height:var(--s5-visible-height,100dvh)!important;box-sizing:border-box;padding:12px!important;overflow:hidden}#userSupportModal>div{height:min(720px,calc(var(--s5-visible-height,100dvh) - 24px))!important;max-height:calc(var(--s5-visible-height,100dvh) - 24px);width:100%;max-width:520px!important;min-height:0;box-sizing:border-box;display:flex;flex-direction:column}#userSupportModal>div>div:first-child{flex-shrink:0;padding:12px 16px!important}#userSupportModal #userSupportMessages{min-height:40px;flex:1 1 0;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;gap:10px;padding:12px!important}#userSupportModal .s5-user-compose{display:flex!important;flex-direction:column;flex-shrink:0;gap:8px!important;padding:10px 12px!important}#userSupportModal .s5-input-line{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center}#userSupportModal .s5-input-line input{width:100%;min-width:0;box-sizing:border-box;min-height:42px;font-size:16px!important;padding:9px 12px!important}#userSupportModal .s5-options{max-height:min(180px,28dvh);overflow:auto;border:1px solid #294057;border-radius:9px;padding:7px 10px;flex-shrink:0}#userSupportModal .s5-options summary{font-size:11px;color:#a6c7df;cursor:pointer}#userSupportModal .s5-options input{display:block;width:100%;box-sizing:border-box;min-width:0;margin-top:8px;font-size:12px;color:#c3d9ea;background:#10243a;border:1px solid #314a63;border-radius:8px;padding:7px}#userSupportModal .s5-notice{font-size:10px;color:#a2bad0;line-height:1.5;margin:3px 12px;max-height:45px;overflow:auto;flex-shrink:0;overflow-wrap:anywhere}#userSupportModal .s5-button{padding:9px 12px;border:1px solid #31516f;border-radius:9px;color:#d3edff;background:#164564;font-size:12px;cursor:pointer;min-height:36px;flex-shrink:0}#userSupportModal button[hidden]{display:none!important}#userSupportModal .s5-button:disabled{opacity:.5}#userSupportModal .s5-bubble{max-width:88%;padding:10px 13px;border:1px solid #ffffff12;border-radius:14px;color:#deebf9;background:#203145;overflow-wrap:anywhere;flex-shrink:0}#userSupportModal .s5-bubble p{margin:6px 0;font-size:13px;line-height:1.6;white-space:pre-wrap}#userSupportModal .s5-bubble small{display:block;font-size:9px;color:#a6bfd4}#userSupportModal .s5-own{align-self:flex-end;background:#10496b;border-bottom-right-radius:3px}#userSupportModal .s5-other{align-self:flex-start;border-bottom-left-radius:3px}#userSupportModal .s5-image-open{padding:0;border:0;background:none;display:block;max-width:100%;cursor:zoom-in}#userSupportModal .s5-image{min-width:40px;min-height:40px;max-width:100%;max-height:170px;object-fit:contain;display:block;border-radius:9px;margin:8px 0}.s5-image-dialog{max-width:92vw;max-height:90dvh;background:#0c1b2c;border:1px solid #31516f;border-radius:15px;padding:15px}.s5-image-dialog::backdrop{background:#000c}.s5-image-dialog img{display:block;max-width:85vw;max-height:72dvh;object-fit:contain;margin-top:10px}.s5-image-dialog button{padding:8px 12px;border:1px solid #31516f;border-radius:8px;color:#d6edff;background:#15314b}@media(max-height:450px){#userSupportModal{padding:6px!important}#userSupportModal>div{height:calc(var(--s5-visible-height,100dvh) - 12px)!important;max-height:calc(var(--s5-visible-height,100dvh) - 12px)}#userSupportModal .s5-user-compose{gap:4px!important;padding:6px 10px!important}#userSupportModal>div>div:first-child{padding:8px 12px!important}}@media(max-width:400px){#userSupportModal .s5-bubble{max-width:96%}}
+
+</style>
+<style id="deletion-dialog-r2-style">
+/* R2: bounded account deletion dialog; only its own content can grow/scroll. */
+#accountDeleteModal{top:var(--del-visible-top,0px)!important;bottom:auto!important;height:var(--del-visible-height,100dvh)!important;box-sizing:border-box;padding:12px!important;overflow:hidden;align-items:center!important;justify-content:center!important}#accountDeleteModal>.modal-box{position:relative;animation:none!important;transform:none!important;width:100%!important;max-width:360px!important;height:min(560px,calc(var(--del-visible-height,100dvh) - 24px));max-height:calc(var(--del-visible-height,100dvh) - 24px)!important;min-height:0;box-sizing:border-box;overflow-x:hidden;overflow-y:auto!important;overscroll-behavior:contain;padding:16px!important;text-align:left;scroll-padding:14px}#accountDeleteModal>.modal-box>h2{font-size:16px!important;padding-right:26px}#deleteModalClose{position:sticky;top:0;float:right;margin:0 0 -32px 0;z-index:2;min-width:32px;min-height:32px;border:0;border-radius:8px;color:var(--text-main,#e2e8f0);background:var(--bg-main,#152235);cursor:pointer;font-size:21px;line-height:1}#accountDeleteModal .deletion-clearance{padding:10px;margin-bottom:10px}#accountDeleteModal .deletion-clearance>strong{font-size:12px}#accountDeleteModal #deleteClearanceSummary{font-size:11px;line-height:1.5;margin:6px 0}#accountDeleteModal #deleteClearanceAccount{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:5px;margin:7px 0}#accountDeleteModal #deleteClearanceAccount>div{border:1px solid #64748b33;border-radius:8px;padding:6px;min-width:0;overflow-wrap:anywhere;font-size:11px}#accountDeleteModal #deleteClearanceAccount strong{display:block;font-size:10px;font-weight:500;color:inherit;opacity:.8}#accountDeleteModal #deleteClearanceRows{max-height:160px;overflow:auto;margin:6px 0}#accountDeleteModal #deleteClearanceRows li{padding:7px 0}#accountDeleteModal .deletion-clearance-heading{gap:4px;font-size:11px}#accountDeleteModal #deleteClearanceRows p{font-size:10px;line-height:1.5}#accountDeleteModal #deleteClearanceTime{font-size:9px;margin:6px 0}#accountDeleteModal #btnRefreshDeleteClearance{margin-top:3px;padding:5px 9px;font-size:10px}#accountDeleteModal #deleteConfirmationWidget{margin-top:0;min-height:52px;padding:10px!important}#accountDeleteModal #deleteVerificationHelp{font-size:11px;line-height:1.5;color:var(--text-sub,#a2b3c8);margin:7px 0;max-height:66px;overflow:auto;overflow-wrap:anywhere}#accountDeleteModal #deleteVerificationHelp:empty{display:none}#accountDeleteModal #deleteEmailOTP,#accountDeleteModal #delete2FACode{font-size:16px!important;min-height:42px;scroll-margin:14px}#accountDeleteModal #btnGetDeleteOTP{min-height:42px}#accountDeleteModal #btnConfirmDelete{font-size:12px}#accountDeleteModal details>summary{font-size:11px}#accountDeleteModal .deletion-clearance-badge{font-size:10px}#accountDeleteModal #deleteTurnstileContainer{max-width:100%;overflow:hidden}@media(max-height:430px){#accountDeleteModal{padding:6px!important}#accountDeleteModal>.modal-box{height:calc(var(--del-visible-height,100dvh) - 12px);max-height:calc(var(--del-visible-height,100dvh) - 12px)!important;padding:12px!important}#accountDeleteModal #deleteClearanceRows{max-height:115px}}
 
 </style>
 </head>
@@ -3983,6 +3988,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 
 <div id="accountDeleteModal" class="modal" data-confirmed="false">
     <div class="modal-box" style="box-sizing:border-box;width:calc(100% - 24px);max-width:340px;max-height:calc(100dvh - 24px);overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:20px;text-align:left;border-color:var(--error);">
+        <button type="button" id="deleteModalClose" aria-label="Close account deletion" onclick="window.closeModal('accountDeleteModal')">×</button>
         <h2 style="font-size:1.1rem;margin:0 0 8px;font-weight:700;">
             <i class="fas fa-trash-alt" style="color:var(--error);"></i>
             Delete Account
@@ -3995,8 +4001,9 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
         <section class="deletion-clearance" aria-labelledby="deleteClearanceTitle">
             <strong id="deleteClearanceTitle">Account settlement</strong>
             <p id="deleteClearanceSummary" role="status" aria-live="polite">Settlement has not been checked.</p>
-            <details open>
-                <summary>Settlement breakdown</summary>
+            <div id="deleteClearanceAccount" style="font-size:.75rem;line-height:1.7;overflow-wrap:anywhere;"></div>
+            <details>
+                <summary>Settlement details</summary>
                 <ul id="deleteClearanceRows"></ul>
             </details>
             <small id="deleteClearanceTime"></small>
@@ -4028,6 +4035,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                aria-hidden="true"></i>
         </button>
 
+        <p id="deleteVerificationHelp" role="status" aria-live="polite"></p>
         <div id="deleteTurnstileContainer"
              hidden
              style="margin:10px auto 0;width:150px;min-height:140px;"></div>
@@ -11978,7 +11986,7 @@ window.renderNFTBlockchainReference = raw => {
             if (!window.dashboardSession.closed && !window.dashboardSession.blocked) {
                 window.syncDashboardState();
                 const support = document.getElementById('userSupportModal');
-                if (support && support.style.display !== 'none') window.socket.emit('join_support_chat');
+                // R5.1: the Support controller owns reconnect/join and history catch-up.
             }
         });
         window.socket.on('connect_error', error => {
@@ -12790,6 +12798,32 @@ window.TCMSupportKit=(()=>{
  const compareMessages=(a,b)=>((a.sortSeconds??Math.floor((a.timestamp||0)/1000))-(b.sortSeconds??Math.floor((b.timestamp||0)/1000)))||((a.sortNanos??((a.timestamp||0)%1000)*1e6)-(b.sortNanos??((b.timestamp||0)%1000)*1e6))||a.id.localeCompare(b.id);
  return {node,button,time,file,bubble,closeImages,compareMessages};
 })();
+/* R5.1 pending requests: fail closed on unreadable storage and persist before sending. */
+window.TCMSupportPending = function(validate) {
+ const memory=new Map(),uuid=/^[a-f\d-]{36}$/i;
+ const good=op=>op&&typeof op==='object'&&uuid.test(op.requestId??op.payload?.requestId??'')&&validate(op);
+ function read(key) {
+  const cached=memory.get(key);let raw;
+  try{raw=sessionStorage.getItem(key);}catch{return {op:cached?.op||null,blocked:true,problem:'Browser storage is unavailable. No new action will be sent. Your open draft is retained.'};}
+  if(raw===null)return {op:cached?.op||null,blocked:false,problem:cached?'The request is held in memory. Retry will save it before sending.':''};
+  try{const op=JSON.parse(raw);if(!good(op))throw new Error();memory.set(key,{op});return {op,blocked:false,problem:''};}
+  catch{return {op:cached?.op||null,blocked:true,problem:'Saved request data is unreadable. Check conversation history before resetting this browser state.'};}
+ }
+ function persist(key,op) {
+  const current=read(key);if(current.blocked)return {ok:false,...current};
+  if(current.op&&JSON.stringify(current.op)!==JSON.stringify(op))return {ok:false,...current,problem:'Another saved request is pending. Retry that request first.'};
+  if(!good(op))return {ok:false,blocked:true,op:null,problem:'The saved request is invalid. No action was sent.'};
+  memory.set(key,{op});
+  try{sessionStorage.setItem(key,JSON.stringify(op));if(sessionStorage.getItem(key)!==JSON.stringify(op))throw new Error();return {ok:true,op,blocked:false,problem:''};}
+  catch{return {ok:false,op,blocked:false,problem:'Browser storage could not save this request. Nothing was sent. Keep this tab open and retry when storage is available.'};}
+ }
+ function clear(key,op) {
+  try{const raw=sessionStorage.getItem(key);if(raw!==null&&raw!==JSON.stringify(op))return false;if(raw!==null)sessionStorage.removeItem(key);memory.delete(key);return true;}
+  catch{return false;}
+ }
+ function reset(key) {try{sessionStorage.removeItem(key);memory.delete(key);return true;}catch{return false;}}
+ return {read,persist,clear,reset};
+};
 
 /* R5 User support controller: authenticated history, attachments and retry-safe sending. */
 (()=>{
@@ -12797,21 +12831,25 @@ window.TCMSupportKit=(()=>{
  const {node,button,time,file,bubble,closeImages,compareMessages}=TCMSupportKit,modal=document.getElementById('userSupportModal'),box=document.getElementById('userSupportMessages'),input=document.getElementById('userSupportInput');if(!modal||!box||!input)return;
  let ctx=null,version=0,loadVersion=0,controller=null,rows=new Map(),cursor=null,picture='',fileVersion=0,busy=false,liveRevision=0;
  const notice=node('p',{class:'s5-notice',role:'status'}),more=button('Load earlier messages',()=>load(true)),status=node('p',{class:'s5-notice'}),order=node('input',{maxlength:'160',placeholder:'Order ID reference (optional)','aria-label':'Support Order ID reference'}),attach=node('input',{type:'file',accept:'image/png,image/jpeg,image/webp','aria-label':'Attach support image'}),attachment=node('p',{class:'s5-notice'}),remove=button('Remove image',()=>{picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}),send=button('Send',()=>sendUserSupportMessage()),retry=button('Retry saved message',()=>sendSaved());
- input.maxLength=4000;const headline=modal.querySelector('h4');if(headline?.nextElementSibling)headline.nextElementSibling.textContent='Private support';const closeButton=modal.querySelector('[onclick="closeSupportChat()"]');if(closeButton){closeButton.textContent='×';closeButton.setAttribute('aria-label','Close support');}remove.hidden=true;const compose=input.parentElement;compose.classList.add('s5-user-compose');compose.replaceChildren(order,input,attach,attachment,remove,send,retry);box.before(status,notice,more);more.hidden=true;retry.hidden=true;
+ input.maxLength=4000;const headline=modal.querySelector('h4');if(headline?.nextElementSibling)headline.nextElementSibling.textContent='Private support';const closeButton=modal.querySelector('[onclick="closeSupportChat()"]');if(closeButton){closeButton.textContent='×';closeButton.setAttribute('aria-label','Close support');}remove.hidden=true;const compose=input.parentElement;compose.classList.add('s5-user-compose');const inputLine=node('div',{class:'s5-input-line'}),options=node('details',{class:'s5-options'}),summary=node('summary',{},'Order reference / image');inputLine.append(input,send);options.append(summary,order,attach,attachment,remove);compose.replaceChildren(inputLine,options,retry);box.before(status,notice,more);more.hidden=true;retry.hidden=true;
  const context=()=>{const s=window.dashboardSession,uid=localStorage.getItem('uid'),token=localStorage.getItem('token');return s?.verified&&!s.closed&&!s.blocked&&uid&&token?{uid,token,epoch:s.epoch}:null;};
  const same=(a,b)=>!!a&&!!b&&a.uid===b.uid&&a.token===b.token&&a.epoch===b.epoch;
  const valid=()=>window.supportChatOpen&&same(ctx,context());
  const key=c=>'tcm_support_user_send_'+c.uid;
- const saved=()=>ctx?JSON.parse(sessionStorage.getItem(key(ctx))||'null'):null;
- function pendingUI(){if(!ctx)return;retry.hidden=!saved();retry.disabled=busy;send.disabled=busy;if(saved())notice.textContent='A message has an unconfirmed result. Retry the saved message before sending another.';}
+ const pending=TCMSupportPending(op=>op&&typeof op.uid==='string'&&/^[\w-]{1,128}$/.test(op.uid)&&typeof op.message==='string'&&op.message.length<=4000&&typeof op.image==='string'&&op.image.length<=245800&&typeof op.orderId==='string'&&op.orderId.length<=160);
+ const pendingState=()=>ctx?pending.read(key(ctx)):{op:null,blocked:false,problem:''};
+ const saved=()=>pendingState().op;
+ const reset=button('Reset unreadable saved state',()=>{if(!ctx||!pendingState().blocked)return;if(!confirm('Check conversation history first: a previous send may already exist. Reset only this browser state? Server messages will remain.'))return;if(pending.reset(key(ctx))){notice.textContent='Browser state reset. Your current draft is retained.';pendingUI();}else notice.textContent='Browser storage is still unavailable. No message was sent.';});compose.append(reset);reset.hidden=true;
+ function pendingUI(){if(!ctx)return;const st=pendingState();reset.hidden=!st.blocked;retry.hidden=!st.op||st.blocked;retry.disabled=busy;send.disabled=busy||st.blocked||!!st.op;if(st.problem)notice.textContent=st.problem;else if(st.op)notice.textContent='A message has an unconfirmed result. Retry the saved message before sending another.';}
  function render(older=false){const h=box.scrollHeight,top=box.scrollTop,nearBottom=h-top-box.clientHeight<70;box.replaceChildren();for(const row of [...rows.values()].sort(compareMessages))box.append(bubble(row));if(!rows.size)box.append(node('p',{class:'s5-notice'},'How can we help you today? Send a message to contact Admin.'));if(older)box.scrollTop=box.scrollHeight-h+top;else if(nearBottom)box.scrollTop=box.scrollHeight;more.hidden=!cursor;}
  async function load(older=false,refresh=false){if(!valid()||older&&!cursor)return;controller?.abort();controller=new AbortController();const c=ctx,gen=version,v=++loadVersion,events=liveRevision;notice.textContent='Loading conversation…';try{const response=await fetch(API_BASE_URL+'/support/messages?uid='+encodeURIComponent(c.uid)+(older?'&before='+encodeURIComponent(cursor):''),{headers:{Authorization:'Bearer '+c.token},cache:'no-store',signal:controller.signal}),r=await response.json();if(!valid()||gen!==version||v!==loadVersion)return;if(response.status===401||response.status===403)window.handleDashboardAccess?.(response.status,r.message,r.code);if(!response.ok||!r.success)throw new Error(r.message||'Support unavailable.');if(!older&&!refresh&&events===liveRevision)rows.clear();for(const m of r.items||r.data)rows.set(m.id,m);if(!refresh)cursor=r.nextCursor;render(older);status.textContent='Status: '+(r.conversation?.status||'Open');notice.textContent='Messages are private between you and Support.';pendingUI();}catch(e){if(e.name!=='AbortError'&&gen===version&&valid())notice.textContent=e.message;}}
- function leave(){++version;++loadVersion;controller?.abort();const wasOpen=window.supportChatOpen;window.supportChatOpen=false;window.supportChatVersion=(window.supportChatVersion||0)+1;if(wasOpen&&window.socket?.connected)window.socket.emit('leave_support_chat');ctx=null;rows.clear();cursor=null;picture='';remove.hidden=true;input.value='';order.value='';attach.value='';attachment.textContent='';notice.textContent='';status.textContent='';box.replaceChildren();more.hidden=true;retry.hidden=true;++fileVersion;closeImages();}
+ function leave(){window.visualViewport?.removeEventListener('resize',fitViewport);window.visualViewport?.removeEventListener('scroll',fitViewport);++version;++loadVersion;controller?.abort();const wasOpen=window.supportChatOpen;window.supportChatOpen=false;window.supportChatVersion=(window.supportChatVersion||0)+1;if(wasOpen&&window.socket?.connected)window.socket.emit('leave_support_chat');ctx=null;rows.clear();cursor=null;picture='';remove.hidden=true;input.value='';order.value='';attach.value='';attachment.textContent='';notice.textContent='';reset.hidden=true;status.textContent='';box.replaceChildren();more.hidden=true;retry.hidden=true;++fileVersion;closeImages();}
+ function fitViewport(){const v=window.visualViewport;modal.style.setProperty('--s5-visible-height',Math.round(v?.height||innerHeight)+'px');modal.style.setProperty('--s5-visible-top',Math.round(v?.offsetTop||0)+'px');}
  window.leaveSupportChat=leave;
  window.closeSupportChat=()=>window.closeModal('userSupportModal');
- window.openSupportChat=()=>{const c=context();if(!c)return window.showToast?.('Please sign in to contact support.',true);leave();ctx=c;window.supportChatOpen=true;window.openModal('userSupportModal');window.socket?.emit('join_support_chat');pendingUI();void load();};
- async function sendSaved(){if(!valid()||busy)return;const c=ctx,gen=version,op=saved();if(!op)return;if(!window.socket?.connected){notice.textContent='Live chat is disconnected. Your saved message is ready to retry.';return;}busy=true;pendingUI();try{const r=await new Promise((resolve,reject)=>window.socket.timeout(15000).emit('send_support_message',op,(e,r)=>e?reject(new Error('Delivery could not be confirmed. Retry the saved message.')):resolve(r)));if(!r?.success)throw Object.assign(new Error(r?.message||'Message could not be confirmed.'),{status:r?.status});if(sessionStorage.getItem(key(c))===JSON.stringify(op))sessionStorage.removeItem(key(c));if(!valid()||!same(c,ctx)||gen!==version)return;if(r.data?.message){rows.set(r.id,r.data.message);render();box.scrollTop=box.scrollHeight;}if(input.value.trim()===op.message)input.value='';if(picture===op.image){picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}notice.textContent='Message sent.';status.textContent='Status: '+(r.data?.conversation?.status||'Open');}catch(e){if([400,403,404,409].includes(e.status)&&sessionStorage.getItem(key(c))===JSON.stringify(op))sessionStorage.removeItem(key(c));if(valid()&&gen===version)notice.textContent=e.message;}finally{busy=false;if(valid()&&gen===version)pendingUI();}}
- window.sendUserSupportMessage=async()=>{if(!valid()||busy)return;if(saved()){pendingUI();return;}const message=input.value.trim();if(!message&&!picture)return;const op={uid:ctx.uid,message,image:picture,orderId:order.value.trim(),requestId:crypto.randomUUID()};sessionStorage.setItem(key(ctx),JSON.stringify(op));await sendSaved();};
+ window.openSupportChat=()=>{const c=context();if(!c)return window.showToast?.('Please sign in to contact support.',true);leave();ctx=c;window.supportChatOpen=true;fitViewport();window.visualViewport?.addEventListener('resize',fitViewport);window.visualViewport?.addEventListener('scroll',fitViewport);window.openModal('userSupportModal');window.socket?.emit('join_support_chat');pendingUI();void load();};
+ async function sendSaved(){if(!valid()||busy)return;const c=ctx,gen=version,op=saved();if(!op)return;const durable=pending.persist(key(c),op);if(!durable.ok){pendingUI();notice.textContent=durable.problem;return;}if(!window.socket?.connected){notice.textContent='Live chat is disconnected. Your saved message is ready to retry.';return;}busy=true;pendingUI();try{const r=await new Promise((resolve,reject)=>window.socket.timeout(15000).emit('send_support_message',op,(e,r)=>e?reject(new Error('Delivery could not be confirmed. Retry the saved message.')):resolve(r)));if(!r?.success)throw Object.assign(new Error(r?.message||'Message could not be confirmed.'),{status:r?.status});pending.clear(key(c),op);if(!valid()||!same(c,ctx)||gen!==version)return;if(r.data?.message){rows.set(r.id,r.data.message);render();box.scrollTop=box.scrollHeight;}if(input.value.trim()===op.message)input.value='';if(picture===op.image){picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}notice.textContent='Message sent.';status.textContent='Status: '+(r.data?.conversation?.status||'Open');}catch(e){if([400,403,404,409].includes(e.status))pending.clear(key(c),op);if(valid()&&gen===version)notice.textContent=e.message;}finally{busy=false;if(valid())pendingUI();}}
+ window.sendUserSupportMessage=async()=>{if(!valid()||busy)return;if(pendingState().blocked||saved()){pendingUI();return;}const message=input.value.trim();if(!message&&!picture)return;const op={uid:ctx.uid,message,image:picture,orderId:order.value.trim(),requestId:crypto.randomUUID()};const durable=pending.persist(key(ctx),op);if(!durable.ok){pendingUI();notice.textContent=durable.problem;return;}await sendSaved();};
  attach.addEventListener('change',async()=>{const gen=version,v=++fileVersion;picture='';try{const p=await file(attach.files[0]);if(gen===version&&v===fileVersion){picture=p;remove.hidden=!p;attachment.textContent=p?'Image attached · up to 180 KB':'';}}catch(e){if(gen===version&&v===fileVersion){attach.value='';notice.textContent=e.message;}}});
  if(window.socket){window.socket.on('receive_support_message',data=>{if(!valid())return;++liveRevision;rows.set(data.id,{...data,...(data.timestamp?.seconds!==undefined?{sortSeconds:data.timestamp.seconds,sortNanos:data.timestamp.nanoseconds||0}:{}),timestamp:typeof data.timestamp==='number'?data.timestamp:data.timestamp?.seconds?data.timestamp.seconds*1000:null});render();void load(false,true);});window.socket.on('connect',()=>{if(valid()){window.socket.emit('join_support_chat');void load(false,true);}});window.socket.on('session_error',e=>{if([401,403].includes(e?.status))leave();});}
  document.addEventListener('visibilitychange',()=>{if(document.hidden){controller?.abort();closeImages();}else if(valid())void load();});window.addEventListener('pagehide',leave);window.addEventListener('storage',e=>{if(['uid','token',null].includes(e.key)){leave();if(modal.style.display!=='none')window.closeModal('userSupportModal');}});
@@ -14681,6 +14719,7 @@ window.TCMSupportKit=(()=>{
         state.report = null;
         document.getElementById('deleteClearanceSummary').textContent = 'Settlement has not been checked.';
         document.getElementById('deleteClearanceRows').replaceChildren();
+        document.getElementById('deleteClearanceAccount').replaceChildren();
         document.getElementById('deleteClearanceTime').textContent = '';
         document.getElementById('btnRefreshDeleteClearance').disabled = false;
     };
@@ -14692,14 +14731,30 @@ window.TCMSupportKit=(()=>{
         const refresh = document.getElementById('btnRefreshDeleteClearance');
         list.replaceChildren();
         refresh.disabled = false;
-        if (!report || report.version !== 1 || !Array.isArray(report.rows) || report.rows.length !== 9) {
+        const accountBox = document.getElementById('deleteClearanceAccount');
+        accountBox.replaceChildren();
+        const required = ['Main_Balance', 'Locked_Balance', 'Admin_Locked_Balance', 'Debt', 'Locked_Withdrawals',
+            'staking', 'nfts', 'transactions', 'durable_bonuses', 'bonuses'];
+        const validRows = Array.isArray(report?.rows) && report.rows.length <= 30 &&
+            report.rows.every(row => row && typeof row.key === 'string' && ['clear','dust','blocked','unknown'].includes(row.status)) &&
+            new Set(report.rows.map(row => row.key)).size === report.rows.length &&
+            required.every(key => report.rows.some(row => row.key === key));
+        const ownAccount = !report?.account || report.account.uid === localStorage.getItem('uid');
+        if (!report || report.version !== 1 || !validRows || !ownAccount) {
             window.deletionClearance.report = null;
             summary.textContent = 'Settlement could not be verified. Use Check again.';
             timestamp.textContent = '';
             return;
         }
         window.deletionClearance.report = report;
-        summary.textContent = report.canDelete === true
+        const balances = [['Main_Balance', 'Available'], ['Locked_Balance', 'Locked'], ['Admin_Locked_Balance', 'Admin locked'], ['Debt', 'Debt']];
+        for (const [key, label] of balances) {
+            const row = report.rows.find(item => item.key === key), item = document.createElement('div'), heading = document.createElement('strong');
+            heading.textContent = label;item.append(heading, document.createTextNode(row && typeof row.amount === 'string' ? row.amount + ' USDT' : 'Not verified'));accountBox.append(item);
+        }
+        summary.textContent = report.walletState === 'missing'
+            ? 'Wallet record is missing. Settlement cannot be verified. Contact support with your UID.'
+            : report.canDelete === true
             ? 'Clear to continue. Eligibility is checked again when you submit.'
             : report.verified === true
                 ? 'Settle the items below before closing your account.'
@@ -14807,6 +14862,7 @@ window.TCMSupportKit=(()=>{
         const container = document.getElementById('deleteTurnstileContainer');
         container.replaceChildren();
         container.hidden = true;
+        document.getElementById('deleteVerificationHelp').textContent = '';
         document.getElementById('btnGetDeleteOTP').disabled = true;
         document.getElementById('btnGetDeleteOTP').textContent = 'Get OTP';
         document.getElementById('deleteEmailOTP').disabled = true;
@@ -14849,6 +14905,16 @@ window.TCMSupportKit=(()=>{
         return window.deletionTurnstileLoader;
     };
 
+    window.deletionVerificationReason = code => {
+        const clean = /^\d{3,8}$/.test(String(code)) ? String(code) : '';
+        let message = 'Verification could not complete. Check your connection or browser blocking, then retry.';
+        if (clean === '110200') message = 'Verification is not enabled for this website address. Contact support.';
+        else if (['110100','110110','400020','400021','400070'].includes(clean)) message = 'Verification configuration needs review. Contact support.';
+        else if (clean === '200500') message = 'Could not connect to the verification service. Check your connection or browser blocking.';
+        else if (['110600','110620'].includes(clean)) message = 'Verification timed out. Check your device time and try again.';
+        else if (clean === '200100') message = 'Check your device date/time, refresh this page and retry verification.';
+        return message + (clean ? ' Code: ' + clean + '.' : '');
+    };
     window.verifyDeletionConfirmation = async () => {
         const state = window.deletionVerification;
         if (state.busy || state.issueBusy || state.submitBusy || state.verified ||
@@ -14860,6 +14926,8 @@ window.TCMSupportKit=(()=>{
             token === localStorage.getItem('token') && !window.dashboardSession.closed &&
             !window.dashboardSession.blocked && document.getElementById('accountDeleteModal').style.display !== 'none';
         const widget = document.getElementById('deleteConfirmationWidget');
+        const help = document.getElementById('deleteVerificationHelp');help.textContent = '';
+        let stage = 'configuration';
         state.busy = true;
         widget.disabled = true;
         document.getElementById('deleteConfirmationIcon').innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
@@ -14870,6 +14938,7 @@ window.TCMSupportKit=(()=>{
             if (!config.success || !config.siteKey || !/^[a-f0-9]{48}$/.test(config.verificationNonce || '')) {
                 throw new Error(config.message || 'Deletion verification is unavailable.');
             }
+            stage = 'connection';
             const turnstile = await window.loadDeletionTurnstile();
             if (!current()) return;
             if (state.widgetId !== null) turnstile.remove(state.widgetId);
@@ -14902,13 +14971,14 @@ window.TCMSupportKit=(()=>{
                     widget.setAttribute('aria-checked', 'true');
                     document.getElementById('deleteConfirmationIcon').textContent = '✓';
                     document.getElementById('deleteConfirmationIcon').style.color = '#34d399';
+                    help.textContent = '';
                     document.getElementById('deleteConfirmationText').textContent = 'Verification ready';
                     document.getElementById('deleteEmailOTP').disabled = false;
                     document.getElementById('btnGetDeleteOTP').disabled = state.issueBusy;
                 },
-                'expired-callback': () => invalidate('Verification expired. Click to verify again.'),
-                'timeout-callback': () => invalidate('Verification timed out. Click to retry.'),
-                'error-callback': () => invalidate('Verification unavailable. Click to retry.')
+                'expired-callback': () => { if (!current()) return;invalidate('Verification expired. Retry');help.textContent = 'Complete a fresh verification before requesting an OTP.'; },
+                'timeout-callback': () => { if (!current()) return;invalidate('Verification timed out. Retry');help.textContent = window.deletionVerificationReason('110620'); },
+                'error-callback': code => { if (!current()) return true;invalidate('Verification unavailable. Retry');help.textContent = window.deletionVerificationReason(code);console.warn('[Deletion verification]', { code: /^\d{3,8}$/.test(String(code)) ? String(code) : 'unknown', hostname: location.hostname });return true; }
             });
             document.getElementById('deleteConfirmationText').textContent = 'Complete verification below';
         } catch (error) {
@@ -14919,7 +14989,8 @@ window.TCMSupportKit=(()=>{
             widget.disabled = false;
             document.getElementById('deleteConfirmationIcon').textContent = '□';
             document.getElementById('deleteConfirmationText').textContent = 'Click to retry verification';
-            window.showToast(error.message, true);
+            help.textContent = stage === 'configuration' ? String(error.message || 'Verification configuration is unavailable.').slice(0, 240) : 'Could not load the verification service. Check your connection or browser blocking, then retry.';
+            console.warn('[Deletion verification]', { stage, hostname: location.hostname });
         }
     };
 
@@ -15774,6 +15845,22 @@ window.TCMSupportKit=(()=>{
  document.addEventListener('visibilitychange',()=>{if(document.hidden)dismissPopup();else start(true);});
  if(window.socket){window.socket.on('connect',()=>start(true));window.socket.on('system_announcement_published',()=>start(true));window.socket.on('session_error',data=>{if([401,403].includes(data?.status))dispose();});}
  start();
+})();
+
+</script>
+<script>
+/* R2: fit the deletion dialog to the visible viewport without scrolling the page. */
+(()=>{
+ const modal=document.getElementById('accountDeleteModal'),box=modal?.querySelector('.modal-box');if(!modal||!box)return;
+ let opened=false,frame=0;
+ const visible=()=>getComputedStyle(modal).display!=='none';
+ function reveal(){const input=document.activeElement;if(!opened||!modal.contains(input)||!input.matches('input,textarea,select,button'))return;const a=input.getBoundingClientRect(),b=box.getBoundingClientRect(),top=b.top+12,bottom=b.bottom-12;if(a.bottom>bottom)box.scrollTop+=a.bottom-bottom;if(a.top<top)box.scrollTop-=top-a.top;}
+ function fit(){if(!opened)return;const v=window.visualViewport,height=Math.round(v?.height||innerHeight)+'px',top=Math.round(v?.offsetTop||0)+'px';if(modal.style.getPropertyValue('--del-visible-height')!==height)modal.style.setProperty('--del-visible-height',height);if(modal.style.getPropertyValue('--del-visible-top')!==top)modal.style.setProperty('--del-visible-top',top);cancelAnimationFrame(frame);frame=requestAnimationFrame(reveal);}
+ function stop(){window.visualViewport?.removeEventListener('resize',fit);window.visualViewport?.removeEventListener('scroll',fit);window.removeEventListener('resize',fit);cancelAnimationFrame(frame);opened=false;}
+ function sync(){const show=visible();if(show===opened)return;if(!show){stop();return;}opened=true;box.querySelectorAll('details[open]').forEach(n=>n.open=false);box.scrollTop=0;document.getElementById('deleteModalClose')?.focus({preventScroll:true});window.visualViewport?.addEventListener('resize',fit);window.visualViewport?.addEventListener('scroll',fit);window.addEventListener('resize',fit);fit();}
+ new MutationObserver(sync).observe(modal,{attributes:true,attributeFilter:['style','class']});
+ modal.addEventListener('focusin',()=>{if(opened)fit();});modal.addEventListener('toggle',()=>{if(opened)fit();},true);
+ window.addEventListener('pagehide',stop);window.addEventListener('pageshow',sync);sync();
 })();
 
 </script>
