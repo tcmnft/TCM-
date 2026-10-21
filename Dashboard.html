@@ -12989,7 +12989,15 @@ window.TCMSupportKit=(()=>{
  const time=t=>window.formatDisplayDate(t,{timeZone:'Asia/Kolkata',seconds:true,suffix:' IST'});
  const safeImage=s=>typeof s==='string'&&s.length<=245800&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(s)?s:'';
  const file=async f=>{if(!f)return '';if(f.size>184320||!['image/png','image/jpeg','image/webp'].includes(f.type))throw new Error('Choose a PNG, JPEG or WebP image up to 180 KB.');return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Image could not be read.'));r.readAsDataURL(f)});};
- const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='admin'?'Support':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));return n;};
+ const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='ai'?'AI Assistant':r.sender==='admin'?'Support Admin':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));
+  for(const order of [...(r.verifiedOrders||[]),...(r.recentTransactions||[])]){
+   const card=node('section',{class:'s5-order-card',style:'padding:10px;margin-top:8px;border:1px solid #31516f;border-radius:8px'});
+   card.append(node('strong',{},order.orderId||'Order ID not recorded'));
+   for(const [label,value]of [['Type',order.type],['Status',order.status],['Amount',order.amount],['Fee',order.fee],['Net',order.net],['Network',order.network],['Hash',order.hash],['Date',order.date?time(order.date):null],['Review note',order.reviewNotes]])
+    if(value!==null&&value!==undefined&&value!=='')card.append(node('p',{},label+': '+String(value)));
+   n.append(card);
+  }
+  return n;};
  const closeImages=()=>document.querySelectorAll('.s5-image-dialog').forEach(d=>d.close());
  const compareMessages=(a,b)=>((a.sortSeconds??Math.floor((a.timestamp||0)/1000))-(b.sortSeconds??Math.floor((b.timestamp||0)/1000)))||((a.sortNanos??((a.timestamp||0)%1000)*1e6)-(b.sortNanos??((b.timestamp||0)%1000)*1e6))||a.id.localeCompare(b.id);
  return {node,button,time,file,bubble,closeImages,compareMessages};
@@ -13032,7 +13040,11 @@ window.TCMSupportPending = function(validate) {
  function applyStreamEvent(data){
   if(!valid())return;++liveRevision;
   if(Object.hasOwn(data,'conversation')){const c=data.conversation;if(c&&currentConversation&&c.revision<currentConversation.revision)return;currentConversation=c;activeTicket=data.activeTicketId||null;if(c){ticketRows.set(c.ticketId,c);drawTickets();}if(!newDraft&&(!selectedTicket||selectedTicket===activeTicket)){selectedTicket=c?.ticketId||null;viewConversation=c;ready=true;paintStatus();pendingUI();}}
-  if(Array.isArray(data.items)&&!newDraft&&data.ticketId===selectedTicket){if(data.initial){rows.clear();cursor=data.nextCursor;}else if(!cursor)cursor=data.nextCursor;for(const m of data.items)if(m.ticketId===selectedTicket)rows.set(m.id,m);render();}
+  if(Array.isArray(data.items)){
+   const op=saved(),confirmed=op&&data.items.find(m=>m.sender==='user'&&m.requestId===op.requestId);
+   if(confirmed){acknowledge(op);if(newDraft&&op.newTicket){newDraft=false;selectedTicket=data.ticketId;viewConversation=currentConversation;ready=true;}if(input.value.trim()===op.message)input.value='';if(picture===op.image){picture='';attach.value='';attachment.textContent='';remove.hidden=true;}paintStatus();pendingUI();}
+  }
+  if(Array.isArray(data.items)&&!newDraft&&data.ticketId===selectedTicket){if(data.initial){rows.clear();cursor=data.nextCursor;}else if(!cursor)cursor=data.nextCursor;for(const m of data.items)if(m.ticketId===selectedTicket)rows.set(m.id,m);render();resumeSaved();}
  }
  function startStream(){
   if(!valid()||document.hidden||streamController)return;clearTimeout(streamTimer);streamTimer=null;
@@ -13054,11 +13066,13 @@ window.TCMSupportPending = function(validate) {
  const notice=node('p',{class:'s5-notice',role:'status'}),more=button('Load earlier messages',()=>load(true)),status=node('p',{class:'s5-notice'}),order=node('input',{maxlength:'160',placeholder:'Order ID reference (optional)','aria-label':'Support Order ID reference'}),attach=node('input',{type:'file',accept:'image/png,image/jpeg,image/webp','aria-label':'Attach support image'}),attachment=node('p',{class:'s5-notice'}),remove=button('Remove image',()=>{picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}),send=button('Send',()=>sendUserSupportMessage()),retry=button('Retry saved message',()=>sendSaved());
  input.maxLength=4000;const headline=modal.querySelector('h4');if(headline?.nextElementSibling)headline.nextElementSibling.textContent='Private support · Live R7';const closeButton=modal.querySelector('[onclick="closeSupportChat()"]');if(closeButton){closeButton.textContent='×';closeButton.setAttribute('aria-label','Close support');}remove.hidden=true;const compose=input.parentElement;compose.classList.add('s5-user-compose');const inputLine=node('div',{class:'s5-input-line'}),options=node('details',{class:'s5-options'}),summary=node('summary',{},'Order reference / image');inputLine.append(input,send);options.append(summary,order,attach,attachment,remove);compose.replaceChildren(inputLine,options,retry);box.before(status,notice,more);more.hidden=true;retry.hidden=true;
  const ticketSelect=node('select',{'aria-label':'Support ticket history',style:'width:100%;padding:8px;background:#10243a;color:#deebf9;border:1px solid #31516f;border-radius:8px'}),ticketBar=node('div',{style:'padding:8px 12px;display:flex;gap:8px;flex-wrap:wrap'}),newButton=button('New ticket',()=>beginNew()),ticketMore=button('Older tickets',()=>loadTickets(true));
- const refreshSupport=button('Refresh messages',()=>load()),connection=node('p',{class:'s5-notice',role:'status'});ticketBar.append(ticketSelect,newButton,ticketMore,refreshSupport);status.before(connection);status.before(ticketBar);compose.before(retry);
+ const connection=node('p',{class:'s5-notice',role:'status'});ticketBar.append(ticketSelect,newButton,ticketMore);status.before(connection);status.before(ticketBar);compose.before(retry);
+ const editUnsent=button('Edit unsent message',()=>{const op=saved();if(!op||!sendError||busy)return;if(!pending.clear(key(ctx),op))return;input.value=op.message;order.value=op.orderId;picture=op.image;sendError='';editUnsent.hidden=true;pendingUI();render();input.focus();});
+ editUnsent.hidden=true;compose.append(editUnsent);
  function choose(id){++version;++fileVersion;controller?.abort();selectedTicket=id;newDraft=false;ready=false;rows.clear();cursor=null;picture='';input.value='';order.value='';attach.value='';attachment.textContent='';remove.hidden=true;render();pendingUI();void load();}
  ticketSelect.addEventListener('change',()=>choose(ticketSelect.value));
  function beginNew(){if(!valid()||busy||saved()||pendingState().blocked||currentConversation&&!isClosed(currentConversation))return;++version;controller?.abort();newDraft=true;ready=true;selectedTicket=null;viewConversation=null;rows.clear();cursor=null;picture='';++fileVersion;input.value='';order.value='';attach.value='';attachment.textContent='';remove.hidden=true;render();paintStatus();pendingUI();input.focus();}
- function paintStatus(){status.textContent=newDraft?'New ticket — send your first message to create it.':!ready?'Loading ticket status…':!viewConversation?'No support ticket yet. Select New ticket to get help.':('Ticket: '+viewConversation.ticketId+' · '+viewConversation.status+(isClosed(viewConversation)?' — This support request is completed. History is read-only. Create a new ticket for more help.':''));}
+ function paintStatus(){status.textContent=newDraft?'New ticket — send your first message to create it.':!ready?'Loading ticket status…':!viewConversation?'No support ticket yet. Select New ticket to get help.':('Ticket: '+viewConversation.ticketId+' · '+viewConversation.status+(viewConversation.aiState==='queued'||viewConversation.aiState==='processing'?' — AI is checking your request…':viewConversation.aiMode==='human'?' — Waiting for Support Admin':' — AI Support')+(isClosed(viewConversation)?' — This support request is completed. History is read-only. Create a new ticket for more help.':''));}
  function drawTickets(){ticketSelect.replaceChildren();for(const c of ticketRows.values())ticketSelect.append(node('option',{value:c.ticketId},c.ticketId+' · '+c.status));ticketSelect.value=selectedTicket||'';ticketMore.hidden=!ticketCursor;}
  async function loadTickets(older=false){if(!valid()||older&&!ticketCursor)return;const c=ctx,g=version,v=++ticketVersion;try{const response=await fetch(API_BASE_URL+'/support/tickets'+(older?'?before='+encodeURIComponent(ticketCursor):''),{headers:{Authorization:'Bearer '+c.token},cache:'no-store'}),r=await response.json();if(!valid()||g!==version||v!==ticketVersion)return;if(!response.ok||!r.success)throw Error(r.message||'Ticket list unavailable.');if(!older)ticketRows.clear();for(const t of r.items)ticketRows.set(t.ticketId,t);ticketCursor=r.nextCursor;drawTickets();}catch(e){if(valid()&&g===version)notice.textContent=e.message;}}
  const context=()=>{const s=window.dashboardSession,uid=localStorage.getItem('uid'),token=localStorage.getItem('token');return s?.verified&&!s.closed&&!s.blocked&&uid&&token?{uid,token,epoch:s.epoch}:null;};
@@ -13066,34 +13080,82 @@ window.TCMSupportPending = function(validate) {
  const valid=()=>window.supportChatOpen&&same(ctx,context());
  const key=c=>'tcm_support_user_send_'+c.uid;
  const pending=TCMSupportPending(op=>op&&typeof op.uid==='string'&&/^[\w-]{1,128}$/.test(op.uid)&&typeof op.message==='string'&&op.message.length<=4000&&typeof op.image==='string'&&op.image.length<=245800&&typeof op.orderId==='string'&&op.orderId.length<=160);
- const pendingState=()=>ctx?pending.read(key(ctx)):{op:null,blocked:false,problem:''};
+ const pendingState=()=>{const state=ctx?pending.read(key(ctx)):{op:null,blocked:false,problem:''};return state.op&&acknowledged.has(state.op.requestId)?{op:null,blocked:state.blocked,problem:state.blocked?state.problem:''}:state;};
  const saved=()=>pendingState().op;
  const reset=button('Reset unreadable saved state',()=>{if(!ctx||!pendingState().blocked)return;if(!confirm('Check conversation history first: a previous send may already exist. Reset only this browser state? Server messages will remain.'))return;if(pending.reset(key(ctx))){notice.textContent='Browser state reset. Your current draft is retained.';pendingUI();}else notice.textContent='Browser storage is still unavailable. No message was sent.';});compose.before(reset);reset.hidden=true;
- function pendingUI(){if(!ctx)return;connection.textContent=streamOnline?'Live support connected.':'Connecting live support… You can still send messages.';const st=pendingState();reset.hidden=!st.blocked;retry.hidden=!st.op||st.blocked;retry.disabled=busy;const writable=ready&&(newDraft||viewConversation&&!isClosed(viewConversation)&&selectedTicket===activeTicket);compose.hidden=!writable;input.disabled=order.disabled=attach.disabled=!writable||busy;newButton.disabled=!ready||busy||st.blocked||!!st.op||!!currentConversation&&!isClosed(currentConversation);newButton.hidden=newDraft;ticketSelect.disabled=busy;send.disabled=!writable||busy||st.blocked||!!st.op;send.textContent=busy?'Sending…':st.op?'Retry above':'Send';if(st.problem)notice.textContent=st.problem;else if(st.op)notice.textContent='A previous message is saved. Tap Retry saved message to send that same message before sending another.';}
- function render(older=false){const h=box.scrollHeight,top=box.scrollTop,nearBottom=h-top-box.clientHeight<70;box.replaceChildren();for(const row of [...rows.values()].sort(compareMessages))box.append(bubble(row));if(!rows.size)box.append(node('p',{class:'s5-notice'},'How can we help you today? Send a message to contact Admin.'));if(older)box.scrollTop=box.scrollHeight-h+top;else if(nearBottom)box.scrollTop=box.scrollHeight;more.hidden=!cursor;}
- async function load(older=false,refresh=false){if(!valid()||older&&!cursor)return;controller?.abort();controller=new AbortController();const c=ctx,gen=version,v=++loadVersion,events=liveRevision;notice.textContent='Loading conversation…';try{const response=await fetch(API_BASE_URL+'/support/messages?uid='+encodeURIComponent(c.uid)+(selectedTicket?'&ticketId='+encodeURIComponent(selectedTicket):'')+(older?'&before='+encodeURIComponent(cursor):''),{headers:{Authorization:'Bearer '+c.token},cache:'no-store',signal:controller.signal}),r=await response.json();if(!valid()||gen!==version||v!==loadVersion)return;if(response.status===401||response.status===403)window.handleDashboardAccess?.(response.status,r.message,r.code);if(!response.ok||!r.success)throw new Error(r.message||'Support unavailable.');if(events!==liveRevision&&r.conversation?.ticketId!==activeTicket&&(!selectedTicket||selectedTicket===activeTicket))return;if(!older&&!refresh&&events===liveRevision)rows.clear();for(const m of r.items||r.data)rows.set(m.id,m);if(!refresh)cursor=r.nextCursor;render(older);if(!currentConversation||!r.conversation||r.conversation.revision>=currentConversation.revision)activeTicket=r.activeTicketId;selectedTicket=r.conversation?.ticketId||null;viewConversation=selectedTicket===currentConversation?.ticketId&&currentConversation.revision>r.conversation.revision?currentConversation:r.conversation;ready=true;if(selectedTicket===activeTicket||!activeTicket)currentConversation=viewConversation;paintStatus();if(!older)void loadTickets();notice.textContent='Messages are private between you and Support.';pendingUI();}catch(e){if(e.name!=='AbortError'&&gen===version&&valid())notice.textContent=e.message;}}
- function leave(){stopStream();sendController?.abort();window.visualViewport?.removeEventListener('resize',fitViewport);window.visualViewport?.removeEventListener('scroll',fitViewport);++version;++loadVersion;controller?.abort();const wasOpen=window.supportChatOpen;window.supportChatOpen=false;window.supportChatVersion=(window.supportChatVersion||0)+1;ctx=null;rows.clear();cursor=null;selectedTicket=activeTicket=null;currentConversation=viewConversation=null;ready=false;newDraft=false;ticketRows.clear();ticketSelect.replaceChildren();ticketCursor=null;++ticketVersion;compose.hidden=true;picture='';remove.hidden=true;input.value='';order.value='';attach.value='';attachment.textContent='';notice.textContent='';reset.hidden=true;status.textContent='';box.replaceChildren();more.hidden=true;retry.hidden=true;++fileVersion;closeImages();}
+ function pendingUI(){
+  if(!ctx)return;connection.textContent=navigator.onLine===false?'Offline. Messages will resume when connected.':streamOnline?'Live support connected.':'Connecting live support. You can still send messages.';
+  const st=pendingState();reset.hidden=!st.blocked;retry.hidden=true;editUnsent.hidden=!st.op||!sendError;
+  const writable=ready&&(newDraft||viewConversation&&!isClosed(viewConversation)&&selectedTicket===activeTicket);
+  compose.hidden=!writable;input.disabled=order.disabled=attach.disabled=!writable||busy;
+  newButton.disabled=!ready||busy||st.blocked||!!st.op||!!currentConversation&&!isClosed(currentConversation);newButton.hidden=newDraft;
+  ticketSelect.disabled=busy;send.disabled=!writable||busy||st.blocked||!!st.op;send.textContent=busy?'Sending…':st.op?'Pending':'Send';
+  if(st.blocked)notice.textContent=st.problem;
+  else if(st.op)notice.textContent=sendError|| (busy?'Sending your message…':navigator.onLine===false?'Offline. Your message is saved.':'Your message is saved. Delivery will be checked automatically.');
+ }
+ function render(older=false){
+  const h=box.scrollHeight,top=box.scrollTop,nearBottom=h-top-box.clientHeight<70;box.replaceChildren();
+  const rendered=[...rows.values()].sort(compareMessages),op=saved();
+  for(const row of rendered){const n=bubble(row);if(row.sender==='user')n.append(node('small',{'data-delivery-state':'sent'},'Sent'));box.append(n);}
+  if(op&&(op.ticketId===selectedTicket||op.newTicket&&newDraft)&&!rendered.some(m=>m.requestId===op.requestId)){
+   const n=bubble({id:'pending-'+op.requestId,sender:'user',message:op.message,image:op.image,orderId:op.orderId,timestamp:null});
+   n.append(node('small',{'data-delivery-state':sendError?'failed':'pending'},sendError|| (busy?'Sending…':'Pending delivery')));box.append(n);
+  }
+  if(!box.children.length)box.append(node('p',{class:'s5-notice'},'Ask AI Support about your order or request an administrator.'));
+  if(older)box.scrollTop=box.scrollHeight-h+top;else if(nearBottom)box.scrollTop=box.scrollHeight;more.hidden=!cursor;
+ }
+ async function load(older=false,refresh=false){if(!valid()||older&&!cursor)return;controller?.abort();controller=new AbortController();const c=ctx,gen=version,v=++loadVersion,events=liveRevision;notice.textContent='Loading conversation…';try{const response=await fetch(API_BASE_URL+'/support/messages?uid='+encodeURIComponent(c.uid)+(selectedTicket?'&ticketId='+encodeURIComponent(selectedTicket):'')+(older?'&before='+encodeURIComponent(cursor):''),{headers:{Authorization:'Bearer '+c.token},cache:'no-store',signal:controller.signal}),r=await response.json();if(!valid()||gen!==version||v!==loadVersion)return;if(response.status===401||response.status===403)window.handleDashboardAccess?.(response.status,r.message,r.code);if(!response.ok||!r.success)throw new Error(r.message||'Support unavailable.');if(events!==liveRevision&&r.conversation?.ticketId!==activeTicket&&(!selectedTicket||selectedTicket===activeTicket))return;if(!older&&!refresh&&events===liveRevision)rows.clear();for(const m of r.items||r.data)rows.set(m.id,m);if(!refresh)cursor=r.nextCursor;render(older);if(!currentConversation||!r.conversation||r.conversation.revision>=currentConversation.revision)activeTicket=r.activeTicketId;selectedTicket=r.conversation?.ticketId||null;viewConversation=selectedTicket===currentConversation?.ticketId&&currentConversation.revision>r.conversation.revision?currentConversation:r.conversation;ready=true;if(selectedTicket===activeTicket||!activeTicket)currentConversation=viewConversation;paintStatus();if(!older)void loadTickets();notice.textContent='Messages are private between you and Support.';pendingUI();resumeSaved();}catch(e){if(e.name!=='AbortError'&&gen===version&&valid())notice.textContent=e.message;}}
+ function leave(){stopStream();clearTimeout(resendTimer);resendTimer=null;sendError='';sendController?.abort();window.visualViewport?.removeEventListener('resize',fitViewport);window.visualViewport?.removeEventListener('scroll',fitViewport);++version;++loadVersion;controller?.abort();const wasOpen=window.supportChatOpen;window.supportChatOpen=false;window.supportChatVersion=(window.supportChatVersion||0)+1;ctx=null;rows.clear();cursor=null;selectedTicket=activeTicket=null;currentConversation=viewConversation=null;ready=false;newDraft=false;ticketRows.clear();ticketSelect.replaceChildren();ticketCursor=null;++ticketVersion;compose.hidden=true;picture='';remove.hidden=true;input.value='';order.value='';attach.value='';attachment.textContent='';notice.textContent='';reset.hidden=true;status.textContent='';box.replaceChildren();more.hidden=true;retry.hidden=true;++fileVersion;closeImages();}
  function fitViewport(){const v=window.visualViewport;modal.style.setProperty('--s5-visible-height',Math.round(v?.height||innerHeight)+'px');modal.style.setProperty('--s5-visible-top',Math.round(v?.offsetTop||0)+'px');}
  window.leaveSupportChat=leave;
  window.closeSupportChat=()=>window.closeModal('userSupportModal');
  window.openSupportChat=()=>{const c=context();if(!c)return window.showToast?.('Please sign in to contact support.',true);leave();ctx=c;window.supportChatOpen=true;fitViewport();window.visualViewport?.addEventListener('resize',fitViewport);window.visualViewport?.addEventListener('scroll',fitViewport);window.openModal('userSupportModal');pendingUI();void load();startStream();};
+ const acknowledged=new Set();let resendTimer=null,resendAttempt=0,sendError='';
+ function acknowledge(op){acknowledged.add(op.requestId);pending.clear(key(ctx),op);clearTimeout(resendTimer);resendTimer=null;resendAttempt=0;sendError='';if(busy)sendController?.abort();}
+ function resumeSaved(){
+  clearTimeout(resendTimer);resendTimer=null;
+  if(!valid()||document.hidden||navigator.onLine===false||busy||!saved()||sendError)return;
+  resendTimer=setTimeout(()=>{resendTimer=null;void sendSaved();},Math.min(15000,1000*2**Math.min(resendAttempt++,4)));
+ }
  async function sendSaved(){
   if(!valid()||busy)return;const c=ctx,gen=version,op=saved();if(!op)return;
   const durable=pending.persist(key(c),op);if(!durable.ok){pendingUI();notice.textContent=durable.problem;return;}
-  busy=true;sendController=new AbortController();const active=sendController,timer=setTimeout(()=>active.abort(),20000);pendingUI();
+  clearTimeout(resendTimer);resendTimer=null;busy=true;sendError='';
+  sendController=new AbortController();const active=sendController,timer=setTimeout(()=>active.abort(),20000);pendingUI();render();
   try{
    const response=await fetch(API_BASE_URL+'/support/message',{method:'POST',headers:{Authorization:'Bearer '+c.token,'Content-Type':'application/json'},body:JSON.stringify(op),signal:active.signal,cache:'no-store'}),r=await response.json();
-   if(!response.ok||!r?.success){if([401,403].includes(response.status)&&valid()&&gen===version)window.handleDashboardAccess?.(response.status,r?.message,r?.code);throw Object.assign(new Error(r?.message||'Message could not be confirmed.'),{status:response.status});}
-   pending.clear(key(c),op);if(!valid()||!same(c,ctx)||gen!==version)return;
+   if(!response.ok||r?.success!==true){if([401,403].includes(response.status)&&valid()&&gen===version)window.handleDashboardAccess?.(response.status,r?.message,r?.code);throw Object.assign(new Error(r?.message||'Message could not be confirmed.'),{status:response.status});}
+   // A saved HTTP response is authoritative even if the SSE stream arrived first or the ticket view changed.
+   acknowledged.add(op.requestId);pending.clear(key(c),op);clearTimeout(resendTimer);resendTimer=null;resendAttempt=0;sendError='';
+   if(!valid()||!same(c,ctx)||gen!==version)return;
    const delivered=r.data?.conversation,applyHere=delivered&&(selectedTicket===delivered.ticketId||newDraft&&op.newTicket===true);
-   if(applyHere){newDraft=false;activeTicket=r.data.activeTicketId||delivered.ticketId;selectedTicket=delivered.ticketId;viewConversation=delivered;if(selectedTicket===activeTicket)currentConversation=viewConversation;ready=true;if(r.data?.message){rows.set(r.id,r.data.message);render();box.scrollTop=box.scrollHeight;}if(input.value.trim()===op.message)input.value='';if(picture===op.image){picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}paintStatus();}
-   void loadTickets();notice.textContent=applyHere?'Message sent.':'Saved message delivered to its original ticket. Current view retained.';
-  }catch(e){if([400,403,404,409].includes(e.status))pending.clear(key(c),op);if(valid()&&gen===version){notice.textContent=e.name==='AbortError'?'Send could not be confirmed. Tap Retry saved message; the same request will be checked without creating a duplicate.':e.message;if(e.status===409){newDraft=false;selectedTicket=null;void load();}}}
-  finally{clearTimeout(timer);if(sendController===active)sendController=null;busy=false;if(valid())pendingUI();}
+   if(applyHere){
+    newDraft=false;selectedTicket=delivered.ticketId;
+    const latest=currentConversation?.ticketId===delivered.ticketId&&currentConversation.revision>delivered.revision?currentConversation:delivered;
+    activeTicket=r.data.activeTicketId||latest.ticketId;viewConversation=latest;if(selectedTicket===activeTicket)currentConversation=latest;ready=true;
+    const m=r.data?.message;if(m&&typeof m.id==='string')rows.set(m.id,{...m,requestId:op.requestId,deliveryState:'sent'});
+    if(input.value.trim()===op.message)input.value='';
+    if(picture===op.image){picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}
+    paintStatus();render();box.scrollTop=box.scrollHeight;
+   }
+   // No history reload is required to confirm a successful send.
+   pendingUI();notice.textContent=applyHere?'Message sent.':'Message sent to its original ticket.';
+  }catch(e){
+   if(acknowledged.has(op.requestId))return;
+   if(valid()&&gen===version){
+    if([400,401,403,404,409,413].includes(e.status)){
+     sendError=e.message;notice.textContent=e.message;
+     if(e.status===409){newDraft=false;selectedTicket=null;void load();}
+    }else notice.textContent=navigator.onLine===false?'Offline. Your message is saved and will send when connected.':'Sending is delayed. Your saved message will be checked automatically.';
+   }
+  }finally{
+   clearTimeout(timer);if(sendController===active)sendController=null;busy=false;
+   if(valid()){pendingUI();render();resumeSaved();}
+  }
  }
  window.sendUserSupportMessage=async()=>{if(!valid()||busy||!ready||!newDraft&&(!viewConversation||isClosed(viewConversation)||selectedTicket!==activeTicket))return;if(pendingState().blocked||saved()){pendingUI();return;}const message=input.value.trim();if(!message&&!picture)return;const op={uid:ctx.uid,message,image:picture,orderId:order.value.trim(),requestId:crypto.randomUUID(),...(newDraft?{newTicket:true,previousTicketId:activeTicket}:{ticketId:selectedTicket})};const durable=pending.persist(key(ctx),op);if(!durable.ok){pendingUI();notice.textContent=durable.problem;return;}await sendSaved();};
  attach.addEventListener('change',async()=>{const gen=version,v=++fileVersion;picture='';try{const p=await file(attach.files[0]);if(gen===version&&v===fileVersion){picture=p;remove.hidden=!p;attachment.textContent=p?'Image attached · up to 180 KB':'';}}catch(e){if(gen===version&&v===fileVersion){attach.value='';notice.textContent=e.message;}}});
- document.addEventListener('visibilitychange',()=>{if(document.hidden){stopStream();controller?.abort();closeImages();}else if(valid()){void load();startStream();}});window.addEventListener('online',()=>{if(valid())startStream();});window.addEventListener('pagehide',leave);window.addEventListener('storage',e=>{if(['uid','token',null].includes(e.key)){leave();if(modal.style.display!=='none')window.closeModal('userSupportModal');}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){stopStream();controller?.abort();closeImages();}else if(valid()){void load();startStream();resumeSaved();}});window.addEventListener('online',()=>{if(valid()){startStream();resumeSaved();}});window.addEventListener('pagehide',leave);window.addEventListener('storage',e=>{if(['uid','token',null].includes(e.key)){leave();if(modal.style.display!=='none')window.closeModal('userSupportModal');}});
 })();
 
 

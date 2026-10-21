@@ -12623,7 +12623,15 @@ window.TCMSupportKit=(()=>{
 
  const file=async f=>{if(!f)return '';if(f.size>184320||!['image/png','image/jpeg','image/webp'].includes(f.type))throw new Error('Choose a PNG, JPEG or WebP image up to 180 KB.');return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Image could not be read.'));r.readAsDataURL(f)});};
 
- const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='admin'?'Support':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));return n;};
+ const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='ai'?'AI Assistant':r.sender==='admin'?'Support Admin':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));
+  for(const order of [...(r.verifiedOrders||[]),...(r.recentTransactions||[])]){
+   const card=node('section',{class:'s5-order-card',style:'padding:10px;margin-top:8px;border:1px solid #31516f;border-radius:8px'});
+   card.append(node('strong',{},order.orderId||'Order ID not recorded'));
+   for(const [label,value]of [['Type',order.type],['Status',order.status],['Amount',order.amount],['Fee',order.fee],['Net',order.net],['Network',order.network],['Hash',order.hash],['Date',order.date?time(order.date):null],['Review note',order.reviewNotes]])
+    if(value!==null&&value!==undefined&&value!=='')card.append(node('p',{},label+': '+String(value)));
+   n.append(card);
+  }
+  return n;};
 
  const closeImages=()=>document.querySelectorAll('.s5-image-dialog').forEach(d=>d.close());
 
@@ -12705,9 +12713,9 @@ window.TCMSupportPending = function(validate) {
 
  const notice=node('p',{class:'s5-notice',role:'status'}),toolbar=node('div',{class:'s5-toolbar'}),search=node('input',{type:'search',placeholder:'Search loaded names, UID, ticket or reference','aria-label':'Search loaded conversations'}),filter=node('select',{'aria-label':'Filter loaded conversation status'}),lookup=node('input',{placeholder:'Exact UID','aria-label':'Find conversation by exact UID'});
 
- for(const v of ['All statuses','Open','Waiting for user','Resolved','Closed'])filter.append(node('option',{value:v},v));
+ for(const v of ['All statuses','Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed'])filter.append(node('option',{value:v},v));
 
- toolbar.append(search,filter,lookup,button('Find UID',()=>loadList(false,true)),button('Refresh',()=>loadList()));
+ toolbar.append(search,filter,lookup,button('Find UID',()=>loadList(false,true)));
 
  const layout=node('div',{class:'s5-layout'}),aside=node('aside',{class:'s5-sidebar'}),list=node('div',{id:'supportUserList',class:'s5-conversations'}),older=button('Load older conversations',()=>loadList(true)),panel=node('div',{class:'s5-panel'}),head=node('div',{class:'s5-head'}),heading=node('h3',{id:'supportChatHeader'},'Select a conversation'),headActions=node('div',{class:'s6-head-actions'}),askAiBtn=button('Open AI Assistant',ev=>{const c=selectedConversation();if(window.openAdminAiAssistant)window.openAdminAiAssistant({source:'support-ticket',uid:selected,conversation:c||null,ticketId:c?.ticketId||viewingTicket||'legacy',messages:[...messages.values()],retrievedAt:Date.now()},ev.currentTarget);},'s5-button'),close=button('Close panel',()=>closeConversation(),'s5-button s5-button-ghost');
 
@@ -12717,9 +12725,10 @@ window.TCMSupportPending = function(validate) {
 
  saveStatus.title='Save selected ticket status (Selecting Resolved or Closed completes the ticket).';
 
- for(const v of ['Open','Waiting for user','Resolved','Closed'])state.append(node('option',{value:v},v));
+ for(const v of ['Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed'])state.append(node('option',{value:v},v));
 
- headActions.append(askAiBtn,close);head.append(heading,headActions);
+ const takeover=button('Take over',()=>startAction('takeover',{}));
+ headActions.append(takeover,askAiBtn,close);head.append(heading,headActions);
 
  const statusbar=node('div',{class:'s5-toolbar'}),ticketSelect=node('select',{'aria-label':'Ticket history'}),ticketMore=button('Older tickets',()=>loadTickets(true));
 
@@ -12733,7 +12742,7 @@ window.TCMSupportPending = function(validate) {
 
  let aiDraftRevision=null;
 
- window.tcmApplyAiSupportDraft=(ref,text)=>{const c=selectedConversation(),active=conversations.get(selected);if(!visible()||busy||!c||!active||isClosed(c)||ref.uid!==selected||ref.ticketId!==c.ticketId||ref.ticketId!==active.ticketId||ref.revision!==c.revision||input.value.trim()||image||saved()||pending.read(storageKey()).blocked||typeof text!=='string'||text.length>4000)return false;input.value=text;aiDraftRevision=ref.revision;return true;};
+ window.tcmApplyAiSupportDraft=(ref,text)=>{const c=selectedConversation(),active=conversations.get(selected);if(!visible()||busy||!c||!active||isClosed(c)||(c.aiMode||'auto')==='auto'||ref.uid!==selected||ref.ticketId!==c.ticketId||ref.ticketId!==active.ticketId||ref.revision!==c.revision||input.value.trim()||image||saved()||pending.read(storageKey()).blocked||typeof text!=='string'||text.length>4000)return false;input.value=text;aiDraftRevision=ref.revision;return true;};
 
  function clearDraftState(){aiDraftRevision=null;input.value='';order.value='';image='';attach.value='';attachment.textContent='';clearImage.hidden=true;++chosenFile;closeImages();}
 
@@ -12831,7 +12840,7 @@ window.TCMSupportPending = function(validate) {
 
  const storageKey=()=>{requireAdminSession();return 'tcm_support_action_'+adminAuthState.actorUid;};
 
- const pending=TCMSupportPending(op=>op&&['reply','status'].includes(op.path)&&op.payload&&typeof op.payload.uid==='string'&&/^[\w-]{1,128}$/.test(op.payload.uid)&&(op.path==='reply'?typeof op.payload.message==='string'&&op.payload.message.length<=4000&&typeof op.payload.image==='string'&&op.payload.image.length<=245800&&typeof op.payload.orderId==='string'&&op.payload.orderId.length<=160:['Open','Waiting for user','Resolved','Closed'].includes(op.payload.status)&&Number.isSafeInteger(op.payload.revision)&&op.payload.revision>=0));
+ const pending=TCMSupportPending(op=>op&&['reply','status','takeover'].includes(op.path)&&op.payload&&typeof op.payload.uid==='string'&&/^[\w-]{1,128}$/.test(op.payload.uid)&&(op.path==='takeover'?typeof op.payload.ticketId==='string':op.path==='reply'?typeof op.payload.message==='string'&&op.payload.message.length<=4000&&typeof op.payload.image==='string'&&op.payload.image.length<=245800&&typeof op.payload.orderId==='string'&&op.payload.orderId.length<=160:['Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed'].includes(op.payload.status)&&Number.isSafeInteger(op.payload.revision)&&op.payload.revision>=0));
 
  function saved(){return pending.read(storageKey()).op;}
 
@@ -12859,7 +12868,7 @@ window.TCMSupportPending = function(validate) {
 
   const readonly=!c||isClosed(c)||isHistorical;
 
-  send.disabled=busy||!selected||readonly||st.blocked||!!op;
+  send.disabled=busy||!selected||readonly||(c.aiMode||'auto')==='auto'||st.blocked||!!op;
 
   saveStatus.disabled=busy||!selected||readonly||st.blocked||!!op;
 
@@ -12903,7 +12912,8 @@ window.TCMSupportPending = function(validate) {
 
   }
 
-  compose.hidden=!c||closed||isHistorical;
+  compose.hidden=!c||closed||isHistorical||(c.aiMode||'auto')==='auto';
+  takeover.hidden=!c||closed||isHistorical||(c.aiMode||'auto')!=='auto';takeover.disabled=busy;
 
   readonlyBanner.hidden=!c||!compose.hidden;
 
@@ -12913,7 +12923,8 @@ window.TCMSupportPending = function(validate) {
 
     ? `Ticket ${c.ticketId||'legacy'} is marked "${c.status}" (Completed / Read-Only). Reply composer is hidden to preserve the completed record.`
 
-    : `Viewing historical ticket ${c.ticketId||'legacy'} (Read-Only). Switch to the active ticket in the Ticket history selector to send a reply.`;
+    : isHistorical?`Viewing historical ticket ${c.ticketId||'legacy'} (Read-Only). Switch to the active ticket to reply.`
+    : 'Live observation: AI is handling this conversation. Take over to pause AI and reply manually.';
 
   }
 
@@ -12921,7 +12932,7 @@ window.TCMSupportPending = function(validate) {
 
   saveStatus.disabled=!c||closed||isHistorical||busy;
 
-  send.disabled=!c||closed||isHistorical||busy;
+  send.disabled=!c||closed||isHistorical||compose.hidden||busy;
 
   close.disabled=!selected;
 
@@ -12997,9 +13008,35 @@ window.TCMSupportPending = function(validate) {
 
  async function loadMessages(append=false,refresh=false){if(!visible()||!selected||append&&!messageCursor)return;ctrl?.abort();ctrl=new AbortController();const gen=version,v=++msgVersion,key=selected,targetTicket=viewingTicket;if(!append&&!refresh){messages.clear();body.replaceChildren(node('p',{class:'s5-notice'},'Loading ticket conversation…'));}try{const r=await api('messages?uid='+encodeURIComponent(key)+(targetTicket?'&ticketId='+encodeURIComponent(targetTicket):'')+(append?'&before='+encodeURIComponent(messageCursor):''),undefined,ctrl.signal);if(!visible()||gen!==version||v!==msgVersion||selected!==key||targetTicket!==viewingTicket)return;for(const m of r.items)messages.set(m.id,m);if(!refresh)messageCursor=r.nextCursor;const current=conversations.get(key);if(r.conversation){if(r.conversation.ticketId)archived.set(r.conversation.ticketId,r.conversation);if(r.conversation.ticketId===r.activeTicketId&&(!current||r.conversation.revision>=current.revision))conversations.set(key,r.conversation);}renderMessages(append);if(!append){body.scrollTop=body.scrollHeight;if(r.conversation?.ticketId===r.activeTicketId&&(!viewingTicket||viewingTicket===r.activeTicketId))void read(r.conversation,gen,key);}}catch(e){if(e.name!=='AbortError'&&visible()&&gen===version)notice.textContent=e.message;}}
 
- function closeConversation(){++version;++msgVersion;ctrl?.abort();ticketCtrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;++ticketVersion;messages.clear();messageCursor=null;body.replaceChildren(node('p',{class:'s5-notice'},'Select a conversation from the left list to view ticket messages.'));clearDraftState();renderList();}
+ let observeController=null,observeTimer=null,observeVersion=0,observeAttempt=0;
+ function stopObservation(){++observeVersion;observeController?.abort();observeController=null;clearTimeout(observeTimer);observeTimer=null;}
+ function observeConversation(){
+  if(!visible()||document.hidden||!selected||observeController)return;
+  clearTimeout(observeTimer);const uid=selected,epoch=adminAuthState.generation,v=++observeVersion,active=new AbortController();observeController=active;
+  const valid=()=>visible()&&!document.hidden&&selected===uid&&epoch===adminAuthState.generation&&v===observeVersion;
+  void(async()=>{
+   try{
+    const response=await adminApiFetch('/api/admin/support/events?uid='+encodeURIComponent(uid),{signal:active.signal,cache:'no-store',headers:{Accept:'text/event-stream'}});
+    if(!response.ok||!response.body?.getReader||!response.headers.get('content-type')?.includes('text/event-stream'))throw Error('Support observation unavailable');
+    const reader=response.body.getReader(),decoder=new TextDecoder();let buffer='';observeAttempt=0;
+    while(valid()){
+     const part=await reader.read();if(part.done)break;buffer+=decoder.decode(part.value,{stream:true}).replace(/\r\n/g,'\n');if(buffer.length>10000000)throw Error('Observation frame exceeded limit');let end;
+     while((end=buffer.indexOf('\n\n'))>=0){
+      const frame=buffer.slice(0,end);buffer=buffer.slice(end+2);const type=frame.split('\n').find(x=>x.startsWith('event:'))?.slice(6).trim(),raw=frame.split('\n').filter(x=>x.startsWith('data:')).map(x=>x.slice(5).trimStart()).join('\n');if(!raw)continue;
+      const data=JSON.parse(raw);if(!valid())return;
+      if(type==='session'||type==='retry')throw Error('Observation reconnecting');if(type!=='support')continue;
+      if(data.conversation)window.a0ApplySupportChange({uid,conversation:data.conversation});
+      const c=selectedConversation();
+      if(Array.isArray(data.items)&&c&&data.ticketId===c.ticketId){for(const m of data.items)if(m.ticketId===c.ticketId)messages.set(m.id,m);renderMessages();if(data.initial&&!messageCursor)messageCursor=data.nextCursor;void read(c,version,uid);}
+     }
+    }
+   }catch(e){if(e.name!=='AbortError'&&valid())notice.textContent='Reconnecting live observation…';}
+   finally{if(v===observeVersion){observeController=null;if(valid())observeTimer=setTimeout(observeConversation,Math.min(10000,1000*2**Math.min(observeAttempt++,4)));}}
+  })();
+ }
+ function closeConversation(){stopObservation();++version;++msgVersion;ctrl?.abort();ticketCtrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;++ticketVersion;messages.clear();messageCursor=null;body.replaceChildren(node('p',{class:'s5-notice'},'Select a conversation from the left list to view ticket messages.'));clearDraftState();renderList();}
 
- window.selectSupportConversation=async(key)=>{if(!visible())return;closeConversation();selected=key;activeSupportUid=key;viewingTicket=conversations.get(key)?.ticketId||null;controls();renderList();await loadMessages();void loadTickets();};
+ window.selectSupportConversation=async(key)=>{if(!visible())return;closeConversation();selected=key;activeSupportUid=key;viewingTicket=conversations.get(key)?.ticketId||null;controls();renderList();observeConversation();await loadMessages();void loadTickets();};
 
  window.a0LoadSupportMessages=()=>loadMessages();
 
@@ -13087,9 +13124,9 @@ window.TCMSupportPending = function(validate) {
 
  const previousStop=window.a0StopSupport;window.a0StopSupport=()=>{stop();previousStop();};
 
- function stop(){++version;++listVersion;++msgVersion;++ticketVersion;ctrl?.abort();listCtrl?.abort();ticketCtrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;conversations.clear();messages.clear();inboxCursor=null;messageCursor=null;clearDraftState();list.replaceChildren();body.replaceChildren();controls();}
+ function stop(){stopObservation();++version;++listVersion;++msgVersion;++ticketVersion;ctrl?.abort();listCtrl?.abort();ticketCtrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;conversations.clear();messages.clear();inboxCursor=null;messageCursor=null;clearDraftState();list.replaceChildren();body.replaceChildren();controls();}
 
- async function mutate(op){if(busy)return;const key=storageKey(),durable=pending.persist(key,op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}const actor=adminAuthState.generation,gen=version;busy=true;updatePending();try{const r=await api(op.path,op.payload);pending.clear(key,op);if(actor!==adminAuthState.generation)return;if(visible()&&gen===version){if(r.data)window.a0ApplySupportChange({uid:op.payload.uid,...r.data});if(r.conversation)window.a0ApplySupportChange({uid:op.payload.uid,conversation:r.conversation});if(selected===op.payload.uid&&op.path==='reply'){if(input.value.trim()===op.payload.message){input.value='';aiDraftRevision=null;}if(order.value.trim()===op.payload.orderId)order.value='';if(image===op.payload.image){image='';attach.value='';attachment.textContent='';clearImage.hidden=true;++chosenFile;}}if(op.path==='reply'&&selected===op.payload.uid&&selectedConversation()?.ticketId===op.payload.ticketId)body.scrollTop=body.scrollHeight;notice.textContent=op.path==='status'?`Ticket status updated to "${op.payload.status}".`:'Reply sent and saved.';}}catch(e){if([400,403,404,409].includes(e.status))pending.clear(key,op);if(actor===adminAuthState.generation&&visible()&&gen===version)notice.textContent=e.message;}finally{busy=false;if(actor===adminAuthState.generation&&visible())updatePending();}}
+ async function mutate(op){if(busy)return;const key=storageKey(),durable=pending.persist(key,op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}const actor=adminAuthState.generation,gen=version;busy=true;updatePending();try{const r=await api(op.path,op.payload);pending.clear(key,op);if(actor!==adminAuthState.generation)return;if(visible()&&gen===version){if(r.data)window.a0ApplySupportChange({uid:op.payload.uid,...r.data});if(r.conversation)window.a0ApplySupportChange({uid:op.payload.uid,conversation:r.conversation});if(selected===op.payload.uid&&op.path==='reply'){if(input.value.trim()===op.payload.message){input.value='';aiDraftRevision=null;}if(order.value.trim()===op.payload.orderId)order.value='';if(image===op.payload.image){image='';attach.value='';attachment.textContent='';clearImage.hidden=true;++chosenFile;}}if(op.path==='reply'&&selected===op.payload.uid&&selectedConversation()?.ticketId===op.payload.ticketId)body.scrollTop=body.scrollHeight;notice.textContent=op.path==='status'?`Ticket status updated to "${op.payload.status}".`:op.path==='takeover'?'You have taken over. AI replies are paused.':'Reply sent and saved.';}}catch(e){if([400,403,404,409].includes(e.status))pending.clear(key,op);if(actor===adminAuthState.generation&&visible()&&gen===version)notice.textContent=e.message;}finally{busy=false;if(actor===adminAuthState.generation&&visible())updatePending();}}
 
  async function startAction(path,payload){if(!selected||busy||!visible())return;if(pending.read(storageKey()).blocked||saved()){updatePending();return;}const c=selectedConversation(),activeConv=conversations.get(selected);if(!c||isClosed(c)||viewingTicket&&activeConv?.ticketId&&viewingTicket!==activeConv.ticketId)return;const op={path,payload:{...payload,uid:selected,ticketId:c.ticketId||'legacy',requestId:crypto.randomUUID()}};const durable=pending.persist(storageKey(),op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}await mutate(op);}
 
@@ -13105,7 +13142,7 @@ window.TCMSupportPending = function(validate) {
 
  document.addEventListener('tcm:admin-page-leave',e=>{if(e.detail?.page==='support')stop();});
 
- document.addEventListener('visibilitychange',()=>{if(document.hidden){ctrl?.abort();listCtrl?.abort();ticketCtrl?.abort();closeImages();}else if(visible()){void loadList();if(selected)void loadMessages();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){stopObservation();ctrl?.abort();listCtrl?.abort();ticketCtrl?.abort();closeImages();}else if(visible()){void loadList();if(selected){void loadMessages();observeConversation();}}});
 
  controls();
 
