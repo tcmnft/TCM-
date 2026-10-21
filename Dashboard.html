@@ -3785,6 +3785,14 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 #userSupportModal .s5-input-line .s5-button{min-width:64px;min-height:42px;touch-action:manipulation}
 #userSupportModal .s5-notice{max-height:70px}
 </style>
+
+<style id="support-r42-quick-style">
+.s42-quick-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.s42-quick-chip{background:#12283e;color:#c8eef5;border:1px solid #35566c;border-radius:999px;padding:9px 13px;font:inherit;font-size:12px;line-height:1.4;cursor:pointer;transition:background .15s,border-color .15s}
+.s42-quick-chip:hover{background:#19374d;border-color:#69b8cc}
+.s42-quick-chip:focus-visible{outline:2px solid #7dd3fc;outline-offset:3px}
+.s42-quick-chip:disabled{opacity:.55;cursor:default}
+</style>
 </head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
@@ -13054,7 +13062,7 @@ window.TCMSupportPending = function(validate) {
  function stopStream(){++streamVersion;streamController?.abort();streamController=null;clearTimeout(streamTimer);streamTimer=null;streamOnline=false;}
  function applyStreamEvent(data){
   if(!valid())return;++liveRevision;
-  if(Object.hasOwn(data,'conversation')){const c=data.conversation;if(c&&currentConversation&&c.revision<currentConversation.revision)return;currentConversation=c;activeTicket=data.activeTicketId||null;if(c){ticketRows.set(c.ticketId,c);drawTickets();}if(!newDraft&&(!selectedTicket||selectedTicket===activeTicket)){selectedTicket=c?.ticketId||null;viewConversation=c;ready=true;paintStatus();pendingUI();}}
+  if(Object.hasOwn(data,'conversation')){const c=data.conversation;if(c&&currentConversation&&c.revision<currentConversation.revision)return;currentConversation=c;activeTicket=data.activeTicketId||null;if(c){ticketRows.set(c.ticketId,c);drawTickets();}if(!newDraft&&(!selectedTicket||selectedTicket===activeTicket)){selectedTicket=c?.ticketId||null;viewConversation=c;ready=true;paintStatus();pendingUI();render();}}
   if(Array.isArray(data.items)){
    const op=saved(),confirmed=op&&data.items.find(m=>m.sender==='user'&&m.requestId===op.requestId);
    if(confirmed){acknowledge(op);if(newDraft&&op.newTicket){newDraft=false;selectedTicket=data.ticketId;viewConversation=currentConversation;ready=true;}if(input.value.trim()===op.message)input.value='';if(picture===op.image){picture='';attach.value='';attachment.textContent='';remove.hidden=true;}paintStatus();pendingUI();}
@@ -13111,10 +13119,21 @@ window.TCMSupportPending = function(validate) {
   if(st.blocked)notice.textContent=st.problem;
   else if(st.op)notice.textContent=sendError|| (busy?'Sending your message…':navigator.onLine===false?'Offline. Your message is saved.':'Your message is saved. Delivery will be checked automatically.');
  }
+ function appendQuickActions(target,row){
+  if(row.sender!=='ai'||!Array.isArray(row.quickActions)||!row.quickActions.length||!valid()||selectedTicket!==activeTicket||viewConversation?.aiQuickActionMessageId!==row.id||isClosed(viewConversation))return;
+  const group=node('div',{class:'s42-quick-actions','aria-label':'Support options'});
+  for(const action of row.quickActions){if(!['resolve','more_help'].includes(action.id))continue;const chip=button(action.label,()=>sendQuickAction(action,row.id),'s42-quick-chip');chip.disabled=busy||!!saved()||pendingState().blocked;group.append(chip);}
+  target.append(group);
+ }
+ async function sendQuickAction(action,promptId){
+  if(!valid()||busy||saved()||pendingState().blocked||!ready||selectedTicket!==activeTicket||isClosed(viewConversation)||viewConversation?.aiQuickActionMessageId!==promptId)return;
+  const op={uid:ctx.uid,message:action.label,image:'',orderId:'',requestId:crypto.randomUUID(),ticketId:selectedTicket,supportAction:action.id,promptId};
+  const durable=pending.persist(key(ctx),op);if(!durable.ok){pendingUI();notice.textContent=durable.problem;return;}await sendSaved();
+ }
  function render(older=false){
   const h=box.scrollHeight,top=box.scrollTop,nearBottom=h-top-box.clientHeight<70;box.replaceChildren();
   const rendered=[...rows.values()].sort(compareMessages),op=saved();
-  for(const row of rendered){const n=bubble(row);if(row.sender==='user')n.append(node('small',{'data-delivery-state':'sent'},'Sent'));box.append(n);}
+  for(const row of rendered){const n=bubble(row);appendQuickActions(n,row);if(row.sender==='user')n.append(node('small',{'data-delivery-state':'sent'},'Sent'));box.append(n);}
   if(op&&(op.ticketId===selectedTicket||op.newTicket&&newDraft)&&!rendered.some(m=>m.requestId===op.requestId)){
    const n=bubble({id:'pending-'+op.requestId,sender:'user',message:op.message,image:op.image,orderId:op.orderId,timestamp:null});
    n.append(node('small',{'data-delivery-state':sendError?'failed':'pending'},sendError|| (busy?'Sending…':'Pending delivery')));box.append(n);
@@ -13152,6 +13171,7 @@ window.TCMSupportPending = function(validate) {
     const latest=currentConversation?.ticketId===delivered.ticketId&&currentConversation.revision>delivered.revision?currentConversation:delivered;
     activeTicket=r.data.activeTicketId||latest.ticketId;viewConversation=latest;if(selectedTicket===activeTicket)currentConversation=latest;ready=true;
     const m=r.data?.message;if(m&&typeof m.id==='string')rows.set(m.id,{...m,requestId:op.requestId,deliveryState:'sent'});
+    if(r.data?.actionReply?.id)rows.set(r.data.actionReply.id,r.data.actionReply);
     if(input.value.trim()===op.message)input.value='';
     if(picture===op.image){picture='';remove.hidden=true;attach.value='';attachment.textContent='';++fileVersion;}
     paintStatus();render();box.scrollTop=box.scrollHeight;
