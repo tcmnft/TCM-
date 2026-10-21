@@ -1822,6 +1822,545 @@ dialog.bg-slate-900::backdrop,
     #section-support .s5-compose{gap:6px}
     #section-support .s5-conversation{padding:10px}
 }
+
+/* === R6 Support Tickets UI Enhancements === */
+#section-support .s5-panel>.s5-toolbar{
+    display:grid;
+    grid-template-columns:minmax(150px,1.25fr) auto minmax(135px,1fr) auto;
+    align-items:center;
+    gap:8px;
+    margin:4px 0;
+    padding:8px 10px;
+    background:rgba(7,13,25,.65);
+    border:1px solid rgba(148,163,184,.14);
+    border-radius:10px;
+}
+#section-support .s5-panel>.s5-toolbar select{
+    width:100%;
+    min-width:0;
+    min-height:34px;
+    padding:5px 10px;
+    font-size:12.5px;
+}
+.s6-meta-bar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    padding:6px 10px;
+    border-radius:8px;
+    background:rgba(15,23,42,.65);
+    border:1px solid rgba(148,163,184,.12);
+    font-size:12px;
+    color:#cbd5e1;
+}
+.s6-badge{
+    display:inline-flex;
+    align-items:center;
+    gap:4px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:.02em;
+    border:1px solid rgba(148,163,184,.25);
+    background:rgba(15,23,42,.8);
+    color:#e2e8f0;
+}
+.s6-badge-open{
+    background:rgba(14,165,233,.16);
+    border-color:rgba(56,189,248,.4);
+    color:#38bdf8;
+}
+.s6-badge-waiting{
+    background:rgba(245,158,11,.16);
+    border-color:rgba(245,158,11,.42);
+    color:#fbbf24;
+}
+.s6-badge-resolved{
+    background:rgba(16,185,129,.16);
+    border-color:rgba(16,185,129,.4);
+    color:#34d399;
+}
+.s6-badge-closed{
+    background:rgba(148,163,184,.16);
+    border-color:rgba(148,163,184,.38);
+    color:#cbd5e1;
+}
+.s6-badge-active{
+    background:rgba(16,185,129,.12);
+    border-color:rgba(16,185,129,.35);
+    color:#6ee7b7;
+}
+.s6-badge-completed{
+    background:rgba(245,158,11,.12);
+    border-color:rgba(245,158,11,.35);
+    color:#fcd34d;
+}
+.s6-readonly-banner{
+    padding:10px 13px;
+    border-radius:9px;
+    border:1px solid rgba(245,158,11,.35);
+    border-left:3px solid #f59e0b;
+    background:rgba(245,158,11,.08);
+    color:#fde68a;
+    font-size:12.25px;
+    line-height:1.5;
+    flex-shrink:0;
+}
+.s6-head-actions{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+}
+.s5-button-ghost{
+    background:rgba(30,41,59,.75);
+    border-color:rgba(148,163,184,.28);
+    color:#cbd5e1;
+}
+.s5-button-ghost:hover:not(:disabled){
+    background:rgba(51,65,85,.9);
+    border-color:#94a3b8;
+    color:#ffffff;
+}
+.s6-conv-meta{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:5px;
+    margin-top:4px;
+}
+
+/* === Copy Helper & Loaded Summary Styles === */
+.r3-copy-btn{
+    display:inline-flex;
+    align-items:center;
+    gap:3px;
+    margin-left:6px;
+    padding:2px 7px;
+    min-height:22px;
+    border-radius:5px;
+    border:1px solid rgba(56,189,248,.3);
+    background:rgba(14,165,233,.12);
+    color:#7dd3fc;
+    font-family:var(--font-sans);
+    font-size:10.5px;
+    font-weight:600;
+    cursor:pointer;
+    vertical-align:middle;
+    transition:background-color .15s ease,border-color .15s ease,color .15s ease;
+}
+.r3-copy-btn:hover{
+    background:#0284c7;
+    border-color:#38bdf8;
+    color:#ffffff;
+}
+.r3-loaded-summary{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 14px;
+    margin-top:8px;
+    border-radius:9px;
+    background:rgba(15,23,42,.78);
+    border:1px solid rgba(56,189,248,.22);
+    font-size:12.25px;
+    color:#cbd5e1;
+    font-variant-numeric:tabular-nums;
+}
+.r3-loaded-summary strong{
+    color:#38bdf8;
+    font-family:var(--font-mono);
+}
+.r3-monitoring-strip{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+    gap:10px;
+    margin:0 0 14px;
+    padding:12px 14px;
+    border-radius:10px;
+    background:rgba(7,13,25,.65);
+    border:1px solid rgba(148,163,184,.16);
+    font-size:12px;
+    color:#cbd5e1;
+}
+.r3-monitoring-strip>div{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+.r3-monitoring-strip small{
+    font-size:11px;
+    color:#94a3b8;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    font-weight:600;
+}
+.r3-monitoring-strip strong{
+    color:#f8fafc;
+    font-size:12.5px;
+}
+
+/* === Admin AI Assistant Drawer & Bounded Mobile Sheet === */
+.ai-header-btn{
+    background:linear-gradient(135deg,rgba(14,165,233,.22),rgba(99,102,241,.22));
+    border:1px solid rgba(56,189,248,.48);
+    color:#e0f2fe;
+    padding:7px 13px;
+    min-height:36px;
+    border-radius:999px;
+    font-size:12.5px;
+    font-weight:700;
+    white-space:nowrap;
+    box-shadow:0 0 16px rgba(14,165,233,.18);
+}
+.ai-header-btn:hover{
+    background:linear-gradient(135deg,#0284c7,#4f46e5);
+    border-color:#7dd3fc;
+    color:#ffffff;
+}
+.ai-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(3,7,18,.68);
+    backdrop-filter:blur(3px);
+    z-index:88;
+}
+.ai-drawer{
+    position:fixed;
+    top:12px;
+    right:12px;
+    bottom:12px;
+    width:min(450px,calc(100vw - 24px));
+    max-height:calc(100dvh - 24px);
+    display:flex;
+    flex-direction:column;
+    background:#091221;
+    border:1px solid rgba(56,189,248,.32);
+    border-radius:16px;
+    box-shadow:-12px 0 44px rgba(0,0,0,.72);
+    z-index:90;
+    overflow:hidden;
+    color:#e2e8f0;
+}
+.ai-drawer[hidden],.ai-backdrop[hidden]{display:none!important}
+.ai-drawer-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:13px 16px;
+    background:rgba(15,23,42,.92);
+    border-bottom:1px solid rgba(148,163,184,.16);
+    flex-shrink:0;
+}
+.ai-drawer-title{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:15px;
+    font-weight:700;
+    color:#f8fafc;
+    margin:0;
+}
+.ai-drawer-sub{
+    font-size:11.5px;
+    color:#94a3b8;
+    margin-top:2px;
+}
+.ai-authority-banner{
+    padding:8px 14px;
+    background:rgba(245,158,11,.09);
+    border-bottom:1px solid rgba(245,158,11,.25);
+    color:#fde68a;
+    font-size:11.5px;
+    line-height:1.45;
+    flex-shrink:0;
+}
+.ai-status-strip{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    padding:7px 14px;
+    background:rgba(7,13,25,.85);
+    border-bottom:1px solid rgba(148,163,184,.12);
+    font-size:11.5px;
+    flex-shrink:0;
+}
+.ai-conn-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    padding:2px 8px;
+    border-radius:999px;
+    font-size:11px;
+    font-weight:700;
+    background:rgba(244,63,94,.14);
+    border:1px solid rgba(244,63,94,.38);
+    color:#fda4af;
+}
+.ai-conn-pill[data-ai-connected="true"]{
+    background:rgba(16,185,129,.14);
+    border-color:rgba(16,185,129,.4);
+    color:#6ee7b7;
+}
+.ai-context-bar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    padding:8px 14px;
+    background:rgba(14,165,233,.08);
+    border-bottom:1px solid rgba(56,189,248,.18);
+    font-size:12px;
+    flex-shrink:0;
+}
+.ai-context-meta{
+    min-width:0;
+    flex:1;
+    overflow-wrap:anywhere;
+}
+.ai-context-meta strong{
+    color:#38bdf8;
+    font-family:var(--font-mono);
+}
+.ai-body{
+    flex:1;
+    min-height:0;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding:12px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+}
+.ai-section-card{
+    padding:11px 12px;
+    border-radius:11px;
+    background:rgba(15,23,42,.72);
+    border:1px solid rgba(148,163,184,.15);
+}
+.ai-section-card h4{
+    font-size:12.5px;
+    font-weight:700;
+    color:#f8fafc;
+    margin:0 0 6px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+}
+.ai-module-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:6px;
+}
+.ai-module-btn{
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:2px;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid rgba(148,163,184,.18);
+    background:rgba(7,13,25,.75);
+    color:#e2e8f0;
+    font-size:12px;
+    font-weight:600;
+    text-align:left;
+    cursor:pointer;
+    transition:border-color .15s ease,background-color .15s ease;
+}
+.ai-module-btn:hover,.ai-module-btn[aria-pressed="true"]{
+    border-color:#38bdf8;
+    background:rgba(14,165,233,.16);
+    color:#ffffff;
+}
+.ai-module-btn small{
+    font-size:10.5px;
+    font-weight:400;
+    color:#94a3b8;
+    line-height:1.3;
+}
+.ai-chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:5px;
+    margin-top:6px;
+}
+.ai-chip{
+    padding:4px 9px;
+    border-radius:999px;
+    border:1px solid rgba(56,189,248,.3);
+    background:rgba(14,165,233,.1);
+    color:#bae6fd;
+    font-size:11.5px;
+    font-weight:600;
+    cursor:pointer;
+}
+.ai-chip:hover,.ai-chip[aria-pressed="true"]{
+    background:#0284c7;
+    border-color:#7dd3fc;
+    color:#ffffff;
+}
+.ai-messages{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+.ai-msg{
+    padding:11px 13px;
+    border-radius:11px;
+    border:1px solid rgba(148,163,184,.18);
+    background:#101c30;
+    font-size:12.75px;
+    line-height:1.55;
+    color:#e2e8f0;
+    overflow-wrap:anywhere;
+}
+.ai-msg-user{
+    align-self:flex-end;
+    background:#0c3b5e;
+    border-color:rgba(56,189,248,.4);
+    max-width:90%;
+}
+.ai-msg-assistant{
+    align-self:stretch;
+    border-left:3px solid #38bdf8;
+}
+.ai-msg-head{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+    margin-bottom:6px;
+    padding-bottom:5px;
+    border-bottom:1px solid rgba(148,163,184,.12);
+    font-size:11px;
+    color:#94a3b8;
+}
+.ai-msg-body{
+    white-space:pre-wrap;
+    font-size:12.75px;
+    line-height:1.6;
+}
+.ai-msg-ref{
+    margin-top:8px;
+    padding:6px 9px;
+    border-radius:7px;
+    background:rgba(7,13,25,.65);
+    border:1px solid rgba(148,163,184,.12);
+    font-size:11.25px;
+    color:#94a3b8;
+    font-family:var(--font-mono);
+}
+.ai-draft-box{
+    margin-top:8px;
+    padding:8px 10px;
+    border-radius:8px;
+    background:rgba(6,11,20,.75);
+    border:1px solid rgba(56,189,248,.24);
+}
+.ai-draft-box strong{
+    display:block;
+    font-size:11.5px;
+    color:#7dd3fc;
+    margin-bottom:4px;
+}
+.ai-draft-box p{
+    white-space:pre-wrap;
+    font-size:12px;
+    color:#cbd5e1;
+    margin:0 0 6px;
+}
+.ai-audio-bar{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:6px;
+    margin-top:8px;
+}
+.ai-btn{
+    min-height:32px;
+    padding:5px 10px;
+    border-radius:7px;
+    border:1px solid #29435a;
+    background:#0d263b;
+    color:#bae6fd;
+    font-family:inherit;
+    font-size:11.75px;
+    font-weight:600;
+    cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+}
+.ai-btn:hover:not(:disabled){
+    background:#075985;
+    border-color:#38bdf8;
+    color:#ffffff;
+}
+.ai-btn:disabled{
+    opacity:.45;
+    cursor:not-allowed;
+}
+.ai-btn-audio{
+    background:rgba(16,185,129,.15);
+    border-color:rgba(16,185,129,.4);
+    color:#6ee7b7;
+}
+.ai-btn-stop{
+    background:rgba(244,63,94,.15);
+    border-color:rgba(244,63,94,.4);
+    color:#fda4af;
+}
+.ai-footer{
+    padding:10px 14px 12px;
+    background:rgba(11,19,34,.96);
+    border-top:1px solid rgba(148,163,184,.16);
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    flex-shrink:0;
+}
+.ai-footer textarea{
+    min-height:54px;
+    max-height:110px;
+    resize:vertical;
+    font-size:12.75px;
+}
+.ai-footer-actions{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    justify-content:space-between;
+    gap:6px;
+}
+@media(max-width:767px){
+    #section-support .s5-panel>.s5-toolbar{
+        grid-template-columns:minmax(0,1fr) auto;
+    }
+    .ai-drawer{
+        top:8px;
+        right:8px;
+        left:8px;
+        bottom:8px;
+        width:auto;
+        max-height:calc(100dvh - 16px);
+        border-radius:14px;
+    }
+    .ai-module-grid{
+        grid-template-columns:1fr;
+    }
+}
+
 </style>
 </head>
 <body class="flex h-screen w-full relative">
@@ -1861,7 +2400,7 @@ dialog.bg-slate-900::backdrop,
     <main class="flex-1 h-screen overflow-y-auto p-4 md:p-6 z-10 relative" id="consoleMain" tabindex="-1">
         
         <!-- TOP HEADER -->
-        <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5"><button type="button" id="consoleMenuButton" class="console-menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="consoleSidebar" onclick="consoleSetMenu(true)">☰</button><div><p id="consoleBreadcrumb" class="console-breadcrumb">Dashboard</p><h2 id="section-title">Overview</h2><p id="section-subtitle">Requests, summaries and shortcuts</p></div><span class="console-phase">Communication · R4</span></header>
+        <header class="flex justify-between items-center mb-6 pb-4 border-b border-white/5"><button type="button" id="consoleMenuButton" class="console-menu-button" aria-label="Open navigation" aria-expanded="false" aria-controls="consoleSidebar" onclick="consoleSetMenu(true)">☰</button><div><p id="consoleBreadcrumb" class="console-breadcrumb">Dashboard</p><h2 id="section-title">Overview</h2><p id="section-subtitle">Requests, summaries and shortcuts</p></div><div class="flex items-center gap-2"><span class="console-phase">Support · R6</span><button type="button" id="adminAiToggleBtn" class="cyber-btn ai-header-btn" aria-expanded="false" aria-controls="adminAiDrawer" onclick="window.toggleAdminAiAssistant(this)"><i class="fa-solid fa-robot" aria-hidden="true"></i> <span>AI Assistant</span></button></div></header>
 
         <!-- DASHBOARD -->
         <div id="section-dashboard" class="admin-section fade-in"><div class="console-note" role="note">Transactions and Order Tracking are available from their menus. Announcements now have a persistent archive and user inbox.</div>
@@ -2389,11 +2928,11 @@ dialog.bg-slate-900::backdrop,
                         </div>
                         <button id="saveFeeConfig" type="button" disabled="" onclick="saveAdminFeeConfig()" class="cyber-btn mt-3 bg-sky-500/20 text-sky-400 px-3 py-2 rounded disabled:opacity-50">Update Fee Rates</button>
                         <p id="feeConfigMessage" role="status" class="text-xs text-slate-400 mt-2">Refresh treasury to load fee rates. Pending orders keep their saved fees.</p>
-                    </div><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite"></p></div><div id="section-dividends" class="admin-section hidden fade-in"><div class="glass-card console-dividend-card"><h3>Dividend Distribution</h3><p>Review the current pool and configured shareholder roster before confirming a distribution. Funding transfers stay on the Treasury page.</p><button type="button" class="console-link" onclick="refreshAdminTreasury()">Refresh treasury &amp; eligibility</button><button type="button" disabled="" data-treasury="dividend" onclick="openTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Distribute Dividend</button><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite">Refresh treasury to load eligibility.</p></div></div><div id="section-reconciliation" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Balance reconciliation is scheduled for a later stage.</h3><p>Historical values must come from saved records. Missing snapshots will be labelled Not recorded; current balances will not be used to invent old amounts.</p><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button></div></div><div id="section-announcements" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Announcement archive is scheduled for the Communication stage.</h3><p>The current broadcast updates one system document. The new archive, user inbox, unread state and three-second popup are not enabled by this menu update.</p><button type="button" class="console-link" onclick="switchTab('broadcast')">Open existing announcement form</button></div></div><div id="section-email" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Email delivery history is scheduled for a later stage.</h3><p>The existing withdrawal approval email queue is unchanged. Approval is separate from verified blockchain payout.</p><button type="button" class="console-link" onclick="switchTab('withdrawals')">Open withdrawal queue</button></div></div><div id="section-recovery" class="admin-section hidden fade-in"><div class="console-note console-warning" role="note">Existing daily-counter and staking settlement recovery only. Recovery for stuck NFT sales is not included.</div><div class="glass-card p-4 mt-6 border-l-4 border-l-amber-500">
+                    </div><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite"></p></div><div id="section-dividends" class="admin-section hidden fade-in"><div class="glass-card console-dividend-card"><h3>Dividend Distribution</h3><p>Review the current pool and configured shareholder roster before confirming a distribution. Funding transfers stay on the Treasury page.</p><button type="button" class="console-link" onclick="refreshAdminTreasury()">Refresh treasury &amp; eligibility</button><button type="button" disabled="" data-treasury="dividend" onclick="openTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Distribute Dividend</button><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite">Refresh treasury to load eligibility.</p></div></div><div id="section-reconciliation" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Backend required · Read-only tools available</span><h3>Balance Reconciliation &amp; Saved Snapshot Audit</h3><p>Full-system automated mismatch scanning requires a dedicated backend reconciliation endpoint (<b>Not recorded</b> in current API). Historical values must come strictly from saved records; current balances are never used to invent historical ledger snapshots.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Per-Order Balance Snapshots</small><strong>Available in Order Details (Before / After / Source)</strong></div><div><small>Treasury &amp; Pending Reserve</small><strong>Available in Corporate Treasury</strong></div><div><small>Filtered Page Totals</small><strong>Available in Deposits, Withdrawals &amp; P2P (Loaded records total)</strong></div><div><small>Full-System Mismatch API</small><strong>Not recorded (Backend required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><button type="button" class="console-link" onclick="switchTab('tracking')">Inspect Order Snapshots</button><button type="button" class="console-link" onclick="switchTab('members')">Open User Balances</button></div></div></div><div id="section-announcements" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Announcement archive is scheduled for the Communication stage.</h3><p>The current broadcast updates one system document. The new archive, user inbox, unread state and three-second popup are not enabled by this menu update.</p><button type="button" class="console-link" onclick="switchTab('broadcast')">Open existing announcement form</button></div></div><div id="section-email" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Per-order records active · Global queue API required</span><h3>Email Delivery Status &amp; Audit Notes</h3><p>Per-order email delivery logs (actual backend status enum, attempt count, created/updated IST timestamps, and last recorded error) are available inside <b>Order Details</b>. Note: A recorded <b>sent</b> state confirms dispatch by the backend mail transport only—it does not guarantee recipient inbox placement. Withdrawal approval remains separate from verified blockchain payout.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Per-Order Email Log</small><strong>Available in Order Details → Recorded email delivery</strong></div><div><small>Recorded Fields</small><strong>Email type, State, Attempts, Created, Last update, Last error</strong></div><div><small>Global Email Queue API</small><strong>Not recorded (Backend endpoint required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('withdrawals')">Open withdrawal queue</button><button type="button" class="console-link" onclick="switchTab('tracking')">Track Order Email Status</button></div></div></div><div id="section-recovery" class="admin-section hidden fade-in"><div class="console-note console-warning" role="note">Existing daily-counter and staking settlement recovery only. Recovery for stuck NFT sales is not included.</div><div class="glass-card p-4 mt-6 border-l-4 border-l-amber-500">
                 <h3 class="text-sm font-bold text-white mb-2">System Settlement Recovery</h3>
                 <p class="text-xs text-slate-400 mb-3">Reconcile today's daily counters and due staking settlements.</p>
                 <button id="adminRecoveryButton" type="button" class="btn btn-warning cyber-btn bg-amber-500/20 text-amber-400 border border-amber-500/40 px-4 py-2 rounded-lg" onclick="window.triggerAdminRecovery()">🔄 Run Daily Reset &amp; Settlement Recovery</button>
-            </div></div><div id="section-jobs" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Failed-job monitoring is scheduled for a later stage.</h3><p>No automatic retries or financial recovery actions are started by this page.</p><button type="button" class="console-link" onclick="switchTab('recovery')">Open existing settlement recovery</button></div></div><div id="section-audit" class="admin-section hidden fade-in"><div class="glass-card overflow-hidden mt-6" data-admin-audit-feed="">
+            </div></div><div id="section-jobs" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Read-only failure views · Dedicated queue API required</span><h3>Failed Jobs &amp; Recovery Inspection</h3><p>No automatic retries, payout re-signing, email resends, or force-clear financial mutations are permitted from this page. Inspect recorded failures through the verified read-only views below while a unified background-job API remains <b>Backend required</b>.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Failed Payouts / Withdrawals</small><strong>Withdrawals → Failed tab (Hash, Attempts, Last error)</strong></div><div><small>Blocked Account Cleanups</small><strong>Account Lifecycle → Cleanup Blocked filter</strong></div><div><small>Daily Reset &amp; Staking ROI</small><strong>Settlement Recovery (On-demand reconciliation)</strong></div><div><small>Global Background Job Queue</small><strong>Not recorded (Backend endpoint required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('recovery')">Open existing settlement recovery</button><button type="button" class="console-link" onclick="switchTab('withdrawals')">Inspect Failed Withdrawals</button><button type="button" class="console-link" onclick="switchTab('lifecycle')">Inspect Cleanup-Blocked Accounts</button></div></div></div><div id="section-audit" class="admin-section hidden fade-in"><div class="glass-card overflow-hidden mt-6" data-admin-audit-feed="">
                 <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-white/5">
                     <div>
                         <h3 class="text-sm font-bold text-white">Admin Audit Feed</h3>
@@ -2877,6 +3416,88 @@ window.addEventListener('storage', event => {
             return `${prefix}-${yy}${mm}${dd}-${timeCode}-${salt}`;
         }
 
+        // 🕒 DETERMINISTIC IST DATE FORMATTER (DD-MM-YYYY, hh:mm:ss AM/PM IST) & SAFE COPY HELPER
+        window.tcmFormatIST = function(value, fallback = 'Not recorded') {
+            if (value === null || value === undefined || value === '') return fallback;
+            let ms = NaN;
+            if (typeof value === 'number') {
+                ms = value;
+            } else if (typeof value === 'object' && typeof value.seconds === 'number') {
+                ms = value.seconds * 1000 + Math.floor((value.nanoseconds || 0) / 1000000);
+            } else if (value instanceof Date) {
+                ms = value.getTime();
+            } else {
+                const parsed = Number(value);
+                ms = Number.isFinite(parsed) && String(value).trim().length >= 10 ? parsed : Date.parse(String(value));
+            }
+            if (!Number.isFinite(ms)) return fallback;
+            try {
+                const parts = new Intl.DateTimeFormat('en-IN', {
+                    timeZone: 'Asia/Kolkata',
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: true
+                }).formatToParts(new Date(ms));
+                const map = {};
+                for (const part of parts) map[part.type] = part.value;
+                const dd = map.day || '00';
+                const mm = map.month || '00';
+                const yyyy = map.year || '0000';
+                const hh = map.hour || '00';
+                const min = map.minute || '00';
+                const ss = map.second || '00';
+                const period = (map.dayPeriod || '').toUpperCase();
+                return `${dd}-${mm}-${yyyy}, ${hh}:${min}:${ss}${period ? ' ' + period : ''} IST`;
+            } catch (err) {
+                return fallback;
+            }
+        };
+
+        window.tcmCopyText = async function(text, label = 'Value') {
+            const value = String(text ?? '').trim();
+            if (!value || value === 'Not recorded' || value === '—') return false;
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(value);
+                } else {
+                    const area = document.createElement('textarea');
+                    area.value = value;
+                    area.setAttribute('readonly', '');
+                    area.style.position = 'fixed';
+                    area.style.opacity = '0';
+                    document.body.appendChild(area);
+                    area.select();
+                    document.execCommand('copy');
+                    area.remove();
+                }
+                showToast(`${label} copied to clipboard.`);
+                return true;
+            } catch (err) {
+                showToast(`Could not copy ${label}.`, true);
+                return false;
+            }
+        };
+
+        window.tcmCopyButton = function(value, label = 'ID') {
+            const text = String(value ?? '').trim();
+            if (!text || text === 'Not recorded' || text === '—' || text === 'Unknown') return null;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'r3-copy-btn';
+            btn.textContent = 'Copy';
+            btn.setAttribute('aria-label', `Copy ${label}`);
+            btn.title = `Copy ${label}`;
+            btn.addEventListener('click', event => {
+                event.stopPropagation();
+                void window.tcmCopyText(text, label);
+            });
+            return btn;
+        };
+
         // 🕒 LIVE SYSTEM CLOCK (IST)
         function updateClock() {
             const now = new Date();
@@ -3084,8 +3705,7 @@ window.addEventListener('storage', event => {
                 row.appendChild(td);
                 return td;
             };
-            const date = new Date(log.timestamp.seconds * 1000 + Math.floor(log.timestamp.nanoseconds / 1000000));
-            const time = cell(date.toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' }), 'p-4 text-xs text-slate-400');
+            const time = cell(window.tcmFormatIST(log.timestamp, 'Not recorded'), 'p-4 text-xs text-slate-400');
             const id = document.createElement('span');
             id.className = 'block text-[10px] text-sky-400 font-mono mt-1 break-all';
             id.textContent = log.id;
@@ -3676,9 +4296,7 @@ window.addEventListener('storage', event => {
             const docId = m1Argument(row.id);
             const uid = m1Argument(row.uid);
             const amount = m1ActionAmount(row.amount);
-            const date = row.timestamp ? new Date(row.timestamp).toLocaleString('en-US', {
-                timeZone: 'Asia/Kolkata', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-            }) + ' IST' : 'Date unavailable';
+            const date = row.timestamp ? window.tcmFormatIST(row.timestamp, 'Not recorded') : 'Not recorded';
             const identity = `<td class="p-4 text-xs text-slate-400">${m1Escape(date)}<br><span class="text-[10px] text-sky-400 font-mono">ORD: ${m1Escape(row.orderId)}</span></td>
                 <td class="p-4 font-bold text-white font-mono">${m1Escape(row.uid || 'Unknown')}</td>`;
             if (kind === 'deposit') {
@@ -3798,7 +4416,7 @@ window.addEventListener('storage', event => {
                 const badge = document.getElementById('rej-badge');
                 badge.textContent = result.archive;
                 badge.style.display = result.archive > 0 ? 'inline-block' : 'none';
-                document.getElementById('m1-summary-notice').textContent = 'Totals: canonical successful ledger records. Legacy aliases/string amounts need reconciliation. Updated ' + new Date(result.generatedAt).toLocaleTimeString('en-US', { timeZone: 'Asia/Kolkata' }) + ' IST';
+                document.getElementById('m1-summary-notice').textContent = 'Totals: canonical successful ledger records. Legacy aliases/string amounts need reconciliation. Updated ' + window.tcmFormatIST(result.generatedAt, 'Not recorded');
             } catch (error) {
                 if (generation === adminAuthState.generation && adminAuthState.ready) {
                     document.getElementById('m1-summary-notice').textContent = 'Summary unavailable • previous values retained; check backend/indexes';
@@ -4092,9 +4710,7 @@ window.addEventListener('storage', event => {
             return '<span class="badge border border-white/20 ' + item[1] + '">' + item[0] + '</span>';
         }
         function l4Date(value) {
-            return Number.isFinite(value) ? new Date(value).toLocaleString('en-GB', {
-                timeZone: 'Asia/Kolkata'
-            }) + ' IST' : '—';
+            return Number.isFinite(value) ? window.tcmFormatIST(value, 'Not recorded') : 'Not recorded';
         }
         const l4Ui = { cursor: null, busy: false, sequence: 0, reload: false, key: '', generation: null };
         async function l4Load(append = false, force = false) {
@@ -5537,65 +6153,97 @@ window.addEventListener('storage', event => {
  'use strict';
  const titles={transactions:'Transactions',nft:'NFT History',p2p:'P2P Ledger'};
  const config={deposits:{kind:'deposit',tabs:[['pending','Pending'],['completed','Completed'],['rejected','Rejected'],['all','All records']]},withdrawals:{kind:'withdraw',tabs:[['pending','Pending'],['approved','Approved / Queued / Legacy unverified'],['processing','Processing'],['completed','Verified Completed'],['failed','Failed'],['cancelled','Cancelled'],['rejected','Rejected'],['locked','Locked'],['all','All records']]},p2p:{kind:'p2p',tabs:[['all','All transfers'],['completed','Completed'],['pending','Pending'],['failed','Failed']]},rejected:{kind:'archive',tabs:[['all','All'],['rejected','Rejected'],['cancelled','Cancelled'],['locked','Locked'],['failed','Failed']]}};
- const states=new Map();let detailSequence=0,detailController=null,currentRecord=null,lookupSequence=0,lookupController=null;
+ const states=new Map();let detailSequence=0,detailController=null,currentRecord=null,currentDetailData=null,lookupSequence=0,lookupController=null;
+ window.tcmAiRecentRecords = new Map();
+ function trackAiRecord(r){if(!r||typeof r!=='object')return;const key=String(r.orderId||r.id||'').trim();if(key&&key!=='Not recorded')window.tcmAiRecentRecords.set(key,r);}
  const node=(tag,attrs={},text)=>{const e=document.createElement(tag);for(const[k,v]of Object.entries(attrs))if(k==='class')e.className=v;else e.setAttribute(k,v);if(text!==undefined)e.textContent=String(text);return e;};
  const button=(label,handler,cls='r3-button')=>{const b=node('button',{type:'button',class:cls},label);b.addEventListener('click',handler);return b;};
  const show=v=>v===null||v===undefined||v===''?'Not recorded':String(v);
- const when=v=>v?new Date(v).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Not recorded';
- const dollars=v=>v===null||v===undefined?'Not recorded':String(v)+' USDT';
+ const when=v=>window.tcmFormatIST?window.tcmFormatIST(v,'Not recorded'):(v?new Date(v).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Not recorded');
+ const dollars=v=>v===null||v===undefined||v===''?'Not recorded':String(v)+' USDT';
  const select=(options)=>{const s=node('select');for(const[v,label]of options)s.append(node('option',{value:v},label));return s;};
  const input=(type,placeholder)=>node('input',{type,placeholder,'aria-label':placeholder});
  const errorText=e=>e.status===404?'This backend does not have the R3 records API yet. Install and deploy server.js with lib/admin-records.cjs.':e.message;
+ const copyableLabels=new Set(['Order ID','UID','Wallet / destination','Saved transaction hash','Mint transaction','Sender','Receiver','NFT ID']);
  async function read(path,signal){const response=await consoleReadFetch(path,{signal});const result=await response.json();if(!response.ok||!result.success)throw Object.assign(new Error(result.message||'Records could not be loaded.'),{status:response.status});return result;}
  function detailsButton(record){return button('Details',()=>openDetails(record.source,record.id),'r3-button r3-small');}
- window.adminRecordDetailsButton=record=>detailsButton({source:'transactions',id:record.id});
- function table(records){const wrap=node('div',{class:'r3-table-wrap'}),t=node('table',{class:'r3-table'}),thead=node('thead'),head=node('tr');for(const s of ['Time / Order','User / Transfer','Type / Network','Amount / Fee / Net','Status',''])head.append(node('th',{},s));thead.append(head);t.append(thead);const body=node('tbody');
-  for(const r of records){const tr=node('tr'),id=node('td');id.append(node('div',{},when(r.date)),node('strong',{},show(r.orderId)));tr.append(id);const user=node('td');user.append(node('div',{},show(r.name)),node('div',{},show(r.uid)));if(r.sender||r.receiver)user.append(node('small',{},show(r.sender)+' → '+show(r.receiver)));tr.append(user);const type=node('td');type.append(node('div',{},show(r.type)),node('small',{},show(r.network)));tr.append(type);const amounts=node('td');amounts.append(node('strong',{},dollars(r.amount)),node('div',{},'Fee: '+dollars(r.fee)),node('small',{},'Net: '+dollars(r.net)));tr.append(amounts);const status=node('td');status.append(node('span',{class:'r3-status'},show(r.status)));if(r.archived)status.append(node('small',{},'Archived from action list; retained'));tr.append(status);const action=node('td');action.append(detailsButton(r));tr.append(action);body.append(tr);}
-  if(!records.length){const tr=node('tr');tr.append(node('td',{colspan:'6',class:'r3-empty'},'No matching records in this page.'));body.append(tr);}t.append(body);wrap.append(t);return wrap;
+ function askAiRowButton(record){return button('Ask AI',ev=>{ev.stopPropagation();trackAiRecord(record);if(window.openAdminAiAssistant)window.openAdminAiAssistant({source:record.source||'transactions',record,retrievedAt:Date.now()},ev.currentTarget);},'r3-button r3-small');}
+ window.adminRecordDetailsButton=record=>{trackAiRecord(record);return detailsButton({source:'transactions',id:record.id});};
+ function computeLoadedTotals(records){
+  let amt=0,fee=0,net=0,amtCount=0,feeCount=0,netCount=0;
+  for(const r of records){
+   const a=Number(r.amount),f=Number(r.fee),n=Number(r.net ?? r.netAmount);
+   if(Number.isFinite(a)){amt+=a;amtCount++;}
+   if(Number.isFinite(f)){fee+=f;feeCount++;}
+   if(Number.isFinite(n)){net+=n;netCount++;}
+  }
+  const bar=node('div',{class:'r3-loaded-summary','data-r3-loaded-total':'true'});
+  const left=node('span',{},`Loaded records total (${records.length} loaded in current view — not a full-system total):`);
+  const right=node('span');
+  right.append(
+   node('span',{},'Amount: '),node('strong',{},amtCount?amt.toFixed(2)+' USDT':'Not recorded'),
+   node('span',{},' · Fee: '),node('strong',{},feeCount?fee.toFixed(2)+' USDT':'Not recorded'),
+   node('span',{},' · Net: '),node('strong',{},netCount?net.toFixed(2)+' USDT':'Not recorded')
+  );
+  bar.append(left,right);
+  return bar;
+ }
+ function table(records){const container=node('div'),wrap=node('div',{class:'r3-table-wrap'}),t=node('table',{class:'r3-table'}),thead=node('thead'),head=node('tr');for(const s of ['Time / Order','User / Transfer','Type / Network','Amount / Fee / Net','Status','Actions'])head.append(node('th',{},s));thead.append(head);t.append(thead);const body=node('tbody');
+  for(const r of records){trackAiRecord(r);const tr=node('tr'),id=node('td');id.append(node('div',{},when(r.date)));const ordLine=node('strong',{},show(r.orderId));const cpOrd=window.tcmCopyButton?.(r.orderId,'Order ID');if(cpOrd)ordLine.append(cpOrd);id.append(ordLine);tr.append(id);const user=node('td');user.append(node('div',{},show(r.name)));const uidLine=node('div',{},show(r.uid));const cpUid=window.tcmCopyButton?.(r.uid,'UID');if(cpUid)uidLine.append(cpUid);user.append(uidLine);if(r.sender||r.receiver)user.append(node('small',{},show(r.sender)+' → '+show(r.receiver)));tr.append(user);const type=node('td');type.append(node('div',{},show(r.type)),node('small',{},show(r.network)));tr.append(type);const amounts=node('td');amounts.append(node('strong',{},dollars(r.amount)),node('div',{},'Fee: '+dollars(r.fee)),node('small',{},'Net: '+dollars(r.net)));tr.append(amounts);const status=node('td');status.append(node('span',{class:'r3-status'},show(r.status)));if(r.archived)status.append(node('small',{},'Archived from action list; retained'));tr.append(status);const action=node('td');const actWrap=node('div',{class:'flex flex-wrap gap-1.5'});actWrap.append(detailsButton(r),askAiRowButton(r));action.append(actWrap);tr.append(action);body.append(tr);}
+  if(!records.length){const tr=node('tr');tr.append(node('td',{colspan:'6',class:'r3-empty'},'No matching records in this page.'));body.append(tr);}t.append(body);wrap.append(t);container.append(wrap);if(records.length)container.append(computeLoadedTotals(records));return container;
  }
  function setupList(page,cfg){const section=document.getElementById('section-'+page);if(!section)return;const planned=section.dataset.consoleStatus==='planned';if(planned){section.replaceChildren();delete section.dataset.consoleStatus;}
   const legacy=node('div',{'data-r3-legacy':page});if(!planned){for(const child of [...section.children])legacy.append(child);section.append(legacy);}
   const shell=node('div',{class:'r3-shell'}),tabs=node('div',{class:'r3-tabs',role:'group','aria-label':'Transaction statuses'}),filters=node('form',{class:'r3-filters'}),mode=select([['order','Order ID'],['uid','UID'],['hash','Transaction hash']]),q=input('text','Exact search value'),network=select([['','All networks'],['BEP20','BEP20'],['TRC20','TRC20']]),from=input('date','From date (IST)'),to=input('date','To date (IST)'),apply=node('button',{type:'submit',class:'r3-button'},'Search / Refresh'),notice=node('p',{class:'r3-notice',role:'status','aria-live':'polite'}),results=node('div'),more=button('Load more',()=>loadList(page,true));
-  const state={page,cfg,tab:cfg.tabs[0][0],mode,q,network,from,to,legacy,notice,results,more,rows:new Map(),cursor:null,sequence:0,controller:null,forceLegacy:false};states.set(page,state);
+  let payoutStrip=null,payoutRefreshNode=null;
+  if(page==='withdrawals'){
+   payoutStrip=node('div',{class:'r3-monitoring-strip','aria-label':'Payout monitoring status'});
+   const c1=node('div');c1.append(node('small',{},'Payout Pipeline Stages'),node('strong',{},'Pending → Approved/Queued → Processing → Verified Completed / Failed'));
+   const c2=node('div');c2.append(node('small',{},'Hot Wallet USDT / Gas Balance'),node('strong',{},'Not recorded (Authorized backend API required)'));
+   const c3=node('div');payoutRefreshNode=node('strong',{},'Not refreshed yet');c3.append(node('small',{},'Last Data Refresh (IST)'),payoutRefreshNode);
+   payoutStrip.append(c1,c2,c3);
+  }
+  const state={page,cfg,tab:cfg.tabs[0][0],mode,q,network,from,to,legacy,notice,results,more,payoutRefreshNode,rows:new Map(),cursor:null,sequence:0,controller:null,forceLegacy:false};states.set(page,state);
   for(const[value,label]of cfg.tabs){const b=button(label,()=>{state.tab=value;state.forceLegacy=false;renderMode(state);void loadList(page);});b.dataset.r3Status=value;tabs.append(b);}state.tabs=tabs;
   const clear=button('Clear filters',()=>{q.value='';network.value='';from.value='';to.value='';state.forceLegacy=false;renderMode(state);void loadList(page);});filters.append(mode,q,network,from,to,apply,clear);
   filters.addEventListener('submit',e=>{e.preventDefault();state.forceLegacy=false;renderMode(state);void loadList(page);});
+  if(payoutStrip)shell.append(payoutStrip);
   shell.append(tabs,filters,notice,results,more);if(page==='rejected')shell.append(button('Existing archive actions',()=>{state.forceLegacy=true;renderMode(state);void m1LoadTerminalPage('archive');}));
   section.prepend(shell);state.shell=shell;renderMode(state);
  }
  function legacyMode(s){return s.forceLegacy||(['deposits','withdrawals'].includes(s.page)&&s.tab==='pending'&&!s.q.value.trim()&&!s.network.value&&!s.from.value&&!s.to.value);}
- function renderMode(s){const legacy=legacyMode(s);s.legacy.hidden=!legacy;s.results.hidden=legacy;s.more.hidden=true;s.tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.r3Status===s.tab)));s.notice.textContent=legacy?'Existing pending/action workflow. Search filters show saved records with Details.':'Saved records only. Up to 20 results per page; dates use IST.';}
+ function renderMode(s){const legacy=legacyMode(s);s.legacy.hidden=!legacy;s.results.hidden=legacy;s.more.hidden=true;s.tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.r3Status===s.tab)));s.notice.textContent=legacy?'Existing pending/action workflow. Search filters show saved records with Details.':'Saved records only. Up to 20 results per page; dates use DD-MM-YYYY (IST).';}
  window.adminRecordsPendingVisible=kind=>{const page={deposit:'deposits',withdraw:'withdrawals',archive:'rejected'}[kind],s=states.get(page);return !s||legacyMode(s);};
- async function loadList(page,append=false){const s=states.get(page);if(!s||consoleCurrentPage!==page)return;s.controller?.abort();const sequence=++s.sequence;s.controller=new AbortController();if(legacyMode(s)){const kind=s.cfg.kind==='archive'?'archive':s.cfg.kind;void m1LoadTerminalPage(kind);return;}
+ async function loadList(page,append=false){const s=states.get(page);if(!s||consoleCurrentPage!==page)return;s.controller?.abort();const sequence=++s.sequence;s.controller=new AbortController();if(legacyMode(s)){if(s.payoutRefreshNode)s.payoutRefreshNode.textContent=when(Date.now());const kind=s.cfg.kind==='archive'?'archive':s.cfg.kind;void m1LoadTerminalPage(kind);return;}
   if(append&&!s.cursor)return;if(!append){s.rows.clear();s.cursor=null;s.results.replaceChildren();}s.more.disabled=true;s.notice.textContent='Loading saved records…';
-  try{const params=new URLSearchParams({kind:s.cfg.kind,status:s.tab,mode:s.mode.value,q:s.q.value.trim(),network:s.network.value,from:s.from.value,to:s.to.value});if(append)params.set('cursor',s.cursor);const answer=await read('/api/admin/records?'+params,s.controller.signal);if(sequence!==s.sequence||consoleCurrentPage!==page)return;for(const r of answer.items)s.rows.set(r.source+':'+r.id,r);s.cursor=answer.nextCursor;s.results.replaceChildren(table([...s.rows.values()]));s.more.hidden=!s.cursor;s.notice.textContent=`${s.rows.size} loaded. This request inspected ${answer.scanned} records (maximum 60). Document order; Load more continues the selected filters.`;if(page==='withdrawals'&&s.tab==='completed')s.notice.textContent+=' Verified payout completion is not enabled yet; approval alone is excluded.';
-  }catch(e){if(e.name!=='AbortError'&&sequence===s.sequence)s.notice.textContent=errorText(e);}finally{if(sequence===s.sequence)s.more.disabled=false;}
+  try{const params=new URLSearchParams({kind:s.cfg.kind,status:s.tab,mode:s.mode.value,q:s.q.value.trim(),network:s.network.value,from:s.from.value,to:s.to.value});if(append)params.set('cursor',s.cursor);const answer=await read('/api/admin/records?'+params,s.controller.signal);if(sequence!==s.sequence||consoleCurrentPage!==page)return;for(const r of answer.items)s.rows.set(r.source+':'+r.id,r);s.cursor=answer.nextCursor;s.results.replaceChildren(table([...s.rows.values()]));s.more.hidden=!s.cursor;const refreshedAt=when(Date.now());if(s.payoutRefreshNode)s.payoutRefreshNode.textContent=refreshedAt;s.notice.textContent=`${s.rows.size} loaded (Refreshed: ${refreshedAt}). This request inspected ${answer.scanned} records (maximum 60). Document order; Load more continues the selected filters.`;if(page==='withdrawals'&&s.tab==='completed')s.notice.textContent+=' Verified payout completion requires confirmed on-chain delivery; approval alone is excluded.';
+  }catch(e){if(e.name!=='AbortError'&&sequence===s.sequence){if(s.payoutRefreshNode)s.payoutRefreshNode.textContent='Unavailable ('+when(Date.now())+')';s.notice.textContent=errorText(e);}}finally{if(sequence===s.sequence)s.more.disabled=false;}
  }
  for(const[page,cfg]of Object.entries(config))setupList(page,cfg);
  // Tracking searches every source once, with independent 20-record pagination.
  const tracking=document.getElementById('section-tracking');tracking.replaceChildren();delete tracking.dataset.consoleStatus;
- const searchForm=node('form',{class:'r3-filters r3-card'}),searchMode=select([['order','Order ID'],['uid','UID'],['hash','Transaction hash']]),searchKey=input('text','Enter exact Order ID, UID or hash'),searchButton=node('button',{type:'submit',class:'r3-button'},'Track order'),lookupNotice=node('p',{class:'r3-notice',role:'status'}),lookupResults=node('div');searchForm.append(searchMode,searchKey,searchButton);tracking.append(searchForm,lookupNotice,lookupResults);lookupNotice.textContent='Search Transactions, NFT History and the P2P Ledger. Each source shows up to 20 records.';
+ const searchForm=node('form',{class:'r3-filters r3-card'}),searchMode=select([['order','Order ID'],['uid','UID'],['hash','Transaction hash']]),searchKey=input('text','Enter exact Order ID, UID or hash'),searchButton=node('button',{type:'submit',class:'r3-button'},'Track order'),askAiSearchBtn=button('Ask AI Helper',ev=>{const val=searchKey.value.trim();if(window.openAdminAiAssistant)window.openAdminAiAssistant({source:'tracking-search',queryMode:searchMode.value,queryKey:val,retrievedAt:Date.now()},ev.currentTarget);}),lookupNotice=node('p',{class:'r3-notice',role:'status'}),lookupResults=node('div');searchForm.append(searchMode,searchKey,searchButton,askAiSearchBtn);tracking.append(searchForm,lookupNotice,lookupResults);lookupNotice.textContent='Search Transactions, NFT History and the P2P Ledger. Each source shows up to 20 records. Dates shown in DD-MM-YYYY (IST).';
  const lookupGroups=new Map();let savedLookup=null;
  searchForm.addEventListener('submit',e=>{e.preventDefault();savedLookup={mode:searchMode.value,key:searchKey.value.trim()};lookupGroups.clear();lookupResults.replaceChildren();void lookup('all');});
  async function lookup(source,cursor=null){if(!savedLookup?.key){lookupNotice.textContent='Enter an exact search value.';return;}lookupController?.abort();lookupController=new AbortController();const sequence=++lookupSequence;lookupNotice.textContent='Searching saved records…';
-  try{const p=new URLSearchParams({...savedLookup,source});if(cursor)p.set('cursor',cursor);const answer=await read('/api/admin/order-search?'+p,lookupController.signal);if(sequence!==lookupSequence||consoleCurrentPage!=='tracking')return;for(const group of answer.groups){const old=cursor?lookupGroups.get(group.source)?.items||[]:[];lookupGroups.set(group.source,{...group,items:[...new Map([...old,...group.items].map(r=>[r.id,r])).values()]});}lookupResults.replaceChildren();for(const group of lookupGroups.values()){const card=node('section',{class:'r3-card'});card.append(node('h3',{},titles[group.source]),table(group.items));if(group.nextCursor)card.append(button('Load more '+titles[group.source],()=>lookup(group.source,group.nextCursor)));lookupResults.append(card);}lookupNotice.textContent='Exact matches. Sources paginate independently. Open Details to inspect linked records and audit.';
+  try{const p=new URLSearchParams({...savedLookup,source});if(cursor)p.set('cursor',cursor);const answer=await read('/api/admin/order-search?'+p,lookupController.signal);if(sequence!==lookupSequence||consoleCurrentPage!=='tracking')return;for(const group of answer.groups){const old=cursor?lookupGroups.get(group.source)?.items||[]:[];lookupGroups.set(group.source,{...group,items:[...new Map([...old,...group.items].map(r=>[r.id,r])).values()]});}lookupResults.replaceChildren();for(const group of lookupGroups.values()){const card=node('section',{class:'r3-card'});card.append(node('h3',{},titles[group.source]),table(group.items));if(group.nextCursor)card.append(button('Load more '+titles[group.source],()=>lookup(group.source,group.nextCursor)));lookupResults.append(card);}lookupNotice.textContent='Exact matches (Retrieved: '+when(Date.now())+'). Sources paginate independently. Open Details or Ask AI to inspect linked records and audit.';
   }catch(e){if(e.name!=='AbortError'&&sequence===lookupSequence)lookupNotice.textContent=errorText(e);}
  }
- const dialog=node('dialog',{id:'adminRecordDetails',class:'r3-dialog','aria-labelledby':'r3-detail-title'}),header=node('div',{class:'r3-dialog-head'}),detailBody=node('div',{class:'r3-dialog-body'});header.append(node('h2',{id:'r3-detail-title'},'Order details'),button('Close',closeDetails));dialog.append(header,detailBody);document.body.append(dialog);
- function closeDetails(){++detailSequence;detailController?.abort();currentRecord=null;if(dialog.open)dialog.close();}
- dialog.addEventListener('cancel',e=>{e.preventDefault();closeDetails();});dialog.addEventListener('click',e=>{if(e.target===dialog)closeDetails();});dialog.addEventListener('close',()=>{if(!dialog.open){++detailSequence;detailController?.abort();currentRecord=null;}});
- function grid(rows){const dl=node('dl',{class:'r3-detail-grid'});for(const[label,value]of rows){const cell=node('div');cell.append(node('dt',{},label),node('dd',{},show(value)));dl.append(cell);}return dl;}
+ const dialog=node('dialog',{id:'adminRecordDetails',class:'r3-dialog','aria-labelledby':'r3-detail-title'}),header=node('div',{class:'r3-dialog-head'}),headActions=node('div',{class:'flex flex-wrap items-center gap-2'}),askAiDetailBtn=button('Ask AI about this Order',ev=>{if(window.openAdminAiAssistant){window.openAdminAiAssistant({source:currentRecord?.source||'transactions',id:currentRecord?.id,record:currentDetailData?.record||null,audit:currentDetailData?.audit?.audit||[],email:currentDetailData?.email?.email||[],notes:currentDetailData?.notes?.notes||[],retrievedAt:currentDetailData?.retrievedAt||Date.now()},ev.currentTarget);}}),detailBody=node('div',{class:'r3-dialog-body'});headActions.append(askAiDetailBtn,button('Close',closeDetails));header.append(node('h2',{id:'r3-detail-title'},'Order details'),headActions);dialog.append(header,detailBody);document.body.append(dialog);
+ function closeDetails(){++detailSequence;detailController?.abort();currentRecord=null;currentDetailData=null;if(dialog.open)dialog.close();}
+ dialog.addEventListener('cancel',e=>{e.preventDefault();closeDetails();});dialog.addEventListener('click',e=>{if(e.target===dialog)closeDetails();});dialog.addEventListener('close',()=>{if(!dialog.open){++detailSequence;detailController?.abort();currentRecord=null;currentDetailData=null;}});
+ function grid(rows){const dl=node('dl',{class:'r3-detail-grid'});for(const[label,value]of rows){const cell=node('div'),dd=node('dd',{},show(value));if(copyableLabels.has(label)){const cp=window.tcmCopyButton?.(value,label);if(cp)dd.append(cp);}cell.append(node('dt',{},label),dd);dl.append(cell);}return dl;}
  async function openDetails(source,id){closeDetails();const sequence=++detailSequence,epoch=consolePageEpoch;currentRecord={source,id};detailController=new AbortController();detailBody.replaceChildren(node('p',{},'Loading saved record…'));dialog.showModal();
-  try{const answer=await read('/api/admin/record-detail?'+new URLSearchParams({source,id}),detailController.signal);if(sequence!==detailSequence||epoch!==consolePageEpoch||!dialog.open)return;renderDetails(answer);
+  try{const answer=await read('/api/admin/record-detail?'+new URLSearchParams({source,id}),detailController.signal);if(sequence!==detailSequence||epoch!==consolePageEpoch||!dialog.open)return;answer.retrievedAt=Date.now();currentDetailData=answer;if(answer.record)trackAiRecord(answer.record);renderDetails(answer);
   }catch(e){if(e.name!=='AbortError'&&sequence===detailSequence&&dialog.open)detailBody.replaceChildren(node('p',{role:'alert'},errorText(e)));}
  }
  function section(title){const s=node('section',{class:'r3-detail-section'});s.append(node('h3',{},title));return s;}
- function renderDetails(data){const r=data.record;detailBody.replaceChildren();const summary=section('Saved order record');summary.append(grid([['Order ID',r.orderId],['Record',titles[r.source]+' / '+r.id],['Name',r.name],['UID',r.uid],['Type',r.type],['Status',r.status],['Stored status',r.rawStatus],['Requested',when(r.requestedAt)],['Approved',when(r.approvedAt)],['Rejected',when(r.rejectedAt)],['Settled / payout time',when(r.settledAt)],['Actor',r.actor]]));detailBody.append(summary);
+ function renderDetails(data){const r=data.record;detailBody.replaceChildren();const summary=section('Saved order record (Retrieved: '+when(data.retrievedAt)+')');summary.append(grid([['Order ID',r.orderId],['Record',titles[r.source]+' / '+r.id],['Name',r.name],['UID',r.uid],['Type',r.type],['Status',r.status],['Stored status',r.rawStatus],['Requested',when(r.requestedAt)],['Approved',when(r.approvedAt)],['Rejected',when(r.rejectedAt)],['Settled / payout time',when(r.settledAt)],['Actor',r.actor]]));detailBody.append(summary);
   const finance=section('Saved financial values');finance.append(grid([['Amount',dollars(r.amount)],['Principal',dollars(r.principal)],['Profit',dollars(r.profit)],['Fee',dollars(r.fee)],['Net amount',dollars(r.net)],['Balance before',dollars(r.oldBalance)],['Balance after',dollars(r.newBalance)],['Snapshot source',r.balanceSource],['Saved fee rate',r.feeRate],['Saved fee version',r.feeVersion],['Refund state',r.refundState],['Refund destination',r.refundDestination],['Refunded at',when(r.refundedAt)],['Deposit wallet credit',dollars(r.depositCredit)],['Debt recovered',dollars(r.debtRecovered)],['Main ledger entry',r.ledgerEntry]]));detailBody.append(finance);
-  const chain=section('Transfer references');chain.append(grid([['Network',r.network],['Wallet / destination',r.wallet],['Saved transaction hash',r.hash],['Confirmations',r.confirmations],['Recorded block',r.blockNumber],['Deposit on-chain verification',r.onchainDepositVerified?'Recorded verified':'Not recorded'],['Payout state',r.payoutState],['Payout delivery',r.deliveryVerified?'Verified completed':'Not verified'],['Native gas paid',r.gasNative===null?null:r.gasNative+' '+(r.network==='BEP20'?'BNB':'TRX')],['Sender',r.sender],['Receiver',r.receiver],['NFT ID',r.nftId],['Mint transaction',r.mintHash],['Last error',r.error],['Remarks',r.note]]));if(r.mintHash&&/^0x[0-9a-fA-F]{64}$/.test(r.mintHash)&&[56,'56'].includes(r.mintChain)){const a=node('a',{href:'https://bscscan.com/tx/'+r.mintHash,target:'_blank',rel:'noopener noreferrer'},'Mint Transaction ↗');chain.append(a);}if(r.type==='Withdraw'){const url=r.network==='BEP20'&&/^0x[a-fA-F0-9]{64}$/.test(r.hash||'')?'https://bscscan.com/tx/'+r.hash:r.network==='TRC20'&&/^[a-fA-F0-9]{64}$/.test(r.hash||'')?'https://tronscan.org/#/transaction/'+r.hash:'';if(url)chain.append(node('a',{href:url,target:'_blank',rel:'noopener noreferrer'},r.deliveryVerified?'Verified payout transaction':'Track payout transaction'));}chain.append(node('p',{class:'r3-notice'},'Mint references do not establish a user ownership transfer. Withdrawal approval is separate from blockchain payout.'));detailBody.append(chain);
+  const chain=section('Transfer references & Payout monitoring');chain.append(grid([['Network',r.network],['Wallet / destination',r.wallet],['Saved transaction hash',r.hash],['Confirmations',r.confirmations],['Recorded block',r.blockNumber],['Deposit on-chain verification',r.onchainDepositVerified?'Recorded verified':'Not recorded'],['Payout state',r.payoutState],['Payout delivery',r.deliveryVerified?'Verified completed':'Not verified'],['Payout attempts',r.attempts??r.payoutAttempts??'Not recorded'],['Native gas paid',r.gasNative===null||r.gasNative===undefined?null:r.gasNative+' '+(r.network==='BEP20'?'BNB':'TRX')],['Sender',r.sender],['Receiver',r.receiver],['NFT ID',r.nftId],['Mint transaction',r.mintHash],['Last error',r.error],['Remarks',r.note]]));if(r.mintHash&&/^0x[0-9a-fA-F]{64}$/.test(r.mintHash)&&[56,'56'].includes(r.mintChain)){const a=node('a',{href:'https://bscscan.com/tx/'+r.mintHash,target:'_blank',rel:'noopener noreferrer'},'Mint Transaction ↗');chain.append(a);}if(r.type==='Withdraw'){const url=r.network==='BEP20'&&/^0x[a-fA-F0-9]{64}$/.test(r.hash||'')?'https://bscscan.com/tx/'+r.hash:r.network==='TRC20'&&/^[a-fA-F0-9]{64}$/.test(r.hash||'')?'https://tronscan.org/#/transaction/'+r.hash:'';if(url)chain.append(node('a',{href:url,target:'_blank',rel:'noopener noreferrer'},r.deliveryVerified?'Verified payout transaction':'Track payout transaction'));}chain.append(node('p',{class:'r3-notice'},'Mint references do not establish a user ownership transfer. Withdrawal approval is separate from blockchain payout.'));detailBody.append(chain);
   for(const group of data.related){const s=section('Linked '+titles[group.source]);s.append(table(group.items));if(group.hasMore)s.append(node('p',{},'More linked records exist. Search this Order ID in Order Tracking to continue.'));detailBody.append(s);}
   const audit=section('Admin audit timeline');for(const a of data.audit.audit)audit.append(grid([['Action',a.action],['Actor',a.name||a.actor],['Time',when(a.date)],['Details',a.details]]));for(const a of r.auditTrail||[])audit.append(grid([['Action',a.action],['Time',when(a.date)],['Note',a.note]]));if(!data.audit.audit.length&&!r.auditTrail?.length)audit.append(node('p',{},'Not recorded'));if(data.audit.hasMore)audit.append(node('p',{},'More audit entries exist; use Admin Audit Logs.'));detailBody.append(audit);
-  const email=section('Recorded email delivery');for(const j of data.email.email)email.append(grid([['Email type',j.kind],['State',j.state],['Attempts',j.attempts],['Created',when(j.created)],['Last update',when(j.updated)],['Last error',j.error]]));if(!data.email.email.length)email.append(node('p',{},'Not recorded'));detailBody.append(email);
+  const email=section('Recorded email delivery (Sent = dispatched by server; inbox placement not guaranteed)');for(const j of data.email.email)email.append(grid([['Email type',j.kind],['State',j.state],['Attempts',j.attempts],['Created',when(j.created)],['Last update',when(j.updated)],['Last error',j.error]]));if(!data.email.email.length)email.append(node('p',{},'Not recorded'));detailBody.append(email);
   const notes=section('Review notes');for(const n of data.notes.notes)notes.append(grid([['Review',n.action],['Note',n.note],['Actor',n.actor],['Time',when(n.date)]]));if(data.notes.hasMore)notes.append(node('p',{},'More review notes are retained.'));const form=node('form',{class:'r3-review'}),action=select([['note','Add review note'],['resolved','Mark issue resolved']]),note=node('textarea',{maxlength:'2000',rows:'3',required:'','aria-label':'Review note',placeholder:'Describe what was checked or resolved.'}),submit=node('button',{type:'submit',class:'r3-button'},'Save review'),message=node('p',{class:'r3-notice',role:'status'});form.append(action,note,submit,message);notes.append(node('p',{class:'r3-notice'},'Review notes are audited. Marking an issue resolved does not change payment status, move funds or delete history.'),form);detailBody.append(notes);
   form.addEventListener('submit',async e=>{e.preventDefault();if(!note.value.trim())return;const epoch=consolePageEpoch,sequence=detailSequence,actor=localStorage.getItem('uid'),payload={source:r.source,id:r.id,action:action.value,note:note.value.trim()},key='tcm_order_review_'+actor+'_'+r.source+'_'+r.id;let intent;
    try{intent=JSON.parse(sessionStorage.getItem(key)||'null');if(intent&&JSON.stringify(intent.payload)!==JSON.stringify(payload))throw new Error('A saved review is awaiting confirmation. Retry its original note before submitting a different one.');if(!intent){intent={payload,requestId:crypto.randomUUID()};sessionStorage.setItem(key,JSON.stringify(intent));}submit.disabled=true;const response=await adminApiFetch('/api/admin/order-note',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({...intent.payload,requestId:intent.requestId})}),answer=await response.json();if(!response.ok||!answer.success)throw new Error(answer.message||'Review could not be saved. Keep the original note and retry.');sessionStorage.removeItem(key);if(sequence===detailSequence&&epoch===consolePageEpoch&&dialog.open){message.textContent=answer.message;note.value='';}
@@ -5640,7 +6288,7 @@ window.addEventListener('storage', event => {
  historyPage.replaceChildren();delete historyPage.dataset.consoleStatus;
  const toolbar=node('div',{class:'ann-admin-toolbar'}),filter=node('input',{type:'search',placeholder:'Filter loaded announcements','aria-label':'Filter loaded announcements'}),refresh=button('Refresh',()=>loadHistory(false)),notice=node('p',{class:'ann-admin-notice',role:'status'}),list=node('div'),more=button('Load older announcements',()=>loadHistory(true));toolbar.append(filter,refresh);historyPage.append(toolbar,notice,list,more);more.hidden=true;
  filter.addEventListener('input',renderHistory);
- function renderHistory(){list.replaceChildren();const query=filter.value.trim().toLowerCase();let visible=0;for(const item of historyRows.values()){if(query&&!(item.title+' '+item.message+' '+item.id).toLowerCase().includes(query))continue;visible++;const card=node('article',{class:'ann-admin-card'}),time=item.createdAt?new Date(item.createdAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Published';card.append(node('small',{},time+' · '+(item.actorName||item.actor)+' · #'+item.seq),node('h3',{},item.title),node('p',{},item.message.length>180?item.message.slice(0,180)+'…':item.message),node('small',{},'ID: '+item.id),button('View full message',()=>{closePreview();send.hidden=true;previewBody.replaceChildren(node('h4',{},item.title),node('p',{class:'ann-admin-full'},item.message));dialog.showModal();}));list.append(card);}if(!visible)list.append(node('p',{class:'ann-admin-notice'},query?'No match in the loaded announcements. Load older pages to continue searching.':'No announcements published in the new archive yet.'));more.hidden=!cursor;}
+ function renderHistory(){list.replaceChildren();const query=filter.value.trim().toLowerCase();let visible=0;for(const item of historyRows.values()){if(query&&!(item.title+' '+item.message+' '+item.id).toLowerCase().includes(query))continue;visible++;const card=node('article',{class:'ann-admin-card'}),time=item.createdAt?(window.tcmFormatIST?window.tcmFormatIST(item.createdAt,'Published'):new Date(item.createdAt).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST'):'Published';card.append(node('small',{},time+' · '+(item.actorName||item.actor)+' · #'+item.seq),node('h3',{},item.title),node('p',{},item.message.length>180?item.message.slice(0,180)+'…':item.message),node('small',{},'ID: '+item.id),button('View full message',()=>{closePreview();send.hidden=true;previewBody.replaceChildren(node('h4',{},item.title),node('p',{class:'ann-admin-full'},item.message));dialog.showModal();}));list.append(card);}if(!visible)list.append(node('p',{class:'ann-admin-notice'},query?'No match in the loaded announcements. Load older pages to continue searching.':'No announcements published in the new archive yet.'));more.hidden=!cursor;}
  async function loadHistory(append=false){if(consoleCurrentPage!=='announcements'||!adminAuthState.ready||append&&!cursor)return;controller?.abort();controller=new AbortController();const current=++view;if(!append){historyRows.clear();cursor=null;list.replaceChildren();}notice.textContent='Loading announcement archive…';more.disabled=true;refresh.disabled=true;
   try{const response=await consoleReadFetch('/api/admin/announcements'+(append?'?before='+encodeURIComponent(cursor):''),{signal:controller.signal}),answer=await response.json();if(!response.ok||!answer.success)throw new Error(answer.message||'Archive unavailable.');if(current!==view||consoleCurrentPage!=='announcements')return;for(const item of answer.items)historyRows.set(item.id,item);cursor=answer.nextCursor;renderHistory();notice.textContent=historyRows.size+' announcements loaded · 20 per page. Published means saved in the archive; per-user delivery totals are not recorded.';
   }catch(e){if(e.name!=='AbortError'&&current===view)notice.textContent=e.message;}finally{if(current===view){more.disabled=false;refresh.disabled=false;}}
@@ -5651,11 +6299,11 @@ window.addEventListener('storage', event => {
 
 </script>
 <script>
-/* R5 safe support DOM helpers. Images are embedded, never fetched from message URLs. */
+/* R5/R6 safe support DOM helpers. Images are embedded, never fetched from message URLs. */
 window.TCMSupportKit=(()=>{
  const node=(tag,attrs={},value)=>{const n=document.createElement(tag);for(const[k,v]of Object.entries(attrs))n.setAttribute(k,v);if(value!==undefined)n.textContent=String(value);return n;};
  const button=(label,fn,cls='s5-button')=>{const n=node('button',{type:'button',class:cls},label);n.addEventListener('click',fn);return n;};
- const time=t=>t?new Date(t).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Not recorded';
+ const time=t=>window.tcmFormatIST?window.tcmFormatIST(t,'Not recorded'):(t?new Date(t).toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})+' IST':'Not recorded');
  const safeImage=s=>typeof s==='string'&&s.length<=245800&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+={0,2}$/.test(s)?s:'';
  const file=async f=>{if(!f)return '';if(f.size>184320||!['image/png','image/jpeg','image/webp'].includes(f.type))throw new Error('Choose a PNG, JPEG or WebP image up to 180 KB.');return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Image could not be read.'));r.readAsDataURL(f)});};
  const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='admin'?'Support':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));return n;};
@@ -5690,52 +6338,1106 @@ window.TCMSupportPending = function(validate) {
  return {read,persist,clear,reset};
 };
 
-/* R5 Admin support inbox; existing authenticated stream and entry points retained. */
+/* R6 Admin support inbox; existing authenticated stream and entry points retained with full R6 ticket & read-only UX. */
 (()=>{
  'use strict';
  const {node,button,time,file,bubble,closeImages,compareMessages}=TCMSupportKit,page=document.getElementById('section-support');
- let viewingTicket=null,ticketCursor=null,ticketVersion=0;const archived=new Map(),isClosed=c=>['Resolved','Closed'].includes(c?.status);
+ let viewingTicket=null,ticketCursor=null,ticketVersion=0,ticketCtrl=null;
+ const archived=new Map(),isClosed=c=>['Resolved','Closed'].includes(c?.status);
  let version=0,selected=null,conversations=new Map(),messages=new Map(),inboxCursor=null,messageCursor=null,ctrl=null,listCtrl=null,listVersion=0,msgVersion=0,image='',busy=false,eventRevision=0,chosenFile=0;
- const notice=node('p',{class:'s5-notice',role:'status'}),toolbar=node('div',{class:'s5-toolbar'}),search=node('input',{type:'search',placeholder:'Search loaded names, UID or reference','aria-label':'Search loaded conversations'}),filter=node('select',{'aria-label':'Filter loaded conversation status'}),lookup=node('input',{placeholder:'Exact UID','aria-label':'Find conversation by exact UID'});
- for(const v of ['All statuses','Open','Waiting for user','Resolved','Closed'])filter.append(node('option',{value:v},v));toolbar.append(search,filter,lookup,button('Find UID',()=>loadList(false,true)),button('Refresh',()=>loadList()));
- const layout=node('div',{class:'s5-layout'}),aside=node('aside',{class:'s5-sidebar'}),list=node('div',{id:'supportUserList',class:'s5-conversations'}),older=button('Load older conversations',()=>loadList(true)),panel=node('div',{class:'s5-panel'}),head=node('div',{class:'s5-head'}),heading=node('h3',{id:'supportChatHeader'},'Select a conversation'),close=button('Close panel',()=>closeConversation()),meta=node('p',{class:'s5-notice'}),state=node('select',{'aria-label':'Conversation status'}),saveStatus=button('Save status',()=>changeStatus());
- for(const v of ['Open','Waiting for user','Resolved','Closed'])state.append(node('option',{value:v},v));head.append(heading,close);const statusbar=node('div',{class:'s5-toolbar'});statusbar.append(state,saveStatus);const body=node('div',{id:'supportChatMessages',class:'s5-messages'}),moreMessages=button('Load earlier messages',()=>loadMessages(true)),compose=node('div',{class:'s5-compose'}),input=node('textarea',{id:'supportReplyInput',rows:'3',maxlength:'4000',placeholder:'Write a reply…','aria-label':'Support reply'}),order=node('input',{maxlength:'160',placeholder:'Order ID reference (optional)','aria-label':'Reply Order ID reference'}),attach=node('input',{type:'file',accept:'image/png,image/jpeg,image/webp','aria-label':'Attach support image'}),attachment=node('p',{class:'s5-notice'}),clearImage=button('Remove image',()=>{clearImage.hidden=true;image='';attach.value='';attachment.textContent='';++chosenFile;}),send=node('button',{type:'button',class:'s5-button',onclick:'sendSupportReply()'},'Send reply'),retry=button('Retry saved action',()=>retrySaved());
- const options=node('details',{class:'s5-options'});options.append(node('summary',{},'Order reference / image'),order,attach,attachment,clearImage);compose.append(input,options,send);aside.append(list,older);panel.append(head,meta,statusbar,moreMessages,body,compose);layout.append(aside,panel);page.replaceChildren(toolbar,notice,retry,layout);retry.hidden=true;clearImage.hidden=true;
- const ticketSelect=node('select',{'aria-label':'Ticket history'}),ticketMore=button('Older tickets',()=>loadTickets(true));statusbar.prepend(ticketSelect,ticketMore);ticketMore.hidden=true;
- function selectedConversation(){const c=conversations.get(selected);return viewingTicket&&viewingTicket!==c?.ticketId?archived.get(viewingTicket):c;}
- async function loadTickets(olderPage=false){if(!visible()||!selected||olderPage&&!ticketCursor)return;const key=selected,gen=version,v=++ticketVersion;try{const r=await api('tickets?uid='+encodeURIComponent(key)+(olderPage?'&before='+encodeURIComponent(ticketCursor):''));if(!visible()||key!==selected||gen!==version||v!==ticketVersion)return;if(!olderPage)archived.clear();for(const c of r.items)archived.set(c.ticketId,c);ticketCursor=r.nextCursor;ticketSelect.replaceChildren();for(const c of archived.values())ticketSelect.append(node('option',{value:c.ticketId},c.ticketId+' · '+c.status));ticketSelect.value=viewingTicket||conversations.get(key)?.ticketId||'';ticketMore.hidden=!ticketCursor;}catch(e){if(gen===version)notice.textContent=e.message;}}
- ticketSelect.addEventListener('change',()=>{viewingTicket=ticketSelect.value;messageCursor=null;messages.clear();controls();void loadMessages();});
+ const statusBadgeClass=st=>st==='Open'?'s6-badge s6-badge-open':st==='Waiting for user'?'s6-badge s6-badge-waiting':st==='Resolved'?'s6-badge s6-badge-resolved':'s6-badge s6-badge-closed';
+ const notice=node('p',{class:'s5-notice',role:'status'}),toolbar=node('div',{class:'s5-toolbar'}),search=node('input',{type:'search',placeholder:'Search loaded names, UID, ticket or reference','aria-label':'Search loaded conversations'}),filter=node('select',{'aria-label':'Filter loaded conversation status'}),lookup=node('input',{placeholder:'Exact UID','aria-label':'Find conversation by exact UID'});
+ for(const v of ['All statuses','Open','Waiting for user','Resolved','Closed'])filter.append(node('option',{value:v},v));
+ toolbar.append(search,filter,lookup,button('Find UID',()=>loadList(false,true)),button('Refresh',()=>loadList()));
+ const layout=node('div',{class:'s5-layout'}),aside=node('aside',{class:'s5-sidebar'}),list=node('div',{id:'supportUserList',class:'s5-conversations'}),older=button('Load older conversations',()=>loadList(true)),panel=node('div',{class:'s5-panel'}),head=node('div',{class:'s5-head'}),heading=node('h3',{id:'supportChatHeader'},'Select a conversation'),headActions=node('div',{class:'s6-head-actions'}),askAiBtn=button('Ask AI / Draft',ev=>{const c=selectedConversation();if(window.openAdminAiAssistant)window.openAdminAiAssistant({source:'support-ticket',uid:selected,conversation:c||null,ticketId:c?.ticketId||viewingTicket||'legacy',messages:[...messages.values()],retrievedAt:Date.now()},ev.currentTarget);},'s5-button'),close=button('Close panel',()=>closeConversation(),'s5-button s5-button-ghost');
+ close.title='Close this right-hand view panel only. Does not resolve or close the support ticket.';
+ const meta=node('div',{class:'s5-notice s6-meta-bar'}),state=node('select',{'aria-label':'Conversation status'}),saveStatus=button('Save status',()=>changeStatus());
+ saveStatus.title='Save selected ticket status (Selecting Resolved or Closed completes the ticket).';
+ for(const v of ['Open','Waiting for user','Resolved','Closed'])state.append(node('option',{value:v},v));
+ headActions.append(askAiBtn,close);head.append(heading,headActions);
+ const statusbar=node('div',{class:'s5-toolbar'}),ticketSelect=node('select',{'aria-label':'Ticket history'}),ticketMore=button('Older tickets',()=>loadTickets(true));
+ statusbar.append(ticketSelect,ticketMore,state,saveStatus);ticketMore.hidden=true;
+ const body=node('div',{id:'supportChatMessages',class:'s5-messages'}),moreMessages=button('Load earlier messages',()=>loadMessages(true)),readonlyBanner=node('div',{class:'s6-readonly-banner',role:'status','aria-live':'polite'}),compose=node('div',{class:'s5-compose'}),input=node('textarea',{id:'supportReplyInput',rows:'3',maxlength:'4000',placeholder:'Write a reply…','aria-label':'Support reply'}),order=node('input',{maxlength:'160',placeholder:'Order ID reference (optional)','aria-label':'Reply Order ID reference'}),attach=node('input',{type:'file',accept:'image/png,image/jpeg,image/webp','aria-label':'Attach support image'}),attachment=node('p',{class:'s5-notice'}),clearImage=button('Remove image',()=>{clearImage.hidden=true;image='';attach.value='';attachment.textContent='';++chosenFile;}),send=node('button',{type:'button',class:'s5-button',onclick:'sendSupportReply()'},'Send reply'),retry=button('Retry saved action',()=>retrySaved());
+ const options=node('details',{class:'s5-options'});options.append(node('summary',{},'Order reference / image'),order,attach,attachment,clearImage);compose.append(input,options,send);aside.append(list,older);panel.append(head,meta,statusbar,moreMessages,body,readonlyBanner,compose);layout.append(aside,panel);page.replaceChildren(toolbar,notice,retry,layout);retry.hidden=true;clearImage.hidden=true;readonlyBanner.hidden=true;
+ function selectedConversation(){const c=conversations.get(selected);return viewingTicket&&viewingTicket!==c?.ticketId?archived.get(viewingTicket)||c:c;}
+ function clearDraftState(){input.value='';order.value='';image='';attach.value='';attachment.textContent='';clearImage.hidden=true;++chosenFile;closeImages();}
+ function syncTicketDropdown(){
+  const activeConv=conversations.get(selected);
+  ticketSelect.replaceChildren();
+  if(!selected){ticketSelect.append(node('option',{value:''},'No ticket selected'));ticketSelect.disabled=true;ticketMore.hidden=true;return;}
+  const seen=new Map();
+  if(activeConv?.ticketId)seen.set(activeConv.ticketId,activeConv);
+  for(const [tid,item] of archived.entries())if(tid)seen.set(tid,item);
+  if(!seen.size){
+   const legacyId=activeConv?.ticketId||'legacy';
+   ticketSelect.append(node('option',{value:legacyId},`Ticket: ${legacyId} · ${activeConv?.status||'Open'} (Current)`));
+  }else{
+   for(const [tid,item] of seen.entries()){
+    const isAct=activeConv?.ticketId&&tid===activeConv.ticketId&&!isClosed(item);
+    const tag=isAct?'Active':isClosed(item)?'Completed':'Historical';
+    ticketSelect.append(node('option',{value:tid},`${tid} · ${item.status||'Open'} (${tag})`));
+   }
+  }
+  const targetVal=viewingTicket||activeConv?.ticketId||ticketSelect.options[0]?.value||'';
+  if(targetVal)ticketSelect.value=targetVal;
+  ticketSelect.disabled=busy||!selected;
+  ticketMore.hidden=!ticketCursor;
+ }
+ async function loadTickets(olderPage=false){
+  if(!visible()||!selected||olderPage&&!ticketCursor)return;
+  ticketCtrl?.abort();ticketCtrl=new AbortController();
+  const key=selected,gen=version,v=++ticketVersion;
+  try{
+   const r=await api('tickets?uid='+encodeURIComponent(key)+(olderPage?'&before='+encodeURIComponent(ticketCursor):''),undefined,ticketCtrl.signal);
+   if(!visible()||key!==selected||gen!==version||v!==ticketVersion)return;
+   if(!olderPage)archived.clear();
+   for(const c of r.items)if(c?.ticketId)archived.set(c.ticketId,c);
+   ticketCursor=r.nextCursor||null;
+   syncTicketDropdown();
+  }catch(e){if(e.name!=='AbortError'&&gen===version){syncTicketDropdown();notice.textContent=e.message;}}
+ }
+ ticketSelect.addEventListener('change',()=>{
+  const nextTicket=ticketSelect.value||null;
+  if(nextTicket===viewingTicket)return;
+  viewingTicket=nextTicket;
+  ++msgVersion;ctrl?.abort();
+  messageCursor=null;messages.clear();
+  clearDraftState();
+  controls();
+  void loadMessages();
+ });
  const visible=()=>adminAuthState.ready&&consoleCurrentPage==='support'&&consoleDocumentActive&&!document.hidden;
  const storageKey=()=>{requireAdminSession();return 'tcm_support_action_'+adminAuthState.actorUid;};
  const pending=TCMSupportPending(op=>op&&['reply','status'].includes(op.path)&&op.payload&&typeof op.payload.uid==='string'&&/^[\w-]{1,128}$/.test(op.payload.uid)&&(op.path==='reply'?typeof op.payload.message==='string'&&op.payload.message.length<=4000&&typeof op.payload.image==='string'&&op.payload.image.length<=245800&&typeof op.payload.orderId==='string'&&op.payload.orderId.length<=160:['Open','Waiting for user','Resolved','Closed'].includes(op.payload.status)&&Number.isSafeInteger(op.payload.revision)&&op.payload.revision>=0));
  function saved(){return pending.read(storageKey()).op;}
  const reset=button('Reset unreadable saved state',()=>{if(!adminAuthState.ready)return;if(!confirm('Check conversation history first. Reset only this browser pending state? Server messages and audit entries will remain.'))return;if(pending.reset(storageKey())){notice.textContent='Browser state reset. The current draft is retained.';updatePending();}else notice.textContent='Browser storage is still unavailable. No action was sent.';});retry.after(reset);reset.hidden=true;
- function updatePending(){if(!adminAuthState.ready)return;const st=pending.read(storageKey()),op=st.op;reset.hidden=!st.blocked;retry.hidden=!op||st.blocked;retry.disabled=busy;if(st.problem)notice.textContent=st.problem;else if(op)notice.textContent='Saved action for '+op.payload.uid+' has an unconfirmed result. Retry it before sending another action.';const c=selectedConversation(),readonly=isClosed(c)||!!viewingTicket&&viewingTicket!==conversations.get(selected)?.ticketId;send.disabled=busy||!selected||readonly||st.blocked||!!op;saveStatus.disabled=busy||!selected||readonly||st.blocked||!!op;}
- function controls(){const c=selectedConversation();heading.textContent=c?c.name+' · '+c.uid:'Select a conversation';meta.textContent=c?'Ticket: '+(c.ticketId||'legacy')+' · Status: '+c.status+(isClosed(c)?' · Completed / read-only':'')+' · Last activity: '+time(c.lastTime)+(c.orderId?' · Order reference: '+c.orderId:''):'';if(c)state.value=c.status;compose.hidden=!c||isClosed(c)||!!viewingTicket&&viewingTicket!==conversations.get(selected)?.ticketId;state.disabled=!c||isClosed(c)||compose.hidden;saveStatus.disabled=!c||busy;send.disabled=!c||busy;moreMessages.hidden=!messageCursor;updatePending();}
- function renderList(){list.replaceChildren();const q=search.value.trim().toLowerCase();let shown=0;for(const c of [...conversations.values()].sort((a,b)=>(b.lastTime||0)-(a.lastTime||0)||b.uid.localeCompare(a.uid))){if(filter.value!=='All statuses'&&c.status!==filter.value)continue;if(q&&!(c.name+' '+c.uid+' '+c.lastMsg+' '+c.orderId).toLowerCase().includes(q))continue;shown++;const b=button('',()=>selectSupportConversation(c.uid,c.name),'s5-conversation'+(selected===c.uid?' s5-selected':''));b.dataset.uid=c.uid;b.append(node('strong',{},c.name),node('small',{},c.uid),node('p',{},c.lastMsg||'No message recorded'),node('small',{},c.status+' · '+time(c.lastTime)));if(c.unread)b.append(node('span',{class:'s5-new'},'Unread'));list.append(b);}if(!shown)list.append(node('p',{class:'s5-notice'},'No matching conversations in the loaded pages.'));older.hidden=!inboxCursor;controls();}
- function renderMessages(appendOlder=false){const oldHeight=body.scrollHeight,oldTop=body.scrollTop,nearBottom=oldHeight-body.clientHeight-oldTop<80;body.replaceChildren();const rows=[...messages.values()].sort(compareMessages);for(const r of rows)body.append(bubble(r,true));if(!rows.length)body.append(node('p',{class:'s5-notice'},'No messages recorded.'));if(appendOlder)body.scrollTop=body.scrollHeight-oldHeight+oldTop;else if(nearBottom)body.scrollTop=body.scrollHeight;controls();}
+ function updatePending(){
+  if(!adminAuthState.ready)return;
+  const st=pending.read(storageKey()),op=st.op;
+  reset.hidden=!st.blocked;
+  retry.hidden=!op||st.blocked;
+  retry.disabled=busy;
+  if(st.problem)notice.textContent=st.problem;
+  else if(op)notice.textContent='Saved action for '+op.payload.uid+(op.payload.ticketId?' (Ticket: '+op.payload.ticketId+')':'')+' has an unconfirmed result. Retry it before sending another action.';
+  const c=selectedConversation(),activeConv=conversations.get(selected);
+  const isHistorical=!!viewingTicket&&!!activeConv?.ticketId&&viewingTicket!==activeConv.ticketId;
+  const readonly=!c||isClosed(c)||isHistorical;
+  send.disabled=busy||!selected||readonly||st.blocked||!!op;
+  saveStatus.disabled=busy||!selected||readonly||st.blocked||!!op;
+ }
+ function controls(){
+  const c=selectedConversation(),activeConv=conversations.get(selected);
+  const isHistorical=!!viewingTicket&&!!activeConv?.ticketId&&viewingTicket!==activeConv.ticketId;
+  const closed=isClosed(c);
+  heading.textContent=c?c.name+' · '+c.uid:'Select a conversation';
+  meta.replaceChildren();
+  if(c){
+   const tid=c.ticketId||'legacy';
+   const tSpan=node('span',{},'Ticket: '+tid);
+   const cpTid=window.tcmCopyButton?.(tid,'Ticket ID');if(cpTid)tSpan.append(cpTid);
+   const cpUid=window.tcmCopyButton?.(c.uid,'UID');
+   const stBadge=node('span',{class:statusBadgeClass(c.status)},c.status||'Open');
+   const modeBadge=node('span',{class:closed||isHistorical?'s6-badge s6-badge-completed':'s6-badge s6-badge-active'},closed?'Completed · Read-only':isHistorical?'Historical · Read-only':'Active Ticket');
+   const actText=node('span',{},'Last activity: '+time(c.lastTime)+(c.orderId?' · Order ref: '+c.orderId:''));
+   meta.append(tSpan);if(cpUid)meta.append(cpUid);meta.append(stBadge,modeBadge,actText);
+   state.value=c.status;
+  }else{
+   meta.textContent='Select a user conversation on the left to inspect tickets, status and message history. "Close panel" closes this view only; "Save status" updates the ticket.';
+  }
+  compose.hidden=!c||closed||isHistorical;
+  readonlyBanner.hidden=!c||!compose.hidden;
+  if(c&&compose.hidden){
+   readonlyBanner.textContent=closed
+    ? `Ticket ${c.ticketId||'legacy'} is marked "${c.status}" (Completed / Read-Only). Reply composer is hidden to preserve the completed record.`
+    : `Viewing historical ticket ${c.ticketId||'legacy'} (Read-Only). Switch to the active ticket in the Ticket history selector to send a reply.`;
+  }
+  state.disabled=!c||closed||isHistorical||compose.hidden||busy;
+  saveStatus.disabled=!c||closed||isHistorical||busy;
+  send.disabled=!c||closed||isHistorical||busy;
+  close.disabled=!selected;
+  askAiBtn.disabled=!selected;
+  moreMessages.hidden=!messageCursor;
+  syncTicketDropdown();
+  updatePending();
+ }
+ function renderList(){
+  list.replaceChildren();
+  const q=search.value.trim().toLowerCase();
+  let shown=0;
+  for(const c of [...conversations.values()].sort((a,b)=>(b.lastTime||0)-(a.lastTime||0)||b.uid.localeCompare(a.uid))){
+   if(filter.value!=='All statuses'&&c.status!==filter.value)continue;
+   if(q&&!(c.name+' '+c.uid+' '+(c.ticketId||'')+' '+(c.lastMsg||'')+' '+(c.orderId||'')).toLowerCase().includes(q))continue;
+   shown++;
+   const b=button('',()=>selectSupportConversation(c.uid,c.name),'s5-conversation'+(selected===c.uid?' s5-selected':''));
+   b.dataset.uid=c.uid;
+   b.append(node('strong',{},c.name),node('small',{},c.uid+(c.ticketId?' · #'+c.ticketId:'')));
+   b.append(node('p',{},c.lastMsg||'No message recorded'));
+   const rowMeta=node('div',{class:'s6-conv-meta'});
+   rowMeta.append(
+    node('span',{class:statusBadgeClass(c.status)},c.status||'Open'),
+    node('span',{class:isClosed(c)?'s6-badge s6-badge-completed':'s6-badge s6-badge-active'},isClosed(c)?'Completed':'Active'),
+    node('small',{},time(c.lastTime))
+   );
+   b.append(rowMeta);
+   if(c.unread)b.append(node('span',{class:'s5-new'},'Unread'));
+   list.append(b);
+  }
+  if(!shown)list.append(node('p',{class:'s5-notice'},'No matching conversations in the loaded pages.'));
+  older.hidden=!inboxCursor;
+  controls();
+ }
+ function renderMessages(appendOlder=false){const oldHeight=body.scrollHeight,oldTop=body.scrollTop,nearBottom=oldHeight-body.clientHeight-oldTop<80;body.replaceChildren();const rows=[...messages.values()].sort(compareMessages);for(const r of rows)body.append(bubble(r,true));if(!rows.length)body.append(node('p',{class:'s5-notice'},'No messages recorded for this ticket.'));if(appendOlder)body.scrollTop=body.scrollHeight-oldHeight+oldTop;else if(nearBottom)body.scrollTop=body.scrollHeight;controls();}
  async function api(path,payload,signal){requireAdminSession();const response=await(payload===undefined?consoleReadFetch:adminApiFetch)('/api/admin/support/'+path,{signal,...(payload===undefined?{}:{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})}),r=await response.json();if(!response.ok||!r.success)throw Object.assign(new Error(r.message||'Support unavailable.'),{status:response.status});return r;}
  async function loadList(append=false,exact=false){if(!visible()||append&&!inboxCursor)return;listCtrl?.abort();listCtrl=new AbortController();const gen=version,v=++listVersion,events=eventRevision;notice.textContent='Loading conversations…';older.disabled=true;try{const r=await api('inbox'+(exact?'?uid='+encodeURIComponent(lookup.value.trim()):append?'?before='+encodeURIComponent(inboxCursor):''),undefined,listCtrl.signal);if(!visible()||gen!==version||v!==listVersion)return;if(!append&&events===eventRevision)conversations.clear();for(const c of r.items){const old=conversations.get(c.uid);if(!old||events===eventRevision||(c.revision||0)>(old.revision||0))conversations.set(c.uid,c);}inboxCursor=r.nextCursor;renderList();notice.textContent=conversations.size+' conversations loaded · 20 per page. Search and status filter apply to loaded pages.';updatePending();}catch(e){if(e.name!=='AbortError'&&visible()&&gen===version)notice.textContent=e.message;}finally{if(v===listVersion)older.disabled=false;}}
  async function read(c,gen,key){if(!c?.unread||!visible()||selected!==key||gen!==version)return;try{const r=await api('read',{uid:key,marker:c.readMarker});if(r.changed&&visible()&&selected===key&&gen===version){const current=conversations.get(key);if(current?.readMarker===c.readMarker){if(r.conversation&&r.conversation.revision>=current.revision)conversations.set(key,r.conversation);else current.unread=false;renderList();}}}catch(e){if(visible()&&gen===version)notice.textContent='Messages loaded; unread status could not sync.';}}
- async function loadMessages(append=false,refresh=false){if(!visible()||!selected||append&&!messageCursor)return;ctrl?.abort();ctrl=new AbortController();const gen=version,v=++msgVersion,key=selected,events=eventRevision;if(!append&&!refresh){messages.clear();body.replaceChildren(node('p',{class:'s5-notice'},'Loading conversation…'));}try{const r=await api('messages?uid='+encodeURIComponent(key)+(viewingTicket?'&ticketId='+encodeURIComponent(viewingTicket):'')+(append?'&before='+encodeURIComponent(messageCursor):''),undefined,ctrl.signal);if(!visible()||gen!==version||v!==msgVersion||selected!==key)return;for(const m of r.items)messages.set(m.id,m);if(!refresh)messageCursor=r.nextCursor;const current=conversations.get(key);if(r.conversation){archived.set(r.conversation.ticketId,r.conversation);if(r.conversation.ticketId===r.activeTicketId&&(!current||r.conversation.revision>=current.revision))conversations.set(key,r.conversation);}renderMessages(append);if(!append){body.scrollTop=body.scrollHeight;if(r.conversation?.ticketId===r.activeTicketId)void read(r.conversation,gen,key);}}catch(e){if(e.name!=='AbortError'&&visible()&&gen===version)notice.textContent=e.message;}}
- function closeConversation(){++version;++msgVersion;ctrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;++ticketVersion;messages.clear();messageCursor=null;body.replaceChildren();input.value='';order.value='';image='';attach.value='';attachment.textContent='';++chosenFile;closeImages();renderList();}
- window.selectSupportConversation=async(key)=>{if(!visible())return;closeConversation();selected=key;activeSupportUid=key;controls();renderList();await loadMessages();void loadTickets();};
+ async function loadMessages(append=false,refresh=false){if(!visible()||!selected||append&&!messageCursor)return;ctrl?.abort();ctrl=new AbortController();const gen=version,v=++msgVersion,key=selected,targetTicket=viewingTicket;if(!append&&!refresh){messages.clear();body.replaceChildren(node('p',{class:'s5-notice'},'Loading ticket conversation…'));}try{const r=await api('messages?uid='+encodeURIComponent(key)+(targetTicket?'&ticketId='+encodeURIComponent(targetTicket):'')+(append?'&before='+encodeURIComponent(messageCursor):''),undefined,ctrl.signal);if(!visible()||gen!==version||v!==msgVersion||selected!==key||targetTicket!==viewingTicket)return;for(const m of r.items)messages.set(m.id,m);if(!refresh)messageCursor=r.nextCursor;const current=conversations.get(key);if(r.conversation){if(r.conversation.ticketId)archived.set(r.conversation.ticketId,r.conversation);if(r.conversation.ticketId===r.activeTicketId&&(!current||r.conversation.revision>=current.revision))conversations.set(key,r.conversation);}renderMessages(append);if(!append){body.scrollTop=body.scrollHeight;if(r.conversation?.ticketId===r.activeTicketId&&(!viewingTicket||viewingTicket===r.activeTicketId))void read(r.conversation,gen,key);}}catch(e){if(e.name!=='AbortError'&&visible()&&gen===version)notice.textContent=e.message;}}
+ function closeConversation(){++version;++msgVersion;ctrl?.abort();ticketCtrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;++ticketVersion;messages.clear();messageCursor=null;body.replaceChildren(node('p',{class:'s5-notice'},'Select a conversation from the left list to view ticket messages.'));clearDraftState();renderList();}
+ window.selectSupportConversation=async(key)=>{if(!visible())return;closeConversation();selected=key;activeSupportUid=key;viewingTicket=conversations.get(key)?.ticketId||null;controls();renderList();await loadMessages();void loadTickets();};
  window.a0LoadSupportMessages=()=>loadMessages();
  window.initAdminSupportInbox=()=>loadList();
- window.a0ApplySupportChange=e=>{if(!visible()||!e||typeof e.uid!=='string')return;++eventRevision;const old=conversations.get(e.uid);if(e.conversation&&(!old||e.conversation.revision>=old.revision))conversations.set(e.uid,e.conversation);if(selected===e.uid&&e.message&&(!viewingTicket||viewingTicket===e.message.ticketId)){messages.set(e.message.id,e.message);renderMessages();if(e.refreshMessages)void loadMessages(false,true);else void read(e.conversation,version,e.uid);}if(selected===e.uid){if(!viewingTicket&&old?.ticketId!==e.conversation?.ticketId){messages.clear();messageCursor=null;void loadMessages();}void loadTickets();}renderList();};
+ window.a0ApplySupportChange=e=>{
+  if(!visible()||!e||typeof e.uid!=='string')return;
+  ++eventRevision;
+  const old=conversations.get(e.uid);
+  const oldTicketId=old?.ticketId||null;
+  const incomingTicketId=e.conversation?.ticketId||e.message?.ticketId||null;
+  if(e.conversation){
+   if(e.conversation.ticketId)archived.set(e.conversation.ticketId,e.conversation);
+   if(!old||e.conversation.revision>=old.revision)conversations.set(e.uid,e.conversation);
+  }
+  if(selected===e.uid){
+   const ticketChanged=Boolean(oldTicketId&&incomingTicketId&&oldTicketId!==incomingTicketId);
+   const hasOpenDraft=Boolean(input.value.trim()||image||order.value.trim());
+   if(ticketChanged){
+    if(hasOpenDraft||(viewingTicket&&viewingTicket!==incomingTicketId)){
+     if(!viewingTicket)viewingTicket=oldTicketId;
+     notice.textContent=`New ticket (${incomingTicketId}) opened by ${e.uid}. Your current view (${viewingTicket}) was kept separate; switch via Ticket history when ready.`;
+     void loadTickets();
+     renderList();
+     return;
+    }
+    viewingTicket=incomingTicketId;
+    messages.clear();
+    messageCursor=null;
+    void loadMessages();
+    void loadTickets();
+    renderList();
+    return;
+   }
+   const activeViewTicket=viewingTicket||e.conversation?.ticketId||oldTicketId;
+   if(e.message&&(!activeViewTicket||!e.message.ticketId||activeViewTicket===e.message.ticketId)){
+    messages.set(e.message.id,e.message);
+    renderMessages();
+    if(e.refreshMessages)void loadMessages(false,true);
+    else void read(e.conversation,version,e.uid);
+   }
+   void loadTickets();
+  }
+  renderList();
+ };
  const previousStop=window.a0StopSupport;window.a0StopSupport=()=>{stop();previousStop();};
- function stop(){++version;++listVersion;++msgVersion;ctrl?.abort();listCtrl?.abort();selected=null;activeSupportUid=null;conversations.clear();messages.clear();inboxCursor=null;messageCursor=null;input.value='';order.value='';image='';attach.value='';attachment.textContent='';++chosenFile;closeImages();list.replaceChildren();body.replaceChildren();controls();}
- async function mutate(op){if(busy)return;const key=storageKey(),durable=pending.persist(key,op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}const actor=adminAuthState.generation,gen=version;busy=true;updatePending();try{const r=await api(op.path,op.payload);pending.clear(key,op);if(actor!==adminAuthState.generation)return;if(visible()&&gen===version){if(r.data)window.a0ApplySupportChange({uid:op.payload.uid,...r.data});if(r.conversation)window.a0ApplySupportChange({uid:op.payload.uid,conversation:r.conversation});if(selected===op.payload.uid&&op.path==='reply'){if(input.value.trim()===op.payload.message)input.value='';if(image===op.payload.image){image='';attach.value='';attachment.textContent='';++chosenFile;}}notice.textContent='Saved successfully.';}}catch(e){if([400,403,404,409].includes(e.status))pending.clear(key,op);if(actor===adminAuthState.generation&&visible()&&gen===version)notice.textContent=e.message;}finally{busy=false;if(actor===adminAuthState.generation&&visible())updatePending();}}
- async function startAction(path,payload){if(!selected||busy||!visible())return;if(pending.read(storageKey()).blocked||saved()){updatePending();return;}const c=selectedConversation();if(!c||isClosed(c)||viewingTicket&&viewingTicket!==conversations.get(selected)?.ticketId)return;const op={path,payload:{...payload,uid:selected,ticketId:c.ticketId||'legacy',requestId:crypto.randomUUID()}};const durable=pending.persist(storageKey(),op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}await mutate(op);}
+ function stop(){++version;++listVersion;++msgVersion;++ticketVersion;ctrl?.abort();listCtrl?.abort();ticketCtrl?.abort();selected=null;activeSupportUid=null;viewingTicket=null;archived.clear();ticketSelect.replaceChildren();ticketCursor=null;conversations.clear();messages.clear();inboxCursor=null;messageCursor=null;clearDraftState();list.replaceChildren();body.replaceChildren();controls();}
+ async function mutate(op){if(busy)return;const key=storageKey(),durable=pending.persist(key,op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}const actor=adminAuthState.generation,gen=version;busy=true;updatePending();try{const r=await api(op.path,op.payload);pending.clear(key,op);if(actor!==adminAuthState.generation)return;if(visible()&&gen===version){if(r.data)window.a0ApplySupportChange({uid:op.payload.uid,...r.data});if(r.conversation)window.a0ApplySupportChange({uid:op.payload.uid,conversation:r.conversation});if(selected===op.payload.uid&&op.path==='reply'){if(input.value.trim()===op.payload.message)input.value='';if(order.value.trim()===op.payload.orderId)order.value='';if(image===op.payload.image){image='';attach.value='';attachment.textContent='';clearImage.hidden=true;++chosenFile;}}notice.textContent=op.path==='status'?`Ticket status updated to "${op.payload.status}".`:'Reply sent and saved.';}}catch(e){if([400,403,404,409].includes(e.status))pending.clear(key,op);if(actor===adminAuthState.generation&&visible()&&gen===version)notice.textContent=e.message;}finally{busy=false;if(actor===adminAuthState.generation&&visible())updatePending();}}
+ async function startAction(path,payload){if(!selected||busy||!visible())return;if(pending.read(storageKey()).blocked||saved()){updatePending();return;}const c=selectedConversation(),activeConv=conversations.get(selected);if(!c||isClosed(c)||viewingTicket&&activeConv?.ticketId&&viewingTicket!==activeConv.ticketId)return;const op={path,payload:{...payload,uid:selected,ticketId:c.ticketId||'legacy',requestId:crypto.randomUUID()}};const durable=pending.persist(storageKey(),op);if(!durable.ok){updatePending();notice.textContent=durable.problem;return;}await mutate(op);}
  window.sendSupportReply=async()=>{if(!input.value.trim()&&!image)return;await startAction('reply',{message:input.value.trim(),image,orderId:order.value.trim()});};
  async function changeStatus(){const c=selectedConversation();if(c)await startAction('status',{status:state.value,revision:c.revision});}
  async function retrySaved(){const op=saved();if(op)await mutate(op);}
- attach.addEventListener('change',async()=>{const gen=version,v=++chosenFile;image='';try{const pic=await file(attach.files[0]);if(gen===version&&v===chosenFile){image=pic;clearImage.hidden=!pic;attachment.textContent=pic?'Image attached · up to 180 KB':'';}}catch(e){if(gen===version&&v===chosenFile){attach.value='';notice.textContent=e.message;}}});
+ attach.addEventListener('change',async()=>{const gen=version,v=++chosenFile;image='';try{const pic=await file(attach.files[0]);if(gen===version&&v===chosenFile){image=pic;clearImage.hidden=!pic;attachment.textContent=pic?'Image attached · up to 180 KB':'';}}catch(e){if(gen===version&&v===chosenFile){attach.value='';clearImage.hidden=true;notice.textContent=e.message;}}});
  search.addEventListener('input',renderList);filter.addEventListener('change',renderList);
  document.addEventListener('tcm:admin-page-leave',e=>{if(e.detail?.page==='support')stop();});
- document.addEventListener('visibilitychange',()=>{if(document.hidden){ctrl?.abort();listCtrl?.abort();closeImages();}else if(visible()){void loadList();if(selected)void loadMessages();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden){ctrl?.abort();listCtrl?.abort();ticketCtrl?.abort();closeImages();}else if(visible()){void loadList();if(selected)void loadMessages();}});
  controls();
 })();
+</script>
+<script>
+/* TCM ADMIN AI ASSISTANT (R6): Read-Only & Draft-Only Drawer, Disconnected Backend Guardrail,
+   Proactive Guided Module & Order ID Diagnostics, Multilingual Auto-Match (BN/EN/HI) & Web Speech Audio Speaker. */
+(() => {
+ 'use strict';
+ const node = (tag, attrs = {}, text) => {
+  const el = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+   if (k === 'class') el.className = v;
+   else if (v !== undefined && v !== null) el.setAttribute(k, String(v));
+  }
+  if (text !== undefined) el.textContent = String(text);
+  return el;
+ };
+ const btn = (label, handler, cls = 'ai-btn') => {
+  const b = node('button', { type: 'button', class: cls }, label);
+  b.addEventListener('click', handler);
+  return b;
+ };
+ const fmtTime = v => window.tcmFormatIST ? window.tcmFormatIST(v, 'Not recorded') : 'Not recorded';
+ const showVal = (v, fb = 'Not recorded') => (v === null || v === undefined || v === '') ? fb : String(v);
 
+ // Complete Dashboard & Console Module Catalog for Guided Auto-Diagnostic
+ const MODULES = [
+  {
+   id: 'staking',
+   titleBn: '১. স্ট্যাকিং ও মেয়াদ (Staking & ROI)',
+   titleEn: '1. Staking & Maturity / ROI',
+   sub: '≤24h maturity filter, matured contracts, 05:30 IST ROI',
+   issues: [
+    { id: 'staking_maturity', bn: '২৪ ঘণ্টার মধ্যে মেয়াদ পূর্ণ বা ম্যাচিউরড কন্ট্রাক্ট যাচাই', en: 'Contracts within 24h of maturity or already matured' },
+    { id: 'staking_roi_reset', bn: '০৫:৩০ IST ডেইলি ROI পেআউট বা কাউন্টার রিসেট বকেয়া', en: '05:30 IST daily ROI settlement or counter reset pending' },
+    { id: 'staking_recovery', bn: 'System Settlement Recovery কখন ও কীভাবে চালাবেন', en: 'When and how to run System Settlement Recovery safely' }
+   ]
+  },
+  {
+   id: 'nft',
+   titleBn: '২. এনএফটি ও সেটেলমেন্ট (NFT & Custody)',
+   titleEn: '2. NFT Gallery, Reservation & Settlement',
+   sub: 'BSC Chain 56 custody, candidate import, off-chain reservation',
+   issues: [
+    { id: 'nft_custody', bn: 'BSC Mainnet (Chain 56) মিন্ট ও প্ল্যাটফর্ম কাস্টডি যাচাই', en: 'Verify BSC Mainnet Chain 56 mint receipt & platform custody' },
+    { id: 'nft_import', bn: 'Candidate JSON ইমপোর্ট, লেভেল ১-৬ প্রাইস ও ১৫ মিনিট প্রিভিউ', en: 'Candidate JSON import, Level 1-6 pricing & 15m preview' },
+    { id: 'nft_settlement', bn: 'রিজার্ভেশন, প্রিন্সিপাল ও প্রফিট রেকর্ড যাচাই', en: 'Inspect saved reservation, principal & profit settlement records' }
+   ]
+  },
+  {
+   id: 'deposit',
+   titleBn: '৩. ডিপোজিট যাচাই (Deposits)',
+   titleEn: '3. Deposit Verification (BEP20/TRC20)',
+   sub: 'Pending deposit queue, TxID proof, wallet credit',
+   issues: [
+    { id: 'dep_txid', bn: 'পেন্ডিং ডিপোজিট TxID ও অন-চেইন ভেরিফিকেশন স্ট্যাটাস', en: 'Pending deposit TxID & on-chain verification status' },
+    { id: 'dep_debt', bn: 'ডিপোজিট ক্রেডিট ও সিস্টেম ডেট রিকভারি হিসাব', en: 'Deposit wallet credit vs. automatic system debt recovery' }
+   ]
+  },
+  {
+   id: 'withdraw',
+   titleBn: '৪. উইথড্রয়াল ও পেআউট (Withdrawals & Payout)',
+   titleEn: '4. Withdrawals & Hot Wallet Payout',
+   sub: 'Approved vs Verified Completed, BEP20/TRC20 gas, health score',
+   issues: [
+    { id: 'wd_payout_state', bn: 'Approved/Queued বনাম Verified Completed পেআউট পার্থক্য', en: 'Approved/Queued vs. Verified Completed blockchain payout' },
+    { id: 'wd_failed_error', bn: 'Failed পেআউট, Last Error ও হট ওয়ালেট গ্যাস/USDT চেক', en: 'Failed payout, Last Error & hot wallet USDT/native gas check' },
+    { id: 'wd_refund_lock', bn: 'উইথড্রয়াল Reject/Refund অথবা Direct Vault Lock রিভিউ', en: 'Withdrawal Reject/Refund vs. Direct Vault Lock review' }
+   ]
+  },
+  {
+   id: 'p2p',
+   titleBn: '৫. পিটুপি ট্রান্সফার (P2P Ledger)',
+   titleEn: '5. P2P Transfers & Fee Ledger',
+   sub: 'Sender, receiver, saved fee %, internal ledger reference',
+   issues: [
+    { id: 'p2p_record', bn: 'পিটুপি সেন্ডার, রিসিভার, ফি এবং নেট অ্যামাউন্ট যাচাই', en: 'Verify P2P sender, receiver, saved fee & net amount' }
+   ]
+  },
+  {
+   id: 'vault',
+   titleBn: '৬. ওয়ালেট ও ভল্ট লক (Wallet & Vault)',
+   titleEn: '6. Wallet, Institutional Vault & Debt',
+   sub: 'Single/mass vault lock, LV 1-6 unlock, pending debt',
+   issues: [
+    { id: 'vault_lock_debt', bn: 'ভল্ট লক/আনলক এবং ঘাটতি ব্যালেন্সের (Debt) নিয়ম', en: 'Vault lock/unlock rules & deficit debt tracking' }
+   ]
+  },
+  {
+   id: 'airdrop',
+   titleBn: '৭. এয়ারড্রপ ইঞ্জিন (Airdrop Engine)',
+   titleEn: '7. Airdrop Engine & Tier Pool',
+   sub: 'Single bonus, LV 1-6 percentage pool, tier reversal',
+   issues: [
+    { id: 'airdrop_ops', bn: 'সিঙ্গেল এয়ারড্রপ, পুল ডিস্ট্রিবিউশন ও লেভেল রিভার্সাল', en: 'Single airdrop, percentage pool distribution & tier reversal' }
+   ]
+  },
+  {
+   id: 'treasury',
+   titleBn: '৮. ট্রেজারি ও ডিভিডেন্ড (Treasury & Fees)',
+   titleEn: '8. Treasury, Fee Config & Dividends',
+   sub: 'Fee wallets, pending reserve, 10-shareholder dividend pool',
+   issues: [
+    { id: 'treasury_div', bn: 'ট্রেজারি পুল ট্রান্সফার, ফি ভার্সন ও ১০ শেয়ারহোল্ডার ডিভিডেন্ড', en: 'Treasury pool transfer, fee version & 10-shareholder dividend' }
+   ]
+  },
+  {
+   id: 'lifecycle',
+   titleBn: '৯. অ্যাকাউন্ট লাইফসাইকেল ও অ্যাক্সেস (Lifecycle)',
+   titleEn: '9. Account Lifecycle & Access Control',
+   sub: 'Active, Banned, Pending Deletion, Cleanup Blocked, Roles',
+   issues: [
+    { id: 'lifecycle_cleanup', bn: 'Pending Deletion, Cleanup Blocked ও Banned স্ট্যাটাস ব্যাখ্যা', en: 'Explain Pending Deletion, Cleanup Blocked & Banned states' }
+   ]
+  },
+  {
+   id: 'support',
+   titleBn: '১০. সাপোর্ট টিকেট R6 ও ব্রডকাস্ট (Support R6)',
+   titleEn: '10. Support Tickets R6 & Announcements',
+   sub: 'Ticket ID, Close panel vs Save status, read-only history',
+   issues: [
+    { id: 'support_r6_flow', bn: 'Support R6: Close panel বনাম Resolved/Closed টিকেট নিয়ম', en: 'Support R6: Close panel vs. Resolved/Closed ticket lifecycle' },
+    { id: 'support_draft', bn: 'ইউজার সাপোর্ট রিপ্লাই ও অ্যানাউন্সমেন্ট ড্রাফট তৈরি', en: 'Generate Support Reply & Announcement drafts for review' }
+   ]
+  }
+ ];
+
+ const state = {
+  open: false,
+  triggerEl: null,
+  langMode: 'auto', // 'auto' | 'bn' | 'en' | 'hi'
+  detectedLang: 'bn',
+  autoSpeak: false,
+  speaking: false,
+  selectedModule: 'staking',
+  selectedIssue: 'staking_maturity',
+  uiState: 'disconnected', // 'empty' | 'disconnected' | 'loading' | 'cancelled' | 'timeout' | 'error'
+  context: null, // { source, id, orderId, uid, hash, ticketId, record, audit, email, notes, conversation, messages, retrievedAt }
+  controller: null,
+  history: []
+ };
+
+ // Language detection: matches user's script/language automatically
+ function detectLanguage(text) {
+  if (state.langMode !== 'auto') return state.langMode;
+  const s = String(text || '');
+  if (/[\u0980-\u09FF]/.test(s)) return 'bn';
+  if (/[\u0900-\u097F]/.test(s)) return 'hi';
+  const lower = s.toLowerCase();
+  if (/\b(ki|kivabe|keno|problem|somossa|stak|order|taka|koto|bep20|trc20|bangla)\b/.test(lower) && !/\b(what|why|how|please|explain|status)\b/.test(lower)) {
+   return 'bn';
+  }
+  if (s.trim().length > 0) return 'en';
+  return state.detectedLang || 'bn';
+ }
+
+ // Web Speech API Audio Speaker (Play / Stop / Auto-Speak)
+ function stopSpeech() {
+  try {
+   if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+  } catch (_) {}
+  state.speaking = false;
+  updateAudioUi();
+ }
+
+ function speakText(text, langCode = 'bn') {
+  stopSpeech();
+  if (!('speechSynthesis' in window) || typeof window.SpeechSynthesisUtterance !== 'function') {
+   showToast('Browser audio speech synthesis is not supported on this device.', true);
+   return;
+  }
+  const clean = String(text || '').replace(/[*#`_~>]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!clean) return;
+  try {
+   const utter = new SpeechSynthesisUtterance(clean);
+   const targetTag = langCode === 'bn' ? 'bn-IN' : langCode === 'hi' ? 'hi-IN' : 'en-IN';
+   utter.lang = targetTag;
+   const voices = window.speechSynthesis.getVoices ? window.speechSynthesis.getVoices() : [];
+   const prefix = langCode === 'bn' ? 'bn' : langCode === 'hi' ? 'hi' : 'en';
+   const matched = voices.find(v => v.lang && v.lang.toLowerCase().startsWith(prefix));
+   if (matched) utter.voice = matched;
+   utter.rate = 0.98;
+   utter.onstart = () => { state.speaking = true; updateAudioUi(); };
+   utter.onend = () => { state.speaking = false; updateAudioUi(); };
+   utter.onerror = () => { state.speaking = false; updateAudioUi(); };
+   state.speaking = true;
+   updateAudioUi();
+   window.speechSynthesis.speak(utter);
+  } catch (err) {
+   state.speaking = false;
+   updateAudioUi();
+  }
+ }
+
+ // Build DOM Elements for AI Assistant Drawer
+ const backdrop = node('div', { id: 'adminAiBackdrop', class: 'ai-backdrop', hidden: '' });
+ const drawer = node('aside', {
+  id: 'adminAiDrawer',
+  class: 'ai-drawer',
+  role: 'dialog',
+  'aria-modal': 'false',
+  'aria-labelledby': 'adminAiTitle',
+  'aria-hidden': 'true',
+  hidden: ''
+ });
+
+ // Drawer Header
+ const head = node('div', { class: 'ai-drawer-head' });
+ const titleWrap = node('div');
+ const titleEl = node('h2', { id: 'adminAiTitle', class: 'ai-drawer-title' });
+ titleEl.append(node('i', { class: 'fa-solid fa-robot text-sky-400', 'aria-hidden': 'true' }), node('span', {}, 'TCM Admin AI Assistant'));
+ const subEl = node('p', { class: 'ai-drawer-sub' }, 'Read-Only & Draft-Only · Multilingual Guided Diagnostics + Audio');
+ titleWrap.append(titleEl, subEl);
+
+ const headControls = node('div', { class: 'flex items-center gap-1.5' });
+ const autoAudioBtn = btn('🔊 Auto-Audio: OFF', () => {
+  state.autoSpeak = !state.autoSpeak;
+  if (!state.autoSpeak) stopSpeech();
+  updateAudioUi();
+ }, 'ai-btn');
+ autoAudioBtn.id = 'aiAutoAudioToggle';
+ const stopAudioGlobalBtn = btn('🔇 Stop', () => stopSpeech(), 'ai-btn ai-btn-stop');
+ stopAudioGlobalBtn.id = 'aiStopAudioGlobal';
+ stopAudioGlobalBtn.hidden = true;
+ const closeBtn = btn('✕ Close', () => closeAdminAiAssistant(), 'ai-btn');
+ closeBtn.id = 'adminAiCloseBtn';
+ closeBtn.setAttribute('aria-label', 'Close AI Assistant');
+ headControls.append(autoAudioBtn, stopAudioGlobalBtn, closeBtn);
+ head.append(titleWrap, headControls);
+
+ // Authoritative source banner
+ const authBanner = node('div', { class: 'ai-authority-banner', role: 'note' },
+  'AI-এর পরামর্শ শুধুমাত্র সহায়ক (Read-Only · Draft-Only)—financial status-এর চূড়ান্ত ও প্রামাণ্য উৎস (authoritative source) হলো ব্যাকএন্ড রেকর্ড। AI নিজে কোনো approve/reject বা payout চালাতে পারে না।'
+ );
+
+ // Connection & Language Strip
+ const statusStrip = node('div', { class: 'ai-status-strip' });
+ const connPill = node('span', { id: 'aiConnStatusPill', class: 'ai-conn-pill', 'data-ai-connected': 'false' }, 'AI Backend: Not Connected');
+ const langSelect = node('select', { id: 'aiLangSelect', 'aria-label': 'Response language mode', style: 'width:auto;min-height:28px;padding:3px 8px;font-size:11.5px' });
+ for (const [val, label] of [['auto', '🌐 Auto-Detect (স্বয়ংক্রিয় ভাষা)'], ['bn', '🇧🇩/🇮🇳 বাংলা (Bengali)'], ['en', '🇬🇧 English'], ['hi', '🇮🇳 हिंदी (Hindi)']]) {
+  langSelect.append(node('option', { value: val }, label));
+ }
+ langSelect.addEventListener('change', () => {
+  state.langMode = langSelect.value;
+  if (state.langMode !== 'auto') state.detectedLang = state.langMode;
+  renderModuleCatalog();
+ });
+ statusStrip.append(connPill, langSelect);
+
+ // Context Bar (Selected Order ID / UID / Hash / Ticket ID + Clear Context + Reset Conversation)
+ const contextBar = node('div', { id: 'aiContextBar', class: 'ai-context-bar' });
+ const contextMeta = node('div', { id: 'aiContextMeta', class: 'ai-context-meta' });
+ const contextBtns = node('div', { class: 'flex items-center gap-1.5' });
+ const clearCtxBtn = btn('Clear context', () => {
+  state.context = null;
+  renderContextBar();
+  renderOrderPicker();
+ }, 'ai-btn');
+ clearCtxBtn.id = 'aiClearContextBtn';
+ const resetChatBtn = btn('Reset', () => {
+  stopSpeech();
+  state.controller?.abort();
+  state.history = [];
+  state.uiState = 'disconnected';
+  renderMessages();
+  renderStateNotice();
+ }, 'ai-btn');
+ resetChatBtn.id = 'aiResetChatBtn';
+ contextBtns.append(clearCtxBtn, resetChatBtn);
+ contextBar.append(contextMeta, contextBtns);
+
+ // Scrollable Body
+ const body = node('div', { id: 'aiDrawerBody', class: 'ai-body' });
+
+ // 1. Proactive Question & Complete Dashboard Module Selector Card
+ const guidedCard = node('section', { class: 'ai-section-card', 'aria-label': 'Guided diagnostic selector' });
+ const guidedTitle = node('h4', { id: 'aiGuidedTitle' }, 'কী সমস্যা হয়েছে? ড্যাশবোর্ড মডিউল বেছে নিন (Choose Module)');
+ const moduleGrid = node('div', { id: 'aiModuleGrid', class: 'ai-module-grid', role: 'group', 'aria-label': 'Dashboard modules' });
+ const issueTitle = node('div', { id: 'aiIssueSubTitle', style: 'font-size:11.5px;color:#94a3b8;margin-top:8px;font-weight:600' }, 'নির্দিষ্ট সমস্যা নির্বাচন করুন (Select specific issue):');
+ const issueChips = node('div', { id: 'aiIssueChips', class: 'ai-chip-row' });
+
+ // Order ID / UID / Hash Quick Picker inside Guided Card
+ const orderPickerWrap = node('div', { style: 'margin-top:10px;padding-top:8px;border-top:1px solid rgba(148,163,184,.14)' });
+ const orderPickerLabel = node('div', { style: 'font-size:11.5px;color:#94a3b8;margin-bottom:5px;font-weight:600' }, 'অর্ডার আইডি / UID / Hash নির্বাচন বা ইনপুট (Bind Record Context):');
+ const orderInputRow = node('div', { class: 'flex gap-1.5' });
+ const orderQuickInput = node('input', { id: 'aiOrderContextInput', type: 'text', placeholder: 'Order ID, UID or TxHash (e.g. TX-...)', 'aria-label': 'Order ID, UID or Transaction hash', style: 'min-height:32px;padding:5px 9px;font-size:12px' });
+ const bindOrderBtn = btn('Bind ID', () => bindManualIdentifier(orderQuickInput.value), 'ai-btn');
+ const openTrackBtn = btn('Track ↗', () => {
+  const val = orderQuickInput.value.trim() || state.context?.orderId || state.context?.uid || '';
+  switchTab('tracking');
+  if (val) {
+   const trackInput = document.querySelector('#section-tracking input[type="text"]');
+   if (trackInput) { trackInput.value = val; trackInput.focus(); }
+  }
+ }, 'ai-btn');
+ orderInputRow.append(orderQuickInput, bindOrderBtn, openTrackBtn);
+ const recentOrderChips = node('div', { id: 'aiRecentOrderChips', class: 'ai-chip-row' });
+ orderPickerWrap.append(orderPickerLabel, orderInputRow, recentOrderChips);
+
+ guidedCard.append(guidedTitle, moduleGrid, issueTitle, issueChips, orderPickerWrap);
+
+ // 2. State Notice Banner (Empty / Disconnected / Loading / Cancelled / Timeout / Error)
+ const stateNotice = node('div', { id: 'aiStateNotice', class: 's5-notice', role: 'status', 'aria-live': 'polite', style: 'padding:8px 11px;border-radius:8px;background:rgba(15,23,42,.85);border:1px solid rgba(148,163,184,.18)' });
+
+ // 3. Conversation & Explanation Stream
+ const msgStream = node('div', { id: 'aiMessageStream', class: 'ai-messages', 'aria-live': 'polite' });
+
+ body.append(guidedCard, stateNotice, msgStream);
+
+ // Footer Composer
+ const footer = node('div', { class: 'ai-footer' });
+ const promptInput = node('textarea', {
+  id: 'aiPromptInput',
+  rows: '2',
+  maxlength: '2000',
+  placeholder: 'ঐচ্ছিক: আপনার ভাষায় প্রশ্ন বা সমস্যার বিবরণ লিখুন (বাংলা / English / हिंदी)...',
+  'aria-label': 'Optional question or issue details for AI Assistant'
+ });
+ const footerActions = node('div', { class: 'ai-footer-actions' });
+ const leftBtns = node('div', { class: 'flex flex-wrap items-center gap-1.5' });
+ const runGuidedBtn = btn('✨ Explain & Draft (Text + 🔊 Audio)', () => runGuidedDiagnostic(), 'ai-btn ai-btn-audio');
+ runGuidedBtn.id = 'aiGuidedRunBtn';
+ const backendSendBtn = btn('Send to Live AI (Not Connected)', () => attemptBackendAiSend(), 'ai-btn');
+ backendSendBtn.id = 'aiBackendSendBtn';
+ backendSendBtn.disabled = true;
+ backendSendBtn.title = 'Disabled because /api/admin/ai/assist backend endpoint is not connected. No fake network requests are sent.';
+ const cancelReqBtn = btn('Cancel', () => cancelAiRequest(), 'ai-btn ai-btn-stop');
+ cancelReqBtn.id = 'aiCancelReqBtn';
+ cancelReqBtn.hidden = true;
+ const retryReqBtn = btn('Retry', () => runGuidedDiagnostic(), 'ai-btn');
+ retryReqBtn.id = 'aiRetryReqBtn';
+ retryReqBtn.hidden = true;
+
+ leftBtns.append(runGuidedBtn, backendSendBtn, cancelReqBtn, retryReqBtn);
+ footerActions.append(leftBtns);
+ footer.append(promptInput, footerActions);
+
+ drawer.append(head, authBanner, statusStrip, contextBar, body, footer);
+ document.body.append(backdrop, drawer);
+
+ function updateAudioUi() {
+  autoAudioBtn.textContent = state.autoSpeak ? '🔊 Auto-Audio: ON' : '🔊 Auto-Audio: OFF';
+  stopAudioGlobalBtn.hidden = !state.speaking;
+ }
+
+ function collectKnownRecords() {
+  const map = new Map();
+  if (window.tcmAiRecentRecords) {
+   for (const [k, v] of window.tcmAiRecentRecords.entries()) map.set(k, v);
+  }
+  if (typeof m1Terminal === 'object' && m1Terminal?.pages) {
+   for (const [kind, p] of Object.entries(m1Terminal.pages)) {
+    for (const r of p.items.values()) {
+     const key = String(r.orderId || r.id || '').trim();
+     if (key) map.set(key, { ...r, source: 'transactions', type: r.type || kind });
+    }
+   }
+  }
+  return map;
+ }
+
+ function bindManualIdentifier(raw) {
+  const key = String(raw || '').trim();
+  if (!key) return;
+  const known = collectKnownRecords();
+  let matched = known.get(key) || null;
+  if (!matched) {
+   for (const r of known.values()) {
+    if (r.uid === key || r.hash === key || r.txid === key || r.id === key || r.orderId === key) {
+     matched = r;
+     break;
+    }
+   }
+  }
+  state.context = {
+   source: matched?.source || 'manual-lookup',
+   id: matched?.id || key,
+   orderId: matched?.orderId || (key.startsWith('TX') || key.startsWith('ORD') ? key : 'Not recorded'),
+   uid: matched?.uid || (key.startsWith('TCM') ? key : 'Not recorded'),
+   hash: matched?.hash || matched?.txid || (/^0x[a-fA-F0-9]{64}$/.test(key) ? key : 'Not recorded'),
+   record: matched || null,
+   retrievedAt: matched ? Date.now() : null
+  };
+  renderContextBar();
+  renderOrderPicker();
+ }
+
+ function renderContextBar() {
+  contextMeta.replaceChildren();
+  const ctx = state.context;
+  if (!ctx) {
+   contextMeta.append(node('span', {}, 'Context: '), node('strong', {}, 'None selected (Empty context)'), node('span', {}, ' · Select an Order ID, open from Details, or pick a module below.'));
+   clearCtxBtn.disabled = true;
+   return;
+  }
+  clearCtxBtn.disabled = false;
+  const r = ctx.record || {};
+  const ord = showVal(ctx.orderId || r.orderId, 'Not recorded');
+  const uid = showVal(ctx.uid || r.uid || ctx.conversation?.uid, 'Not recorded');
+  const hash = showVal(ctx.hash || r.hash || r.txid, 'Not recorded');
+  const ticket = ctx.ticketId || ctx.conversation?.ticketId || null;
+  const retrieved = ctx.retrievedAt ? fmtTime(ctx.retrievedAt) : 'Not recorded';
+
+  contextMeta.append(node('span', {}, 'Order: '), node('strong', {}, ord));
+  const cpOrd = window.tcmCopyButton?.(ord, 'Order ID');
+  if (cpOrd) contextMeta.append(cpOrd);
+  contextMeta.append(node('span', {}, ' · UID: '), node('strong', {}, uid));
+  const cpUid = window.tcmCopyButton?.(uid, 'UID');
+  if (cpUid) contextMeta.append(cpUid);
+  if (ticket) {
+   contextMeta.append(node('span', {}, ' · Ticket: '), node('strong', {}, ticket));
+  }
+  if (hash !== 'Not recorded') {
+   const shortHash = hash.length > 18 ? hash.slice(0, 10) + '…' + hash.slice(-6) : hash;
+   contextMeta.append(node('span', {}, ' · Hash: '), node('strong', {}, shortHash));
+  }
+  contextMeta.append(node('div', { style: 'font-size:11px;color:#94a3b8;margin-top:2px' },
+   `Source: ${showVal(ctx.source, 'console')} · Retrieved: ${retrieved} · Record loaded: ${ctx.record ? 'Yes (Saved record)' : 'Not recorded in memory'}`
+  ));
+ }
+
+ function renderOrderPicker() {
+  recentOrderChips.replaceChildren();
+  const known = collectKnownRecords();
+  const entries = [...known.entries()].slice(0, 6);
+  if (!entries.length) {
+   recentOrderChips.append(node('span', { style: 'font-size:11px;color:#64748b' }, 'No records loaded in current page yet. Load Deposits/Withdrawals/Order Tracking or enter an ID above.'));
+   return;
+  }
+  for (const [key, rec] of entries) {
+   const active = state.context?.orderId === key || state.context?.id === key;
+   const c = btn(`${key} (${showVal(rec.status, 'Record')})`, () => {
+    orderQuickInput.value = key;
+    state.context = {
+     source: rec.source || 'transactions',
+     id: rec.id || key,
+     orderId: rec.orderId || key,
+     uid: rec.uid || 'Not recorded',
+     hash: rec.hash || rec.txid || 'Not recorded',
+     record: rec,
+     retrievedAt: Date.now()
+    };
+    renderContextBar();
+    renderOrderPicker();
+   }, 'ai-chip');
+   c.setAttribute('aria-pressed', String(active));
+   recentOrderChips.append(c);
+  }
+ }
+
+ function renderModuleCatalog() {
+  const lang = state.langMode === 'auto' ? state.detectedLang : state.langMode;
+  guidedTitle.textContent = lang === 'en'
+   ? 'What issue occurred? Choose a Dashboard Module:'
+   : 'কী সমস্যা হয়েছে? ড্যাশবোর্ড মডিউল তালিকা থেকে বেছে নিন:';
+  moduleGrid.replaceChildren();
+  for (const mod of MODULES) {
+   const pressed = state.selectedModule === mod.id;
+   const b = node('button', {
+    type: 'button',
+    class: 'ai-module-btn',
+    'aria-pressed': String(pressed),
+    'data-ai-module': mod.id
+   });
+   b.append(
+    node('span', {}, lang === 'en' ? mod.titleEn : mod.titleBn),
+    node('small', {}, mod.sub)
+   );
+   b.addEventListener('click', () => {
+    state.selectedModule = mod.id;
+    state.selectedIssue = mod.issues[0]?.id || '';
+    renderModuleCatalog();
+   });
+   moduleGrid.append(b);
+  }
+  const currentMod = MODULES.find(m => m.id === state.selectedModule) || MODULES[0];
+  issueChips.replaceChildren();
+  for (const iss of currentMod.issues) {
+   const active = state.selectedIssue === iss.id;
+   const chip = btn(lang === 'en' ? iss.en : iss.bn, () => {
+    state.selectedIssue = iss.id;
+    renderModuleCatalog();
+   }, 'ai-chip');
+   chip.setAttribute('aria-pressed', String(active));
+   issueChips.append(chip);
+  }
+ }
+
+ function renderStateNotice() {
+  const liveConnected = Boolean(window.TCM_ADMIN_AI_ENABLED === true && window.TCM_ADMIN_AI_ENDPOINT);
+  connPill.setAttribute('data-ai-connected', String(liveConnected));
+  connPill.textContent = liveConnected ? 'AI Backend: Connected' : 'AI Backend: Not Connected (Read-Only Local Guide)';
+  backendSendBtn.disabled = !liveConnected;
+
+  if (state.uiState === 'loading') {
+   stateNotice.textContent = '⏳ Analyzing saved context and preparing read-only explanation… (Click Cancel to abort client wait; note that server-side cancellation requires backend support.)';
+   cancelReqBtn.hidden = false;
+   retryReqBtn.hidden = true;
+  } else if (state.uiState === 'cancelled') {
+   stateNotice.textContent = '⚠️ Request cancelled in browser. Note: Browser abort stops the local UI wait; if a live AI backend is connected in future, server-side cancellation must also be enforced.';
+   cancelReqBtn.hidden = true;
+   retryReqBtn.hidden = false;
+  } else if (state.uiState === 'timeout') {
+   stateNotice.textContent = '⏱️ Request timed out. No financial or record state was changed. Click Retry to run again.';
+   cancelReqBtn.hidden = true;
+   retryReqBtn.hidden = false;
+  } else if (state.uiState === 'error') {
+   stateNotice.textContent = '❌ AI Assistant encountered an error while reading context. Existing Admin Console workflows remain unaffected.';
+   cancelReqBtn.hidden = true;
+   retryReqBtn.hidden = false;
+  } else {
+   cancelReqBtn.hidden = true;
+   retryReqBtn.hidden = true;
+   stateNotice.textContent = liveConnected
+    ? '✅ Connected to authenticated read-only AI endpoint.'
+    : '🔌 AI not connected to a live LLM endpoint (Send to Live AI is disabled; zero external AI requests are sent). Use the Guided Auto-Diagnostic & Saved-Record Explainer below with Text + 🔊 Audio!';
+  }
+ }
+
+ function buildDiagnosticResponse(userText) {
+  const lang = detectLanguage(userText);
+  state.detectedLang = lang;
+  const mod = MODULES.find(m => m.id === state.selectedModule) || MODULES[0];
+  const issue = mod.issues.find(i => i.id === state.selectedIssue) || mod.issues[0];
+  const ctx = state.context;
+  const r = ctx?.record || null;
+  const retrievedTime = fmtTime(ctx?.retrievedAt || Date.now());
+
+  // Strictly read saved record fields; never invent values
+  const ordId = showVal(ctx?.orderId || r?.orderId, lang === 'bn' ? 'তথ্য পাওয়া যায়নি (Not recorded)' : 'Not recorded');
+  const uid = showVal(ctx?.uid || r?.uid || ctx?.conversation?.uid, lang === 'bn' ? 'তথ্য পাওয়া যায়নি (Not recorded)' : 'Not recorded');
+  const status = showVal(r?.status || ctx?.conversation?.status, lang === 'bn' ? 'তথ্য পাওয়া যায়নি (Not recorded)' : 'Not recorded');
+  const rawStatus = showVal(r?.rawStatus, 'Not recorded');
+  const amount = r?.amount !== undefined && r?.amount !== null ? `${r.amount} USDT` : (lang === 'bn' ? 'তথ্য পাওয়া যায়নি (Not recorded)' : 'Not recorded');
+  const fee = r?.fee !== undefined && r?.fee !== null ? `${r.fee} USDT` : (lang === 'bn' ? 'তথ্য পাওয়া যায়নি (Not recorded)' : 'Not recorded');
+  const net = (r?.net ?? r?.netAmount) !== undefined && (r?.net ?? r?.netAmount) !== null ? `${r.net ?? r.netAmount} USDT` : (lang === 'bn' ? 'তথ্য পাওয়া যায়নি (Not recorded)' : 'Not recorded');
+  const network = showVal(r?.network, 'Not recorded');
+  const hash = showVal(r?.hash || r?.txid || ctx?.hash, 'Not recorded');
+  const reqTime = r?.requestedAt || r?.date || r?.timestamp ? fmtTime(r.requestedAt || r.date || r.timestamp) : 'Not recorded';
+  const settledTime = r?.settledAt ? fmtTime(r.settledAt) : 'Not recorded';
+  const lastError = showVal(r?.error || r?.adminNote, 'Not recorded');
+  const deliveryVerified = r ? (r.deliveryVerified ? 'Verified completed' : 'Not verified') : 'Not recorded';
+
+  let explanation = '';
+  let supportDraft = '';
+  let announcementDraft = '';
+
+  if (lang === 'bn') {
+   explanation += `📋 অটো-ডায়াগনস্টিক রিপোর্ট (${mod.titleBn})\n`;
+   explanation += `• নির্বাচিত বিষয়: ${issue ? issue.bn : mod.titleBn}\n`;
+   if (userText) explanation += `• আপনার প্রশ্ন/নোট: "${userText}"\n`;
+   explanation += `\n🔍 সংরক্ষিত রেকর্ড বিশ্লেষণ (Saved Record Status):\n`;
+   if (r) {
+    explanation += `• Order ID: ${ordId} | UID: ${uid}\n`;
+    explanation += `• বর্তমান স্ট্যাটাস: ${status} (Stored: ${rawStatus})\n`;
+    explanation += `• আর্থিক হিসাব: Amount: ${amount} | Fee: ${fee} | Net: ${net}\n`;
+    explanation += `• নেটওয়ার্ক ও হ্যাশ: ${network} | Hash: ${hash}\n`;
+    explanation += `• অন-চেইন পেআউট ভেরিফিকেশন: ${deliveryVerified}\n`;
+    explanation += `• সময়কাল (IST): অনুরোধ ${reqTime} | সেটেলমেন্ট ${settledTime}\n`;
+    explanation += `• শেষ রেকর্ডকৃত ত্রুটি/নোট (Last Error): ${lastError}\n`;
+   } else if (ctx?.conversation) {
+    explanation += `• সাপোর্ট কনভারসেশন UID: ${uid} | Ticket ID: ${showVal(ctx.ticketId, 'legacy')}\n`;
+    explanation += `• টিকেট স্ট্যাটাস: ${status} | লোড হওয়া মেসেজ সংখ্যা: ${ctx.messages?.length ?? 0}\n`;
+   } else {
+    explanation += `• নির্দিষ্ট অর্ডার রেকর্ড: তথ্য পাওয়া যায়নি (Not recorded in current memory)। অনুগ্রহ করে Order Tracking বা টেবিল থেকে "Details" বা "Ask AI" ক্লিক করে রেকর্ড লোড করুন।\n`;
+   }
+
+   explanation += `\n💡 মডিউল গাইড ও করণীয়:\n`;
+   if (mod.id === 'staking') {
+    explanation += `• স্ট্যাকিং মডিউল নিয়ম অনুযায়ী শুধুমাত্র যে কন্ট্রাক্টগুলোর মেয়াদ পূর্ণ হতে ২৪ ঘণ্টার কম বাকি (≤ 24 hours to maturity) অথবা যেগুলো ইতিমধ্যে ম্যাচিউরড (matured), সেগুলোই অগ্রাধিকার তালিকায় প্রদর্শিত হওয়া উচিত।\n• প্রতিদিনের ROI পেআউট ভারতীয় সময় ভোর ০৫:৩০ IST-এর আগে দেয় হয় না। কোনো সেটেলমেন্ট আটকে থাকলে System → Settlement Recovery থেকে "Run Daily Reset & Settlement Recovery" ব্যবহার করুন।`;
+   } else if (mod.id === 'withdraw') {
+    explanation += `• উইথড্রয়াল "Approved" মানে রিকোয়েস্টটি হট ওয়ালেট কিউতে গেছে; যতক্ষণ না ব্লকচেইন ডেলিভারি নিশ্চিত হচ্ছে ততক্ষণ এটি "Verified Completed" নয়।\n• পেআউট ফেইল হলে Order Details-এ "Last error" এবং হট ওয়ালেটে পর্যাপ্ত USDT ও নেটিভ গ্যাস (BNB/TRX) আছে কি না যাচাই করুন।`;
+   } else if (mod.id === 'nft') {
+    explanation += `• BSC Mainnet (Chain 56) মিন্ট ভেরিফিকেশন কেবল প্ল্যাটফর্ম কাস্টডি (0x1E7d...A2f3) এবং মেটাডেটা CID যাচাই করে; অ্যাপ রিজার্ভেশন ও সেটেলমেন্ট অফ-চেইন লেজারে পরিচালিত হয়।`;
+   } else if (mod.id === 'support') {
+    explanation += `• Support R6-এ "Close panel" শুধুমাত্র ডানপাশের ভিউ প্যানেল বন্ধ করে (টিকেট বন্ধ করে না)। টিকেট সম্পন্ন করতে স্ট্যাটাস "Resolved" বা "Closed" সিলেক্ট করে "Save status" বাটনে ক্লিক করুন।`;
+   } else {
+    explanation += `• যেকোনো ব্যালেন্স বা স্ট্যাটাস পরিবর্তনের আগে Order Details এবং Admin Audit Logs মিলিয়ে নিন। তথ্য না থাকলে অনুমান করে কোনো অ্যাকশন নেবেন না।`;
+   }
+
+   supportDraft = `প্রিয় ইউজার (${uid !== 'তথ্য পাওয়া যায়নি (Not recorded)' ? uid : 'UID'}),\nআপনার ${mod.titleBn} সংক্রান্ত রিকোয়েস্ট (Order ID: ${ordId}) আমাদের অ্যাডমিন টিম যাচাই করেছে। রেকর্ড অনুযায়ী বর্তমান স্ট্যাটাস: ${status} (Amount: ${amount}, Fee: ${fee}, Net: ${net})। ${lastError !== 'Not recorded' ? 'রেকর্ডকৃত নোট: ' + lastError + '। ' : ''}অনুগ্রহ করে ড্যাশবোর্ডে আপডেটেড স্ট্যাটাস দেখুন। ধন্যবাদ — TCM Support Team.`;
+   announcementDraft = `[সিস্টেম আপডেট — ${mod.titleBn}] সম্মানিত মেম্বারবৃন্দ, আমাদের ${mod.titleEn} মডিউলের নিয়মিত যাচাই ও সেটেলমেন্ট প্রক্রিয়া নির্ধারিত সময়সূচি (IST) অনুযায়ী চলমান রয়েছে। যেকোনো অর্ডার সংক্রান্ত সহায়তার জন্য Support Inbox-এ আপনার Order ID উল্লেখ করে টিকেট খুলুন।`;
+  } else if (lang === 'hi') {
+   explanation += `📋 ऑटो-डायग्नोस्टिक रिपोर्ट (${mod.titleEn})\n`;
+   explanation += `• चयनित विषय: ${issue ? issue.en : mod.titleEn}\n`;
+   if (userText) explanation += `• आपका प्रश्न: "${userText}"\n`;
+   explanation += `\n🔍 रिकॉर्ड विश्लेषण (Saved Record Status):\n`;
+   if (r) {
+    explanation += `• Order ID: ${ordId} | UID: ${uid}\n`;
+    explanation += `• स्थिति (Status): ${status} | राशि: ${amount} | शुल्क (Fee): ${fee} | नेट: ${net}\n`;
+    explanation += `• नेटवर्क: ${network} | Hash: ${hash} | समय: ${reqTime}\n`;
+    explanation += `• अंतिम त्रुटि (Last Error): ${lastError}\n`;
+   } else {
+    explanation += `• रिकॉर्ड: जानकारी उपलब्ध नहीं है (Not recorded in current session)। कृपया Order Details से रिकॉर्ड खोलें।\n`;
+   }
+   supportDraft = `प्रिय उपयोगकर्ता (${uid}), आपके ऑर्डर (${ordId}) की जांच की गई है। वर्तमान रिकॉर्ड स्थिति: ${status} (राशि: ${amount}, शुल्क: ${fee}, नेट: ${net})। सहायता के लिए धन्यवाद — TCM Support.`;
+   announcementDraft = `[सिस्टम सूचना — ${mod.titleEn}] सभी सदस्यों को सूचित किया जाता है कि ${mod.titleEn} प्रक्रियाएं निर्धारित IST समय के अनुसार संचालित हो रही हैं।`;
+  } else {
+   explanation += `📋 Guided Diagnostic Report (${mod.titleEn})\n`;
+   explanation += `• Selected Scenario: ${issue ? issue.en : mod.titleEn}\n`;
+   if (userText) explanation += `• Admin Query: "${userText}"\n`;
+   explanation += `\n🔍 Saved Record Inspection:\n`;
+   if (r) {
+    explanation += `• Order ID: ${ordId} | UID: ${uid}\n`;
+    explanation += `• Saved Status: ${status} (Raw: ${rawStatus})\n`;
+    explanation += `• Financial Values: Amount: ${amount} | Fee: ${fee} | Net: ${net}\n`;
+    explanation += `• Network & Hash: ${network} | Hash: ${hash}\n`;
+    explanation += `• On-Chain Delivery Verification: ${deliveryVerified}\n`;
+    explanation += `• Timestamps (IST): Requested ${reqTime} | Settled ${settledTime}\n`;
+    explanation += `• Last Recorded Error / Note: ${lastError}\n`;
+   } else if (ctx?.conversation) {
+    explanation += `• Support Conversation UID: ${uid} | Ticket ID: ${showVal(ctx.ticketId, 'legacy')}\n`;
+    explanation += `• Ticket Status: ${status} | Loaded Messages: ${ctx.messages?.length ?? 0}\n`;
+   } else {
+    explanation += `• Specific Order Record: Not recorded in current loaded memory. Open "Details" or "Ask AI" from Order Tracking or a transaction row to inspect a saved record.\n`;
+   }
+
+   explanation += `\n💡 Operational Guidance:\n`;
+   if (mod.id === 'staking') {
+    explanation += `• Per TCM Staking rules, prioritize contracts within 24 hours of maturity (≤ 24h) or already matured contracts.\n• Daily ROI payouts are deferred until 05:30 IST. Use System → Settlement Recovery ("Run Daily Reset & Settlement Recovery") to reconcile due staking settlements.`;
+   } else if (mod.id === 'withdraw') {
+    explanation += `• Withdrawal "Approved" queues the request for the hot wallet; "Verified Completed" requires confirmed on-chain delivery.\n• If a payout failed, inspect "Last error" in Order Details and verify hot wallet USDT + native gas (BNB/TRX).`;
+   } else if (mod.id === 'nft') {
+    explanation += `• Mainnet NFT verification checks BSC Chain 56 custody (0x1E7d...A2f3) and raw CID SHA-256 integrity. Reservations and settlements remain off-chain.`;
+   } else if (mod.id === 'support') {
+    explanation += `• In Support Tickets R6, "Close panel" only closes the view panel. Select "Resolved" or "Closed" and click "Save status" to complete a ticket (which hides the composer in read-only mode).`;
+   } else {
+    explanation += `• Always cross-check Order Details and Admin Audit Logs before taking any action. Missing fields are strictly shown as "Not recorded".`;
+   }
+
+   supportDraft = `Hello (${uid}), we reviewed your ${mod.titleEn} inquiry (Order ID: ${ordId}). According to our saved backend records, the current status is "${status}" (Amount: ${amount}, Fee: ${fee}, Net: ${net}). ${lastError !== 'Not recorded' ? 'Recorded note: ' + lastError + '. ' : ''}Please check your dashboard for updates. — TCM Support`;
+   announcementDraft = `[System Notice — ${mod.titleEn}] All ${mod.titleEn} operations and scheduled IST reconciliations are running normally. For order-specific assistance, please include your exact Order ID in Support Inbox.`;
+  }
+
+  return {
+   lang,
+   moduleTitle: lang === 'en' ? mod.titleEn : mod.titleBn,
+   explanation,
+   supportDraft,
+   announcementDraft,
+   sourceRef: r ? `${showVal(r.source, 'transactions')} / ${showVal(r.id, ordId)} (Order: ${ordId})` : ctx?.conversation ? `support / ${uid} (Ticket: ${showVal(ctx.ticketId, 'legacy')})` : `module-guide / ${mod.id}`,
+   retrievedTime
+  };
+ }
+
+ function renderMessages() {
+  msgStream.replaceChildren();
+  if (!state.history.length) {
+   const emptyBox = node('div', { class: 'ai-msg ai-msg-assistant' });
+   emptyBox.append(
+    node('div', { class: 'ai-msg-head' }, '🤖 AI Assistant · Proactive Auto-Diagnostic Ready'),
+    node('div', { class: 'ai-msg-body' },
+     'আসসালামু আলাইকুম / নমস্কার! কী সমস্যা হয়েছে?\n' +
+     '১. নিচের তালিকা থেকে স্ট্যাকিং (Staking), এনএফটি (NFT), ডিপোজিট, উইথড্রয়াল বা সাপোর্ট মডিউল সিলেক্ট করুন।\n' +
+     '২. প্রয়োজনে নির্দিষ্ট Order ID / UID সিলেক্ট করুন এবং নিচে বাংলা বা English-এ আপনার প্রশ্ন লিখুন।\n' +
+     '৩. "✨ Explain & Draft (Text + 🔊 Audio)" বাটনে ক্লিক করলে সাথে সাথে লেখায় এবং অডিও স্পিকারে উত্তর পাবেন!'
+    )
+   );
+   msgStream.append(emptyBox);
+   return;
+  }
+
+  for (const item of state.history) {
+   if (item.role === 'user') {
+    const uBubble = node('div', { class: 'ai-msg ai-msg-user' });
+    uBubble.append(
+     node('div', { class: 'ai-msg-head' }, `👤 Admin · ${item.time}`),
+     node('div', { class: 'ai-msg-body' }, item.text)
+    );
+    msgStream.append(uBubble);
+   } else {
+    const aBubble = node('article', { class: 'ai-msg ai-msg-assistant' });
+    const langLabel = item.lang === 'bn' ? 'বাংলা (BN)' : item.lang === 'hi' ? 'हिंदी (HI)' : 'English (EN)';
+    aBubble.append(
+     node('div', { class: 'ai-msg-head' }, `🤖 AI Diagnostic (${langLabel}) · ${item.moduleTitle}`),
+     node('div', { class: 'ai-msg-body' }, item.explanation),
+     node('div', { class: 'ai-msg-ref' }, `Source Reference: ${item.sourceRef} · Retrieved: ${item.retrievedTime}`)
+    );
+
+    // Audio Speaker Controls on every assistant reply
+    const audioBar = node('div', { class: 'ai-audio-bar' });
+    const playBtn = btn(item.lang === 'bn' ? '🔊 অডিওতে শুনুন (Listen)' : '🔊 Listen Audio', () => speakText(item.explanation, item.lang), 'ai-btn ai-btn-audio');
+    const stopBtn = btn(item.lang === 'bn' ? '🔇 অডিও বন্ধ (Stop)' : '🔇 Stop Audio', () => stopSpeech(), 'ai-btn ai-btn-stop');
+    const copyExpBtn = btn('Copy Explanation', () => void window.tcmCopyText(item.explanation, 'AI explanation'), 'ai-btn');
+    audioBar.append(playBtn, stopBtn, copyExpBtn);
+    aBubble.append(audioBar);
+
+    // Support Reply Draft Box
+    if (item.supportDraft) {
+     const sBox = node('div', { class: 'ai-draft-box' });
+     sBox.append(node('strong', {}, '💬 Draft Support Reply (Read-only — Admin must review before sending):'), node('p', {}, item.supportDraft));
+     const sBtns = node('div', { class: 'flex flex-wrap gap-1.5' });
+     sBtns.append(
+      btn('Copy Support Draft', () => void window.tcmCopyText(item.supportDraft, 'Support reply draft'), 'ai-btn'),
+      btn('Place in Support Composer (No auto-send)', () => {
+       const supInput = document.getElementById('supportReplyInput');
+       if (supInput && !supInput.closest('[hidden]')) {
+        supInput.value = item.supportDraft;
+        showToast('Draft placed in Support Reply box for Admin review. Not sent.');
+       } else {
+        void window.tcmCopyText(item.supportDraft, 'Support reply draft');
+       }
+      }, 'ai-btn')
+     );
+     sBox.append(sBtns);
+     aBubble.append(sBox);
+    }
+
+    // Announcement Draft Box
+    if (item.announcementDraft) {
+     const bBox = node('div', { class: 'ai-draft-box' });
+     bBox.append(node('strong', {}, '📢 Draft Announcement (Read-only — Admin must preview & publish):'), node('p', {}, item.announcementDraft));
+     const bBtns = node('div', { class: 'flex flex-wrap gap-1.5' });
+     bBtns.append(
+      btn('Copy Announcement Draft', () => void window.tcmCopyText(item.announcementDraft, 'Announcement draft'), 'ai-btn'),
+      btn('Place in Broadcast Form (No auto-publish)', () => {
+       const bcMsg = document.getElementById('bcMessage');
+       const bcTit = document.getElementById('bcTitle');
+       if (bcMsg) {
+        if (bcTit && !bcTit.value.trim()) bcTit.value = item.moduleTitle;
+        bcMsg.value = item.announcementDraft;
+        showToast('Draft placed in Broadcast form for Admin review. Not published.');
+       } else {
+        void window.tcmCopyText(item.announcementDraft, 'Announcement draft');
+       }
+      }, 'ai-btn')
+     );
+     bBox.append(bBtns);
+     aBubble.append(bBox);
+    }
+
+    msgStream.append(aBubble);
+   }
+  }
+  body.scrollTop = body.scrollHeight;
+ }
+
+ function runGuidedDiagnostic() {
+  const text = promptInput.value.trim();
+  const mod = MODULES.find(m => m.id === state.selectedModule) || MODULES[0];
+  const issue = mod.issues.find(i => i.id === state.selectedIssue) || mod.issues[0];
+  const userSummary = text || (state.detectedLang === 'en' ? `[Selected: ${mod.titleEn} — ${issue.en}]` : `[নির্বাচিত মডিউল: ${mod.titleBn} — ${issue.bn}]`);
+
+  state.history.push({
+   role: 'user',
+   text: userSummary,
+   time: fmtTime(Date.now())
+  });
+  const reply = buildDiagnosticResponse(text);
+  state.history.push({
+   role: 'assistant',
+   ...reply
+  });
+  promptInput.value = '';
+  state.uiState = 'disconnected';
+  renderModuleCatalog();
+  renderStateNotice();
+  renderMessages();
+  if (state.autoSpeak) {
+   speakText(reply.explanation, reply.lang);
+  }
+ }
+
+ async function attemptBackendAiSend() {
+  if (window.TCM_ADMIN_AI_ENABLED !== true || !window.TCM_ADMIN_AI_ENDPOINT) {
+   state.uiState = 'disconnected';
+   renderStateNotice();
+   return;
+  }
+  requireAdminSession();
+  state.controller?.abort();
+  const ctrl = new AbortController();
+  state.controller = ctrl;
+  state.uiState = 'loading';
+  renderStateNotice();
+  const timer = setTimeout(() => {
+   state.uiState = 'timeout';
+   ctrl.abort();
+   renderStateNotice();
+  }, 25000);
+  try {
+   const response = await adminApiFetch(window.TCM_ADMIN_AI_ENDPOINT, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    signal: ctrl.signal,
+    body: JSON.stringify({
+     module: state.selectedModule,
+     issue: state.selectedIssue,
+     query: promptInput.value.trim(),
+     context: state.context ? {
+      source: state.context.source,
+      id: state.context.id,
+      orderId: state.context.orderId,
+      uid: state.context.uid
+     } : null
+    })
+   });
+   const result = await response.json();
+   if (!response.ok || !result.success) throw new Error(result.message || 'AI request failed.');
+   state.uiState = 'disconnected';
+   renderStateNotice();
+  } catch (err) {
+   if (state.uiState !== 'timeout' && state.uiState !== 'cancelled') {
+    state.uiState = err.name === 'AbortError' ? 'cancelled' : 'error';
+   }
+   renderStateNotice();
+  } finally {
+   clearTimeout(timer);
+  }
+ }
+
+ function cancelAiRequest() {
+  state.controller?.abort();
+  state.uiState = 'cancelled';
+  stopSpeech();
+  renderStateNotice();
+ }
+
+ window.openAdminAiAssistant = function(contextObj = null, triggerElement = null) {
+  if (triggerElement instanceof HTMLElement) state.triggerEl = triggerElement;
+  if (contextObj && typeof contextObj === 'object') {
+   const rec = contextObj.record || null;
+   state.context = {
+    source: contextObj.source || rec?.source || 'console',
+    id: contextObj.id || rec?.id || null,
+    orderId: contextObj.orderId || rec?.orderId || contextObj.queryKey || null,
+    uid: contextObj.uid || rec?.uid || contextObj.conversation?.uid || null,
+    hash: contextObj.hash || rec?.hash || rec?.txid || null,
+    ticketId: contextObj.ticketId || contextObj.conversation?.ticketId || null,
+    record: rec,
+    audit: contextObj.audit || [],
+    email: contextObj.email || [],
+    notes: contextObj.notes || [],
+    conversation: contextObj.conversation || null,
+    messages: contextObj.messages || [],
+    retrievedAt: contextObj.retrievedAt || Date.now()
+   };
+   if (rec?.type === 'Deposit') { state.selectedModule = 'deposit'; state.selectedIssue = 'dep_txid'; }
+   else if (rec?.type === 'Withdraw') { state.selectedModule = 'withdraw'; state.selectedIssue = 'wd_payout_state'; }
+   else if (contextObj.source === 'support-ticket') { state.selectedModule = 'support'; state.selectedIssue = 'support_draft'; }
+   else if (contextObj.source === 'nft') { state.selectedModule = 'nft'; state.selectedIssue = 'nft_settlement'; }
+   else if (contextObj.source === 'p2p') { state.selectedModule = 'p2p'; state.selectedIssue = 'p2p_record'; }
+  }
+  state.open = true;
+  drawer.hidden = false;
+  backdrop.hidden = !window.matchMedia('(max-width: 1023px)').matches;
+  drawer.setAttribute('aria-hidden', 'false');
+  const toggleBtn = document.getElementById('adminAiToggleBtn');
+  if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'true');
+  renderContextBar();
+  renderOrderPicker();
+  renderModuleCatalog();
+  renderStateNotice();
+  renderMessages();
+  setTimeout(() => closeBtn.focus(), 20);
+ };
+
+ window.closeAdminAiAssistant = function() {
+  if (!state.open) return;
+  state.open = false;
+  stopSpeech();
+  state.controller?.abort();
+  drawer.hidden = true;
+  backdrop.hidden = true;
+  drawer.setAttribute('aria-hidden', 'true');
+  const toggleBtn = document.getElementById('adminAiToggleBtn');
+  if (toggleBtn) toggleBtn.setAttribute('aria-expanded', 'false');
+  if (state.triggerEl && typeof state.triggerEl.focus === 'function' && document.contains(state.triggerEl)) {
+   state.triggerEl.focus();
+  } else if (toggleBtn) {
+   toggleBtn.focus();
+  }
+ };
+
+ window.toggleAdminAiAssistant = function(triggerElement) {
+  if (state.open) window.closeAdminAiAssistant();
+  else window.openAdminAiAssistant(null, triggerElement || document.getElementById('adminAiToggleBtn'));
+ };
+
+ backdrop.addEventListener('click', () => window.closeAdminAiAssistant());
+ window.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && state.open) {
+   const openDialogs = [...document.querySelectorAll('dialog[open]')];
+   if (openDialogs.length > 0) return;
+   event.stopPropagation();
+   window.closeAdminAiAssistant();
+  }
+ });
+ document.addEventListener('tcm:admin-page-leave', () => {
+  stopSpeech();
+  state.controller?.abort();
+ });
+})();
 </script>
 </body></html>
