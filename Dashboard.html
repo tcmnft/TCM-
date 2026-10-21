@@ -6896,8 +6896,10 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             const safeOrderIdText = escapeText(orderIdText);
             const encodedOrderId = encodeURIComponent(String(orderIdText)).replace(/'/g, '%27');
 
-            let interactiveBadgeHtml = `<span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${window.escapeDashboardLedgerText(tx.Status || 'Pending')}</span>`;
+            if(isWd&&!window.withdrawalDeliveryVerified(tx)&&['Success','Completed','Approved','Processing'].includes(tx.Status))stClr='var(--warning)';
+            let interactiveBadgeHtml = `<span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${window.escapeDashboardLedgerText(window.withdrawalStatusLabel(tx))}</span>`;
             let simpleTimerHtml = '';
+            const payoutURL=window.withdrawalPayoutURL(tx);
 
             if ((isDep || isWd) && tx.Status === 'Pending') {
                 let timeVal = window.parseSafeTimestamp(tx.timestamp || tx.Date);
@@ -6948,6 +6950,7 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
                             </div>
                             ${interactiveBadgeHtml}
                             ${simpleTimerHtml}
+                            ${payoutURL?`<a href="${payoutURL}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="font-size:0.65rem;color:var(--text-sub);">${window.withdrawalDeliveryVerified(tx)?'Payout Transaction ↗':'Track Payout ↗'}</a>`:''}
                         </div>
                         ${auditToggleBtnHtml}
                     </div>
@@ -7404,14 +7407,15 @@ window.observeTxIconRecords = (records, directSuccess = false) => {
             ? 'Deposit' : type === 'withdraw' ? 'Withdraw' : null;
         if (!kind) continue;
 
-        const status = String(row.Status || row.status || '').toLowerCase();
+        let status = String(row.Status || row.status || '').toLowerCase();
+        if(kind==='Withdraw'&&['success','completed'].includes(status)&&!window.withdrawalDeliveryVerified(row))status='unverified';
         const previous = state.records.get(row.id);
         if (previous === 'success' && status === 'pending') continue;
         if (!status) continue;
 
         state.records.set(row.id, status);
 
-        if (['pending', 'confirming', 'awaiting_confirmations', 'processing'].includes(status)) {
+        if (['pending', 'approved', 'confirming', 'awaiting_confirmations', 'processing'].includes(status)) {
             state.pending[kind].add(row.id);
         } else {
             const wasPending = state.pending[kind].delete(row.id);
@@ -7427,7 +7431,7 @@ window.observeTxIconRecords = (records, directSuccess = false) => {
     if (state.records.size > 1000) {
         for (const [id, status] of state.records) {
             if (state.records.size <= 1000) break;
-            if (!['pending', 'confirming', 'awaiting_confirmations', 'processing'].includes(status)) {
+            if (!['pending', 'approved', 'confirming', 'awaiting_confirmations', 'processing'].includes(status)) {
                 state.records.delete(id);
                 state.played.delete(id);
             }
@@ -7465,6 +7469,50 @@ window.mergeDashboardHistory = (records, replace = false) => {
 };
 
 /* JS 11 | SECURE API CALL HANDLER (Fetch Wrapper) | END */
+// WITHDRAWAL PAYOUT UI START — authoritative status only; balances remain snapshot-owned.
+window.withdrawalDeliveryVerified = row => row?.Type==='Withdraw' && row.Payout_Version===1 &&
+    row.Payout_Verified===true && row.Payout_State==='Completed' && row.Status==='Success' &&
+    (row.Network==='BEP20'?/^0x[a-fA-F0-9]{64}$/:row.Network==='TRC20'?/^[a-fA-F0-9]{64}$/:/a^/).test(row.Payout_TxHash||'');
+window.withdrawalStatusLabel = row => {
+    if(row?.Type!=='Withdraw')return row?.Status||'Pending';
+    if(window.withdrawalDeliveryVerified(row))return 'Completed';
+    if(row.Payout_State==='Review')return 'Needs review';
+    if(row.Payout_State==='Blocked')return 'Awaiting payout';
+    if(row.Status==='Approved')return 'Approved · queued';
+    if(row.Status==='Processing')return row.Payout_State==='Confirming'?'Confirming':'Processing';
+    if(['Success','Completed'].includes(row.Status))return 'Delivery unverified';
+    return row.Status||'Pending';
+};
+window.withdrawalPayoutURL = row => {
+    if(row?.Type!=='Withdraw')return '';
+    const hash=row.Payout_TxHash||'';
+    if(row.Network==='BEP20'&&/^0x[a-fA-F0-9]{64}$/.test(hash))return 'https://bscscan.com/tx/'+hash;
+    if(row.Network==='TRC20'&&/^[a-fA-F0-9]{64}$/.test(hash))return 'https://tronscan.org/#/transaction/'+hash;
+    return '';
+};
+window.applyWithdrawalPayoutRecord = row => {
+    if(!row||row.UID!==localStorage.getItem('uid')||row.Type!=='Withdraw'||typeof row.id!=='string'||!/^[A-Za-z0-9_-]{1,180}$/.test(row.id)||window.dashboardSession?.closed||window.dashboardSession?.blocked)return;
+    const prior=(window.allTransactions||[]).find(r=>r.id===row.id);
+    if((prior?.Payout_Revision||0)>(row.Payout_Revision||0))return;
+    window.forceInjectToHistory(row);
+};
+(() => {
+    let flight=null;
+    window.refreshWithdrawalPayoutStatus = () => {
+        if(flight||document.hidden||window.dashboardSession?.closed||window.dashboardSession?.blocked)return flight;
+        const uid=localStorage.getItem('uid'),token=localStorage.getItem('token');
+        const ids=[...new Set((window.allTransactions||[]).filter(r=>r.UID===uid&&r.Type==='Withdraw'&&
+            !window.withdrawalDeliveryVerified(r)&&!['Rejected','Refunded','Cancelled','Locked'].includes(r.Status)&&/^[A-Za-z0-9_-]{1,180}$/.test(r.id||'')).map(r=>r.id))].slice(0,20);
+        if(!uid||!token||!ids.length)return Promise.resolve();
+        flight=Promise.resolve().then(()=>window.fetchAPI('/finance/withdrawal-status?ids='+encodeURIComponent(ids.join(',')),'GET'))
+            .then(result=>{if(uid!==localStorage.getItem('uid')||token!==localStorage.getItem('token'))return;
+                if(result.success&&Array.isArray(result.records))for(const row of result.records)window.applyWithdrawalPayoutRecord(row);
+            }).catch(()=>{}).finally(()=>{flight=null;});return flight;
+    };
+})();
+// WITHDRAWAL PAYOUT UI END
+
+
 /* JS 12 | MAIN BALANCE TRANSACTION HISTORY | START */
 (() => {
     let state = null, dbPromise = null, scrollAt = 0;
@@ -7559,7 +7607,7 @@ window.mergeDashboardHistory = (records, replace = false) => {
         const node = document.createElement('article'); node.className = 't8-row';
         const title = document.createElement('div'); title.className = 't8-title';
         const name = document.createElement('span'); name.textContent = row.Type || 'Transaction';
-        const badge = document.createElement('span'); badge.textContent = row.Status || 'Recorded';
+        const badge = document.createElement('span'); badge.textContent = row.Type==='Withdraw'?window.withdrawalStatusLabel(row):(row.Status || 'Recorded');
         title.append(name, badge);
         const time = document.createElement('div'); time.className = 't8-time';
         time.textContent = window.formatDisplayDate(row.Date, { seconds:true, fallback:'Time not recorded' });
@@ -8017,6 +8065,7 @@ window.syncDashboardState = (followUp = false) => {
         }
         if (result.success) {
             window.applyDashboardSnapshot(result.data);
+            void window.refreshWithdrawalPayoutStatus();
             state.appliedFreshVersion = freshVersion;
             state.retryAt = 0;
         } else {
@@ -9899,7 +9948,7 @@ window.renderNFTBlockchainReference = raw => {
         const code = document.getElementById('wd2FACode').value;
         const boundAddr = window.userWallets ? window.userWallets[net] : "";
 
-        if (!amt || amt < 10) return window.showToast("Minimum withdrawal is 10 USDT!", true);
+        if (!Number.isFinite(amt) || amt < 1) return window.showToast("Minimum withdrawal is 1 USDT!", true);
         if (!code || code.length !== 6) return window.showToast("Enter a valid 6-digit 2FA Code!", true);
         if (!boundAddr || boundAddr.length < 5) return window.showToast(`Bind your ${net} wallet first!`, true);
 
@@ -12054,6 +12103,7 @@ window.renderNFTBlockchainReference = raw => {
             window.renderDashboardRoleBadge(data.role);
         });
 
+        window.socket.on('withdrawal_payout_updated', row => window.applyWithdrawalPayoutRecord(row));
         window.socket.on('dashboard_invalidated', hint => {
             if (!hint || hint.uid !== localStorage.getItem('uid') ||
                 window.dashboardSession.closed || window.dashboardSession.blocked) return;
