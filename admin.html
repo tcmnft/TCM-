@@ -12624,7 +12624,22 @@ window.TCMSupportKit=(()=>{
  const file=async f=>{if(!f)return '';if(f.size>184320||!['image/png','image/jpeg','image/webp'].includes(f.type))throw new Error('Choose a PNG, JPEG or WebP image up to 180 KB.');return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Image could not be read.'));r.readAsDataURL(f)});};
 
  const bubble=(r,adminSide=false)=>{const own=r.sender===(adminSide?'admin':'user'),n=node('article',{class:'s5-bubble '+(own?'s5-own':'s5-other'),'data-message-id':r.id});n.append(node('small',{},(r.sender==='ai'?'AI Assistant':r.sender==='admin'?'Support Admin':'User')+' · '+time(r.timestamp)));if(r.message)n.append(node('p',{},r.message));if(safeImage(r.image)){const img=node('img',{src:r.image,alt:'Support attachment',loading:'lazy',class:'s5-image'}),link=node('button',{type:'button',class:'s5-image-open','aria-label':'View support image'});link.append(img);link.addEventListener('click',()=>{const d=node('dialog',{class:'s5-image-dialog'}),close=button('Close',()=>d.close()),full=node('img',{src:r.image,alt:'Support attachment'});d.append(close,full);d.addEventListener('close',()=>d.remove());document.body.append(d);d.showModal();});n.append(link);}if(r.orderId)n.append(node('small',{},'Order reference: '+r.orderId));
-  for(const order of [...(r.verifiedOrders||[]),...(r.recentTransactions||[])]){
+  const summaries=Array.isArray(r.orderSummaries)?r.orderSummaries:[],summarized=new Set(summaries.map(x=>x.orderId));
+  const bn=/[\u0980-\u09ff]/.test(r.message||'');
+  for(const row of summaries){
+   const card=node('section',{class:'s5-order-card',style:'padding:10px;margin-top:8px;border:1px solid #31516f;border-radius:8px'});
+   card.append(node('strong',{},row.orderId),node('p',{},row.status));
+   const labels=bn?['মূল টাকা','ফি কাটার আগের লাভ','ফি','নিট লাভ','মোট ফেরত']:['Principal','Gross profit','Fee','Net profit','Total returned'];
+   [row.principal,row.grossProfit,row.fee,row.netProfit,row.totalReturned].forEach((value,i)=>{if(value!==null&&value!==undefined)card.append(node('p',{},labels[i]+': '+String(value)+' USDT'));});
+   if(row.saleRecorded)card.append(node('p',{},row.balanceCreditVerified?(bn?'মূল ব্যালান্সে জমার ledger যাচাই হয়েছে':'Main-balance ledger credit verified'):(bn?'মূল ব্যালান্সে জমার ledger যাচাই হয়নি':'Main-balance ledger credit unverified')));
+   if(row.reservationState==='active_verified')card.append(node('p',{},bn?'বর্তমান রিজার্ভেশন যাচাই হয়েছে':'Current reservation verified'));
+   if(row.reservedAt)card.append(node('p',{},(bn?'রিজার্ভের সময়: ':'Reserved: ')+time(row.reservedAt)));
+   if(row.soldAt)card.append(node('p',{},(bn?'বিক্রির সময়: ':'Sold: ')+time(row.soldAt)));
+   card.append(node('small',{},bn?'নিট লাভ মোট ফেরতের মধ্যেই আছে। এটি বর্তমান ব্যালান্স নয়।':'Net profit is included in total returned. This is not your current balance.'));
+   if(row.needsReview)card.append(node('p',{},bn?'হিসাব অ্যাডমিনের যাচাই প্রয়োজন।':'Administrator review is required.'));
+   n.append(card);
+  }
+  for(const order of [...(r.verifiedOrders||[]),...(r.recentTransactions||[])].filter(x=>!summarized.has(x.orderId))){
    const card=node('section',{class:'s5-order-card',style:'padding:10px;margin-top:8px;border:1px solid #31516f;border-radius:8px'});
    card.append(node('strong',{},order.orderId||'Order ID not recorded'));
    for(const [label,value]of [['Type',order.type],['Status',order.status],['Amount',order.amount],['Fee',order.fee],['Net',order.net],['Network',order.network],['Hash',order.hash],['Date',order.date?time(order.date):null],['Review note',order.reviewNotes]])
