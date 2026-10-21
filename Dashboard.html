@@ -9948,7 +9948,7 @@ window.renderNFTBlockchainReference = raw => {
         const code = document.getElementById('wd2FACode').value;
         const boundAddr = window.userWallets ? window.userWallets[net] : "";
 
-        if (!Number.isFinite(amt) || amt < 1) return window.showToast("Minimum withdrawal is 1 USDT!", true);
+        if (!amt || amt < 10) return window.showToast("Minimum withdrawal is 10 USDT!", true);
         if (!code || code.length !== 6) return window.showToast("Enter a valid 6-digit 2FA Code!", true);
         if (!boundAddr || boundAddr.length < 5) return window.showToast(`Bind your ${net} wallet first!`, true);
 
