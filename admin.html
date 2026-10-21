@@ -12728,7 +12728,7 @@ window.TCMSupportPending = function(validate) {
 
  let viewingTicket=null,ticketCursor=null,ticketVersion=0,ticketCtrl=null;
 
- const archived=new Map(),isClosed=c=>['Resolved','Closed','Cancelled'].includes(c?.status);
+ const archived=new Map(),isClosed=c=>['Resolved','Closed'].includes(c?.status);
 
  let version=0,selected=null,conversations=new Map(),messages=new Map(),inboxCursor=null,messageCursor=null,ctrl=null,listCtrl=null,listVersion=0,msgVersion=0,image='',busy=false,eventRevision=0,chosenFile=0;
 
@@ -12736,7 +12736,7 @@ window.TCMSupportPending = function(validate) {
 
  const notice=node('p',{class:'s5-notice',role:'status'}),toolbar=node('div',{class:'s5-toolbar'}),search=node('input',{type:'search',placeholder:'Search loaded names, UID, ticket or reference','aria-label':'Search loaded conversations'}),filter=node('select',{'aria-label':'Filter loaded conversation status'}),lookup=node('input',{placeholder:'Exact UID','aria-label':'Find conversation by exact UID'});
 
- for(const v of ['All statuses','Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed','Cancelled'])filter.append(node('option',{value:v},v));
+ for(const v of ['All statuses','Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed'])filter.append(node('option',{value:v},v));
 
  toolbar.append(search,filter,lookup,button('Find UID',()=>loadList(false,true)));
 
@@ -12748,7 +12748,7 @@ window.TCMSupportPending = function(validate) {
 
  saveStatus.title='Save selected ticket status (Selecting Resolved or Closed completes the ticket).';
 
- for(const v of ['Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed','Cancelled'])state.append(node('option',{value:v},v));
+ for(const v of ['Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed'])state.append(node('option',{value:v},v));
 
  const takeover=button('Take over',()=>startAction('takeover',{}));
  headActions.append(takeover,askAiBtn,close);head.append(heading,headActions);
@@ -12863,7 +12863,7 @@ window.TCMSupportPending = function(validate) {
 
  const storageKey=()=>{requireAdminSession();return 'tcm_support_action_'+adminAuthState.actorUid;};
 
- const pending=TCMSupportPending(op=>op&&['reply','status','takeover'].includes(op.path)&&op.payload&&typeof op.payload.uid==='string'&&/^[\w-]{1,128}$/.test(op.payload.uid)&&(op.path==='takeover'?typeof op.payload.ticketId==='string':op.path==='reply'?typeof op.payload.message==='string'&&op.payload.message.length<=4000&&typeof op.payload.image==='string'&&op.payload.image.length<=245800&&typeof op.payload.orderId==='string'&&op.payload.orderId.length<=160:['Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed','Cancelled'].includes(op.payload.status)&&Number.isSafeInteger(op.payload.revision)&&op.payload.revision>=0));
+ const pending=TCMSupportPending(op=>op&&['reply','status','takeover'].includes(op.path)&&op.payload&&typeof op.payload.uid==='string'&&/^[\w-]{1,128}$/.test(op.payload.uid)&&(op.path==='takeover'?typeof op.payload.ticketId==='string':op.path==='reply'?typeof op.payload.message==='string'&&op.payload.message.length<=4000&&typeof op.payload.image==='string'&&op.payload.image.length<=245800&&typeof op.payload.orderId==='string'&&op.payload.orderId.length<=160:['Open','Waiting for user','Escalated / Waiting for Admin','Resolved','Closed'].includes(op.payload.status)&&Number.isSafeInteger(op.payload.revision)&&op.payload.revision>=0));
 
  function saved(){return pending.read(storageKey()).op;}
 
@@ -12890,8 +12890,6 @@ window.TCMSupportPending = function(validate) {
   const isHistorical=!!viewingTicket&&!!activeConv?.ticketId&&viewingTicket!==activeConv.ticketId;
 
   const readonly=!c||isClosed(c)||isHistorical;
-  input.disabled=order.disabled=attach.disabled=clearImage.disabled=readonly||busy||(c.aiMode||'auto')==='auto'||st.blocked||!!op;
-  state.disabled=readonly||busy||st.blocked||!!op;
 
   send.disabled=busy||!selected||readonly||(c.aiMode||'auto')==='auto'||st.blocked||!!op;
 
@@ -12938,7 +12936,6 @@ window.TCMSupportPending = function(validate) {
   }
 
   compose.hidden=!c||closed||isHistorical||(c.aiMode||'auto')==='auto';
-  input.disabled=order.disabled=attach.disabled=clearImage.disabled=compose.hidden||busy;
   takeover.hidden=!c||closed||isHistorical||(c.aiMode||'auto')!=='auto';takeover.disabled=busy;
 
   readonlyBanner.hidden=!c||!compose.hidden;
@@ -12947,14 +12944,14 @@ window.TCMSupportPending = function(validate) {
 
    readonlyBanner.textContent=closed
 
-    ? '✓ এই টিকিটটি সম্পন্ন/বন্ধ করা হয়েছে। নতুন অনুসন্ধানের জন্য দয়া করে মেনু থেকে নতুন টিকিট খুলুন।'
+    ? `Ticket ${c.ticketId||'legacy'} is marked "${c.status}" (Completed / Read-Only). Reply composer is hidden to preserve the completed record.`
 
     : isHistorical?`Viewing historical ticket ${c.ticketId||'legacy'} (Read-Only). Switch to the active ticket to reply.`
     : 'Live observation: AI is handling this conversation. Take over to pause AI and reply manually.';
 
   }
 
-  state.disabled=!c||closed||isHistorical||busy;
+  state.disabled=!c||closed||isHistorical||compose.hidden||busy;
 
   saveStatus.disabled=!c||closed||isHistorical||busy;
 
