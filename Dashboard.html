@@ -6925,32 +6925,35 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             }
 
             html += `
-            <div class="tx-item tx-item-animated" data-ledger-id="${escapeText(tx.id || '')}" style="display: flex; flex-direction: column; padding: 15px 0; border-bottom: 1px solid var(--border);">
-                <div class="tx-card-main-row" style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                    <div style="display: flex; gap: 12px; flex: 1; min-width: 0;">
-                        <div class="tx-icon ${bgCls}" style="flex-shrink: 0; margin-top: 2px;"><i class="fas fa-${icn}"></i></div>
-                        <div style="display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1;">
-                            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-main); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">${escapeText(displayTitle)}</h4>
-                            ${extractedUid ? `<span style="font-size: 0.7rem; color: var(--text-sub); font-family: monospace; font-weight: 500;">UID: ${escapeText(extractedUid)}</span>` : ''}
+            <div class="tx-item tx-item-animated" data-ledger-id="${escapeText(tx.id || '')}" style="display:flex; flex-direction:column; padding:15px 0; border-bottom:1px solid var(--border);">
+                <div class="tx-card-main-row" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                    <div style="display:flex; gap:12px; flex:1; min-width:0;">
+                        <div class="tx-icon ${bgCls}" style="flex-shrink:0; margin-top:2px;">
+                            <i class="fas fa-${icn}"></i>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:2px; min-width:0; flex:1;">
+                            <h4 style="font-size:0.95rem; font-weight:700; color:var(--text-main); margin:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; line-height:1.2;">${escapeText(displayTitle)}</h4>
+                            ${extractedUid ? `<span style="font-size:0.7rem; color:var(--text-sub); font-family:monospace; font-weight:500;">UID: ${escapeText(extractedUid)}</span>` : ''}
                             ${categoryBadgeHtml}
                             ${extraRemarks}
-                            <span style="font-size: 0.65rem; color: var(--text-sub); font-family: monospace; margin-top: 2px;">${displayDate}</span>
-                            <div class="tx-order-id-box" style="display: inline-flex; align-items: center; gap: 6px; background: #0f172a; color: #fff; padding: 3px 8px; border-radius: 6px; border: 1px solid #1e293b; font-family: monospace; font-size: 0.65rem; max-width: 100%; margin-top: 6px; overflow: hidden;">
-                                <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 130px;">${safeOrderIdText}</span>
-                                <i class="far fa-copy" style="cursor: pointer; color: var(--success); flex-shrink: 0;" onclick="window.copyText(decodeURIComponent('${encodedOrderId}'), this)" title="Copy ID"></i>
+                            <span style="font-size:0.65rem; color:var(--text-sub); font-family:monospace; margin-top:2px;">${displayDate}</span>
+                            <div class="tx-order-id-box" style="display:inline-flex; align-items:center; gap:6px; background:#0f172a; color:#fff; padding:3px 8px; border-radius:6px; border:1px solid #1e293b; font-family:monospace; font-size:0.65rem; max-width:100%; margin-top:6px; overflow:hidden;">
+                                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px;">${safeOrderIdText}</span>
+                                <i class="far fa-copy" style="cursor:pointer; color:var(--success); flex-shrink:0;" onclick="window.copyText(decodeURIComponent('${encodedOrderId}'), this)" title="Copy ID"></i>
                             </div>
                         </div>
                     </div>
-                    <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: space-between; align-self: stretch; gap: 4px; flex-shrink: 0; padding-left: 10px;">
-                        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; align-self:stretch; gap:4px; flex-shrink:0; padding-left:10px;">
+                        <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
                             ${mintURL ? `<a class="tx-mint-reference" href="${mintURL}" target="_blank" rel="noopener noreferrer" aria-label="View this NFT's mint transaction on BscScan" title="NFT creation record; not the profit payment" onclick="event.stopPropagation()" style="font-size:0.65rem; font-weight:500; color:var(--text-sub); text-decoration:none; white-space:nowrap; padding:3px 0;">Mint Transaction ↗</a>` : ''}
-                            ${displayTypeRight ? `<span style="font-size: ${hand || tType === 'Staking Reward' ? '0.65rem' : '0.8rem'}; font-weight: ${hand || tType === 'Staking Reward' ? '500' : '700'}; color: var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
-                            <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size: 1rem; font-weight: 700; margin-bottom: 2px;">
+                            ${displayTypeRight ? `<span style="font-size:${hand || tType === 'Staking Reward' ? '0.65rem' : '0.8rem'}; font-weight:${hand || tType === 'Staking Reward' ? '500' : '700'}; color:var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
+                            ${payoutURL ? `<a class="tx-payout-reference" href="${payoutURL}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-block; font-size:0.65rem; font-weight:500; line-height:1.3; color:var(--text-sub); text-decoration:none; border:0; box-shadow:none; background:transparent; padding:0; margin:0; white-space:nowrap;">${window.withdrawalDeliveryVerified(tx) ? 'Payout Transaction ↗' : 'Track Payout ↗'}</a>` : ''}
+                            <div class="${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'tx-amt-cancelled' : ''}" style="color:${(isReversedAirdrop || tx.Status === 'Refunded' || tx.Status === 'Cancelled') ? 'rgba(244, 63, 94, 0.65)' : clr}; font-size:1rem; font-weight:700; margin-bottom:2px;">
                                 ${displayMicro === null ? '' : amountSign}${displayAmount} ₮
                             </div>
                             ${interactiveBadgeHtml}
                             ${simpleTimerHtml}
-                            ${payoutURL?`<a href="${payoutURL}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="font-size:0.65rem;color:var(--text-sub);">${window.withdrawalDeliveryVerified(tx)?'Payout Transaction ↗':'Track Payout ↗'}</a>`:''}
                         </div>
                         ${auditToggleBtnHtml}
                     </div>
