@@ -6240,6 +6240,8 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
     };
     window.closeModal = id => {
         if (id === 'setup2FAModal') window.clearTwoFASetup?.();
+        if (id === 'walletBindModal') window.clearGeneralOTP?.('bind-wallet');
+        if (id === 'walletUnbindModal') window.clearGeneralOTP?.('unbind-2fa');
         if (id === 'addFriendModal' && window.abortFriendDirectory) window.abortFriendDirectory();
         if (id === 'userSupportModal' && window.leaveSupportChat) window.leaveSupportChat();
         if (id === 'sendMoneyModal' && window.cancelP2PScanHandshake) {
@@ -7257,6 +7259,7 @@ window.dashboardSync = {
 };
 
 window.clearDashboardSession = () => {
+    window.clearGeneralOTP?.();
     window.clearTwoFASetup?.();
     window.TCMAnnouncements?.dispose();
     window.resetTxIconState();
@@ -9369,7 +9372,45 @@ window.renderNFTBlockchainReference = raw => {
  // 🔥 OTP Attempts Tracker & Live Button Timer
  window.otpAttempts = {};
 
+ // OTP-R3 GENERAL SECURITY UI START
+ window.generalOTPState = {};
+ window.generalOTPGeneration = 0;
+ window.clearGeneralOTP = (purpose) => {
+    ++window.generalOTPGeneration;
+    if(purpose) delete window.generalOTPState[purpose]; else window.generalOTPState = {};
+    const ids=purpose==='bind-wallet'?['bindOTP','bind2FACode']:purpose==='unbind-2fa'?['unbindEmailOTP','unbindPassword']:['bindOTP','bind2FACode','unbindEmailOTP','unbindPassword'];
+    for(const id of ids){const el=document.getElementById(id);if(el)el.value='';}
+ };
+ window.generalOTPIntent = purpose => purpose==='bind-wallet' ? {
+    network:document.getElementById('bindNetwork').value,
+    address:document.getElementById('bindAddress').value.trim()
+ } : {};
+ window.generalOTPFor = purpose => {
+    const state=window.generalOTPState[purpose];
+    return state && state.uid===localStorage.getItem('uid') && state.token===localStorage.getItem('token') &&
+        state.expiresAt>Date.now() && state.intent===JSON.stringify(window.generalOTPIntent(purpose)) ? state : null;
+ };
+ window.requestGeneralSecurityOTP = async btnId => {
+    const purpose=btnId==='btnGetOTP'?'bind-wallet':'unbind-2fa',btn=document.getElementById(btnId);
+    if(!btn||btn.disabled)return;
+    const uid=localStorage.getItem('uid'),token=localStorage.getItem('token'),context=window.generalOTPIntent(purpose),generation=window.generalOTPGeneration;
+    delete window.generalOTPState[purpose];btn.disabled=true;btn.textContent='Sending...';
+    try {
+        const result=await window.fetchAPI('/security/send-otp','POST',{uid,purpose,...context});
+        if(generation!==window.generalOTPGeneration||uid!==localStorage.getItem('uid')||token!==localStorage.getItem('token')||JSON.stringify(context)!==JSON.stringify(window.generalOTPIntent(purpose)))return;
+        if(!result.success||result.purpose!==purpose||typeof result.otpRequestId!=='string'||!Number.isFinite(result.expiresAt))return window.showToast(result.message||'Request a new security code.',true);
+        window.generalOTPState[purpose]={id:result.otpRequestId,uid,token,intent:JSON.stringify(context),expiresAt:result.expiresAt};
+        document.getElementById(purpose==='bind-wallet'?'bindOTP':'unbindEmailOTP').value='';
+        window.showToast(result.message||'Security code sent. Expires in 5 minutes.');
+    } catch(_){window.showToast('Security email request could not complete. Try again.',true);}
+    finally{btn.disabled=false;btn.textContent='Get OTP';}
+ };
+ window.addEventListener('pagehide',()=>window.clearGeneralOTP());
+ window.addEventListener('storage',event=>{if(event.key===null||event.key==='token'||event.key==='uid')window.clearGeneralOTP();});
+ // OTP-R3 GENERAL SECURITY UI END
+
  window.requestSystemOTP = async (btnId) => {
+     if (btnId === 'btnGetOTP' || btnId === 'btnGetUnbindOTP') return window.requestGeneralSecurityOTP(btnId);
      if (btnId === 'btnGetDeleteOTP') return window.requestDeletionOTP();
      if (btnId === 'btnGet2FAOTP') return window.requestTwoFABindOTP();
      const uid = localStorage.getItem('uid');
@@ -12098,6 +12139,8 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
  };
 
  window.submitWalletBind = async () => {
+    const proof=window.generalOTPFor('bind-wallet');
+    if(!proof)return window.showToast('Request a new code for this exact network and wallet address.',true);
     const net = document.getElementById('bindNetwork').value;
     const addr = document.getElementById('bindAddress').value.trim();
     const otp = document.getElementById('bindOTP').value.trim();
@@ -12115,11 +12158,14 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         uid: localStorage.getItem('uid'),
         network: net,
         address: addr,
+        otpRequestId: proof.id,
         otp,
         code2FA
     });
 
+    if(proof!==window.generalOTPFor('bind-wallet')){btn.innerHTML='Secure Bind';btn.disabled=false;return;}
     if (result.success) {
+        delete window.generalOTPState['bind-wallet'];
         window.isWalletBound = true;
         window.userWallets[net] = result.address || addr;
         window.userWalletDisplay = window.userWalletDisplay || {};
@@ -12151,6 +12197,8 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
  };
 
  window.submit2FAUnbind = async () => {
+     const proof=window.generalOTPFor('unbind-2fa');
+     if(!proof)return window.showToast('Request a new 2FA removal email code first.',true);
      const pass = document.getElementById('unbindPassword').value;
      const otp = document.getElementById('unbindEmailOTP').value.trim();
      if (!pass) return window.showToast("Enter your login password!", true);
@@ -12163,10 +12211,13 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
      const result = await window.fetchAPI('/auth/unbind-2fa', 'POST', {
          uid: localStorage.getItem('uid'),
          password: pass,
+         otpRequestId: proof.id,
          otp
      });
 
+     if(proof!==window.generalOTPFor('unbind-2fa')){btn.innerHTML='Secure Unbind';btn.disabled=false;return;}
      if (result.success) {
+         delete window.generalOTPState['unbind-2fa'];
          window.is2FABound = false;
          if (window.RAM_STATE) window.RAM_STATE.security.is2FA = false; // 🔥 Optimistic UI
 
