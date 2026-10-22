@@ -12890,6 +12890,8 @@ window.TCMSupportPending = function(validate) {
   const isHistorical=!!viewingTicket&&!!activeConv?.ticketId&&viewingTicket!==activeConv.ticketId;
 
   const readonly=!c||isClosed(c)||isHistorical;
+  input.disabled=order.disabled=attach.disabled=clearImage.disabled=readonly||busy||(c.aiMode||'auto')==='auto'||st.blocked||!!op;
+  state.disabled=readonly||busy||st.blocked||!!op;
 
   send.disabled=busy||!selected||readonly||(c.aiMode||'auto')==='auto'||st.blocked||!!op;
 
@@ -12936,6 +12938,7 @@ window.TCMSupportPending = function(validate) {
   }
 
   compose.hidden=!c||closed||isHistorical||(c.aiMode||'auto')==='auto';
+  input.disabled=order.disabled=attach.disabled=clearImage.disabled=compose.hidden||busy;
   takeover.hidden=!c||closed||isHistorical||(c.aiMode||'auto')!=='auto';takeover.disabled=busy;
 
   readonlyBanner.hidden=!c||!compose.hidden;
@@ -12951,7 +12954,7 @@ window.TCMSupportPending = function(validate) {
 
   }
 
-  state.disabled=!c||closed||isHistorical||compose.hidden||busy;
+  state.disabled=!c||closed||isHistorical||busy;
 
   saveStatus.disabled=!c||closed||isHistorical||busy;
 
@@ -13027,7 +13030,8 @@ window.TCMSupportPending = function(validate) {
 
  async function loadList(append=false,exact=false){if(!visible()||append&&!inboxCursor)return;listCtrl?.abort();listCtrl=new AbortController();const gen=version,v=++listVersion,events=eventRevision;notice.textContent='Loading conversations…';older.disabled=true;try{const r=await api('inbox'+(exact?'?uid='+encodeURIComponent(lookup.value.trim()):append?'?before='+encodeURIComponent(inboxCursor):''),undefined,listCtrl.signal);if(!visible()||gen!==version||v!==listVersion)return;if(!append&&events===eventRevision)conversations.clear();for(const c of r.items){const old=conversations.get(c.uid);if(!old||events===eventRevision||(c.revision||0)>(old.revision||0))conversations.set(c.uid,c);}inboxCursor=r.nextCursor;renderList();notice.textContent=conversations.size+' conversations loaded · 20 per page. Search and status filter apply to loaded pages.';updatePending();}catch(e){if(e.name!=='AbortError'&&visible()&&gen===version)notice.textContent=e.message;}finally{if(v===listVersion)older.disabled=false;}}
 
- async function read(c,gen,key){if(!c?.unread||!visible()||selected!==key||gen!==version)return;try{const r=await api('read',{uid:key,marker:c.readMarker});if(r.changed&&visible()&&selected===key&&gen===version){const current=conversations.get(key);if(current?.readMarker===c.readMarker){if(r.conversation&&r.conversation.revision>=current.revision)conversations.set(key,r.conversation);else current.unread=false;renderList();}}}catch(e){if(visible()&&gen===version)notice.textContent='Messages loaded; unread status could not sync.';}}
+ const readRequests=new Set(),readConfirmed=new Set();
+ async function read(c,gen,key){if(!c?.unread||!visible()||selected!==key||gen!==version)return;const requestKey=key+':'+c.readMarker;if(readRequests.has(requestKey)||readConfirmed.has(requestKey))return;readRequests.add(requestKey);try{const r=await api('read',{uid:key,marker:c.readMarker});readConfirmed.add(requestKey);if(readConfirmed.size>100)readConfirmed.delete(readConfirmed.values().next().value);if(r.changed&&visible()&&selected===key&&gen===version){const current=conversations.get(key);if(current?.readMarker===c.readMarker){if(r.conversation&&r.conversation.revision>=current.revision)conversations.set(key,r.conversation);else current.unread=false;renderList();}}}catch(e){if(visible()&&gen===version)notice.textContent='Messages loaded; unread status could not sync.';}finally{readRequests.delete(requestKey);}}
 
  async function loadMessages(append=false,refresh=false){if(!visible()||!selected||append&&!messageCursor)return;ctrl?.abort();ctrl=new AbortController();const gen=version,v=++msgVersion,key=selected,targetTicket=viewingTicket;if(!append&&!refresh){messages.clear();body.replaceChildren(node('p',{class:'s5-notice'},'Loading ticket conversation…'));}try{const r=await api('messages?uid='+encodeURIComponent(key)+(targetTicket?'&ticketId='+encodeURIComponent(targetTicket):'')+(append?'&before='+encodeURIComponent(messageCursor):''),undefined,ctrl.signal);if(!visible()||gen!==version||v!==msgVersion||selected!==key||targetTicket!==viewingTicket)return;for(const m of r.items)messages.set(m.id,m);if(!refresh)messageCursor=r.nextCursor;const current=conversations.get(key);if(r.conversation){if(r.conversation.ticketId)archived.set(r.conversation.ticketId,r.conversation);if(r.conversation.ticketId===r.activeTicketId&&(!current||r.conversation.revision>=current.revision))conversations.set(key,r.conversation);}renderMessages(append);if(!append){body.scrollTop=body.scrollHeight;if(r.conversation?.ticketId===r.activeTicketId&&(!viewingTicket||viewingTicket===r.activeTicketId))void read(r.conversation,gen,key);}}catch(e){if(e.name!=='AbortError'&&visible()&&gen===version)notice.textContent=e.message;}}
 
@@ -13077,6 +13081,7 @@ window.TCMSupportPending = function(validate) {
 
   const incomingTicketId=e.conversation?.ticketId||e.message?.ticketId||null;
 
+  if(e.conversation&&old&&e.conversation.ticketId===old.ticketId&&e.conversation.revision<old.revision)return;
   if(e.conversation){
 
    if(e.conversation.ticketId&&(!archived.has(e.conversation.ticketId)||e.conversation.revision>=archived.get(e.conversation.ticketId).revision))archived.set(e.conversation.ticketId,e.conversation);
@@ -13099,7 +13104,7 @@ window.TCMSupportPending = function(validate) {
 
      notice.textContent=`New ticket (${incomingTicketId}) opened by ${e.uid}. Your current view (${viewingTicket}) was kept separate; switch via Ticket history when ready.`;
 
-     void loadTickets();
+     syncTicketDropdown();
 
      renderList();
 
@@ -13115,7 +13120,7 @@ window.TCMSupportPending = function(validate) {
 
     void loadMessages();
 
-    void loadTickets();
+    syncTicketDropdown();
 
     renderList();
 
@@ -13137,7 +13142,7 @@ window.TCMSupportPending = function(validate) {
 
    }
 
-   void loadTickets();
+   syncTicketDropdown();
 
   }
 
