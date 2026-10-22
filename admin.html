@@ -6211,6 +6211,13 @@ const adminAuthState = {
 
 };
 
+// B2: the authenticated SSE already watches role/status/token revocation live.
+function hasVerifiedAdminLiveSession() {
+    const live = adminAuthState.liveSession;
+    const age = live ? Date.now() - live.seenAt : Infinity;
+    return Boolean(live && !live.controller.signal.aborted && live.generation === adminAuthState.generation &&
+        live.token === localStorage.getItem('token') && age >= 0 && age < 45000);
+}
 let adminAuthDialog = null;
 
 let adminAuthOriginalInert = new Map();
@@ -8904,6 +8911,7 @@ window.addEventListener('storage', event => {
             if (m1Terminal.stream) m1Terminal.stream.abort();
 
             m1Terminal.stream = null;
+            adminAuthState.liveSession = null;
 
         }
 
@@ -8964,6 +8972,7 @@ window.addEventListener('storage', event => {
                     if (chunk.done) break;
 
                     if (generation !== adminAuthState.generation || !adminAuthState.ready) break;
+                    adminAuthState.liveSession = {controller,generation,token,seenAt:Date.now()};
 
                     buffer += decoder.decode(chunk.value, { stream: true });
 
@@ -9024,6 +9033,7 @@ window.addEventListener('storage', event => {
                 controller.abort();
 
                 if (m1Terminal.stream === controller) m1Terminal.stream = null;
+                if (adminAuthState.liveSession?.controller === controller) adminAuthState.liveSession = null;
 
                 if (!controller.signal.reason || generation === adminAuthState.generation) {
 
@@ -10780,6 +10790,7 @@ window.addEventListener('storage', event => {
         setInterval(() => {
 
             if (!adminAuthState.ready || document.visibilityState !== 'visible') return;
+            if (hasVerifiedAdminLiveSession()) return;
 
             validateInlineAdminSession().catch(error => pauseAdminSession(error.message));
 
