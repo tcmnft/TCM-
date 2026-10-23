@@ -18772,22 +18772,47 @@ window.TCMSupportPending = function(validate) {
     const identity=()=>({uid:localStorage.getItem('uid'),token:localStorage.getItem('token')});
     const live=s=>s.uid&&s.token&&s.uid===localStorage.getItem('uid')&&s.token===localStorage.getItem('token')&&!window.dashboardSession?.closed&&!window.dashboardSession?.blocked;
     const banner=$('unreadMessagesBanner'),roster=new Map(),messages=new Map(),signatures=new Map(),versions=new Map(),flights=new Map(),wanted=new Set();
+    const livePreviews = new Map();
+    const seenPreviews = new Set();
     let prefs={enabled:false,peers:[],revision:-1},ready=false,epoch=0,settingsFlight=null,busy=false,pendingChoice=null,fetchTimer=null,animationTimer=null,animationEpoch=0,clockActive=false,nextAt=0,currentKey='',sheet=null,sheetPeer='',sheetFocus=null,settingsError='';
     const settingsCard=$('settingsWipeArea'),settingsWrapper=settingsCard?.querySelector('.settings-wrapper');
     const settingsExpanded=()=>settingsWrapper?.classList.contains('settings-active')===true;
     function syncSystemSettings(){const open=settingsExpanded();settingsCard?.classList.toggle('system-settings-open',open);if(banner){banner.inert=open;if(open)banner.setAttribute('aria-hidden','true');else banner.removeAttribute('aria-hidden');}if(open)stopClock();}
     function homeVisible(){return live(identity())&&!document.hidden&&$('view-my')?.classList.contains('active')&&getComputedStyle($('view-my')).display!=='none'&&(!$('chat-window')||getComputedStyle($('chat-window')).display==='none')&&!sheet?.classList.contains('is-open');}
     function allowed(id){return ready&&prefs.peers.includes(id)&&roster.has(id)&&!(pendingChoice?.kind==='peer'&&!pendingChoice.enabled&&pendingChoice.target===id);}
-    function showAllowed(){return ready&&prefs.enabled&&!(pendingChoice?.kind==='global'&&!pendingChoice.enabled)&&homeVisible();}
+    function showAllowed(){return homeVisible();}
     function stopClock(){if(clockActive){window.MasterClockDispatcher.unregister('dashboardPreviewCarousel');clockActive=false;}}
     function hide(){stopClock();clearTimeout(animationTimer);animationEpoch++;if(banner){banner.hidden=true;banner.replaceChildren();}currentKey='';}
-    function queue(){const out=[];for(const [peer,map]of messages){if(!allowed(peer)||!(Number(roster.get(peer)?.unreadCount)>0))continue;const cached=new Map((window.localChatCache?.private?.[peer]||[]).map(m=>[m.id,m]));for(const m of map.values())if(cached.get(m.id)?.status!=='read'&&!(cached.get(m.id)?.deletedFor||[]).includes(identity().uid))out.push({...m,peer,key:peer+':'+m.id});}return out.sort((a,b)=>window.chatTimestamp(a.timestamp)-window.chatTimestamp(b.timestamp)||a.key.localeCompare(b.key)).slice(-200);}
+    function storedQueue(){const out=[];for(const [peer,map]of messages){if(!allowed(peer)||!(Number(roster.get(peer)?.unreadCount)>0))continue;const cached=new Map((window.localChatCache?.private?.[peer]||[]).map(m=>[m.id,m]));for(const m of map.values())if(cached.get(m.id)?.status!=='read'&&!(cached.get(m.id)?.deletedFor||[]).includes(identity().uid))out.push({...m,peer,key:peer+':'+m.id});}return out.sort((a,b)=>window.chatTimestamp(a.timestamp)-window.chatTimestamp(b.timestamp)||a.key.localeCompare(b.key)).slice(-200);}
+    function queue() {
+        const combined = new Map(storedQueue().map(m => [m.key, m]));
+
+        for (const [key, m] of livePreviews) {
+            const cached = (window.localChatCache?.private?.[m.peer] || [])
+                .find(row => row.id === m.id);
+
+            if (cached?.status === 'read' ||
+                (cached?.deletedFor || []).includes(identity().uid)) {
+                livePreviews.delete(key);
+                continue;
+            }
+
+            combined.set(key, m);
+        }
+
+        return [...combined.values()]
+            .sort((a, b) =>
+                window.chatTimestamp(a.timestamp) -
+                window.chatTimestamp(b.timestamp) ||
+                a.key.localeCompare(b.key))
+            .slice(-200);
+    }
     function maintainClock(count){if(showAllowed()&&!settingsExpanded()&&count>1){if(!clockActive){clockActive=true;window.MasterClockDispatcher.register('dashboardPreviewCarousel',()=>{if(!showAllowed()){hide();return;}if(Date.now()>=nextAt)advance();});}}else stopClock();}
     function display(item,count){
         if(!banner||!showAllowed()){hide();return;}if(currentKey===item.key&&!banner.hidden){maintainClock(count);return;}
         const text=item.fileId?(String(item.fileType).startsWith('image/')?'Sent a photo':item.fileName||'Sent an attachment'):item.message;if(typeof text!=='string'||!text.trim())return;
         const previous=banner.querySelector('.preview-message-layer.is-current'),layer=document.createElement('span');layer.className='preview-message-layer';layer.dataset.previewKey=item.key;
-        const name=document.createElement('span');name.className='unread-preview-name';name.textContent=window.usersStore?.get(item.peer)?.name||roster.get(item.peer)?.name||'TCM member';
+        const name=document.createElement('span');name.className='unread-preview-name';name.textContent=item.senderName||window.usersStore?.get(item.peer)?.name||roster.get(item.peer)?.name||'TCM member';
         const content=document.createElement('span');content.className='unread-preview-message';content.textContent=text;layer.append(name,content);
         clearTimeout(animationTimer);const generation=++animationEpoch;banner.replaceChildren(...(previous?[previous]:[]),layer);if(previous){previous.classList.remove('is-current');previous.classList.add('is-leaving');}
         currentKey=item.key;nextAt=Date.now()+4000;banner.hidden=false;banner.dataset.previewKey=item.key;banner.setAttribute('aria-label','Open unread message from '+name.textContent);
@@ -18850,17 +18875,96 @@ window.TCMSupportPending = function(validate) {
     const unfriend=$('unfriend-btn');if(unfriend){const button=document.createElement('button');button.id='dashboardPreviewMenuButton';button.type='button';button.hidden=true;button.textContent='⋮';button.title='Chat options';button.setAttribute('aria-label','Chat options');button.onclick=()=>void openSheet();unfriend.parentElement.insertBefore(button,unfriend);}
     const openRoom=window.openChatRoom;window.openChatRoom=async(...args)=>{hide();const value=await openRoom(...args);syncControls();return value;};
     const account=window.openAccountSettingsModal;window.openAccountSettingsModal=()=>{account();void loadSettings();syncControls();};
-    if(banner){banner.replaceChildren();banner.hidden=true;banner.onclick=async()=>{const item=queue().find(m=>m.key===currentKey),s=identity();if(!item||!live(s)||!showAllowed())return;const friend=roster.get(item.peer);hide();$('chat-window').style.display='flex';try{await window.openChatRoom('private',friend.name||'TCM member',friend.avatar||'',item.peer,{messageId:item.id});}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}};}
+    if(banner){banner.replaceChildren();banner.hidden=true;banner.onclick=async()=>{const item=queue().find(m=>m.key===currentKey),s=identity();if(!item||!live(s)||!showAllowed())return;const friend=roster.get(item.peer)||{};hide();$('chat-window').style.display='flex';try{await window.openChatRoom('private',item.senderName||friend.name||'TCM member',item.avatar||friend.avatar||'',item.peer,{messageId:item.id});}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}};}
     function resume(){if(!homeVisible()){hide();return;}render();for(const [peer,f]of roster)if(allowed(peer)&&Number(f.unreadCount)>0&&!messages.get(peer)?.size)requestFetch(peer);if(wanted.size&&!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
     const observer=new MutationObserver(()=>{syncSystemSettings();resume();syncControls();});if(settingsWrapper)observer.observe(settingsWrapper,{attributes:true,attributeFilter:['class']});syncSystemSettings();if($('chat-window'))observer.observe($('chat-window'),{attributes:true,attributeFilter:['style','class']});if($('view-my'))observer.observe($('view-my'),{attributes:true,attributeFilter:['style','class']});
     if(window.socket){
-        const incoming=m=>{if(!live(identity())||!prefs.enabled||!allowed(m?.senderUid))return;accept(m.senderUid,m);render();};window.socket.on('receive_new_message',incoming);window.socket.on('chat_v15_message',m=>{if(m?.mode==='private')incoming(m);});
+        const incoming = m => {
+            const s = identity();
+            if (!live(s) || !m ||
+                !valid(m.senderUid) || !valid(m.id) ||
+                m.senderUid === s.uid ||
+                (m.receiverUid !== undefined && m.receiverUid !== s.uid) ||
+                m.status === 'read' ||
+                (m.deletedFor || []).includes(s.uid) ||
+                (!valid(m.fileId) &&
+                    (typeof m.message !== 'string' ||
+                     !m.message.trim() || m.message.length > 4000))) return;
+
+            const peer = m.senderUid;
+            const key = peer + ':' + m.id;
+            if (seenPreviews.has(key)) return;
+            seenPreviews.add(key);
+            while (seenPreviews.size > 1000) {
+                seenPreviews.delete(seenPreviews.values().next().value);
+            }
+
+            const item = { ...m, peer, key };
+            livePreviews.set(key, item);
+            while (livePreviews.size > 200) {
+                livePreviews.delete(livePreviews.keys().next().value);
+            }
+
+            const friend = (window.chat15Friends || [])
+                .find(row => row.uid === peer);
+            const old = roster.get(peer) || {};
+            const liveCount = [...livePreviews.values()]
+                .filter(row => row.peer === peer).length;
+
+            roster.set(peer, {
+                ...old,
+                ...friend,
+                uid: peer,
+                name: friend?.name || m.senderName || old.name || 'TCM member',
+                avatar: friend?.avatar || m.avatar || old.avatar || '',
+                lastMsg: m.message || m.fileName || '',
+                lastMsgTime: m.timestamp,
+                unreadCount: Math.max(
+                    Number(friend?.unreadCount) || 0,
+                    liveCount
+                )
+            });
+
+            if (showAllowed() && !settingsExpanded()) {
+                display(item, queue().length);
+            } else {
+                render();
+            }
+        };
+
+        window.socket.on('receive_new_message', incoming);
+        window.socket.on('chat_v15_message', m => {
+            if (m?.mode === 'private') incoming(m);
+        });
         window.socket.on('chat_preview_preferences',notice=>{if(live(identity())&&notice?.uid===identity().uid)applySettings(notice);});
         window.socket.on('chat_v15_unread_cleared',notice=>{const peer=notice?.target;if(!live(identity())||!valid(peer))return;messages.delete(peer);versions.set(peer,(versions.get(peer)||0)+1);flights.delete(peer);if(Number(notice.unreadCount)>0)requestFetch(peer);render();});
         window.socket.on('chat_v15_deleted',notice=>{if(!live(identity())||notice?.mode!=='private'||!Array.isArray(notice.ids))return;const peer=notice.sender===identity().uid?notice.target:notice.sender;for(const id of notice.ids)messages.get(peer)?.delete(id);render();});
+        window.socket.on('chat_v15_unread_cleared', notice => {
+            if (!live(identity()) || !valid(notice?.target)) return;
+            if (Number(notice.unreadCount) === 0) {
+                for (const [key, m] of livePreviews) {
+                    if (m.peer === notice.target) livePreviews.delete(key);
+                }
+            }
+            render();
+        });
+
+        window.socket.on('chat_v15_deleted', notice => {
+            if (!live(identity()) ||
+                notice?.mode !== 'private' ||
+                !Array.isArray(notice.ids)) return;
+
+            const peer = notice.sender === identity().uid
+                ? notice.target : notice.sender;
+
+            for (const id of notice.ids) {
+                livePreviews.delete(peer + ':' + id);
+            }
+            render();
+        });
         window.socket.on('connect',()=>{void loadSettings();});window.socket.on('session_error',()=>dispose());
     }
-    function dispose(){epoch++;ready=false;prefs={enabled:false,peers:[],revision:-1};settingsFlight=null;busy=false;pendingChoice=null;clearTimeout(fetchTimer);fetchTimer=null;wanted.clear();roster.clear();messages.clear();signatures.clear();versions.clear();flights.clear();hide();closeSheet();sheetPeer='';settingsError='';syncControls();}
+    function dispose(){livePreviews.clear();seenPreviews.clear();epoch++;ready=false;prefs={enabled:false,peers:[],revision:-1};settingsFlight=null;busy=false;pendingChoice=null;clearTimeout(fetchTimer);fetchTimer=null;wanted.clear();roster.clear();messages.clear();signatures.clear();versions.clear();flights.clear();hide();closeSheet();sheetPeer='';settingsError='';syncControls();}
     const clearSession=window.clearDashboardSession;window.clearDashboardSession=()=>{dispose();return clearSession();};
     document.addEventListener('visibilitychange',resume);window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',()=>{void loadSettings();resume();});window.addEventListener('storage',e=>{if(e.key==='uid'||e.key==='token')dispose();});
     window.DashboardPreview=Object.freeze({syncFriends});syncFriends(window.chat15Friends||[]);syncControls();if(live(identity()))void loadSettings();
