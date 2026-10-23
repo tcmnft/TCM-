@@ -8814,17 +8814,19 @@ app.post('/api/auth/logout', async (req, res) => {
     } catch (error) { return a0Failure(res, error); }
 });
 
-async function verifyDashboardSocketSession(socket) {
-    const current = await db.collection('Users').doc(socket.data.authenticatedUid).get();
-    const user = current.exists ? current.data() : null;
-    if (!user || user.Account_Deleted === true || user.Token !== socket.data.sessionToken) {
+function verifyDashboardSocketSession(socket) {
+    const user = socket.data.sessionUser;
+
+    if (!user ||
+        user.Account_Deleted === true ||
+        user.Token !== socket.data.sessionToken) {
         throw dashboardSocketError(401, 'Session expired. Please sign in again.');
     }
+
     if (user.Status === 'Banned' || deletionV3AccessExpired(user)) {
-        socket.disconnect(true);
         throw dashboardSocketError(403, 'Account access is blocked.');
     }
-    socket.data.sessionUser = user;
+
     return user;
 }
 
@@ -8840,7 +8842,8 @@ io.use(async (socket, next) => {
         }
         socket.data.authenticatedUid = result.docs[0].id;
         socket.data.sessionToken = token;
-        await verifyDashboardSocketSession(socket);
+        socket.data.sessionUser = result.docs[0].data();
+        verifyDashboardSocketSession(socket);
         return next();
     } catch (error) {
         return next(error.data ? error : dashboardSocketError(503, 'Session verification is temporarily unavailable.'));
@@ -8865,9 +8868,9 @@ io.on('connection', socket => {
     };
 
     // Recheck each incoming application packet, not only the initial handshake.
-    socket.use(async (packet, next) => {
+    socket.use((packet, next) => {
         try {
-            await verifyDashboardSocketSession(socket);
+            verifyDashboardSocketSession(socket); // Memory only.
             next();
         } catch (error) {
             next(error);
@@ -8922,48 +8925,86 @@ io.on('connection', socket => {
     chatModule15.attach(socket);
 
     socket.on('send_private_message', async (data = {}, acknowledgement) => {
+        const reply = result => {
+            if (typeof acknowledgement === 'function') acknowledgement(result);
+        };
+
         try {
-            const sender = socket.data.sessionUser;
+            const sender = verifyDashboardSocketSession(socket);
+
             const receiverUid = data.receiverUid;
             const message = data.message;
-            if (
-                typeof receiverUid !== 'string' || !receiverUid || receiverUid.includes('/') ||
-                receiverUid === uid || typeof message !== 'string' ||
-                !message.trim() || message.length > 4000
-            ) {
-                throw new Error('Invalid private message.');
+
+            if (typeof receiverUid !== 'string' ||
+                !/^[A-Za-z0-9_-]{1,128}$/.test(receiverUid) ||
+                receiverUid === uid ||
+                typeof message !== 'string' ||
+                !message.trim() ||
+                message.length > 4000) {
+                reply({ success: false, message: 'Invalid private message.' });
+                return;
             }
-            const receiver = await db.collection('Users').doc(receiverUid).get();
-            if (!receiver.exists || receiver.data().Status === 'Banned') {
-                throw new Error('Recipient is unavailable.');
-            }
-            const senderName = typeof sender.Name === 'string' ? sender.Name : 'TCM User';
-            const avatar = typeof sender.Avatar === 'string' ? sender.Avatar : '';
-            const chatId = uid < receiverUid ? `${uid}_${receiverUid}` : `${receiverUid}_${uid}`;
-            const batch = db.batch();
+
+            const senderRef = db.collection('Users').doc(uid);
+            const receiverRef = db.collection('Users').doc(receiverUid);
+            const senderFriend = senderRef.collection('Friends').doc(receiverUid);
+            const receiverFriend = receiverRef.collection('Friends').doc(uid);
+
+            const chatId = [uid, receiverUid].sort().join('_');
             const messageRef = db.collection('Private_Chats').doc(chatId).collection('Messages').doc();
-            batch.set(messageRef, {
-                senderUid: uid, senderName, avatar, message,
-                timestamp: FieldValue.serverTimestamp(), deletedFor: [], status: 'sent'
-            });
-            batch.set(db.collection('Users').doc(uid).collection('Friends').doc(receiverUid), {
-                lastMsg: 'You: ' + message, lastMsgTime: FieldValue.serverTimestamp()
-            }, { merge: true });
-            batch.set(db.collection('Users').doc(receiverUid).collection('Friends').doc(uid), {
-                unreadCount: FieldValue.increment(1), lastMsg: message,
+
+            const record = {
+                senderUid: uid,
+                senderName: String(sender.Name || 'TCM User').slice(0, 120),
+                avatar: typeof sender.Avatar === 'string' ? sender.Avatar : '',
+                message: message.trim(),
+                timestamp: FieldValue.serverTimestamp(),
+                deletedFor: [],
+                status: 'sent'
+            };
+
+            const batch = db.batch();
+            batch.create(messageRef, record);
+            batch.set(senderFriend, {
+                lastMsg: 'You: ' + record.message,
                 lastMsgTime: FieldValue.serverTimestamp()
             }, { merge: true });
+            batch.set(receiverFriend, {
+                unreadCount: FieldValue.increment(1),
+                lastMsg: record.message,
+                lastMsgTime: FieldValue.serverTimestamp()
+            }, { merge: true });
+
             await batch.commit();
-            try { await f1Invalidate(uid, receiverUid); } catch (_) {}
-            io.to(uid).emit('chat_v15_private_sent', { target: receiverUid });
-            io.to(receiverUid).emit('receive_new_message', {
-                senderUid: uid, receiverUid, senderName, avatar, message,
-                id: messageRef.id, timestamp: new Date().toISOString()
-            });
-            if (typeof acknowledgement === 'function') acknowledgement({ success: true, id: messageRef.id });
+
+            const committed = {
+                id: messageRef.id,
+                senderUid: uid,
+                receiverUid,
+                senderName: record.senderName,
+                avatar: record.avatar,
+                message: record.message,
+                timestamp: new Date().toISOString(),
+                deletedFor: [],
+                status: 'sent'
+            };
+
+            // Start existing cache invalidation without delaying socket delivery.
+            void f1Invalidate(uid, receiverUid).catch(() => {});
+
+            try {
+                io.to(uid).emit('chat_v15_private_sent', { target: receiverUid });
+                io.to(receiverUid).emit('receive_new_message', committed);
+            } catch (_) {
+                console.warn('[CHAT] Message committed; live notification unavailable.');
+            }
+
+            reply({ success: true, id: committed.id });
         } catch (error) {
-            if (typeof acknowledgement === 'function') acknowledgement({ success: false, message: error.message });
-            console.warn('Private message rejected:', error.message);
+            reply({
+                success: false,
+                message: error.data?.message || 'Message could not be confirmed.'
+            });
         }
     });
 
