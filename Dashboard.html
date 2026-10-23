@@ -6831,6 +6831,18 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
         return 'https://bscscan.com/tx/' + ref.Mint_TxHash.toLowerCase();
     };
 
+    window.dashboardDepositTransactionURL = tx => {
+        if (tx?.Type !== 'Deposit' || tx.Verified_OnChain !== true) return '';
+        const hash = typeof tx.TXID === 'string' ? tx.TXID : '';
+        if (tx.Network === 'BEP20' && /^0x[0-9a-fA-F]{64}$/.test(hash)) {
+            return 'https://bscscan.com/tx/' + hash;
+        }
+        if (tx.Network === 'TRC20' && /^[0-9a-fA-F]{64}$/.test(hash)) {
+            return 'https://tronscan.org/#/transaction/' + hash;
+        }
+        return '';
+    };
+
     window.buildDashboardHistoryRowHTML = tx => {
         let html = '';
             let tType = tx.Type || '';
@@ -6886,6 +6898,16 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             let displayTitle = (isP2P && extractedName) ? extractedName : tType;
             let displayTypeRight = (isP2P && extractedName) ? tType : '';
             const mintURL = window.dashboardMintTransactionURL(tx);
+            const depositURL = window.dashboardDepositTransactionURL(tx);
+            const depositLabel = isDep
+                ? window.escapeDashboardLedgerText(
+                    'Deposit / ' + (
+                        typeof tx.Status === 'string' && tx.Status.trim()
+                            ? tx.Status
+                            : 'Status unavailable'
+                    )
+                )
+                : '';
             const hand = /^Team Bonus \(([ABC]-Hand)\)$/.exec(tType);
             if (hand) { displayTitle = 'Team Bonus'; displayTypeRight = hand[1]; }
             if (tType === 'Staking Reward') displayTypeRight = 'ROI Received';
@@ -6992,6 +7014,14 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
 
                     <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content:space-between; align-self:stretch; gap:4px; flex-shrink:0; padding-left:10px;">
                         <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px;">
+                            ${isDep ? (depositURL
+                                ? `<a href="${depositURL}" target="_blank"
+                                    rel="noopener noreferrer"
+                                    title="Blockchain transaction; platform status is shown separately"
+                                    onclick="event.stopPropagation()"
+                                    style="font-size:0.65rem;font-weight:500;color:var(--text-sub);text-decoration:none;padding:3px 0;">${depositLabel}</a>`
+                                : `<span style="font-size:0.65rem;font-weight:500;color:var(--text-sub);padding:3px 0;">${depositLabel}</span>`
+                            ) : ''}
                             ${mintURL ? `<a class="tx-mint-reference" href="${mintURL}" target="_blank" rel="noopener noreferrer" aria-label="View this NFT's mint transaction on BscScan" title="NFT creation record; not the profit payment" onclick="event.stopPropagation()" style="font-size:0.65rem; font-weight:500; color:var(--text-sub); text-decoration:none; white-space:nowrap; padding:3px 0;">Mint Transaction ↗</a>` : ''}
                             ${displayTypeRight ? `<span style="font-size:${hand || tType === 'Staking Reward' ? '0.65rem' : '0.8rem'}; font-weight:${hand || tType === 'Staking Reward' ? '500' : '700'}; color:var(--text-sub);">${escapeText(displayTypeRight)}</span>` : ''}
                             ${payoutURL ? `<a class="tx-payout-reference" href="${payoutURL}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" style="display:inline-block; font-size:0.65rem; font-weight:500; line-height:1.3; color:var(--text-sub); text-decoration:none; border:0; box-shadow:none; background:transparent; padding:0; margin:0; white-space:nowrap;">${window.withdrawalDeliveryVerified(tx) ? 'Payout Transaction ↗' : 'Track Payout ↗'}</a>` : ''}
