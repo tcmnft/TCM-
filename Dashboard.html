@@ -14758,7 +14758,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
     window.chatDeliveries = new Map();
     window.chatStartDelivery = (id, details) => {
         const state = {
-            ...details, uid: localStorage.getItem('uid'),
+            ...details, phase: 'sending', attempt: 0, uid: localStorage.getItem('uid'),
             token: localStorage.getItem('token')
         };
         window.chatDeliveries.set(id, state);
@@ -14777,10 +14777,16 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         const state = window.chatDeliveries.get(id);
         if (!state) return;
         clearTimeout(state.timer);
-        window.chatDeliveries.delete(id);
         if (state.uid !== localStorage.getItem('uid') ||
-            state.token !== localStorage.getItem('token')) return;
+            state.token !== localStorage.getItem('token')) { window.chatDeliveries.delete(id); return; }
         const node = document.getElementById('msg-' + id);
+        if (error && state.mode === 'private') {
+            state.phase = 'retry'; state.timer = null;
+            window.chatPaintPrivateRetries();
+            window.showToast(error, true);
+            return;
+        }
+        window.chatDeliveries.delete(id);
         if (error) {
             node?.remove();
             if (state.mode === 'global') {
@@ -14794,6 +14800,19 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
             window.showToast(error, true);
             return;
         }
+        if (state.mode === 'private' && committed) {
+            const rows = window.localChatCache.private[state.target] || [];
+            const known = rows.find(m => m.id === committed.id && m !== state.optimistic);
+            const ranks = { sent: 0, delivered: 1, read: 2 };
+            const status = (ranks[known?.status] || 0) > (ranks[committed.status] || 0) ? known.status : committed.status;
+            if (state.optimistic) Object.assign(state.optimistic, committed, {status});
+            window.localChatCache.private[state.target] = committed.removed
+                ? rows.filter(m => m.id !== id && m.id !== committed.id)
+                : [...new Map(rows.map(m => [m.id, m])).values()];
+            if (window.currentChatMode === 'private' && window.activePrivateUid === state.target)
+                window.renderChatMessages(window.localChatCache.private[state.target]);
+            return;
+        }
         if (state.optimistic && committed) Object.assign(state.optimistic, committed);
         if (node) {
             if (committed?.id) node.id = 'msg-' + committed.id;
@@ -14802,20 +14821,59 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         }
     };
     window.chatSendWithAck = (event, payload, id) => {
+        const state = window.chatDeliveries.get(id);
+        if (!state || state.uid !== localStorage.getItem('uid') || state.token !== localStorage.getItem('token')) return;
+        const attempt = ++state.attempt;
+        state.phase = 'sending'; clearTimeout(state.timer);
+        const current = () => window.chatDeliveries.get(id) === state && state.attempt === attempt &&
+            state.uid === localStorage.getItem('uid') && state.token === localStorage.getItem('token');
         if (!window.socket?.connected) {
-            window.chatFinishDelivery(id, 'Live chat is disconnected. Please try again when connected.');
-            return;
+            window.chatFinishDelivery(id, 'Live chat is disconnected. Retry when connected.'); return;
         }
-        window.socket.timeout(10000).emit(event, payload, (error, result) => {
-            if (error || result?.success !== true || !result.id) {
-                window.chatFinishDelivery(id, result?.message ||
-                    'Delivery could not be confirmed. Reopen the chat before retrying.');
+        state.timer = setTimeout(() => {
+            if (current()) window.chatFinishDelivery(id, 'Delivery could not be confirmed. Retry this message.');
+        }, 10000);
+        window.chatPaintPrivateRetries();
+        window.socket.timeout(10000).emit(event, state.mode === 'private' ? state.payload : payload, (error, result) => {
+            if (!current()) return;
+            if (error || result?.success !== true || typeof result.id !== 'string' ||
+                !/^[A-Za-z0-9_-]{1,128}$/.test(result.id) || (state.mode === 'private' && result.clientMessageId !== id)) {
+                state.retryable = error ? true : result?.retryable !== false;
+                window.chatFinishDelivery(id, result?.message || 'Delivery could not be confirmed. Retry this message.');
                 return;
             }
             window.chatFinishDelivery(id, null, {
-                id: result.id, status: 'sent', timestamp: new Date().toISOString()
+                id: result.id, status: 'sent', removed: result.removed === true,
+                timestamp: result.timestamp || new Date().toISOString()
             });
         });
+    };
+    window.chatPaintPrivateRetries = () => {
+        for (const [id, state] of window.chatDeliveries) {
+            if (state.mode !== 'private' || state.uid !== localStorage.getItem('uid') ||
+                state.token !== localStorage.getItem('token') || window.currentChatMode !== 'private' ||
+                state.target !== window.activePrivateUid) continue;
+            const node = document.getElementById('msg-' + id);
+            if (!node) continue;
+            const label = node.querySelector('.chat-delivery-status');
+            if (label) label.textContent = state.phase === 'retry' ? 'Not confirmed' : 'Sending...';
+            let button = node.querySelector('[data-chat-retry]');
+            if (state.phase === 'retry' && state.retryable !== false) {
+                if (!button) {
+                    button = document.createElement('button');
+                    button.type = 'button'; button.dataset.chatRetry = id;
+                    button.className = 'chat-history-control'; button.textContent = 'Retry';
+                    button.onclick = event => { event.stopPropagation(); window.chatRetryPrivateMessage(id); };
+                    node.appendChild(button);
+                }
+            } else button?.remove();
+        }
+    };
+    window.chatRetryPrivateMessage = id => {
+        const state = window.chatDeliveries.get(id);
+        if (!state || state.mode !== 'private' || state.phase !== 'retry' || state.retryable === false ||
+            state.uid !== localStorage.getItem('uid') || state.token !== localStorage.getItem('token')) return;
+        window.chatSendWithAck('send_private_message', state.payload, id);
     };
     window.chatReceiveGlobal = data => {
         if (window.dashboardSession.closed || window.dashboardSession.blocked ||
@@ -15091,7 +15149,8 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         const mode = window.currentChatMode;
         window.chatStartDelivery(tempId, {
             mode, target: socketData.receiverUid, message,
-            input: 'chat-input', optimistic: socketData
+            input: 'chat-input', optimistic: socketData,
+            payload: mode === 'private' ? Object.freeze({...socketData}) : undefined
         });
         if (mode === 'private') {
             if (!window.localChatCache.private[socketData.receiverUid]) window.localChatCache.private[socketData.receiverUid] = [];
@@ -15655,6 +15714,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         html+=typingMarkup;fragments.push({key:'typing',markup:typingMarkup});
         if(box.dataset.renderedChat!==html){box.dataset.renderedChat=html;reconcileMessageDOM(box,fragments,s);box.scrollTop=nearBottom?box.scrollHeight:scroll;}
         window.chatRestoreMessageNodes?.();
+        window.chatPaintPrivateRetries();
         window.updateSelectCount();
         imageObserver?.disconnect();
         if(typeof IntersectionObserver!=='undefined')imageObserver=new IntersectionObserver(entries=>{for(const entry of entries)if(entry.isIntersecting){const el=entry.target;imageObserver.unobserve(el);imageQueue.push({id:el.dataset.fileId,el,epoch:fileEpoch});}drainImages();},{root:box});
