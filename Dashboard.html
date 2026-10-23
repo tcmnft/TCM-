@@ -18793,7 +18793,7 @@ window.TCMSupportPending = function(validate) {
         );
 
         for (const [key, m] of livePreviews) {
-            if (m.startupPreview && livePeers.has(m.peer)) {
+            if (m.startupPreview && !valid(m.id) && livePeers.has(m.peer)) {
                 livePreviews.delete(key);
                 continue;
             }
@@ -18813,8 +18813,7 @@ window.TCMSupportPending = function(validate) {
             .sort((a, b) =>
                 window.chatTimestamp(a.timestamp) -
                 window.chatTimestamp(b.timestamp) ||
-                a.key.localeCompare(b.key))
-            .slice(-200);
+                a.key.localeCompare(b.key));
     }
     function maintainClock(count){if(showAllowed()&&!settingsExpanded()&&count>1){if(!clockActive){clockActive=true;window.MasterClockDispatcher.register('dashboardPreviewCarousel',()=>{if(!showAllowed()){hide();return;}if(Date.now()>=nextAt)advance();});}}else stopClock();}
     function display(item,count){
@@ -18845,52 +18844,83 @@ window.TCMSupportPending = function(validate) {
         const s = identity();
         if (!live(s)) return;
 
+        const cache = window.localChatCache?.private || {};
+        const peers = new Map();
+
         for (const f of Array.isArray(rows) ? rows : []) {
-            const peer = f?.uid;
-            if (!valid(peer) || peer === s.uid) continue;
+            if (valid(f?.uid)) peers.set(f.uid, f);
+        }
+        for (const peer of Object.keys(cache)) {
+            if (valid(peer) && !peers.has(peer)) {
+                peers.set(peer, { uid: peer });
+            }
+        }
 
-            const existing = [...livePreviews.values()];
-            if (existing.some(m => m.peer === peer && !m.startupPreview)) {
-                continue; // Preserve newer live socket messages.
+        for (const [peer, f] of peers) {
+            if (peer === s.uid) continue;
+
+            const cached = Array.isArray(cache[peer]) ? cache[peer] : [];
+            const fallbackKey = peer + ':startup';
+
+            if (cached.length > 0) {
+                // Real cached entries supersede the roster-only placeholder.
+                livePreviews.delete(fallbackKey);
+
+                for (const m of cached) {
+                    if (!valid(m?.id) || m.senderUid !== peer ||
+                        (m.receiverUid !== undefined &&
+                         m.receiverUid !== s.uid)) continue;
+
+                    const key = peer + ':' + m.id;
+
+                    if (m.status === 'read' ||
+                        (m.deletedFor || []).includes(s.uid)) {
+                        livePreviews.delete(key);
+                        continue;
+                    }
+
+                    if (!valid(m.fileId) &&
+                        (typeof m.message !== 'string' ||
+                         !m.message.trim())) continue;
+
+                    const existing = livePreviews.get(key);
+                    if (existing && !existing.startupPreview) continue;
+
+                    livePreviews.set(key, {
+                        ...m,
+                        senderName: m.senderName || f.name || 'TCM member',
+                        avatar: m.avatar || f.avatar || '',
+                        peer,
+                        key,
+                        startupPreview: true
+                    });
+                }
+
+                // Nonempty cache: never invent an additional roster message.
+                continue;
             }
 
-            for (const [key, m] of livePreviews) {
-                if (m.peer === peer && m.startupPreview) livePreviews.delete(key);
+            const hasRealMessage = [...livePreviews.values()]
+                .some(m => m.peer === peer && valid(m.id));
+
+            const text = typeof f.lastMsg === 'string'
+                ? f.lastMsg.trim() : '';
+
+            if (hasRealMessage || !(Number(f.unreadCount) > 0) ||
+                !text || /^You:\s/i.test(text)) {
+                livePreviews.delete(fallbackKey);
+                continue;
             }
 
-            if (!(Number(f.unreadCount) > 0)) continue;
-
-            const cached = (window.localChatCache?.private?.[peer] || [])
-                .filter(m =>
-                    valid(m?.id) && m.senderUid === peer &&
-                    m.status !== 'read' &&
-                    !(m.deletedFor || []).includes(s.uid) &&
-                    (valid(m.fileId) ||
-                        (typeof m.message === 'string' && m.message.trim())))
-                .sort((a, b) =>
-                    window.chatTimestamp(b.timestamp) -
-                    window.chatTimestamp(a.timestamp))[0];
-
-            const useCached = cached &&
-                window.chatTimestamp(cached.timestamp) >=
-                window.chatTimestamp(f.lastMsgTime);
-
-            const text = typeof f.lastMsg === 'string' ? f.lastMsg.trim() : '';
-            if (!useCached && (!text || /^You:\s/i.test(text))) continue;
-            if (livePreviews.size >= 200) continue;
-
-            const item = useCached
-                ? { ...cached }
-                : { message: text, timestamp: f.lastMsgTime, status: 'sent' };
-
-            const key = peer + ':' + (useCached ? item.id : 'startup');
-            livePreviews.set(key, {
-                ...item,
+            livePreviews.set(fallbackKey, {
                 senderUid: peer,
-                senderName: item.senderName || f.name || 'TCM member',
-                avatar: item.avatar || f.avatar || '',
+                senderName: f.name || 'TCM member',
+                avatar: f.avatar || '',
+                message: text,
+                timestamp: f.lastMsgTime,
+                status: 'sent',
                 peer,
-                key,
+                key: fallbackKey,
                 startupPreview: true
             });
         }
@@ -18965,9 +18995,6 @@ window.TCMSupportPending = function(validate) {
 
             const item = { ...m, peer, key };
             livePreviews.set(key, item);
-            while (livePreviews.size > 200) {
-                livePreviews.delete(livePreviews.keys().next().value);
-            }
 
             const friend = (window.chat15Friends || [])
                 .find(row => row.uid === peer);
