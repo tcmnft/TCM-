@@ -13156,7 +13156,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
     window.calculateLiveFee = () => {
         const input = document.getElementById('sendAmt');
         const box = document.getElementById('liveFeeDisplay');
-        if (Number(input.value) < 5) { box.style.display = 'none'; return; }
+        if (Number(input.value) < 1) { box.style.display = 'none'; return; }
         window.renderFeePreview(box, input.value, window.systemFeeConfig?.p2pFeePct, 'Receiver gets');
     };
 
@@ -13396,7 +13396,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         const btn = document.getElementById('btnSendMoney');
 
         if(!rUid || rUid.length < 5) return window.showToast("Enter Receiver UID!", true);
-        if(!amt || amt < 5) return window.showToast("Minimum 5 USDT!", true);
+        if(!amt || amt < 1) return window.showToast("Minimum 1 USDT!", true);
         if(!code2FA || code2FA.length !== 6) return window.showToast("Enter 6-digit 2FA!", true);
 
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
@@ -13777,7 +13777,73 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
     };
 
     window.handleP2PScanNotice = (data, acknowledge) => applyP2PReceiveEvent('waiting', data, acknowledge);
-    window.handleP2PSettlementNotice = (data, acknowledge) => applyP2PReceiveEvent('settled', data, acknowledge);
+    // Account-scoped IndexedDB receipts survive reloads and the 100-entry RAM cache.
+    // A readwrite transaction serializes claims across tabs; it performs no network I/O.
+    let p2pReceiptDatabase;
+    const openP2PReceiptDatabase = () => {
+        if (p2pReceiptDatabase) return p2pReceiptDatabase;
+        p2pReceiptDatabase = new Promise((resolve, reject) => {
+            if (!window.indexedDB) { reject(new Error('Persistent receipt storage unavailable.')); return; }
+            const request = window.indexedDB.open('TCM-P2P-Receipt-Dedup-v1', 1);
+            request.onupgradeneeded = () => {
+                if (!request.result.objectStoreNames.contains('receipts')) request.result.createObjectStore('receipts');
+            };
+            request.onsuccess = () => {
+                const database = request.result;
+                database.onversionchange = () => { database.close(); p2pReceiptDatabase = null; };
+                resolve(database);
+            };
+            request.onerror = () => { p2pReceiptDatabase = null; reject(request.error); };
+            request.onblocked = () => { p2pReceiptDatabase = null; reject(new Error('Receipt storage upgrade blocked.')); };
+        });
+        return p2pReceiptDatabase;
+    };
+    const claimP2PReceipt = async (uid, event) => {
+        const database = await openP2PReceiptDatabase();
+        const key = JSON.stringify([uid, event.eventId]);
+        // Bind the dedup key to immutable receipt details, not arbitrary event IDs alone.
+        const intent = JSON.stringify([event.senderUid, event.receiverUid, event.orderId, String(event.grossAmount), String(event.feeAmount), String(event.netAmount)]);
+        return new Promise((resolve, reject) => {
+            const tx = database.transaction('receipts', 'readwrite'), store = tx.objectStore('receipts');
+            let fresh = false;
+            const get = store.get(key);
+            get.onsuccess = () => {
+                if (get.result !== undefined) {
+                    if (get.result.intent !== intent) { tx.abort(); return; }
+                } else { store.put({ intent, acceptedAt: Date.now() }, key); fresh = true; }
+            };
+            tx.oncomplete = () => resolve(fresh);
+            tx.onerror = tx.onabort = () => reject(new Error('Receipt persistence failed or identity conflict.'));
+        });
+    };
+    window.handleP2PSettlementNotice = async (data, acknowledge) => {
+        const uid = localStorage.getItem('uid'), token = localStorage.getItem('token');
+        const reply = result => { if (typeof acknowledge === 'function') acknowledge(result); };
+        if (!data || data.receiverUid !== uid || window.dashboardSession.closed || window.dashboardSession.blocked ||
+            typeof data.eventId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(data.eventId) ||
+            typeof data.senderUid !== 'string' || typeof data.senderName !== 'string' ||
+            data.status !== 'Success' || typeof data.orderId !== 'string' || !data.orderId) {
+            reply({ accepted: false, reason: 'invalid-settlement' }); return;
+        }
+        try {
+            // Validate before persisting so malformed payloads cannot poison deduplication.
+            [data.grossAmount, data.feeAmount, data.netAmount].forEach(formatP2PReceiptAmount);
+            const fresh = await claimP2PReceipt(uid, data);
+            if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token') ||
+                window.dashboardSession.closed || window.dashboardSession.blocked) {
+                reply({ accepted: false, reason: 'session-changed' }); return;
+            }
+            let result = { accepted: true, rendered: false, reason: 'persistent-duplicate' };
+            if (fresh) applyP2PReceiveEvent('settled', data, value => { result = value; });
+            const confirmed = { ...result, eventId: data.eventId, receiverUid: uid };
+            reply(confirmed);
+            if (confirmed.accepted === true && typeof data.noticeRef === 'string') {
+                window.socket?.emit('p2p_notice_ack', { noticeRef: data.noticeRef, eventId: data.eventId });
+            }
+            // Glow is driven ONLY by Users.hasUnreadP2P in the existing dashboard snapshot.
+            // Replayed receipts never set or re-light an already cleared glow.
+        } catch (_) { reply({ accepted: false, reason: 'persistent-storage-unavailable' }); }
+    };
 
     window.showMyP2PQr = async () => {
         const myUid = localStorage.getItem('uid');
