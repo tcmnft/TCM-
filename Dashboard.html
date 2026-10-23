@@ -8141,6 +8141,87 @@ window.syncDashboardState = (followUp = false) => {
     return state.promise;
 };
 
+// C04 FINANCIAL REQUESTS START
+(() => {
+    const flights = new Map();
+    function amount(value) {
+        const match = /^(\d+)(?:\.(\d{1,6}))?$/.exec(String(value).trim());
+        if (!match) throw new Error('Invalid financial amount.');
+        return (BigInt(match[1]) * 1000000n + BigInt((match[2] || '').padEnd(6, '0'))).toString();
+    }
+    function details(endpoint, body) {
+        if (endpoint === '/finance/withdraw') return ['withdraw', amount(body.amount), body.network,
+            body.network === 'BEP20' ? String(body.address).toLowerCase() : body.address, body.feeConfigVersion ?? null];
+        if (['/p2p/transfer','/finance/p2p'].includes(endpoint)) return ['p2p', amount(body.amount), body.receiverUid ?? body.rUid, body.feeConfigVersion ?? null];
+        if (endpoint === '/finance/stake') return ['stake', amount(body.amount), Number(body.durationDays), Number(body.dailyRoi), String(body.cardNumber).trim()];
+        throw new Error('Unsupported financial action.');
+    }
+    window.recoverFinancialRequest = async action => {
+        const uid = localStorage.getItem('uid'), token = localStorage.getItem('token');
+        const storageKey = 'tcm.c04.v1:' + uid + ':' + action;
+        const raw = localStorage.getItem(storageKey);
+        if (!raw || !navigator.locks?.request) return null;
+        try {
+            const proof = JSON.parse(raw);
+            const result = await window.fetchAPI('/requests/financial-status', 'POST', { action, idempotencyKey: proof.key });
+            if (!result.success || !result.found || !['Committed','Rejected'].includes(result.outcome) || !result.response) return null;
+            if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) return null;
+            await navigator.locks.request(storageKey, () => {
+                const current = JSON.parse(localStorage.getItem(storageKey) || 'null');
+                if (current?.key === proof.key) localStorage.removeItem(storageKey);
+            });
+            window.showToast?.(result.outcome === 'Committed' ? 'Previous request confirmed. No new debit was made.' : 'Previous request was rejected. Review the details and try again.', result.outcome !== 'Committed');
+            return { ...result.response, financialRetry: true };
+        } catch (_) { return null; } // Unknown outcomes keep the original proof.
+    };
+    window.financialRequest = async (endpoint, method, body) => {
+        if (method !== 'POST') throw new Error('Financial action must use POST.');
+        const uid = localStorage.getItem('uid'), token = localStorage.getItem('token');
+        if (!uid || !token) throw new Error('Sign in before starting a financial action.');
+        const intent = details(endpoint, body), fingerprint = JSON.stringify(intent);
+        const business = value => JSON.stringify(value[0] === 'stake' ? value : value.slice(0, -1));
+        let retry = false;
+        const storageKey = 'tcm.c04.v1:' + uid + ':' + intent[0];
+        // Cross-tab preparation/retirement must be atomic. Unsupported clients fail
+        // closed rather than silently generate a second key for uncertain money.
+        if (!navigator.locks?.request || !crypto.randomUUID) throw new Error('Use an updated browser over HTTPS for secure financial requests.');
+        const locked = work => navigator.locks.request(storageKey, work);
+        const proof = await locked(() => {
+            const raw = localStorage.getItem(storageKey);
+            const previous = raw ? JSON.parse(raw) : null;
+            if (previous) {
+                if (previous.version !== 1 || typeof previous.key !== 'string' || business(JSON.parse(previous.intent)) !== business(intent))
+                    throw new Error('A previous request is unresolved. Retry its original details before starting another.');
+                retry = true;
+                return previous;
+            }
+            const value = { version: 1, key: crypto.randomUUID(), intent: fingerprint };
+            localStorage.setItem(storageKey, JSON.stringify(value));
+            return value;
+        });
+        if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) throw new Error('Session changed. Sign in again.');
+        if (flights.has(proof.key)) return flights.get(proof.key);
+        const flight = Promise.resolve().then(async () => {
+            const original = JSON.parse(proof.intent);
+            const payload = { ...body, idempotencyKey: proof.key };
+            if (intent[0] !== 'stake') payload.feeConfigVersion = original.at(-1);
+            const result = await window.fetchAPI(endpoint, method, payload);
+            if (uid !== localStorage.getItem('uid') || token !== localStorage.getItem('token')) throw new Error('Session changed. Retry after signing in.');
+            if (result.success === true || result.idempotencyOutcome === 'rejected') {
+                // Keep the key if storage retirement fails: replay is always safer.
+                await locked(() => {
+                    const raw = localStorage.getItem(storageKey), current = raw ? JSON.parse(raw) : null;
+                    if (current?.key === proof.key) localStorage.removeItem(storageKey);
+                });
+            }
+            return { ...result, financialRetry: retry };
+        }).finally(() => flights.delete(proof.key));
+        flights.set(proof.key, flight);
+        return flight;
+    };
+})();
+// C04 FINANCIAL REQUESTS END
+
 window.fetchAPI = async (endpoint, method = 'GET', body = null) => {
     const path = endpoint.split('?')[0];
     if (method === 'GET' && path === '/user/init-data') return window.syncDashboardState();
@@ -12324,6 +12405,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
  };
 
  window.openTxModal = async (type) => {
+     if (type === 'Withdraw') await window.recoverFinancialRequest('withdraw');
      if (type === 'Deposit' && window.RAM_STATE?.user?.Status === 'Pending_Deletion') {
          window.showDepositDeletionWarning();
          return;
@@ -12632,6 +12714,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         }
     }
     else if (window.txMode === 'Withdraw') {
+        if (await window.recoverFinancialRequest('withdraw')) return;
         if (!await window.feeReadyForSubmit()) return;
         if (window.currentWdCount >= 5) return window.showToast("Monthly withdrawal limit (5) reached!", true);
 
@@ -12648,7 +12731,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
 
         try {
             window.txIconFlight('Withdraw', true, uid);
-            const result = await window.fetchAPI('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr, feeConfigVersion: window.systemFeeConfig.version })
+            const result = await window.financialRequest('/finance/withdraw', 'POST', { uid, amount: amt, code2FA: code, network: net, address: boundAddr, feeConfigVersion: window.systemFeeConfig.version })
                 .finally(() => window.txIconFlight('Withdraw', false, uid));
 
             if (result.success) {
@@ -12673,7 +12756,8 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
                     Order_ID: sData.Order_ID || 'WD-' + Date.now() // সার্ভারের আসল আইডি
                 };
 
-                if (typeof window.forceInjectToHistory === 'function') {
+                if (!result.financialRetry && typeof window.forceInjectToHistory === 'function' &&
+                    !(window.allTransactions || []).some(row => row.id === newTx.id && row.UID === uid)) {
                     window.forceInjectToHistory(newTx);
                 }
             } else {
@@ -12844,6 +12928,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
     window.currentP2pCount = 0;
 
     window.openSendModal = async () => {
+        await window.recoverFinancialRequest('p2p');
         if (!window.is2FABound) {
             window.showToast("Please Bind Google 2FA First!", true);
             window.openSecurityCenter();
@@ -13270,6 +13355,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
     })();
 
     window.submitSendMoney = async () => {
+        if (await window.recoverFinancialRequest('p2p')) return;
         if (!await window.feeReadyForSubmit()) return;
         if (window.currentP2pCount >= 15) return window.showToast("Monthly P2P limit (15) reached!", true);
 
@@ -13289,7 +13375,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         btn.style.boxShadow = 'none';
 
         try {
-            const result = await window.fetchAPI('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA, feeConfigVersion: window.systemFeeConfig.version });
+            const result = await window.financialRequest('/p2p/transfer', 'POST', { senderUid: sUid, receiverUid: rUid, amount: amt, code2FA, feeConfigVersion: window.systemFeeConfig.version });
 
             if (result.success) {
                 p2pOutboundScan = null;
@@ -16871,6 +16957,7 @@ window.TCMSupportPending = function(validate) {
 
     window.stakeSubmitFlights = new Set();
     window.executeStake = async (days, roi, inputId, cardId) => {
+        if (await window.recoverFinancialRequest('stake')) return;
         const amtInput = document.getElementById(inputId);
         const amount = parseFloat(amtInput.value);
         const uid = localStorage.getItem('uid');
@@ -16892,7 +16979,7 @@ window.TCMSupportPending = function(validate) {
         }
 
         try {
-            const result = await window.fetchAPI('/finance/stake', 'POST', {
+            const result = await window.financialRequest('/finance/stake', 'POST', {
                 uid,
                 amount,
                 durationDays: days,

@@ -552,6 +552,18 @@ window.togglePassword = () => {
 // ==============================================================
     // 🔥 MEMO 07: OTP Sending Engine with 60s Countdown
     // ==============================================================
+    // C03: only opaque recovery proof is stored. Password and OTP stay in the form.
+    const c03StorageKey = 'tcm.signup.c03';
+    function c03Read() {
+        try { return JSON.parse(sessionStorage.getItem(c03StorageKey) || 'null'); }
+        catch (_) { throw new Error('Enable session storage for secure signup recovery.'); }
+    }
+    function c03New(challengeId, email) {
+        const proof = { challengeId, email: email.trim().toLowerCase(), requestId: crypto.randomUUID(),
+            resumeToken: Array.from(crypto.getRandomValues(new Uint8Array(32)), b => b.toString(16).padStart(2,'0')).join('') };
+        sessionStorage.setItem(c03StorageKey, JSON.stringify(proof));
+        return proof;
+    }
     window.sendSignupOTP = async () => {
         const emailInput = document.getElementById('regEmail');
         const nameInput = document.getElementById('regName');
@@ -581,6 +593,7 @@ window.togglePassword = () => {
                 throw new Error(result.message || "Failed to send OTP.");
             }
             
+            c03New(result.challengeId, email);
             window.showToast("OTP sent to your email successfully!");
             
             // ⏳ 60 Seconds Smart Countdown
@@ -718,6 +731,9 @@ if (regBtn) {
                     otp: document.getElementById('regOTP').value.trim() // 🔥 MEMO 07: Send OTP to Server
                 };
 
+            const proof = c03Read();
+            if (!proof || proof.email !== payload.email) throw new Error('Request a registration OTP for this email first.');
+            Object.assign(payload, { requestId: proof.requestId, resumeToken: proof.resumeToken, challengeId: proof.challengeId });
             const response = await fetch('https://tcm-bakend.onrender.com/api/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -739,6 +755,7 @@ if (regBtn) {
             if (compressedAvatarBase64 !== "") {
                 localStorage.setItem("tcm_user_dp", compressedAvatarBase64);
             }
+            sessionStorage.removeItem(c03StorageKey);
 
             if (newUID) newUID.innerText = finalUID;
             if (uidPortal) {
