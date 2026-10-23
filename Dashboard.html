@@ -18537,7 +18537,7 @@ window.TCMSupportPending = function(validate) {
     };
     window.renderChatReceipt=value=>{
         const status=value==='read'?'read':value==='delivered'?'delivered':'sent',label=status[0].toUpperCase()+status.slice(1);
-        const paths=status==='sent'?'<path d="M2 6 6 10 16 2"/>':'<path d="M1 6 5 10 13 2"/><path d="M8 8 10 10 18 2"/>';
+        const paths=status==='read'?'<path d="M1 6 5 10 13 2"/><path d="M8 8 10 10 18 2"/>':'<path d="M2 6 6 10 16 2"/>';
         return '<span class="m15-ticks" data-status="'+status+'" aria-label="'+label+'" title="'+label+'"><svg viewBox="0 0 20 12" aria-hidden="true">'+paths+'</svg></span>';
     };
     const badgeSVG='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 1.5 13.5 4v4c0 3-3 5-5.5 6.5C5.5 13 2.5 11 2.5 8V4Z"/><path d="m5 8 2 2 4-4"/></svg>';
