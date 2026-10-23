@@ -18774,6 +18774,8 @@ window.TCMSupportPending = function(validate) {
     const banner=$('unreadMessagesBanner'),roster=new Map(),messages=new Map(),signatures=new Map(),versions=new Map(),flights=new Map(),wanted=new Set();
     const livePreviews = new Map();
     const seenPreviews = new Set();
+    const removedPreviews = new Set(), clearedPeers = new Set(), refreshPeers = new Set();
+    let recoveryRunning = false;
     let prefs={enabled:false,peers:[],revision:-1},ready=false,epoch=0,settingsFlight=null,busy=false,pendingChoice=null,fetchTimer=null,animationTimer=null,animationEpoch=0,clockActive=false,nextAt=0,currentKey='',sheet=null,sheetPeer='',sheetFocus=null,settingsError='';
     const settingsCard=$('settingsWipeArea'),settingsWrapper=settingsCard?.querySelector('.settings-wrapper');
     const settingsExpanded=()=>settingsWrapper?.classList.contains('settings-active')===true;
@@ -18831,15 +18833,83 @@ window.TCMSupportPending = function(validate) {
     function advance(){if(settingsExpanded()){stopClock();return;}const items=queue();if(!showAllowed()||!items.length){hide();return;}const index=items.findIndex(m=>m.key===currentKey);display(items[(index+1)%items.length],items.length);}
     function trim(){let total=[...messages.values()].reduce((sum,map)=>sum+map.size,0);if(total<=200)return;const all=[...messages].flatMap(([peer,map])=>[...map.values()].map(m=>({peer,id:m.id,time:window.chatTimestamp(m.timestamp)}))).sort((a,b)=>a.time-b.time);for(const m of all){if(total--<=200)break;messages.get(m.peer)?.delete(m.id);}}
     function accept(peer,m){if(!valid(peer)||!valid(m?.id)||m.senderUid!==peer||m.status==='read'||(!m.fileId&&(typeof m.message!=='string'||!m.message.trim()))||(m.deletedFor||[]).includes(identity().uid))return;let map=messages.get(peer);if(!map){map=new Map();messages.set(peer,map);}map.set(m.id,m);trim();}
-    async function fetchPeer(peer){
-        if(flights.has(peer)||!showAllowed()||!allowed(peer))return;const s=identity(),generation=epoch,version=versions.get(peer)||0,prior=new Set(messages.get(peer)?.keys()||[]);
-        const task=(async()=>{try{
-            const result=await window.fetchAPI('/chat/v15/preview-messages?target='+encodeURIComponent(peer));if(!live(s)||generation!==epoch||version!==(versions.get(peer)||0)||!prefs.enabled||!allowed(peer))return;
-            if(!result.success||!Array.isArray(result.data))throw Error();const arrived=[...(messages.get(peer)?.values()||[])].filter(m=>!prior.has(m.id));messages.set(peer,new Map());for(const m of [...result.data,...arrived])accept(peer,m);render();
-        }catch(_){if(live(s)&&generation===epoch&&version===(versions.get(peer)||0)){messages.delete(peer);render();}}finally{if(flights.get(peer)===task)flights.delete(peer);}})();flights.set(peer,task);return task;
+    function pendingUnread(peer) {
+        const rows = new Map(), own = identity().uid;
+        for (const m of refreshPeers.has(peer) ? [] : window.localChatCache?.private?.[peer] || []) if (valid(m?.id)) rows.set(m.id, m);
+        for (const m of livePreviews.values()) if (m.peer === peer && valid(m.id) && !rows.has(m.id)) rows.set(m.id, m);
+        return [...rows.values()].filter(m => m.senderUid === peer && m.status !== 'read' &&
+            (m.receiverUid === undefined || m.receiverUid === own) && !(m.deletedFor || []).includes(own) && !removedPreviews.has(peer + ':' + m.id));
     }
-    async function drain(){fetchTimer=null;if(!showAllowed())return;const list=[...wanted];wanted.clear();let offset=0;async function worker(){while(offset<list.length&&showAllowed()){const peer=list[offset++];await fetchPeer(peer);}}await Promise.all([worker(),worker(),worker()]);}
-    function requestFetch(peer,force=false){if(!valid(peer)||!allowed(peer))return;if(force){versions.set(peer,(versions.get(peer)||0)+1);flights.delete(peer);}wanted.add(peer);if(!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
+    function needsRecovery(peer) {
+        return valid(peer) && !clearedPeers.has(peer) && Number(roster.get(peer)?.unreadCount) > pendingUnread(peer).length;
+    }
+    function scheduleRecovery() {
+        if (wanted.size && !recoveryRunning && !fetchTimer && showAllowed()) fetchTimer = setTimeout(drain, 80);
+    }
+    async function fetchPeer(peer) {
+        if (flights.has(peer)) return flights.get(peer);
+        if (!showAllowed() || !needsRecovery(peer)) return;
+        const s = identity(), generation = epoch, version = versions.get(peer) || 0;
+        const targetUnread = Number(roster.get(peer)?.unreadCount) || 0, priorLiveKeys = new Set(seenPreviews);
+        const missing = () => pendingUnread(peer).filter(m => !seenPreviews.has(peer + ':' + m.id) || priorLiveKeys.has(peer + ':' + m.id)).length < targetUnread;
+        const current = () => live(s) && generation === epoch && version === (versions.get(peer) || 0) && !clearedPeers.has(peer);
+        const task = (async () => {
+            try {
+                let cursor = '';
+                const visited = new Set();
+                while (current() && missing()) {
+                    // Startup/changed-roster/reconnect recovery only. No idle polling.
+                    const result = await window.fetchAPI('/chat/v15/history?mode=private&target=' + encodeURIComponent(peer) + (cursor ? '&before=' + encodeURIComponent(cursor) : ''));
+                    if (!current()) return;
+                    if (!result?.success || !Array.isArray(result.data) || typeof result.hasMore !== 'boolean') throw Error();
+                    const friend = roster.get(peer) || {};
+                    for (const m of result.data) {
+                        const key = peer + ':' + m?.id;
+                        if (!valid(m?.id) || m.senderUid !== peer || removedPreviews.has(key) || (m.receiverUid !== undefined && m.receiverUid !== s.uid)) continue;
+                        const cached = (window.localChatCache?.private?.[peer] || []).find(x => x.id === m.id);
+                        if (m.status === 'read' || (m.deletedFor || []).includes(s.uid) || cached?.status === 'read' || (cached?.deletedFor || []).includes(s.uid)) {
+                            livePreviews.delete(key); continue;
+                        }
+                        if (!valid(m.fileId) && (typeof m.message !== 'string' || !m.message.trim())) continue;
+                        const existing = livePreviews.get(key);
+                        if (!existing || existing.startupPreview) livePreviews.set(key, {...m, senderName: m.senderName || friend.name || 'TCM member', avatar: m.avatar || friend.avatar || '', peer, key, startupPreview: true});
+                    }
+                    livePreviews.delete(peer + ':startup'); render();
+                    if (!result.hasMore || !missing()) break;
+                    const next = result.nextCursor;
+                    if (!valid(next) || visited.has(next)) throw Error();
+                    visited.add(next); cursor = next;
+                }
+            } catch (_) {
+                if (current()) window.showToast?.('Some unread previews could not load. Reconnect to retry.', true);
+            } finally {
+                if (flights.get(peer) === task) flights.delete(peer);
+                if (live(s) && generation === epoch && version !== (versions.get(peer) || 0) && needsRecovery(peer)) wanted.add(peer);
+                scheduleRecovery();
+            }
+        })();
+        flights.set(peer, task); return task;
+    }
+    async function drain() {
+        fetchTimer = null;
+        if (!showAllowed() || recoveryRunning) return;
+        recoveryRunning = true;
+        const list = [...wanted]; wanted.clear(); let offset = 0;
+        async function worker() {
+            while (offset < list.length) {
+                const peer = list[offset++];
+                if (!showAllowed()) { wanted.add(peer); continue; }
+                await fetchPeer(peer);
+            }
+        }
+        try { await Promise.all([worker(), worker(), worker()]); }
+        finally { recoveryRunning = false; scheduleRecovery(); }
+    }
+    function requestFetch(peer, force = false) {
+        if (!valid(peer) || !needsRecovery(peer)) return;
+        if (force) versions.set(peer, (versions.get(peer) || 0) + 1);
+        wanted.add(peer); scheduleRecovery();
+    }
     function seedUnreadPreviews(rows) {
         const s = identity();
         if (!live(s)) return;
@@ -18857,7 +18927,7 @@ window.TCMSupportPending = function(validate) {
         }
 
         for (const [peer, f] of peers) {
-            if (peer === s.uid) continue;
+            if (peer === s.uid || clearedPeers.has(peer) || refreshPeers.has(peer)) continue;
 
             const cached = Array.isArray(cache[peer]) ? cache[peer] : [];
             const fallbackKey = peer + ':startup';
@@ -18873,7 +18943,7 @@ window.TCMSupportPending = function(validate) {
 
                     const key = peer + ':' + m.id;
 
-                    if (m.status === 'read' ||
+                    if (removedPreviews.has(key) || m.status === 'read' ||
                         (m.deletedFor || []).includes(s.uid)) {
                         livePreviews.delete(key);
                         continue;
@@ -18925,15 +18995,20 @@ window.TCMSupportPending = function(validate) {
             });
         }
     }
-    function syncFriends(rows){
+    function syncFriends(rows) {
         seedUnreadPreviews(rows);
-        const present=new Set();for(const f of rows||[])if(valid(f.uid)){present.add(f.uid);roster.set(f.uid,{...f});}
-        for(const id of [...roster.keys()])if(!present.has(id)){roster.delete(id);messages.delete(id);signatures.delete(id);wanted.delete(id);versions.set(id,(versions.get(id)||0)+1);}
-        for(const [peer,f]of roster){
-            if(!allowed(peer)||!(Number(f.unreadCount)>0)){messages.delete(peer);signatures.delete(peer);wanted.delete(peer);continue;}
-            for(const m of window.localChatCache?.private?.[peer]||[])accept(peer,m);
-            const signature=f.unreadCount+':'+window.chatTimestamp(f.lastMsgTime);if(signatures.get(peer)!==signature){signatures.set(peer,signature);requestFetch(peer);}
-        }render();
+        const present = new Set();
+        for (const f of rows || []) if (valid(f.uid)) { present.add(f.uid); roster.set(f.uid, {...f}); }
+        for (const id of [...roster.keys()]) if (!present.has(id)) {
+            roster.delete(id); messages.delete(id); signatures.delete(id); wanted.delete(id);
+            versions.set(id, (versions.get(id) || 0) + 1);
+        }
+        for (const [peer, f] of roster) {
+            if (!(Number(f.unreadCount) > 0)) { signatures.delete(peer); wanted.delete(peer); continue; }
+            const signature = f.unreadCount + ':' + window.chatTimestamp(f.lastMsgTime);
+            if (signatures.get(peer) !== signature) { signatures.set(peer, signature); requestFetch(peer); }
+        }
+        render();
     }
     function syncControls(){
         for(const input of document.querySelectorAll('[data-preview-global]')){input.checked=pendingChoice?.kind==='global'?pendingChoice.enabled:prefs.enabled;input.disabled=!ready||busy;}
@@ -18946,7 +19021,7 @@ window.TCMSupportPending = function(validate) {
         const old=prefs;prefs={enabled:raw.enabled,peers:[...new Set(raw.peers.filter(valid))].slice(0,200),revision:raw.revision};ready=true;settingsError='';
         for(const peer of [...messages.keys()])if(!prefs.peers.includes(peer))messages.delete(peer);
         if(!prefs.enabled)hide();syncControls();syncFriends(window.chat15Friends||[]);
-        if(prefs.enabled)for(const [peer,f]of roster)if(prefs.peers.includes(peer)&&Number(f.unreadCount)>0&&(!old.enabled||!old.peers.includes(peer)))requestFetch(peer,true);
+        // Startup recovery is independent of selected-contact preferences.
     }
     async function loadSettings(){
         if(settingsFlight)return settingsFlight;const s=identity(),generation=epoch;if(!live(s))return;
@@ -18970,7 +19045,7 @@ window.TCMSupportPending = function(validate) {
     const openRoom=window.openChatRoom;window.openChatRoom=async(...args)=>{hide();const value=await openRoom(...args);syncControls();return value;};
     const account=window.openAccountSettingsModal;window.openAccountSettingsModal=()=>{account();void loadSettings();syncControls();};
     if(banner){banner.replaceChildren();banner.hidden=true;banner.onclick=async()=>{const item=queue().find(m=>m.key===currentKey),s=identity();if(!item||!live(s)||!showAllowed())return;const friend=roster.get(item.peer)||{};hide();$('chat-window').style.display='flex';try{await window.openChatRoom('private',item.senderName||friend.name||'TCM member',item.avatar||friend.avatar||'',item.peer,valid(item.id)?{messageId:item.id}:{});}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}};}
-    function resume(){if(!homeVisible()){hide();return;}render();for(const [peer,f]of roster)if(allowed(peer)&&Number(f.unreadCount)>0&&!messages.get(peer)?.size)requestFetch(peer);if(wanted.size&&!fetchTimer&&showAllowed())fetchTimer=setTimeout(drain,80);}
+    function resume(){if(!homeVisible()){hide();return;}render();scheduleRecovery();}
     const observer=new MutationObserver(()=>{syncSystemSettings();resume();syncControls();});if(settingsWrapper)observer.observe(settingsWrapper,{attributes:true,attributeFilter:['class']});syncSystemSettings();if($('chat-window'))observer.observe($('chat-window'),{attributes:true,attributeFilter:['style','class']});if($('view-my'))observer.observe($('view-my'),{attributes:true,attributeFilter:['style','class']});
     if(window.socket){
         const incoming = m => {
@@ -18987,6 +19062,8 @@ window.TCMSupportPending = function(validate) {
 
             const peer = m.senderUid;
             const key = peer + ':' + m.id;
+            if (removedPreviews.has(key)) return;
+            clearedPeers.delete(peer);
             if (seenPreviews.has(key)) return;
             seenPreviews.add(key);
             while (seenPreviews.size > 1000) {
@@ -19028,15 +19105,16 @@ window.TCMSupportPending = function(validate) {
             if (m?.mode === 'private') incoming(m);
         });
         window.socket.on('chat_preview_preferences',notice=>{if(live(identity())&&notice?.uid===identity().uid)applySettings(notice);});
-        window.socket.on('chat_v15_unread_cleared',notice=>{const peer=notice?.target;if(!live(identity())||!valid(peer))return;messages.delete(peer);versions.set(peer,(versions.get(peer)||0)+1);flights.delete(peer);if(Number(notice.unreadCount)>0)requestFetch(peer);render();});
-        window.socket.on('chat_v15_deleted',notice=>{if(!live(identity())||notice?.mode!=='private'||!Array.isArray(notice.ids))return;const peer=notice.sender===identity().uid?notice.target:notice.sender;for(const id of notice.ids)messages.get(peer)?.delete(id);render();});
         window.socket.on('chat_v15_unread_cleared', notice => {
-            if (!live(identity()) || !valid(notice?.target)) return;
-            if (Number(notice.unreadCount) === 0) {
-                for (const [key, m] of livePreviews) {
-                    if (m.peer === notice.target) livePreviews.delete(key);
-                }
-            }
+            const peer = notice?.target;
+            if (!live(identity()) || !valid(peer)) return;
+            versions.set(peer, (versions.get(peer) || 0) + 1);
+            messages.delete(peer); wanted.delete(peer); signatures.delete(peer);
+            for (const [key, m] of livePreviews) if (m.peer === peer) livePreviews.delete(key);
+            const friend = {...(roster.get(peer) || {}), uid: peer, unreadCount: Number(notice.unreadCount) || 0};
+            roster.set(peer, friend);
+            if (friend.unreadCount <= 0) clearedPeers.add(peer);
+            else { clearedPeers.delete(peer); refreshPeers.add(peer); requestFetch(peer); }
             render();
         });
 
@@ -19049,13 +19127,15 @@ window.TCMSupportPending = function(validate) {
                 ? notice.target : notice.sender;
 
             for (const id of notice.ids) {
+                removedPreviews.add(peer + ':' + id);
+                messages.get(peer)?.delete(id);
                 livePreviews.delete(peer + ':' + id);
             }
             render();
         });
-        window.socket.on('connect',()=>{void loadSettings();});window.socket.on('session_error',()=>dispose());
+        window.socket.on('connect',()=>{for(const peer of roster.keys())requestFetch(peer,true);void loadSettings();});window.socket.on('session_error',()=>dispose());
     }
-    function dispose(){livePreviews.clear();seenPreviews.clear();epoch++;ready=false;prefs={enabled:false,peers:[],revision:-1};settingsFlight=null;busy=false;pendingChoice=null;clearTimeout(fetchTimer);fetchTimer=null;wanted.clear();roster.clear();messages.clear();signatures.clear();versions.clear();flights.clear();hide();closeSheet();sheetPeer='';settingsError='';syncControls();}
+    function dispose(){livePreviews.clear();seenPreviews.clear();removedPreviews.clear();clearedPeers.clear();refreshPeers.clear();epoch++;ready=false;prefs={enabled:false,peers:[],revision:-1};settingsFlight=null;busy=false;pendingChoice=null;clearTimeout(fetchTimer);fetchTimer=null;wanted.clear();roster.clear();messages.clear();signatures.clear();versions.clear();flights.clear();hide();closeSheet();sheetPeer='';settingsError='';syncControls();}
     const clearSession=window.clearDashboardSession;window.clearDashboardSession=()=>{dispose();return clearSession();};
     document.addEventListener('visibilitychange',resume);window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',()=>{void loadSettings();resume();});window.addEventListener('storage',e=>{if(e.key==='uid'||e.key==='token')dispose();});
     window.DashboardPreview=Object.freeze({syncFriends});syncFriends(window.chat15Friends||[]);syncControls();if(live(identity()))void loadSettings();
