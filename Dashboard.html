@@ -18731,7 +18731,7 @@ window.TCMSupportPending = function(validate) {
         }).slice(0,50).map(m=>m.id);if(!ids.length)return;for(const id of ids)s.reading.add(id);
         try{const result=await window.fetchAPI('/chat/v15/read','POST',{mode:'private',target:s.target,msgIds:ids});if(!current(s)||!result.success)return;
             const read=new Set(result.confirmedIds||result.ids||[]);for(const id of read)s.examined.add(id);for(const m of rows(s))if(read.has(m.id))m.status='read';
-            window.applyChatUnread?.(s.target,result.unreadCount);render(s);persist(s);
+            if(window.DashboardPreview?.applyRead)window.DashboardPreview.applyRead(s.target,[...read],result.unreadCount);else window.applyChatUnread?.(s.target,result.unreadCount);render(s);persist(s);
         }catch(_){}finally{for(const id of ids)s.reading.delete(id);}
     }
     function recover(){const s=state;if(s&&visible(s))void load(s,s.anchorId?'latest':'latest');}
@@ -18756,7 +18756,7 @@ window.TCMSupportPending = function(validate) {
         const active=state;if(active&&current(active)&&active.mode===mode&&active.target===target){persist(active);return;}
         const local=mode==='global'?window.localChatCache.global:window.localChatCache.private[target];cached.rows=(local?.length?local:cached.rows).filter(m=>!ids.includes(m.id)).slice(-200);void window.ChatDiskCache?.put('history',mode+':'+target,cached);
     }
-    window.ChatHistory=Object.freeze({open,invalidate,markVisible,preview:(friends,count)=>window.DashboardPreview?.syncFriends(friends,count),recover,persist:()=>state&&persist(state),forget,followSent,afterSent,get generation(){return epoch;}});
+    window.ChatHistory=Object.freeze({open,invalidate,markVisible,isReadyFor:target=>!!(state&&state.mode==='private'&&state.target===target&&visible(state)&&state.loaded&&!state.loading&&!state.error&&state.positioned),preview:(friends,count)=>window.DashboardPreview?.syncFriends(friends,count),recover,persist:()=>state&&persist(state),forget,followSent,afterSent,get generation(){return epoch;}});
     if(window.socket){window.socket.on('connect',recover);window.socket.on('session_error',dispose);}
     document.addEventListener('visibilitychange',()=>{if(!document.hidden)recover();});window.addEventListener('pageshow',recover);window.addEventListener('pagehide',dispose);window.addEventListener('storage',e=>{if(e.key==='uid'||e.key==='token')dispose();});
     const clearSession=window.clearDashboardSession;window.clearDashboardSession=()=>{dispose();return clearSession();};
@@ -19044,7 +19044,86 @@ window.TCMSupportPending = function(validate) {
     const unfriend=$('unfriend-btn');if(unfriend){const button=document.createElement('button');button.id='dashboardPreviewMenuButton';button.type='button';button.hidden=true;button.textContent='⋮';button.title='Chat options';button.setAttribute('aria-label','Chat options');button.onclick=()=>void openSheet();unfriend.parentElement.insertBefore(button,unfriend);}
     const openRoom=window.openChatRoom;window.openChatRoom=async(...args)=>{hide();const value=await openRoom(...args);syncControls();return value;};
     const account=window.openAccountSettingsModal;window.openAccountSettingsModal=()=>{account();void loadSettings();syncControls();};
-    if(banner){banner.replaceChildren();banner.hidden=true;banner.onclick=async()=>{const item=queue().find(m=>m.key===currentKey),s=identity();if(!item||!live(s)||!showAllowed())return;const friend=roster.get(item.peer)||{};hide();$('chat-window').style.display='flex';try{await window.openChatRoom('private',item.senderName||friend.name||'TCM member',item.avatar||friend.avatar||'',item.peer,valid(item.id)?{messageId:item.id}:{});}catch(_){if(live(s))window.showToast('Chat could not open. Please retry.',true);}};}
+    function applyPreviewRead(peer, ids, remaining) {
+        if (!valid(peer) || !Array.isArray(ids)) return;
+        const confirmed = new Set(ids.filter(valid));
+        versions.set(peer, (versions.get(peer) || 0) + 1);
+        for (const id of confirmed) {
+            removedPreviews.add(peer + ':' + id);
+            livePreviews.delete(peer + ':' + id);
+            messages.get(peer)?.delete(id);
+        }
+        for (const m of window.localChatCache?.private?.[peer] || []) if (confirmed.has(m.id)) m.status = 'read';
+        livePreviews.delete(peer + ':startup');
+        const count = Math.max(0, Number(remaining) || 0, pendingUnread(peer).length);
+        const hasNew = [...livePreviews.values()].some(m => m.peer === peer && valid(m.id));
+        if (count === 0 && !hasNew) clearedPeers.add(peer);
+        else clearedPeers.delete(peer);
+        const friend = roster.get(peer);
+        if (friend) friend.unreadCount = count;
+        window.applyChatUnread?.(peer, count);
+        render();
+    }
+    async function previewReadSnapshot(peer, s) {
+        // Freeze this click's known IDs before awaiting anything; later arrivals are separate.
+        const ids = new Set(queue().filter(m => m.peer === peer && valid(m.id)).map(m => m.id));
+        const expected = Math.max(ids.size, Number(roster.get(peer)?.unreadCount) || 0);
+        if (ids.size >= expected) return [...ids];
+        let cursor = '';
+        const visited = new Set();
+        // Existing history API supplies a stable descending cursor, never a moving latest-page loop.
+        while (live(s)) {
+            const result = await window.fetchAPI('/chat/v15/history?mode=private&target=' + encodeURIComponent(peer) +
+                (cursor ? '&before=' + encodeURIComponent(cursor) : ''));
+            if (!live(s)) throw Error('Session changed.');
+            if (!result?.success || !Array.isArray(result.data) || typeof result.hasMore !== 'boolean') throw Error('Unread messages could not load.');
+            for (const m of result.data) if (valid(m?.id) && m.senderUid === peer && m.status !== 'read' &&
+                (m.receiverUid === undefined || m.receiverUid === s.uid) && !(m.deletedFor || []).includes(s.uid)) ids.add(m.id);
+            if (ids.size >= expected || !result.hasMore) return [...ids];
+            if (!valid(result.nextCursor) || visited.has(result.nextCursor)) throw Error('History cursor did not advance.');
+            visited.add(result.nextCursor); cursor = result.nextCursor;
+        }
+        throw Error('Session changed.');
+    }
+    async function markPreviewSnapshotRead(peer, ids, s) {
+        for (let offset = 0; offset < ids.length; offset += 50) {
+            if (!live(s)) throw Error('Session changed.');
+            const result = await window.fetchAPI('/chat/v15/read', 'POST', {
+                mode: 'private', target: peer, msgIds: ids.slice(offset, offset + 50)
+            });
+            if (!live(s)) return;
+            if (!result?.success || !Array.isArray(result.confirmedIds)) throw Error('Seen status could not sync. Open the preview again to retry.');
+            applyPreviewRead(peer, result.confirmedIds, result.unreadCount);
+        }
+        if (live(s) && window.ChatHistory?.isReadyFor(peer)) { window.renderChatMessages?.(window.localChatCache?.private?.[peer] || []); window.ChatHistory?.persist?.(); }
+    }
+    let previewOpening = false;
+    if (banner) {
+        banner.replaceChildren(); banner.hidden = true;
+        banner.onclick = async () => {
+            const item = queue().find(m => m.key === currentKey), s = identity();
+            if (!item || !live(s) || !showAllowed() || previewOpening) return;
+            previewOpening = true;
+            let opened = false;
+            try {
+                const ids = await previewReadSnapshot(item.peer, s);
+                if (!live(s)) return;
+                const friend = roster.get(item.peer) || {};
+                hide(); $('chat-window').style.display = 'flex';
+                await window.openChatRoom('private', item.senderName || friend.name || 'TCM member',
+                    item.avatar || friend.avatar || '', item.peer, valid(item.id) ? {messageId: item.id} : {});
+                if (!live(s) || !window.ChatHistory?.isReadyFor(item.peer)) throw Error('Chat could not open.');
+                opened = true;
+                await markPreviewSnapshotRead(item.peer, ids, s);
+            } catch (error) {
+                if (live(s)) {
+                    if (!opened) { $('chat-window').style.display = 'none'; render(); }
+                    window.showToast?.(error.message || 'Seen status could not sync. Please retry.', true);
+                }
+            } finally { previewOpening = false; }
+        };
+    }
+
     function resume(){if(!homeVisible()){hide();return;}render();scheduleRecovery();}
     const observer=new MutationObserver(()=>{syncSystemSettings();resume();syncControls();});if(settingsWrapper)observer.observe(settingsWrapper,{attributes:true,attributeFilter:['class']});syncSystemSettings();if($('chat-window'))observer.observe($('chat-window'),{attributes:true,attributeFilter:['style','class']});if($('view-my'))observer.observe($('view-my'),{attributes:true,attributeFilter:['style','class']});
     if(window.socket){
@@ -19108,6 +19187,7 @@ window.TCMSupportPending = function(validate) {
         window.socket.on('chat_v15_unread_cleared', notice => {
             const peer = notice?.target;
             if (!live(identity()) || !valid(peer)) return;
+            if (Array.isArray(notice.confirmedIds)) { applyPreviewRead(peer, notice.confirmedIds, notice.unreadCount); return; }
             versions.set(peer, (versions.get(peer) || 0) + 1);
             messages.delete(peer); wanted.delete(peer); signatures.delete(peer);
             for (const [key, m] of livePreviews) if (m.peer === peer) livePreviews.delete(key);
@@ -19138,7 +19218,7 @@ window.TCMSupportPending = function(validate) {
     function dispose(){livePreviews.clear();seenPreviews.clear();removedPreviews.clear();clearedPeers.clear();refreshPeers.clear();epoch++;ready=false;prefs={enabled:false,peers:[],revision:-1};settingsFlight=null;busy=false;pendingChoice=null;clearTimeout(fetchTimer);fetchTimer=null;wanted.clear();roster.clear();messages.clear();signatures.clear();versions.clear();flights.clear();hide();closeSheet();sheetPeer='';settingsError='';syncControls();}
     const clearSession=window.clearDashboardSession;window.clearDashboardSession=()=>{dispose();return clearSession();};
     document.addEventListener('visibilitychange',resume);window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',()=>{void loadSettings();resume();});window.addEventListener('storage',e=>{if(e.key==='uid'||e.key==='token')dispose();});
-    window.DashboardPreview=Object.freeze({syncFriends});syncFriends(window.chat15Friends||[]);syncControls();if(live(identity()))void loadSettings();
+    window.DashboardPreview=Object.freeze({syncFriends,applyRead:applyPreviewRead});syncFriends(window.chat15Friends||[]);syncControls();if(live(identity()))void loadSettings();
 })();
 /* LUXURY R5 END */
 /* CHAT BACK STACK START */
