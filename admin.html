@@ -5873,7 +5873,7 @@ dialog.bg-slate-900::backdrop,
 
                         <p id="feeConfigMessage" role="status" class="text-xs text-slate-400 mt-2">Refresh treasury to load fee rates. Pending orders keep their saved fees.</p>
 
-                    </div><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite"></p></div><div id="section-dividends" class="admin-section hidden fade-in"><div class="glass-card console-dividend-card"><h3>Dividend Distribution</h3><p>Divide the full pool equally among eligible Active Admin accounts. Credits go to app Main Balance. Funding transfers stay on the Treasury page.</p><div class="mt-3 text-sm">Available Dividend Pool: <strong data-treasury="eligible-pool">—</strong> USDT · Eligible Admins: <strong data-treasury="eligible-count">—</strong></div><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th class="p-3">Admin name</th><th class="p-3">UID</th><th class="p-3">Main Balance credit</th></tr></thead><tbody data-treasury="eligible-rows"></tbody></table></div><button type="button" class="console-link" onclick="refreshAdminTreasury()">Refresh treasury &amp; eligibility</button><button type="button" disabled="" data-treasury="dividend" onclick="openTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Distribute Dividend</button><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite">Refresh treasury to load eligibility.</p></div></div><div id="section-reconciliation" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Backend required · Read-only tools available</span><h3>Balance Reconciliation &amp; Saved Snapshot Audit</h3><p>Full-system automated mismatch scanning requires a dedicated backend reconciliation endpoint (<b>Not recorded</b> in current API). Historical values must come strictly from saved records; current balances are never used to invent historical ledger snapshots.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Per-Order Balance Snapshots</small><strong>Available in Order Details (Before / After / Source)</strong></div><div><small>Treasury &amp; Pending Reserve</small><strong>Available in Corporate Treasury</strong></div><div><small>Filtered Page Totals</small><strong>Available in Deposits, Withdrawals &amp; P2P (Loaded records total)</strong></div><div><small>Full-System Mismatch API</small><strong>Not recorded (Backend required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><button type="button" class="console-link" onclick="switchTab('tracking')">Inspect Order Snapshots</button><button type="button" class="console-link" onclick="switchTab('members')">Open User Balances</button></div></div></div><div id="section-announcements" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Announcement archive is scheduled for the Communication stage.</h3><p>The current broadcast updates one system document. The new archive, user inbox, unread state and three-second popup are not enabled by this menu update.</p><button type="button" class="console-link" onclick="switchTab('broadcast')">Open existing announcement form</button></div></div><div id="section-email" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Per-order records active · Global queue API required</span><h3>Email Delivery Status &amp; Audit Notes</h3><p>Per-order email delivery logs (actual backend status enum, attempt count, created/updated IST timestamps, and last recorded error) are available inside <b>Order Details</b>. Note: A recorded <b>sent</b> state confirms dispatch by the backend mail transport only—it does not guarantee recipient inbox placement. Withdrawal approval remains separate from verified blockchain payout.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Per-Order Email Log</small><strong>Available in Order Details → Recorded email delivery</strong></div><div><small>Recorded Fields</small><strong>Email type, State, Attempts, Created, Last update, Last error</strong></div><div><small>Global Email Queue API</small><strong>Not recorded (Backend endpoint required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('withdrawals')">Open withdrawal queue</button><button type="button" class="console-link" onclick="switchTab('tracking')">Track Order Email Status</button></div></div></div><div id="section-recovery" class="admin-section hidden fade-in"><div class="console-note console-warning" role="note">Existing daily-counter and staking settlement recovery only. Recovery for stuck NFT sales is not included.</div><div class="glass-card p-4 mt-6 border-l-4 border-l-amber-500">
+                    </div><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite"></p></div><div id="section-dividends" class="admin-section hidden fade-in"><div class="glass-card console-dividend-card"><h3>Dividend Distribution</h3><p>Select the Active Admin accounts that should receive this distribution. The full pool is divided equally only among the selected accounts and credited to app Main Balance.</p><div class="mt-3 text-sm">Available Dividend Pool: <strong data-treasury="eligible-pool">—</strong> USDT · Eligible Admins: <strong data-treasury="eligible-count">—</strong> · Selected: <strong data-treasury="selected-count">0</strong></div><div class="overflow-x-auto"><table class="w-full text-left"><thead><tr><th class="p-3">Select</th><th class="p-3">Admin name</th><th class="p-3">UID</th></tr></thead><tbody data-treasury="eligible-rows"></tbody></table></div><button type="button" class="console-link" onclick="refreshAdminTreasury()">Refresh treasury &amp; eligibility</button><button type="button" disabled="" data-treasury="dividend" onclick="openTreasuryDividend()" class="cyber-btn bg-emerald-500/20 text-emerald-400 px-3 py-2 rounded disabled:opacity-50">Preview Selected Admins</button><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><p data-console-treasury-message="" class="console-finance-message" role="status" aria-live="polite">Refresh treasury to load eligibility.</p></div></div><div id="section-reconciliation" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Backend required · Read-only tools available</span><h3>Balance Reconciliation &amp; Saved Snapshot Audit</h3><p>Full-system automated mismatch scanning requires a dedicated backend reconciliation endpoint (<b>Not recorded</b> in current API). Historical values must come strictly from saved records; current balances are never used to invent historical ledger snapshots.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Per-Order Balance Snapshots</small><strong>Available in Order Details (Before / After / Source)</strong></div><div><small>Treasury &amp; Pending Reserve</small><strong>Available in Corporate Treasury</strong></div><div><small>Filtered Page Totals</small><strong>Available in Deposits, Withdrawals &amp; P2P (Loaded records total)</strong></div><div><small>Full-System Mismatch API</small><strong>Not recorded (Backend required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('treasury')">Open Treasury</button><button type="button" class="console-link" onclick="switchTab('tracking')">Inspect Order Snapshots</button><button type="button" class="console-link" onclick="switchTab('members')">Open User Balances</button></div></div></div><div id="section-announcements" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">In development</span><h3>Announcement archive is scheduled for the Communication stage.</h3><p>The current broadcast updates one system document. The new archive, user inbox, unread state and three-second popup are not enabled by this menu update.</p><button type="button" class="console-link" onclick="switchTab('broadcast')">Open existing announcement form</button></div></div><div id="section-email" class="admin-section hidden fade-in" data-console-status="planned"><div class="glass-card console-planned"><span class="console-status">Per-order records active · Global queue API required</span><h3>Email Delivery Status &amp; Audit Notes</h3><p>Per-order email delivery logs (actual backend status enum, attempt count, created/updated IST timestamps, and last recorded error) are available inside <b>Order Details</b>. Note: A recorded <b>sent</b> state confirms dispatch by the backend mail transport only—it does not guarantee recipient inbox placement. Withdrawal approval remains separate from verified blockchain payout.</p><div class="r3-monitoring-strip" style="margin-top:14px"><div><small>Per-Order Email Log</small><strong>Available in Order Details → Recorded email delivery</strong></div><div><small>Recorded Fields</small><strong>Email type, State, Attempts, Created, Last update, Last error</strong></div><div><small>Global Email Queue API</small><strong>Not recorded (Backend endpoint required)</strong></div></div><div class="flex flex-wrap gap-2"><button type="button" class="console-link" onclick="switchTab('withdrawals')">Open withdrawal queue</button><button type="button" class="console-link" onclick="switchTab('tracking')">Track Order Email Status</button></div></div></div><div id="section-recovery" class="admin-section hidden fade-in"><div class="console-note console-warning" role="note">Existing daily-counter and staking settlement recovery only. Recovery for stuck NFT sales is not included.</div><div class="glass-card p-4 mt-6 border-l-4 border-l-amber-500">
 
                 <h3 class="text-sm font-bold text-white mb-2">System Settlement Recovery</h3>
 
@@ -7660,7 +7660,7 @@ window.addEventListener('storage', event => {
 
             snapshot: null, fresh: false, busy: false,
 
-            refreshing: false, preview: null
+            refreshing: false, preview: null, selectedUids: new Set(), selectionOwner: null
 
         };
 
@@ -7796,7 +7796,8 @@ window.addEventListener('storage', event => {
 
                         !adminTreasuryState.fresh ||
 
-                        !adminTreasuryState.snapshot?.distributionReady
+                        !adminTreasuryState.snapshot?.distributionReady ||
+                        adminTreasuryState.selectedUids.size === 0
 
                     ));
 
@@ -7816,9 +7817,13 @@ window.addEventListener('storage', event => {
 
                     ? 'Retry Saved Transfer' : 'Move to Dividend Pool';
 
+                treasuryNode('eligible-rows').querySelectorAll('input[type=checkbox]').forEach(box => {
+                    box.disabled = adminTreasuryState.busy || adminTreasuryState.refreshing || !!transferIntent || !!dividendIntent;
+                });
+
                 dividend.textContent = dividendIntent
 
-                    ? 'Retry Saved Dividend' : 'Distribute Dividend';
+                    ? 'Retry Saved Dividend' : 'Preview Selected Admins';
 
 
 
@@ -8020,8 +8025,8 @@ window.addEventListener('storage', event => {
 
                 adminTreasuryState.snapshot = data;
                 treasuryNode('eligible-pool').textContent = treasuryMoney(data.treasuryMicro.Dividend_Pool_Wallet);
-                treasuryNode('eligible-count').textContent = String(data.eligibleAdminCount ?? data.shareholders?.length ?? 0);
-                renderDividendRows(data.shareholders || [], treasuryNode('eligible-rows'));
+                treasuryNode('eligible-count').textContent = String(data.eligibleAdminCount ?? 0);
+                renderDividendChoices(data.eligibleAdmins || []);
 
                 adminTreasuryState.fresh = true;
 
@@ -8227,6 +8232,60 @@ window.addEventListener('storage', event => {
 
 
 
+        function dividendSelectionOwner() {
+            return JSON.stringify([localStorage.getItem('uid'), localStorage.getItem('token')]);
+        }
+        function renderDividendChoices(admins) {
+            const owner = dividendSelectionOwner();
+            const previousSelection = JSON.stringify([...adminTreasuryState.selectedUids].sort());
+            const previousPreview = adminTreasuryState.preview;
+            const ownerChanged = adminTreasuryState.selectionOwner !== owner;
+            if (ownerChanged) {
+                adminTreasuryState.selectedUids.clear();
+                adminTreasuryState.preview = null;
+                adminTreasuryState.selectionOwner = owner;
+            }
+            const allowed = new Set(admins.map(row => row.uid));
+            adminTreasuryState.selectedUids = new Set([...adminTreasuryState.selectedUids].filter(uid => allowed.has(uid)));
+            if (previousPreview && (ownerChanged || previousSelection !== JSON.stringify([...adminTreasuryState.selectedUids].sort()))) {
+                adminTreasuryState.preview = null;
+                ++consoleDialogEpoch;
+                treasuryNode('modal').close();
+            }
+            const target = treasuryNode('eligible-rows');
+            target.replaceChildren();
+            for (const admin of admins) {
+                const row = document.createElement('tr');
+                row.className = 'border-b border-white/5';
+                const selectCell = document.createElement('td');
+                selectCell.className = 'p-3';
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.checked = adminTreasuryState.selectedUids.has(admin.uid);
+                checkbox.setAttribute('aria-label', 'Select ' + (admin.name || admin.uid) + ' (' + admin.uid + ')');
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.disabled) return;
+                    if (checkbox.checked) adminTreasuryState.selectedUids.add(admin.uid);
+                    else adminTreasuryState.selectedUids.delete(admin.uid);
+                    adminTreasuryState.preview = null;
+                    ++consoleDialogEpoch;
+                    treasuryNode('modal').close();
+                    treasuryNode('selected-count').textContent = String(adminTreasuryState.selectedUids.size);
+                    treasuryControls();
+                });
+                selectCell.appendChild(checkbox);
+                row.appendChild(selectCell);
+                for (const text of [admin.name || admin.uid, admin.uid]) {
+                    const cell = document.createElement('td');
+                    cell.className = 'p-3 text-xs text-slate-300';
+                    cell.textContent = text;
+                    row.appendChild(cell);
+                }
+                target.appendChild(row);
+            }
+            treasuryNode('selected-count').textContent = String(adminTreasuryState.selectedUids.size);
+        }
+
         function renderDividendRows(shares, target) {
             target.replaceChildren();
             for (const share of shares) {
@@ -8242,102 +8301,43 @@ window.addEventListener('storage', event => {
             }
         }
 
-        function openTreasuryDividend() {
-
+        async function openTreasuryDividend() {
             if (adminTreasuryState.busy || adminTreasuryState.refreshing) return;
-
-
-
+            const owner = dividendSelectionOwner(), epoch = consoleDialogEpoch;
             try {
-
-                if (treasuryIntent('transfer')) {
-
-                    throw new Error('Resolve the saved transfer request first.');
-
-                }
-
-
-
+                if (treasuryIntent('transfer')) throw new Error('Resolve the saved transfer request first.');
                 const saved = treasuryIntent('dividend');
-
-                if (!saved && (
-
-                    !adminTreasuryState.fresh ||
-
-                    !adminTreasuryState.snapshot?.distributionReady
-
-                )) {
-
-                    throw new Error(
-
-                        'Refresh treasury and resolve eligibility or pool errors before distributing.'
-
-                    );
-
+                let data;
+                if (saved) {
+                    data = { ...saved.preview, ...saved.payload };
+                } else {
+                    if (!adminTreasuryState.fresh || !adminTreasuryState.snapshot?.distributionReady) {
+                        throw new Error('Refresh treasury and resolve eligibility or pool errors before distributing.');
+                    }
+                    const selectedUids = [...adminTreasuryState.selectedUids].sort();
+                    if (!selectedUids.length) throw new Error('Select at least one Admin account.');
+                    adminTreasuryState.refreshing = true;
+                    treasuryControls();
+                    data = await treasuryFetch('/api/admin/dividend-preview', { selectedUids });
+                    if (owner !== dividendSelectionOwner() || epoch !== consoleDialogEpoch ||
+                        JSON.stringify(selectedUids) !== JSON.stringify([...adminTreasuryState.selectedUids].sort())) return;
                 }
-
-
-
-                const data = saved ? saved.preview : adminTreasuryState.snapshot;
-
-                if (!data || !Array.isArray(data.shareholders) || data.shareholders.length === 0) {
-
+                if (!data || !Array.isArray(data.shareholders) || !data.shareholders.length) {
                     throw new Error('Dividend preview is unavailable.');
-
                 }
-
-
-
                 adminTreasuryState.preview = {
-
-                    expectedPoolMicro: saved
-
-                        ? saved.payload.expectedPoolMicro
-
-                        : data.treasuryMicro.Dividend_Pool_Wallet,
-
-                    rosterVersion: saved
-
-                        ? saved.payload.rosterVersion : data.rosterVersion,
-
+                    expectedPoolMicro: data.expectedPoolMicro,
+                    rosterVersion: data.rosterVersion,
+                    selectedUids: data.selectedUids,
                     shareholders: data.shareholders
-
                 };
-
-
-
-                treasuryNode('preview-total').textContent =
-
-                    treasuryMoney(
-
-                        adminTreasuryState.preview.expectedPoolMicro
-
-                    ) + ' USDT';
-
-
-
-                const tbody = treasuryNode('rows');
-
-                tbody.replaceChildren();
-
-
-
-                renderDividendRows(data.shareholders, tbody);
+                treasuryNode('preview-total').textContent = treasuryMoney(data.expectedPoolMicro) + ' USDT';
+                renderDividendRows(data.shareholders, treasuryNode('rows'));
                 treasuryNode('preview-count').textContent = String(data.shareholders.length);
-
                 treasuryNode('modal').showModal();
-
-                treasuryControls();
-
-            } catch (error) {
-
-                treasuryMessage(error.message);
-
-            }
-
+            } catch (error) { treasuryMessage(error.message); }
+            finally { adminTreasuryState.refreshing = false; treasuryControls(); }
         }
-
-
 
         function closeTreasuryDividend() {
 
@@ -8379,7 +8379,8 @@ window.addEventListener('storage', event => {
 
                             expectedPoolMicro: preview.expectedPoolMicro,
 
-                            rosterVersion: preview.rosterVersion
+                            rosterVersion: preview.rosterVersion,
+                            ...(preview.selectedUids ? { selectedUids: preview.selectedUids } : {})
 
                         },
 
@@ -12277,7 +12278,7 @@ window.addEventListener('storage', event => {
 
                     <p class="text-xs text-slate-400 mt-1">
 
-                        Available Dividend Pool: <span data-treasury="preview-total"></span> · Eligible Admins: <span data-treasury="preview-count"></span>
+                        Available Dividend Pool: <span data-treasury="preview-total"></span> · Selected Admins: <span data-treasury="preview-count"></span>
 
                     </p>
 
