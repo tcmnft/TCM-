@@ -12675,6 +12675,25 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
      return `${prefix}-${datePart}-${randomPart}`;
  };
 
+// WITHDRAWAL LIMITS R1 START
+// Level 0 cannot create new withdrawals; existing receipt recovery remains available.
+function createWithdrawalLimits() {
+    const maximum = Object.freeze({1:500,2:2000,3:3000,4:4000,5:5000,6:6000});
+    function membership(raw) {
+        if (raw === undefined || raw === 0 || raw === '0') throw Error('Level 0 accounts cannot request a new withdrawal.');
+        if (!['string','number'].includes(typeof raw) || !/^[1-6]$/.test(String(raw))) throw Error('Invalid membership level.');
+        const level=Number(raw);return {level,minimum:1,maximum:maximum[level],legacy:false};
+    }
+    function validate(raw, micro) {
+        const rule=membership(raw);
+        if (typeof micro !== 'bigint' || micro < 1000000n) throw Error('Minimum withdrawal is 1 USDT!');
+        if (micro > BigInt(rule.maximum)*1000000n) throw Error('Level '+rule.level+' maximum withdrawal is '+rule.maximum+' USDT per request before fees.');
+        return rule;
+    }
+    return Object.freeze({membership,validate});
+}
+window.withdrawalLimits = createWithdrawalLimits();
+// WITHDRAWAL LIMITS R1 END
  window.submitTx = async () => {
     const amt = parseFloat(document.getElementById('txAmt').value);
     const btn = document.getElementById('subBtn');
@@ -12752,7 +12771,11 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
         const code = document.getElementById('wd2FACode').value;
         const boundAddr = window.userWallets ? window.userWallets[net] : "";
 
-        if (!amt || amt < 10) return window.showToast("Minimum withdrawal is 10 USDT!", true);
+        try {
+            const rawRank = window.RAM_STATE?.user?.Rank;
+            if (rawRank === undefined) throw new Error('Membership information is unavailable. Refresh your dashboard.');
+            window.withdrawalLimits.validate(rawRank, window.parseDashboardMoneyMicro(document.getElementById('txAmt').value));
+        } catch (error) { return window.showToast(error.message, true); }
         if (!code || code.length !== 6) return window.showToast("Enter a valid 6-digit 2FA Code!", true);
         if (!boundAddr || boundAddr.length < 5) return window.showToast(`Bind your ${net} wallet first!`, true);
 
