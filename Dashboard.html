@@ -19469,7 +19469,7 @@ window.TCMSupportPending = function(validate) {
 </script>
 <!-- Testnet simulation controller removed. -->
 <script>
-/* R4 announcements: durable inbox, server-owned read state and one popup claim per user. */
+/* Announcement management R1: lifecycle catch-up, stable reads and popup claims. */
 (() => {
  'use strict';
  const $=s=>document.querySelector(s),modal=$('#messageModal'),body=$('#msgBodyContent');if(!modal||!body)return;
@@ -19477,34 +19477,61 @@ window.TCMSupportPending = function(validate) {
  const button=(text,fn,cls='ann-button')=>{const el=node('button',{type:'button',class:cls},text);el.addEventListener('click',fn);return el;};
  const time=t=>window.formatDisplayDate(t,{timeZone:'Asia/Kolkata',seconds:true,suffix:' IST',fallback:'Published announcement'});
  let identity=null,version=0,queue=[],active=null,timer=null,pumping=false,fetching=false,dirty=false,morePending=false,stopped=false,inboxVersion=0,inboxController=null,inboxCursor=null,inboxRows=new Map(),popupController=null;
- let unreadCurrent=0,readRevision=0;const locallyRead=new Set();
+ let unreadCurrent=0,readRevision=0,contentGeneration=0,knownRevision=0,handledHintRevision=0,syncFlight=null;const locallyRead=new Set();
  const notice=node('p',{class:'ann-notice',role:'status'}),rows=node('div',{class:'ann-list'}),more=button('Load older announcements',()=>loadInbox(true));body.replaceChildren(notice,rows,more);more.hidden=true;
  const popup=node('section',{id:'announcementPopup',class:'ann-popup',role:'status','aria-live':'polite',hidden:''}),popupHead=node('div',{class:'ann-popup-head'}),popupTitle=node('strong'),popupBody=node('p'),popupOpen=button('Read full message',()=>readPopup()),popupClose=button('×',()=>dismissPopup(true),'ann-popup-close');popupClose.setAttribute('aria-label','Dismiss announcement popup');popupHead.append(node('span',{},'TCM ANNOUNCEMENT'),popupClose);popup.append(popupHead,popupTitle,popupBody,popupOpen);document.body.append(popup);
  const identityNow=()=>{const uid=localStorage.getItem('uid'),token=localStorage.getItem('token'),s=window.dashboardSession;return uid&&token&&s&&!s.closed&&!s.blocked&&s.verified?{uid,token,epoch:s.epoch}:null;};
  const same=(a,b)=>!!a&&!!b&&a.uid===b.uid&&a.token===b.token&&a.epoch===b.epoch;
  const live=()=>!stopped&&same(identity,identityNow());
- async function request(path,method='GET',payload=null,signal){
+ async function rawRequest(path,method='GET',payload=null,signal){
   const ctx=identity,epoch=version;if(!ctx||!live())throw new Error('Sign in to view announcements.');
   const abort=new AbortController(),stop=()=>abort.abort(),timeout=setTimeout(stop,25000);if(signal?.aborted)stop();signal?.addEventListener('abort',stop,{once:true});
-  try{const response=await fetch(API_BASE_URL+'/announcements'+path,{method,cache:'no-store',signal:abort.signal,headers:{Authorization:'Bearer '+ctx.token,Accept:'application/json',...(payload?{'Content-Type':'application/json'}:{})},...(payload?{body:JSON.stringify(payload)}:{})});if(!(response.headers.get('content-type')||'').includes('application/json'))throw new Error('Announcement service returned an invalid response.');const result=await response.json();if(!same(ctx,identity)||epoch!==version||!live())throw Object.assign(new Error('Session changed.'),{name:'AbortError'});if(response.status===401||response.status===403)window.handleDashboardAccess?.(response.status,result.message,result.code);if(!response.ok||!result.success)throw Object.assign(new Error(result.message||'Announcement service unavailable.'),{status:response.status});return result;}
+  try{const response=await fetch(API_BASE_URL+'/announcements'+path,{method,cache:'no-store',signal:abort.signal,headers:{Authorization:'Bearer '+ctx.token,Accept:'application/json',...(payload?{'Content-Type':'application/json'}:{})},...(payload?{body:JSON.stringify(payload)}:{})});if(!(response.headers.get('content-type')||'').includes('application/json'))throw new Error('Announcement service returned an invalid response.');const result=await response.json();if(!same(ctx,identity)||epoch!==version||!live())throw Object.assign(new Error('Session changed.'),{name:'AbortError'});if(response.status===401||response.status===403)window.handleDashboardAccess?.(response.status,result.message,result.code);if(!response.ok||!result.success)throw Object.assign(new Error(result.message||'Announcement service unavailable.'),{status:response.status,syncRequired:result.syncRequired});return result;}
   finally{clearTimeout(timeout);signal?.removeEventListener('abort',stop);}
  }
+
+ async function request(path,method='GET',payload=null,signal){
+  for(let attempt=0;attempt<3;attempt++){
+   try{const result=await rawRequest(path,method,payload,signal);if(Number.isSafeInteger(result.revision)&&result.revision<knownRevision)throw Object.assign(new Error('Announcement changed during loading. Retry.'),{name:'AbortError'});if(Number.isSafeInteger(result.revision))knownRevision=result.revision;return result;}
+   catch(e){if(!e.syncRequired||attempt===2)throw e;await catchUp();}
+  }
+ }
+ async function catchUp(){
+  if(syncFlight)return syncFlight;const epoch=version;
+  const task=(async()=>{showSync();for(let page=0;page<20;page++){const r=await rawRequest('/sync');if(epoch!==version||!live())return;removeItems(r.removedIds||[]);if(r.complete){knownRevision=Math.max(knownRevision,r.revision);badge(r.unread);return;} }throw new Error('More announcement updates remain. Use Continue sync.');})();
+  syncFlight=task;try{return await task;}finally{if(syncFlight===task)syncFlight=null;}
+ }
+ function showSync(){const el=$('#announcementUnread');if(el){el.hidden=false;el.textContent='â€¦';}notice.textContent='Syncing announcement updatesâ€¦';}
+ function removeItems(ids){const removed=new Set(ids);queue=queue.filter(x=>!removed.has(x.id));for(const id of removed){inboxRows.delete(id);locallyRead.delete(id);}if(active&&removed.has(active.id))dismissPopup(true);}
+ async function lifecycle(data){
+  if(!live())return;if(Number.isSafeInteger(data?.revision)&&data.revision<=handledHintRevision)return;if(Number.isSafeInteger(data?.revision))handledHintRevision=data.revision;
+  if(Number.isSafeInteger(data?.revision))knownRevision=data.revision;
+  const generation=++contentGeneration,epoch=version,activeId=active?.id;
+  popupController?.abort();inboxController?.abort();queue=[];morePending=false;dirty=true;dismissPopup();showSync();
+  // Never leave a withdrawn cached card visible while the refreshed API is pending.
+  inboxRows.clear();rows.replaceChildren();inboxCursor=null;
+  try{await catchUp();if(epoch!==version||generation!==contentGeneration||!live())return;
+   if(activeId){const r=await request('/resolve','POST',{ids:[activeId]});if(generation!==contentGeneration)return;if(r.items.length){active=r.items[0];popupTitle.textContent=active.title+(active.edited?' Â· Edited':'');popupBody.textContent=active.message.slice(0,180);popup.hidden=false;timer=setTimeout(()=>dismissPopup(true),3000);}}
+   if(modal.style.display==='flex'||modal.classList.contains('show'))void loadInbox();start(true);
+  }catch(e){if(epoch===version&&e.name!=='AbortError')notice.textContent=e.message;}
+ }
+ const syncButton=button('Continue sync',()=>lifecycle());body.append(syncButton);
  function badge(count){unreadCurrent=count;const el=$('#announcementUnread');if(!el)return;el.textContent=count>99?'99+':String(count);el.hidden=count===0;$('#announcementButton')?.setAttribute('aria-label','Announcements, '+count+' unread');}
  function dismissPopup(next=false){clearTimeout(timer);timer=null;popup.hidden=true;active=null;if(next)queueMicrotask(()=>pump());}
- function dispose(){++version;++inboxVersion;stopped=true;fetching=false;pumping=false;readRevision=0;locallyRead.clear();popupController?.abort();inboxController?.abort();queue=[];dirty=false;morePending=false;dismissPopup();identity=null;inboxRows.clear();inboxCursor=null;badge(0);rows.replaceChildren();notice.textContent='Sign in to view announcements.';if(modal.style.display==='flex'||modal.classList.contains('show'))window.closeModal?.('messageModal');}
+ function dispose(){++version;++inboxVersion;++contentGeneration;knownRevision=0;handledHintRevision=0;syncFlight=null;stopped=true;fetching=false;pumping=false;readRevision=0;locallyRead.clear();popupController?.abort();inboxController?.abort();queue=[];dirty=false;morePending=false;dismissPopup();identity=null;inboxRows.clear();inboxCursor=null;badge(0);rows.replaceChildren();notice.textContent='Sign in to view announcements.';if(modal.style.display==='flex'||modal.classList.contains('show'))window.closeModal?.('messageModal');}
  function start(force=false){const next=identityNow();if(!next){if(identity)dispose();return;}if(!same(identity,next)){dispose();stopped=false;identity=next;}if(!force&&fetching)return;dirty=true;if(queue.length&&!active)void pump();else void pending();}
- async function pending(){if(!live()||document.hidden)return;if(fetching){dirty=true;return;}if(queue.length||active){dirty=true;return;}fetching=true;dirty=false;const epoch=version,revision=readRevision;popupController=new AbortController();try{const r=await request('/pending','GET',null,popupController.signal);if(epoch!==version||!live())return;if(revision===readRevision)badge(r.unread);queue=r.items;morePending=r.hasMore;}
+ async function pending(){if(!live()||document.hidden)return;if(fetching){dirty=true;return;}if(queue.length||active){dirty=true;return;}fetching=true;dirty=false;const epoch=version,revision=readRevision,generation=contentGeneration;popupController=new AbortController();try{const r=await request('/pending','GET',null,popupController.signal);if(epoch!==version||generation!==contentGeneration||!live())return;if(revision===readRevision)badge(r.unread);queue=r.items;morePending=r.hasMore;}
   catch(e){if(e.name!=='AbortError'&&live())notice.textContent='Announcements will sync when the connection is available.';}
   finally{if(epoch===version){fetching=false;if(live())void pump();}}
  }
- async function pump(){if(pumping||active||!live()||document.hidden)return;pumping=true;const epoch=version;try{while(queue.length&&live()&&!document.hidden){const candidate=queue.shift();const result=await request('/claim','POST',{id:candidate.id});if(epoch!==version||!live())return;if(!result.claimed)continue;active=result.item||candidate;popupTitle.textContent=active.title;popupBody.textContent=active.message.length>180?active.message.slice(0,180)+'…':active.message;popup.hidden=false;timer=setTimeout(()=>dismissPopup(true),3000);return;}}
-  catch(e){if(epoch===version&&live()){queue=[];morePending=false;dirty=false;notice.textContent='Popup sync paused. Your messages remain in the inbox.';}}
+ async function pump(){if(pumping||active||!live()||document.hidden)return;pumping=true;const epoch=version,generation=contentGeneration;try{while(queue.length&&live()&&!document.hidden){const candidate=queue.shift();const result=await request('/claim','POST',{id:candidate.id});if(epoch!==version||generation!==contentGeneration||!live())return;if(!result.claimed)continue;active=result.item||candidate;popupTitle.textContent=active.title+(active.edited?' Â· Edited':'');popupBody.textContent=active.message.length>180?active.message.slice(0,180)+'…':active.message;popup.hidden=false;timer=setTimeout(()=>dismissPopup(true),3000);return;}}
+  catch(e){if(epoch===version&&generation===contentGeneration&&live()){queue=[];morePending=false;dirty=false;notice.textContent='Popup sync paused. Your messages remain in the inbox.';}}
   finally{if(epoch===version){pumping=false;if(!active&&!queue.length&&live()&&!document.hidden&&(morePending||dirty)){morePending=false;queueMicrotask(()=>pending());}}}
  }
  function renderInbox(){rows.replaceChildren();for(const item of inboxRows.values()){const card=node('article',{class:'ann-card'+(item.read?'':' ann-unread'),'data-announcement-id':item.id}),head=button(item.title,()=>expand(item,card),'ann-title');card.append(node('small',{},time(item.createdAt)+(item.read?'':' · Unread')),head,node('p',{class:'ann-excerpt'},item.message.length>150?item.message.slice(0,150)+'…':item.message));rows.append(card);}if(!inboxRows.size)rows.append(node('p',{class:'ann-empty'},'No announcements yet.'));more.hidden=!inboxCursor;}
- async function markRead(ids){const result=await request('/read','POST',{ids});readRevision++;for(const key of result.readIds){locallyRead.add(key);const item=inboxRows.get(key);if(item)item.read=true;}badge(result.unread);if(modal.style.display==='flex')notice.textContent=unreadCurrent+' unread. Announcement history is retained.';return result;}
- function expand(item,card){const epoch=version,view=inboxVersion;card.replaceChildren(node('small',{},time(item.createdAt)),node('h3',{},item.title),node('p',{class:'ann-full'},item.message));if(!item.read)void markRead([item.id]).then(()=>{if(epoch===version&&view===inboxVersion)card.classList.remove('ann-unread');}).catch(e=>{if(epoch===version&&view===inboxVersion)notice.textContent='Message opened. Read status could not sync; open it again to retry.';});}
- async function loadInbox(append=false){if(!live())start();if(!live())return;if(append&&!inboxCursor)return;inboxController?.abort();inboxController=new AbortController();const view=++inboxVersion,epoch=version,revision=readRevision;if(!append){inboxRows.clear();inboxCursor=null;rows.replaceChildren();}notice.textContent='Loading announcements…';more.disabled=true;try{const r=await request('/inbox'+(append?'?before='+encodeURIComponent(inboxCursor):''),'GET',null,inboxController.signal);if(view!==inboxVersion||epoch!==version)return;for(const item of r.items)inboxRows.set(item.id,{...item,read:item.read||locallyRead.has(item.id)});inboxCursor=r.nextCursor;if(revision===readRevision)badge(r.unread);renderInbox();notice.textContent=unreadCurrent+' unread · '+r.total+' published. Open a message to mark it read.';}catch(e){if(e.name!=='AbortError'&&view===inboxVersion)notice.textContent=e.message;}finally{more.disabled=false;}}
+ async function markRead(ids){const result=await request('/read','POST',{ids});readRevision++;removeItems(result.removedIds||[]);if(result.removedIds?.length)renderInbox();for(const key of result.readIds){locallyRead.add(key);const item=inboxRows.get(key);if(item)item.read=true;}badge(result.unread);if(modal.style.display==='flex')notice.textContent=unreadCurrent+' unread. Announcement history is retained.';return result;}
+ async function expand(item,card){const epoch=version,view=inboxVersion,generation=contentGeneration;card.replaceChildren(node('p',{},'Checking current announcementâ€¦'));try{const r=await request('/resolve','POST',{ids:[item.id]});if(epoch!==version||view!==inboxVersion||generation!==contentGeneration)return;removeItems(r.removedIds||[]);badge(r.unread);const current=r.items[0];if(!current){renderInbox();notice.textContent='This announcement was withdrawn.';return;}inboxRows.set(current.id,current);card.replaceChildren(node('small',{},time(current.createdAt)+(current.edited?' Â· Edited':'')),node('h3',{},current.title),node('p',{class:'ann-full'},current.message));if(!current.read)await markRead([current.id]);if(epoch===version&&view===inboxVersion)card.classList.remove('ann-unread');}catch(e){if(epoch===version&&view===inboxVersion&&e.name!=='AbortError')notice.textContent=e.message;}}
+ async function loadInbox(append=false){if(!live())start();if(!live())return;if(append&&!inboxCursor)return;inboxController?.abort();inboxController=new AbortController();const view=++inboxVersion,epoch=version,revision=readRevision,generation=contentGeneration;if(!append){inboxRows.clear();inboxCursor=null;rows.replaceChildren();}notice.textContent='Loading announcements…';more.disabled=true;try{const r=await request('/inbox'+(append?'?before='+encodeURIComponent(inboxCursor):''),'GET',null,inboxController.signal);if(view!==inboxVersion||epoch!==version||generation!==contentGeneration)return;for(const item of r.items)inboxRows.set(item.id,{...item,read:item.read||locallyRead.has(item.id)});inboxCursor=r.nextCursor;if(revision===readRevision)badge(r.unread);renderInbox();notice.textContent=unreadCurrent+' unread · '+r.total+' published. Open a message to mark it read.';}catch(e){if(e.name!=='AbortError'&&view===inboxVersion)notice.textContent=e.message;}finally{more.disabled=false;}}
  function closeInbox(){++inboxVersion;inboxController?.abort();window.closeModal?.('messageModal');}
  window.openMessageModal=()=>{if(!live())start();window.openModal?.('messageModal');void loadInbox();};
  window.closeMessageModal=closeInbox;
@@ -19515,9 +19542,9 @@ window.TCMSupportPending = function(validate) {
  window.TCMAnnouncements={start,dispose};
  window.addEventListener('tcm:dashboard-ready',()=>{if(!same(identity,identityNow()))start();});
  window.addEventListener('storage',e=>{if(e.key===null||['uid','token'].includes(e.key)){dispose();if(identityNow())start();}});
- window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',e=>{if(e.persisted)start(true);});
- document.addEventListener('visibilitychange',()=>{if(document.hidden)dismissPopup();else start(true);});
- if(window.socket){window.socket.on('connect',()=>start(true));window.socket.on('system_announcement_published',()=>start(true));window.socket.on('session_error',data=>{if([401,403].includes(data?.status))dispose();});}
+ window.addEventListener('pagehide',dispose);window.addEventListener('pageshow',e=>{if(e.persisted){start(true);void lifecycle();}});
+ document.addEventListener('visibilitychange',()=>{if(document.hidden)dismissPopup();else void lifecycle();});
+ if(window.socket){window.socket.on('connect',()=>lifecycle());window.socket.on('system_announcement_changed',data=>lifecycle(data));window.socket.on('system_announcement_published',()=>start(true));window.socket.on('session_error',data=>{if([401,403].includes(data?.status))dispose();});}
  start();
 })();
 
