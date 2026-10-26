@@ -7154,6 +7154,7 @@ window.addEventListener('storage', event => {
             const previousPage = consoleCurrentPage;
 
             ++consolePageEpoch; ++consoleDialogEpoch;
+            m1CancelSummaryView();
 
             for (const controller of consolePageReads) controller.abort();
 
@@ -7198,6 +7199,7 @@ window.addEventListener('storage', event => {
         function consoleEnterPage() {
 
             if (!adminAuthState.ready) return;
+            if (m1Terminal.summaryDirty) m1QueueSummaryRefresh();
 
             const page = consoleCurrentPage;
 
@@ -8479,7 +8481,8 @@ window.addEventListener('storage', event => {
 
             searchTimer: null,
 
-            summarySequence: 0
+            summarySequence: 0,
+            summaryFlight: null, summaryTimer: null, summaryDirty: false, summaryForce: false
 
         };
 
@@ -8525,9 +8528,10 @@ window.addEventListener('storage', event => {
 
 
 
-        async function m1Read(path) {
+        async function m1Read(path, signal) {
 
-            const response = await (path.startsWith('/api/admin/terminal-summary') ? adminApiFetch(path, { cache: 'no-store' }) : consoleReadFetch(path, { cache: 'no-store' }));
+            const options = { cache: 'no-store', ...(signal ? { signal } : {}) };
+            const response = await (path.startsWith('/api/admin/terminal-summary') ? adminApiFetch(path, options) : consoleReadFetch(path, options));
 
             const result = await response.json();
 
@@ -8831,59 +8835,87 @@ window.addEventListener('storage', event => {
 
 
 
-        async function m1RefreshSummary(force = false) {
+        function m1CancelSummaryView() {
+            const flight = m1Terminal.summaryFlight;
+            clearTimeout(m1Terminal.summaryTimer);
+            m1Terminal.summaryTimer = null;
+            m1Terminal.summaryFlight = null;
+            m1Terminal.summaryDirty = true;
+            m1Terminal.summaryForce ||= !!flight?.force;
+            flight?.controller.abort();
+        }
 
-            if (!adminAuthState.ready || document.visibilityState !== 'visible') return;
-
-            const generation = adminAuthState.generation;
-
-            const sequence = ++m1Terminal.summarySequence;
-
-            try {
-
-                const result = await m1Read('/api/admin/terminal-summary' + (force ? '?refresh=1' : ''));
-
-                if (!adminAuthState.ready || generation !== adminAuthState.generation || sequence !== m1Terminal.summarySequence) return;
-
-                document.getElementById('statMembers').textContent = result.members;
-
-                document.getElementById('dash-users').textContent = result.members;
-
-                for (const [id, type] of [['statDeposits', 'Deposit'], ['statWithdraws', 'Withdraw'], ['statAirdrop', 'Airdrop']]) {
-
-                    const node = document.getElementById(id);
-
-                    node.textContent = m1Money(result.totals[type]) + ' ₮';
-
-                    node.title = result.totalsScope;
-
-                }
-
-                const badge = document.getElementById('rej-badge');
-
-                badge.textContent = result.archive;
-
-                badge.style.display = result.archive > 0 ? 'inline-block' : 'none';
-
-                document.getElementById('m1-summary-notice').textContent = 'Totals: canonical successful ledger records. Legacy aliases/string amounts need reconciliation. Updated ' + window.tcmFormatIST(result.generatedAt, 'Not recorded');
-
-            } catch (error) {
-
-                if (generation === adminAuthState.generation && adminAuthState.ready) {
-
-                    document.getElementById('m1-summary-notice').textContent = 'Summary unavailable • previous values retained; check backend/indexes';
-
-                    console.warn('M1 summary failed:', error.message);
-
-                }
-
+        function m1QueueSummaryRefresh(force = false) {
+            m1Terminal.summaryDirty = true;
+            m1Terminal.summaryForce ||= force;
+            if (!consoleDocumentActive || !adminAuthState.ready || document.visibilityState !== 'visible') return;
+            if (m1Terminal.summaryFlight) return m1Terminal.summaryFlight.promise;
+            if (m1Terminal.summaryTimer === null) {
+                m1Terminal.summaryTimer = setTimeout(() => {
+                    m1Terminal.summaryTimer = null;
+                    void m1RefreshSummary();
+                }, 250);
             }
+        }
 
+        function m1RefreshSummary(force = false) {
+            if (!consoleDocumentActive || !adminAuthState.ready || document.visibilityState !== 'visible') return;
+            if (force) {
+                m1Terminal.summaryDirty = true;
+                m1Terminal.summaryForce = true;
+            }
+            if (m1Terminal.summaryFlight) return m1Terminal.summaryFlight.promise;
+            clearTimeout(m1Terminal.summaryTimer);
+            m1Terminal.summaryTimer = null;
+            const flight = {
+                controller: new AbortController(),
+                generation: adminAuthState.generation,
+                epoch: consolePageEpoch,
+                sequence: ++m1Terminal.summarySequence,
+                force: m1Terminal.summaryForce,
+                promise: null
+            };
+            m1Terminal.summaryDirty = false;
+            m1Terminal.summaryForce = false;
+            m1Terminal.summaryFlight = flight;
+            const ownsView = () => consoleDocumentActive && adminAuthState.ready &&
+                flight.generation === adminAuthState.generation && flight.epoch === consolePageEpoch;
+            const canApply = () => ownsView() && m1Terminal.summaryFlight === flight &&
+                flight.sequence === m1Terminal.summarySequence && !flight.controller.signal.aborted;
+            flight.promise = Promise.resolve().then(async () => {
+                try {
+                    const result = await m1Read('/api/admin/terminal-summary' +
+                        (flight.force ? '?refresh=1' : ''), flight.controller.signal);
+                    if (!canApply()) return;
+                    document.getElementById('statMembers').textContent = result.members;
+                    document.getElementById('dash-users').textContent = result.members;
+                    for (const [id, type] of [['statDeposits', 'Deposit'], ['statWithdraws', 'Withdraw'], ['statAirdrop', 'Airdrop']]) {
+                        const node = document.getElementById(id);
+                        node.textContent = m1Money(result.totals[type]) + ' ₮';
+                        node.title = result.totalsScope;
+                    }
+                    const badge = document.getElementById('rej-badge');
+                    badge.textContent = result.archive;
+                    badge.style.display = result.archive > 0 ? 'inline-block' : 'none';
+                    document.getElementById('m1-summary-notice').textContent = 'Totals: canonical successful ledger records. Legacy aliases/string amounts need reconciliation. Updated ' + window.tcmFormatIST(result.generatedAt, 'Not recorded');
+                } catch (error) {
+                    if (error.name !== 'AbortError' && canApply()) {
+                        document.getElementById('m1-summary-notice').textContent = 'Summary unavailable • previous values retained; check backend/indexes';
+                        console.warn('M1 summary failed:', error.message);
+                    }
+                } finally {
+                    if (m1Terminal.summaryFlight === flight) {
+                        m1Terminal.summaryFlight = null;
+                        if (ownsView() && m1Terminal.summaryDirty) m1QueueSummaryRefresh();
+                    }
+                }
+            });
+            return flight.promise;
         }
 
 
-
-        function m1ScheduleTerminalRefresh() {
+        function m1ScheduleTerminalRefresh(refreshSummary = true) {
+            if (refreshSummary) m1QueueSummaryRefresh();
 
             if (m1Terminal.refreshTimer !== null) clearTimeout(m1Terminal.refreshTimer);
 
@@ -8893,9 +8925,7 @@ window.addEventListener('storage', event => {
 
                 if (!adminAuthState.ready || document.visibilityState !== 'visible') return;
 
-                Promise.allSettled(['deposit', 'withdraw', 'archive'].map(kind => m1LoadTerminalPage(kind))
-
-                    .concat(m1RefreshSummary()));
+                Promise.allSettled(['deposit', 'withdraw', 'archive'].map(kind => m1LoadTerminalPage(kind)));
 
             }, 250);
 
@@ -9291,11 +9321,12 @@ window.addEventListener('storage', event => {
 
 
 
-        function scheduleAdminCommittedRefresh(path) {
+        function scheduleAdminCommittedRefresh(path, summarySignal = true) {
 
             if (!adminAuthState.ready) return;
 
             if (path === '/api/admin/withdrawal-action' && window.bulkWithdrawalRunning) return;
+            if (summarySignal) m1QueueSummaryRefresh(true);
 
             const affectsMembers = ['/api/admin/deposit-action', '/api/admin/access-action',
 
@@ -9321,7 +9352,7 @@ window.addEventListener('storage', event => {
 
                     adminTreasuryState.refreshing || adminMemberRefreshPromise) {
 
-                    scheduleAdminCommittedRefresh(path);
+                    scheduleAdminCommittedRefresh(path, false);
 
                     return;
 
@@ -9331,7 +9362,7 @@ window.addEventListener('storage', event => {
 
                 window.adminCommittedMembersDirty = false;
 
-                m1ScheduleTerminalRefresh();
+                m1ScheduleTerminalRefresh(false);
 
                 const reads = [loadAdminAuditLogs(true), refreshAdminTreasury()];
 
