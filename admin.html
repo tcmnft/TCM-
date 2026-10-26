@@ -4835,7 +4835,8 @@ dialog.bg-slate-900::backdrop,
 
                 <div class="glass-card p-4 border-t-2 border-t-sky-500">
 
-                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Members</p>
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Wallet Records</p>
+                    <p class="text-xs text-slate-400">Wallet documents; not active users.</p>
 
                     <h3 id="statMembers" class="text-2xl font-bold text-white mt-1">0</h3>
 
@@ -4844,6 +4845,7 @@ dialog.bg-slate-900::backdrop,
                 <div class="glass-card p-4 border-t-2 border-t-emerald-500">
 
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Deposit</p>
+                    <p class="text-xs text-slate-400">Historical successful deposits.</p>
 
                     <h3 id="statDeposits" class="text-2xl font-bold text-emerald-400 mt-1">0.00 ₮</h3>
 
@@ -4851,7 +4853,8 @@ dialog.bg-slate-900::backdrop,
 
                 <div class="glass-card p-4 border-t-2 border-t-rose-500">
 
-                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Withdraw</p>
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Withdraw · Gross</p>
+                    <p class="text-xs text-slate-400">Successful records; before fees, not net payout.</p>
 
                     <h3 id="statWithdraws" class="text-2xl font-bold text-rose-400 mt-1">0.00 ₮</h3>
 
@@ -4860,6 +4863,7 @@ dialog.bg-slate-900::backdrop,
                 <div class="glass-card p-4 border-t-2 border-t-amber-500">
 
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Total Airdrop</p>
+                    <p class="text-xs text-slate-400">Historical successful airdrop credits.</p>
 
                     <h3 id="statAirdrop" class="text-2xl font-bold text-amber-400 mt-1">0.00 ₮</h3>
 
@@ -4868,6 +4872,7 @@ dialog.bg-slate-900::backdrop,
                 <div class="glass-card p-4 border-t-2 border-t-fuchsia-500">
 
                     <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Pending Requests</p>
+                    <p class="text-xs text-slate-400">Pending Deposit + Withdraw record count.</p>
 
                     <h3 id="statPending" class="text-2xl font-bold text-fuchsia-400 mt-1">0</h3>
 
@@ -4875,7 +4880,8 @@ dialog.bg-slate-900::backdrop,
 
                 <div class="glass-card p-4 border-t-2 border-t-purple-500">
 
-                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Active System Users</p>
+                    <p class="text-[10px] text-slate-400 tracking-wider uppercase font-bold">Wallet Records</p>
+                    <p class="text-xs text-slate-400">Same wallet count; not online users.</p>
 
                     <h3 id="dash-users" class="text-2xl font-bold text-purple-400 mt-1"><i class="fa-solid fa-circle-notch fa-spin text-sm"></i></h3>
 
@@ -5763,7 +5769,7 @@ dialog.bg-slate-900::backdrop,
 
                 <div class="p-4 flex flex-wrap justify-between items-center gap-3 border-b border-white/5">
 
-                    <h3 class="text-sm font-bold text-white">Corporate Treasury &amp; Dividends</h3>
+                    <h3 class="text-sm font-bold text-white">Corporate Treasury &amp; Dividends - Internal Ledger</h3>
 
                     <button type="button" onclick="refreshAdminTreasury()" class="cyber-btn bg-sky-500/20 text-sky-400 px-3 py-2 rounded">Refresh</button>
 
@@ -5775,7 +5781,8 @@ dialog.bg-slate-900::backdrop,
 
                     <div class="bg-white/5 rounded-lg p-3">
 
-                        <p class="text-xs text-slate-400">Withdrawal Fees</p>
+                        <p class="text-xs text-slate-400">Withdrawal Fee Bucket</p>
+                        <p class="text-xs text-slate-400">Ledger balance · Includes held fees.</p>
 
                         <p class="text-sm font-bold text-white" data-treasury="Withdrawal_Fee_Wallet">—</p>
 
@@ -5783,7 +5790,8 @@ dialog.bg-slate-900::backdrop,
 
                     <div class="bg-white/5 rounded-lg p-3">
 
-                        <p class="text-xs text-slate-400">P2P Fees</p>
+                        <p class="text-xs text-slate-400">P2P Fee Bucket</p>
+                        <p class="text-xs text-slate-400">Ledger balance · Remaining P2P fees.</p>
 
                         <p class="text-sm font-bold text-white" data-treasury="P2P_Fee_Wallet">—</p>
 
@@ -5791,7 +5799,8 @@ dialog.bg-slate-900::backdrop,
 
                     <div class="bg-white/5 rounded-lg p-3">
 
-                        <p class="text-xs text-slate-400">Pending Withdrawal Reserve</p>
+                        <p class="text-xs text-slate-400">Held Withdrawal Fees</p>
+                        <p class="text-xs text-slate-400">Reserved fees within the withdrawal bucket; not full payouts.</p>
 
                         <p class="text-sm font-bold text-amber-400" data-treasury="Withdrawal_Pending_Fees">—</p>
 
@@ -5800,6 +5809,7 @@ dialog.bg-slate-900::backdrop,
                     <div class="bg-white/5 rounded-lg p-3">
 
                         <p class="text-xs text-slate-400">Dividend Pool</p>
+                        <p class="text-xs text-slate-400">Allocated ledger balance · For distribution.</p>
 
                         <p class="text-sm font-bold text-emerald-400" data-treasury="Dividend_Pool_Wallet">—</p>
 
@@ -5807,7 +5817,8 @@ dialog.bg-slate-900::backdrop,
 
                     <div class="bg-white/5 rounded-lg p-3">
 
-                        <p class="text-xs text-slate-400">Total Revenue</p>
+                        <p class="text-xs text-slate-400">Recorded Fee Revenue</p>
+                        <details class="text-xs text-slate-400"><summary>Historical fee counter · Scope</summary><p>Accumulated withdrawal and P2P fees, adjusted for recorded reversals. Includes held withdrawal fees; not spendable balance or total profit.</p></details>
 
                         <p class="text-sm font-bold text-white" data-treasury="Total_Revenue">—</p>
 
@@ -5815,7 +5826,8 @@ dialog.bg-slate-900::backdrop,
 
                     <div class="bg-white/5 rounded-lg p-3">
 
-                        <p class="text-xs text-slate-400">Breakage Profit</p>
+                        <p class="text-xs text-slate-400">Breakage Fund Bucket</p>
+                        <p class="text-xs text-slate-400">Ledger balance · Remaining missed sponsor bonuses.</p>
 
                         <p class="text-sm font-bold text-white" data-treasury="Total_Breakage_Profit">—</p>
 
@@ -5826,10 +5838,11 @@ dialog.bg-slate-900::backdrop,
 
 
                 <div class="px-4 pb-4">
+                    <p class="text-xs text-slate-400 mb-3">Ledger balances, historical counters and reserved portions overlap. Do not add these cards together. This screen does not read on-chain wallet balances.</p>
 
                     <p class="text-xs text-slate-400 mb-3">
 
-                        Spendable withdrawal fees:
+                        Spendable Withdrawal Fees:
 
                         <span class="text-emerald-400" data-treasury="available">—</span>
 
@@ -5839,11 +5852,11 @@ dialog.bg-slate-900::backdrop,
 
                         <select data-treasury="source" class="bg-slate-900 text-white border border-white/10 rounded p-2 text-xs">
 
-                            <option value="Withdrawal_Fee_Wallet">Withdrawal Fees</option>
+                            <option value="Withdrawal_Fee_Wallet">Withdrawal Fee Bucket</option>
 
-                            <option value="P2P_Fee_Wallet">P2P Fees</option>
+                            <option value="P2P_Fee_Wallet">P2P Fee Bucket</option>
 
-                            <option value="Total_Breakage_Profit">Breakage Profit</option>
+                            <option value="Total_Breakage_Profit">Breakage Fund Bucket</option>
 
                         </select>
 
