@@ -4401,6 +4401,11 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
             </div>
         </div>
 
+        <div id="healthPreviewPanel" style="margin-bottom:12px; font-size:0.75rem; overflow-wrap:anywhere;">
+            <button type="button" id="healthPreviewButton" class="chat-history-control">Preview Health for this withdrawal</button>
+            <p id="healthPreviewResult" role="status" aria-live="polite"></p>
+        </div>
+
         <div id="wdLockArea" style="display: none; text-align: center; padding: 20px; background: rgba(244, 63, 94, 0.05); border: 1px dashed var(--error); border-radius: 12px; margin-bottom: 15px;">
             <div style="color:var(--warning); font-weight:800; letter-spacing:1px; font-size:1rem; margin-top:5px;">
                 <i class="fas fa-shield-alt"></i> COOLING DOWN
@@ -6239,6 +6244,7 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
         }
     };
     window.closeModal = id => {
+        if (id === 'txModal') window.invalidateHealthPreview?.();
         if (id === 'setup2FAModal') window.clearTwoFASetup?.();
         if (id === 'walletBindModal') window.clearGeneralOTP?.('bind-wallet');
         if (id === 'walletUnbindModal') window.clearGeneralOTP?.('unbind-2fa');
@@ -12351,12 +12357,79 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
 /* JS 15 | HYBRID SECURITY ENGINE (IMAGE MATCHING SHIELD) | END */
 /* JS 16 | FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer) | START */
 
+ // Read-only, explicit preview. No input polling, auto-submit or client score formula.
+ window.healthDisplayValue = value => typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 100 ? value : null;
+ window.healthPreviewFlight = null;
+ window.invalidateHealthPreview = () => {
+     const old = window.healthPreviewFlight;
+     window.healthPreviewFlight = null;
+     old?.controller.abort();
+     const button = document.getElementById('healthPreviewButton');
+     const output = document.getElementById('healthPreviewResult');
+     if (button) button.disabled = false;
+     if (output) output.textContent = '';
+ };
+ window.requestHealthPreview = async () => {
+     window.invalidateHealthPreview();
+     if (window.txMode !== 'Withdraw') return;
+     const amount = document.getElementById('txAmt').value.trim();
+     const output = document.getElementById('healthPreviewResult');
+     const button = document.getElementById('healthPreviewButton');
+     const uid = localStorage.getItem('uid'), token = localStorage.getItem('token');
+     try { window.parseDashboardMoneyMicro(amount); }
+     catch (_) { output.textContent = 'Enter a valid amount first.'; return; }
+     const network = document.getElementById('wdNetwork').value;
+     const flight = { uid, token, amount, network, controller: new AbortController() };
+     window.healthPreviewFlight = flight;
+     const current = () => window.healthPreviewFlight === flight && window.txMode === 'Withdraw' &&
+         uid === localStorage.getItem('uid') && token === localStorage.getItem('token') &&
+         amount === document.getElementById('txAmt').value.trim() &&
+         network === document.getElementById('wdNetwork').value &&
+         !window.dashboardSession?.closed && !window.dashboardSession?.blocked;
+     button.disabled = true;
+     output.textContent = 'Loading Health preview...';
+     const timer = setTimeout(() => flight.controller.abort(), 10000);
+     try {
+         const response = await fetch(API_BASE_URL.replace(/\/$/, '') + '/finance/withdraw-health-preview', {
+             method: 'POST', cache: 'no-store', signal: flight.controller.signal,
+             headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
+             body: JSON.stringify({ uid, amount })
+         });
+         const result = await response.json();
+         if (!current()) return;
+         if (!response.ok || result.success !== true) throw new Error(result.message || 'Preview unavailable.');
+         const data = result.data;
+         const before = window.healthDisplayValue(data?.current?.score);
+         const after = window.healthDisplayValue(data?.projected?.score);
+         if (before === null || after === null || data.scope !== 'health-only' || data.amountMicro !== window.parseDashboardMoneyMicro(amount).toString()) throw new Error('Invalid Health preview.');
+         output.textContent = `Health now: ${before}% → if accepted: ${after}%. ` +
+             (data.healthRuleError ? data.healthRuleError + ' ' : 'Current Health rule satisfied. ') +
+             'Not withdrawal approval. Other checks apply. Historical team coverage is not verified.';
+     } catch (error) {
+         if (current()) output.textContent = error.name === 'AbortError' ? 'Preview timed out. Try again; no withdrawal submitted.' : error.message;
+     } finally {
+         clearTimeout(timer);
+         if (window.healthPreviewFlight === flight) { window.healthPreviewFlight = null; button.disabled = false; }
+     }
+ };
+ document.getElementById('healthPreviewButton').addEventListener('click', window.requestHealthPreview);
+ document.getElementById('txAmt').addEventListener('input', window.invalidateHealthPreview);
+ document.getElementById('wdNetwork').addEventListener('change', window.invalidateHealthPreview);
+ window.addEventListener('pagehide', window.invalidateHealthPreview);
+ window.addEventListener('popstate', window.invalidateHealthPreview);
+
  window.updateSpeedometerUI = (score) => {
      const needle = document.getElementById('speedNeedle');
      const scoreText = document.getElementById('healthScoreText');
      const msgBox = document.getElementById('healthStatusMsg');
 
-     let safeScore = Math.min(100, Math.max(0, score));
+     const safeScore = window.healthDisplayValue(score);
+     if (safeScore === null) {
+         if (needle) needle.style.strokeDashoffset = 125.6;
+         if (scoreText) scoreText.innerText = 'Unavailable';
+         if (msgBox) { msgBox.textContent = 'Health data unavailable. Refresh your dashboard.'; msgBox.style.background = ''; msgBox.style.color = 'var(--text-sub)'; }
+         return;
+     }
      let offset = 125.6 - (125.6 * (safeScore / 100));
 
      setTimeout(() => {
@@ -12398,7 +12471,11 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
              return;
          }
 
-         if (score < 40) {
+         if (window.healthDisplayValue(score) === null) {
+             btn.className = 'stealth-btn locked';
+             btn.textContent = 'Health unavailable — refresh';
+             btn.disabled = true;
+         } else if (score < 40) {
              btn.className = 'stealth-btn locked';
              btn.innerHTML = '<i class="fas fa-lock"></i> Locked (Health < 40%)';
              btn.disabled = true;
@@ -12440,7 +12517,9 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
          window.showDepositDeletionWarning();
          return;
      }
+     window.invalidateHealthPreview();
      window.txMode = type;
+     document.getElementById('healthPreviewPanel').hidden = type !== 'Withdraw';
      window.updateWithdrawalFeePreview();
      if (type === 'Withdraw') void window.syncSystemFees();
      const mTitle = document.getElementById('mTitle');
@@ -12471,7 +12550,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
 
      if (type === 'Withdraw') {
          const uid = localStorage.getItem('uid');
-         const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
+         const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? window.healthDisplayValue(window.RAM_STATE.balances.Health_Score) : null;
 
          if(healthArea) {
              healthArea.style.display = 'block';
@@ -12815,7 +12894,7 @@ window.withdrawalLimits = createWithdrawalLimits();
                 }
             } else {
                 window.showToast(result.message, true);
-                const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? (window.RAM_STATE.balances.Health_Score || 100) : 100;
+                const healthScore = window.RAM_STATE && window.RAM_STATE.balances ? window.healthDisplayValue(window.RAM_STATE.balances.Health_Score) : null;
                 if (typeof window.applyStealthButtonLogic === 'function') window.applyStealthButtonLogic(healthScore);
             }
         } catch (e) {
