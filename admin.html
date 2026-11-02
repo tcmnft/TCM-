@@ -6827,7 +6827,7 @@ window.addEventListener('storage', event => {
 
                 },
 
-                body: JSON.stringify({ action, docId, adminNote })
+                body: JSON.stringify({ action, docId, adminNote, operationId: (()=>{const key='withdraw-action:'+localStorage.getItem('uid')+':'+action+':'+docId+':'+adminNote;let id=sessionStorage.getItem(key);if(!id){id=crypto.randomUUID();sessionStorage.setItem(key,id);}return id;})() })
 
             });
 
@@ -6838,6 +6838,8 @@ window.addEventListener('storage', event => {
                 throw new Error(result.message || 'Withdrawal action failed.');
 
             }
+            sessionStorage.removeItem('withdraw-action:'+localStorage.getItem('uid')+':'+action+':'+docId+':'+adminNote);
+
 
             return result;
 

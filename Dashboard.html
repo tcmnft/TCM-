@@ -9397,7 +9397,7 @@ window.renderNFTBlockchainReference = raw => {
      const modal = document.getElementById('confirmModal');
      const confirmBtn = document.getElementById('confirmYesBtn');
      if (modal && confirmBtn) {
-         modal.querySelector('p').innerHTML = `Are you sure? <strong>${amount} ₮</strong> will be instantly refunded to your main wallet.`;
+         modal.querySelector('p').innerHTML = `Are you sure? <strong>${amount} ₮</strong> will return to your locked vault for 24 hours.`;
          confirmBtn.onclick = () => window.executeCancelWithdraw(txId, amount);
          window.openModal('confirmModal');
      }
@@ -9411,9 +9411,12 @@ window.renderNFTBlockchainReference = raw => {
      btn.disabled = true;
 
      try {
-         const result = await window.fetchAPI('/finance/cancel-withdrawal', 'POST', { uid, txId });
+         const key='withdraw-action:'+uid+':cancel:'+txId;
+         let operationId=sessionStorage.getItem(key);if(!operationId){operationId=crypto.randomUUID();sessionStorage.setItem(key,operationId);}
+         const result = await window.fetchAPI('/finance/cancel-withdrawal', 'POST', { uid, txId, operationId });
 
          if (result.success) {
+             sessionStorage.removeItem(key);
              window.showToast("Withdrawal Cancelled & Refunded!");
              window.closeConfirmModal();
 
@@ -12358,7 +12361,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
 /* JS 16 | FINANCE ENGINE (Smart Withdraw & Deposit API + Speedometer) | START */
 
  // Read-only, explicit preview. No input polling, auto-submit or client score formula.
- window.healthDisplayValue = value => typeof value === 'number' && Number.isInteger(value) && value >= 0 && value <= 100 ? value : null;
+ window.healthDisplayValue = value => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100 ? value : null;
  window.healthPreviewFlight = null;
  window.invalidateHealthPreview = () => {
      const old = window.healthPreviewFlight;
@@ -12393,7 +12396,7 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
          const response = await fetch(API_BASE_URL.replace(/\/$/, '') + '/finance/withdraw-health-preview', {
              method: 'POST', cache: 'no-store', signal: flight.controller.signal,
              headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-             body: JSON.stringify({ uid, amount })
+             body: JSON.stringify({ uid, amount, network })
          });
          const result = await response.json();
          if (!current()) return;
@@ -12401,10 +12404,11 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
          const data = result.data;
          const before = window.healthDisplayValue(data?.current?.score);
          const after = window.healthDisplayValue(data?.projected?.score);
-         if (before === null || after === null || data.scope !== 'health-only' || data.amountMicro !== window.parseDashboardMoneyMicro(amount).toString()) throw new Error('Invalid Health preview.');
+         if (before === null || after === null || data.policyVersion !== 'Phase2B-v2' || data.scope !== 'health-only' || data.amountMicro !== window.parseDashboardMoneyMicro(amount).toString()) throw new Error('Invalid Health preview.');
          output.textContent = `Health now: ${before}% → if accepted: ${after}%. ` +
+             (data.reservation ? 'Pending-reservation Health: '+data.reservation.score+'%. ' : '') +
              (data.healthRuleError ? data.healthRuleError + ' ' : 'Current Health rule satisfied. ') +
-             'Not withdrawal approval. Other checks apply. Historical team coverage is not verified.';
+             (data.policy ? 'Gross cap: '+data.policy.maximumGross+' USDT. ' : '') + 'Not withdrawal approval. Deposit, level, quota, fee and security checks still apply.';
      } catch (error) {
          if (current()) output.textContent = error.name === 'AbortError' ? 'Preview timed out. Try again; no withdrawal submitted.' : error.message;
      } finally {
@@ -12438,11 +12442,11 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
      }, 100);
 
      if(msgBox) {
-         if (safeScore < 40) {
+         if (safeScore < 35) {
              msgBox.style.background = 'rgba(244, 63, 94, 0.15)';
              msgBox.style.color = 'var(--error)';
              msgBox.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Unstable: Need Deposits';
-         } else if (safeScore >= 40 && safeScore <= 49) {
+         } else if (safeScore < 50) {
              msgBox.style.background = 'rgba(250, 204, 21, 0.15)';
              msgBox.style.color = 'var(--warning)';
              msgBox.innerHTML = '<i class="fas fa-bolt"></i> Emergency Quota Active';
@@ -12475,20 +12479,8 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
              btn.className = 'stealth-btn locked';
              btn.textContent = 'Health unavailable — refresh';
              btn.disabled = true;
-         } else if (score < 40) {
-             btn.className = 'stealth-btn locked';
-             btn.innerHTML = '<i class="fas fa-lock"></i> Locked (Health < 40%)';
-             btn.disabled = true;
-         } else if (score >= 40 && score <= 49) {
-             if (val === 25) {
-                 btn.className = 'stealth-btn emergency-ready';
-                 btn.innerHTML = '<i class="fas fa-bolt"></i> Withdraw $25 (Emergency)';
-                 btn.disabled = false;
-             } else {
-                 btn.className = 'stealth-btn emergency-wait';
-                 btn.innerHTML = '<i class="fas fa-exclamation"></i> Enter Exactly 25';
-                 btn.disabled = true;
-             }
+         } else if (score < 35) {
+             btn.className='stealth-btn locked';btn.textContent='Critical Health - withdrawals blocked';btn.disabled=true;
          } else {
              btn.className = 'stealth-btn normal';
              btn.innerHTML = '✅ Confirm Withdraw';
@@ -12761,11 +12753,11 @@ function createWithdrawalLimits() {
     function membership(raw) {
         if (raw === undefined || raw === 0 || raw === '0') throw Error('Level 0 accounts cannot request a new withdrawal.');
         if (!['string','number'].includes(typeof raw) || !/^[1-6]$/.test(String(raw))) throw Error('Invalid membership level.');
-        const level=Number(raw);return {level,minimum:1,maximum:maximum[level],legacy:false};
+        const level=Number(raw);return {level,minimum:10,maximum:maximum[level],legacy:false};
     }
     function validate(raw, micro) {
         const rule=membership(raw);
-        if (typeof micro !== 'bigint' || micro < 1000000n) throw Error('Minimum withdrawal is 1 USDT!');
+        if (typeof micro !== 'bigint' || micro < 10000000n) throw Error('Minimum withdrawal is 10 USDT!');
         if (micro > BigInt(rule.maximum)*1000000n) throw Error('Level '+rule.level+' maximum withdrawal is '+rule.maximum+' USDT per request before fees.');
         return rule;
     }
