@@ -3823,7 +3823,567 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 @media(max-width:540px){#userSupportModal{padding:0!important}#userSupportModal>div{height:var(--s5-visible-height,100dvh)!important;max-height:var(--s5-visible-height,100dvh)!important;border-radius:0!important;max-width:100%!important}#userSupportModal .s5-bubble{max-width:95%}#userSupportModal>div>div:first-child{padding:9px 12px!important}}
 
 </style>
-<link rel="stylesheet" href="g2-core/core.css"><script defer src="g2-core/claim.js"></script><script defer src="g2-core/core.js"></script></head>
+<style id="rewards-luxury-style">
+    /* ==========================================================================
+       1. BASE & SCROLL FIX: ডাবল প্যাডিং দূর করে স্বাভাবিক স্ক্রোলিং স্থাপন
+       ========================================================================== */
+    #view-rewards {
+        min-width: 0;
+        width: 100%;
+        padding-bottom: 20px; /* ডাবল প্যাডিং বাতিল: body-র 120px প্যাডিংই যথেষ্ট */
+    }
+
+    #view-rewards,
+    #view-rewards *,
+    #g2-receipt-modal .modal-box,
+    #g2-receipt-modal .modal-box *,
+    #g2-rules-modal .modal-box,
+    #g2-rules-modal .modal-box * {
+        box-sizing: border-box;
+    }
+
+    /* ==========================================================================
+       2. LIGHT MODE (ডিফল্ট: স্ফটিক সাদা আলপাইন ও নীল নদের জলীয় ফিল)
+       ========================================================================== */
+    #view-rewards .rx-card {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        padding: clamp(20px, 4.5vw, 28px);
+        margin: 0 0 18px;
+        border: 1px solid rgba(255, 255, 255, 0.95);
+        border-radius: 26px;
+        background: 
+            radial-gradient(circle at 100% 0%, rgba(2, 132, 199, 0.12) 0%, transparent 50%),
+            radial-gradient(circle at 0% 100%, rgba(0, 188, 212, 0.08) 0%, transparent 50%),
+            linear-gradient(145deg, #ffffff 0%, #f1f5f9 100%);
+        box-shadow: 
+            0 15px 35px rgba(15, 23, 42, 0.06),
+            0 3px 8px rgba(15, 23, 42, 0.03),
+            inset 0 1px 2px #ffffff;
+        color: #0f172a;
+        text-align: left;
+        overflow-wrap: anywhere;
+        transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    }
+
+    #view-rewards .rx-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    #view-rewards .rx-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 0;
+        color: #0369a1;
+        font-size: clamp(1.05rem, 3.8vw, 1.2rem);
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    #view-rewards .rx-title i {
+        color: #0284c7;
+        filter: drop-shadow(0 3px 8px rgba(2, 132, 199, 0.35));
+    }
+
+    #view-rewards #salaryStatusBadge {
+        display: inline-block;
+        padding: 6px 14px;
+        border: 1px solid rgba(2, 132, 199, 0.35);
+        border-radius: 999px;
+        background: rgba(2, 132, 199, 0.08);
+        color: #0369a1;
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        box-shadow: 0 2px 8px rgba(2, 132, 199, 0.1);
+    }
+
+    #view-rewards .rx-summary {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+
+    #view-rewards .rx-summary-cell {
+        padding: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03), inset 0 1px 1px #fff;
+        transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    #view-rewards .rx-label {
+        display: block;
+        margin-bottom: 5px;
+        color: #64748b;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    #view-rewards .rx-summary-value {
+        margin: 0;
+        color: #0f172a;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: clamp(1.15rem, 4vw, 1.55rem);
+        font-weight: 800;
+        line-height: 1.3;
+    }
+
+    #view-rewards #userSalaryAmount {
+        background: linear-gradient(135deg, #0284c7 0%, #00bcd4 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    #view-rewards .rx-progress {
+        margin-bottom: 12px;
+        padding: 15px 16px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.85);
+        transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    #view-rewards .rx-progress-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    #view-rewards .rx-progress--direct i,
+    #view-rewards #aHandCount {
+        color: #059669;
+    }
+
+    #view-rewards .rx-progress--team i,
+    #view-rewards #bcHandCount {
+        color: #0284c7;
+    }
+
+    #view-rewards .rx-track {
+        width: 100%;
+        height: 10px;
+        overflow: hidden;
+        border: 1px solid rgba(203, 213, 225, 0.7);
+        border-radius: 999px;
+        background: #e2e8f0;
+        box-shadow: inset 0 2px 4px rgba(15, 23, 42, 0.05);
+    }
+
+    #view-rewards .rx-fill {
+        height: 100%;
+        border-radius: inherit;
+        transition: width 800ms cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    #view-rewards #aHandBar {
+        background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+        box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+    }
+
+    #view-rewards #bcHandBar {
+        background: linear-gradient(90deg, #0284c7 0%, #00bcd4 100%);
+        box-shadow: 0 0 10px rgba(2, 132, 199, 0.35);
+    }
+
+    #view-rewards .rx-note {
+        margin: 14px 0;
+        color: #64748b;
+        font-size: 0.72rem;
+        line-height: 1.6;
+        text-align: center;
+    }
+
+    #view-rewards .rx-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+    }
+
+    #view-rewards #salaryClaimButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: 100%;
+        min-height: 50px;
+        padding: 13px 18px;
+        border: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 16px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 60%, #075985 100%);
+        color: #ffffff;
+        font-size: 0.86rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 22px rgba(2, 132, 199, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    #view-rewards #salaryReceiptButton {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: 100%;
+        min-height: 50px;
+        padding: 13px 18px;
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        background: linear-gradient(145deg, #ffffff, #f8fafc);
+        color: #334155;
+        font-size: 0.84rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.04);
+        transition: all 150ms ease;
+    }
+
+    #view-rewards #salaryClaimButton:disabled {
+        background: #e2e8f0;
+        border-color: #cbd5e1;
+        color: #94a3b8;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    #view-rewards #salaryReceiptButton:disabled {
+        background: #f8fafc;
+        border-color: #e2e8f0;
+        color: #94a3b8;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+    #view-rewards .rx-booster {
+        background: 
+            radial-gradient(circle at 100% 100%, rgba(0, 188, 212, 0.1) 0%, transparent 50%),
+            linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+    }
+
+    #view-rewards .rx-booster-body {
+        padding: 16px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 18px;
+        background: #ffffff;
+        box-shadow: 0 3px 12px rgba(15, 23, 42, 0.03);
+    }
+
+    #view-rewards .rx-booster-heading {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #0f172a;
+        font-size: 0.9rem;
+        font-weight: 800;
+        margin-bottom: 6px;
+    }
+
+    #view-rewards .rx-rate {
+        padding: 4px 12px;
+        border: 1px solid rgba(5, 150, 105, 0.35);
+        border-radius: 999px;
+        background: rgba(5, 150, 105, 0.08);
+        color: #059669;
+        font-size: 0.7rem;
+        font-weight: 800;
+    }
+
+    #view-rewards .rx-invite {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        width: 100%;
+        min-height: 48px;
+        padding: 13px 18px;
+        border: none;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #0284c7 0%, #00bcd4 100%);
+        color: #ffffff !important;
+        font-size: 0.86rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 6px 18px rgba(0, 188, 212, 0.28), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        transition: all 150ms ease;
+    }
+
+    /* ==========================================================================
+       3. DARK MODE (সুইচ করলে স্বয়ংক্রিয়ভাবে চাঁদের আলো ও অবসিডিয়ান নিয়ন থিম)
+       ========================================================================== */
+    [data-theme="dark"] #view-rewards .rx-card {
+        border-color: rgba(2, 132, 199, 0.3);
+        background: 
+            radial-gradient(circle at 100% 0%, rgba(2, 132, 199, 0.22) 0%, transparent 55%),
+            radial-gradient(circle at 0% 100%, rgba(0, 188, 212, 0.12) 0%, transparent 50%),
+            linear-gradient(160deg, #101622 0%, #060910 100%);
+        box-shadow: 
+            0 20px 45px rgba(0, 0, 0, 0.65),
+            inset 0 1px 1px rgba(255, 255, 255, 0.1),
+            inset 0 0 20px rgba(2, 132, 199, 0.06);
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] #view-rewards .rx-title {
+        color: #38bdf8;
+    }
+
+    [data-theme="dark"] #view-rewards .rx-title i {
+        color: #00f5ff;
+        filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.7));
+    }
+
+    [data-theme="dark"] #view-rewards #salaryStatusBadge {
+        border-color: rgba(0, 245, 255, 0.4);
+        background: rgba(0, 245, 255, 0.1);
+        color: #67e8f9;
+        box-shadow: 0 0 14px rgba(0, 245, 255, 0.25);
+    }
+
+    [data-theme="dark"] #view-rewards .rx-summary-cell {
+        border-color: rgba(255, 255, 255, 0.07);
+        background: rgba(15, 23, 42, 0.65);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), 0 6px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    [data-theme="dark"] #view-rewards .rx-label {
+        color: #94a3b8;
+    }
+
+    [data-theme="dark"] #view-rewards .rx-summary-value {
+        color: #ffffff;
+    }
+
+    [data-theme="dark"] #view-rewards #userSalaryAmount {
+        background: linear-gradient(135deg, #00f5ff 0%, #38bdf8 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        filter: drop-shadow(0 0 10px rgba(0, 245, 255, 0.45));
+    }
+
+    [data-theme="dark"] #view-rewards .rx-progress {
+        border-color: rgba(255, 255, 255, 0.06);
+        background: rgba(7, 11, 18, 0.6);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    [data-theme="dark"] #view-rewards .rx-progress-heading {
+        color: #e2e8f0;
+    }
+
+    [data-theme="dark"] #view-rewards .rx-track {
+        border-color: rgba(255, 255, 255, 0.08);
+        background: #090e17;
+        box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
+    }
+
+    [data-theme="dark"] #view-rewards #aHandBar {
+        box-shadow: 0 0 14px rgba(16, 185, 129, 0.6);
+    }
+
+    [data-theme="dark"] #view-rewards #bcHandBar {
+        box-shadow: 0 0 14px rgba(0, 188, 212, 0.6);
+    }
+
+    [data-theme="dark"] #view-rewards .rx-note {
+        color: #8292a8;
+    }
+
+    [data-theme="dark"] #view-rewards #salaryReceiptButton {
+        border-color: rgba(255, 255, 255, 0.14);
+        background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+        color: #f1f5f9;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+    }
+
+    [data-theme="dark"] #view-rewards #salaryClaimButton:disabled {
+        background: #182230;
+        border-color: #26354a;
+        color: #64748b;
+    }
+
+    [data-theme="dark"] #view-rewards #salaryReceiptButton:disabled {
+        background: rgba(255, 255, 255, 0.02);
+        border-color: rgba(255, 255, 255, 0.05);
+        color: #475569;
+    }
+
+    [data-theme="dark"] #view-rewards .rx-booster {
+        background: 
+            radial-gradient(circle at 100% 100%, rgba(0, 188, 212, 0.16) 0%, transparent 50%),
+            linear-gradient(160deg, #101622 0%, #060910 100%);
+    }
+
+    [data-theme="dark"] #view-rewards .rx-booster-body {
+        border-color: rgba(255, 255, 255, 0.07);
+        background: rgba(15, 23, 42, 0.65);
+    }
+
+    [data-theme="dark"] #view-rewards .rx-booster-heading {
+        color: #f8fafc;
+    }
+
+    /* রেসপনসিভ হ্যান্ডলিং */
+    @media (max-width: 560px) {
+        #view-rewards .rx-actions {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+
+    @media (max-width: 430px) {
+        #view-rewards .rx-summary {
+            grid-template-columns: minmax(0, 1fr);
+        }
+
+        #view-rewards .rx-card {
+            padding: 18px 14px;
+            border-radius: 22px;
+        }
+
+        #view-rewards .rx-progress,
+        #view-rewards .rx-summary-cell,
+        #view-rewards .rx-booster-body {
+            padding: 13px;
+        }
+    }
+
+    /* ==========================================================================
+       4. POPUP & MODAL LUXURY FINISH (Light & Dark Dual Adaptation)
+       ========================================================================== */
+    #g2-receipt-modal .modal-box,
+    #g2-rules-modal .modal-box {
+        width: min(100%, 540px);
+        min-width: 0;
+        max-width: calc(100vw - 24px);
+        max-height: 85vh;
+        max-height: 85dvh;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: clamp(22px, 5vw, 32px);
+        border: 1px solid rgba(226, 232, 240, 0.95);
+        border-radius: 28px;
+        background: 
+            radial-gradient(circle at 100% 0%, rgba(2, 132, 199, 0.1) 0%, transparent 60%),
+            linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
+        box-shadow: 0 25px 65px rgba(15, 23, 42, 0.14), 0 4px 15px rgba(15, 23, 42, 0.05);
+        color: #0f172a;
+        text-align: left;
+        overflow-wrap: anywhere;
+        transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    #g2-receipt-modal h2,
+    #g2-rules-modal h2 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        color: #0284c7;
+        font-size: 1.25rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+
+    #g2-receipt-modal [data-g2-content] p,
+    #g2-rules-modal [data-g2-content] p {
+        margin: 0 0 10px;
+        padding: 13px 18px;
+        border: 1px solid rgba(226, 232, 240, 0.9);
+        border-radius: 16px;
+        background: #ffffff;
+        color: #334155;
+        font-size: 0.86rem;
+        font-weight: 600;
+        line-height: 1.6;
+        box-shadow: 0 2px 6px rgba(15, 23, 42, 0.02);
+    }
+
+    #g2-receipt-modal .g2-button,
+    #g2-rules-modal .g2-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        min-height: 48px;
+        margin-top: 14px;
+        padding: 12px 24px;
+        border: none;
+        border-radius: 16px;
+        background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+        color: #ffffff;
+        font-family: inherit;
+        font-size: 0.88rem;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+        transition: transform 150ms ease, box-shadow 150ms ease;
+    }
+
+    #g2-receipt-modal .g2-button:hover,
+    #g2-rules-modal .g2-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 26px rgba(2, 132, 199, 0.45);
+    }
+
+    /* DARK MODE POPUP OVERRIDES */
+    [data-theme="dark"] #g2-receipt-modal .modal-box,
+    [data-theme="dark"] #g2-rules-modal .modal-box {
+        border-color: rgba(2, 132, 199, 0.35);
+        background: 
+            radial-gradient(circle at 100% 0%, rgba(2, 132, 199, 0.2) 0%, transparent 60%),
+            linear-gradient(160deg, #101622 0%, #060910 100%);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(2, 132, 199, 0.06);
+        color: #f8fafc;
+    }
+
+    [data-theme="dark"] #g2-receipt-modal h2,
+    [data-theme="dark"] #g2-rules-modal h2 {
+        color: #38bdf8;
+        text-shadow: 0 0 12px rgba(0, 245, 255, 0.4);
+    }
+
+    [data-theme="dark"] #g2-receipt-modal [data-g2-content] p,
+    [data-theme="dark"] #g2-rules-modal [data-g2-content] p {
+        border-color: rgba(255, 255, 255, 0.08);
+        background: rgba(15, 23, 42, 0.65);
+        color: #e2e8f0;
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    }
+
+    [data-theme="dark"] #g2-receipt-modal .g2-button,
+    [data-theme="dark"] #g2-rules-modal .g2-button {
+        background: linear-gradient(135deg, #0284c7 0%, #00bcd4 100%);
+        color: #ffffff;
+        box-shadow: 0 8px 25px rgba(0, 188, 212, 0.35);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        #view-rewards .rx-fill,
+        #view-rewards .rx-actions button,
+        #view-rewards .rx-invite,
+        #g2-receipt-modal .g2-button,
+        #g2-rules-modal .g2-button {
+            animation: none !important;
+            transition: none !important;
+        }
+    }
+</style><script defer src="g2-core/claim.js"></script><script defer src="g2-core/core.js"></script><script defer src="g2-core/salary-live.js"></script></head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
 <div id="toast"><i class="fas fa-check-circle"></i> Action Successful!</div>
@@ -5111,7 +5671,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                     <p class="sec-title">Core Functions</p>
                     <div class="grid-box">
                         <div class="f-item"><div class="f-icon"><i class="fas fa-robot"></i></div><span>AI Trade</span></div>
-                        <div class="f-item" role="button" tabindex="0" onclick="switchPageView('earn')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPageView('earn');}"><div class="f-icon" style="color:#facc15;"><i class="fas fa-gift"></i></div><span>Rewards</span></div>
+                        <div class="f-item" role="button" tabindex="0" onclick="switchPageView('rewards')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();switchPageView('earn');}"><div class="f-icon" style="color:#facc15;"><i class="fas fa-gift"></i></div><span>Rewards</span></div>
                         <div class="f-item" onclick="openTeamModal()"><div class="f-icon"><i class="fas fa-users"></i></div><span>Team</span></div>
 
                         <div class="f-item" onclick="openReferralModal()">
@@ -5427,11 +5987,92 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
         </div>
     </div>
 
-    <!-- 🟢 Earn View -->
-    <div id="view-earn" class="app-view"><div id="g2-rewards-root" class="g2-root"></div>
-        <div class="empty-state" style="margin-top: 50px;">
-            <i class="fas fa-bolt"></i>
-            <p>Authoritative rewards</p>
+    <!-- 🟢 Earn View (Live Bidding Arena) -->
+    <div id="view-earn" class="app-view">
+        <div class="portfolio-hero" style="background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 1px solid rgba(0, 245, 255, 0.3);">
+            <p class="ph-title"><i class="fas fa-gavel" style="color:var(--primary);"></i> Live Bidding & Auction Arena</p>
+            <h1 class="ph-value" style="font-size:1.8rem; margin: 12px 0; color:#00f5ff; text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);">P2P War Room</h1>
+            <p style="font-size:0.8rem; color:var(--text-sub); line-height:1.5;">Compete, stake and bid in real-time decentralized NFT battles.</p>
+        </div>
+        <div class="empty-state" style="margin-top: 20px; border: 1px dashed rgba(0, 245, 255, 0.2); background: rgba(15, 23, 42, 0.6);">
+            <i class="fas fa-dragon" style="color: var(--primary); font-size: 2.5rem; opacity: 0.8; margin-bottom: 12px;"></i>
+            <h4 style="color:#fff; font-size:1rem; margin-bottom:6px;">Multiplayer Arena Incoming</h4>
+            <p style="font-size:0.8rem; color:var(--text-sub);">High-roller live auction room with voice banter & staking power is activating soon.</p>
+        </div>
+    </div>
+
+    <!-- 🟢 Rewards View (Luxury Halfway Salary & Referral Engine) -->
+    <div id="view-rewards" class="app-view">
+        <div class="portfolio-hero rx-card">
+            <div class="rx-header">
+                <span class="ph-title rx-title">
+                    <i class="fas fa-crown" aria-hidden="true"></i>
+                    Monthly Leader Salary
+                </span>
+                <span class="badge glow-locked" id="salaryStatusBadge" role="status" aria-live="polite">Authoritative data unavailable</span>
+            </div>
+
+            <div class="rx-summary">
+                <div class="rx-summary-cell">
+                    <span class="rx-label">Eligible level / applicable cap</span>
+                    <h2 class="rx-summary-value" id="userSalaryLevel">Unavailable</h2>
+                </div>
+                <div class="rx-summary-cell">
+                    <span class="rx-label">Salary record</span>
+                    <h2 class="rx-summary-value" id="userSalaryAmount">Unavailable</h2>
+                </div>
+            </div>
+
+            <div class="rx-progress rx-progress--direct">
+                <div class="rx-progress-heading">
+                    <span><i class="fas fa-user-check" aria-hidden="true"></i> Direct A-Hand Qualifying</span>
+                    <span id="aHandCount">Unavailable</span>
+                </div>
+                <div class="rx-track" role="progressbar" aria-label="Direct A-Hand qualification" aria-valuetext="Unavailable">
+                    <div class="rx-fill" style="width:0%;" id="aHandBar"></div>
+                </div>
+            </div>
+
+            <div class="rx-progress rx-progress--team">
+                <div class="rx-progress-heading">
+                    <span><i class="fas fa-users" aria-hidden="true"></i> Team B+C Hand Qualifying</span>
+                    <span id="bcHandCount">Unavailable</span>
+                </div>
+                <div class="rx-track" role="progressbar" aria-label="Team B+C Hand qualification" aria-valuetext="Unavailable">
+                    <div class="rx-fill" style="width:0%;" id="bcHandBar"></div>
+                </div>
+            </div>
+
+            <p class="rx-note">Monthly cycle. Eligibility and claim availability depend on verified server records and all applicable checks. Completed progress bars alone do not authorize payment.</p>
+
+            <div class="rx-actions">
+                <button type="button" class="act-btn btn-dep" id="salaryClaimButton" disabled>
+                    <i class="fas fa-money-bill-wave" aria-hidden="true"></i> Claim Salary
+                </button>
+                <button type="button" class="act-btn" id="salaryReceiptButton" disabled>
+                    <i class="fas fa-receipt" aria-hidden="true"></i> View Audit Ledger
+                </button>
+            </div>
+        </div>
+
+        <div class="grid-panel rx-card rx-booster">
+            <div class="rx-header">
+                <span class="rx-title">
+                    <i class="fas fa-share-nodes" aria-hidden="true"></i>
+                    Referral Bonus Staking ($3–$12)
+                </span>
+            </div>
+
+            <div class="rx-booster-body">
+                <div class="rx-booster-heading">
+                    <strong>Referral Staking Booster</strong>
+                    <span class="rx-rate">1.20% daily simple rate</span>
+                </div>
+                <p class="rx-note">The referral cycle requires 168 active hours and verified qualifying reservations on three distinct IST days. Eligibility loss can suspend the active clock. The displayed daily rate does not mean a daily Main Balance credit. Maturity does not pay automatically: verified eligibility, reservation proof and a manual Claim Bonus are required before any credit. Personal deposit funds are not automatically locked into referral staking.</p>
+                <button type="button" class="act-btn btn-dep rx-invite" onclick="window.openReferralModal()">
+                    <i class="fas fa-qrcode" aria-hidden="true"></i> Invite &amp; View Referral
+                </button>
+            </div>
         </div>
     </div>
 
@@ -6175,10 +6816,10 @@ const API_BASE_URL = ['localhost', '127.0.0.1'].includes(window.location.hostnam
             let autoBtn = document.querySelector(`[onclick*="('${targetId}'"]`);
             if(autoBtn) autoBtn.classList.add('active');
         }
-        // Bottom navigation always starts the selected page at the top.
-        if (['stake', 'earn', 'reserve', 'assets', 'my'].includes(targetId)) {
-            window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
-        }
+        // View switch scroll fix: Always start from top when changing views
+        window.scrollTo(0, 0);
+        document.body.scrollTop = 0;
+        document.documentElement.scrollTop = 0;
     };
     window.switchPageView = window.switchTab;
     window.showSection = window.switchTab;
