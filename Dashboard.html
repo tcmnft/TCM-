@@ -4636,7 +4636,8 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
             transition: none !important;
         }
     }
-</style><script defer src="g2-core/claim.js"></script><script defer src="g2-core/core.js"></script><script defer src="g2-core/salary-live.js"></script></head>
+</style><script defer src="g2-core/claim.js"></script><script defer src="g2-core/core.js"></script><script defer src="g2-core/salary-live.js"></script><style id="deposit-receipt-style">#txModal #depositListenerNotice{margin:12px 0;padding:14px;border-radius:12px;background:rgba(16,185,129,.08);border:1px solid rgba(16,185,129,.2);color:var(--text-main);text-align:left}#depositListenerNotice[hidden]{display:none}#depositListenerNotice strong,#depositListenerNotice span{display:block;margin-bottom:6px}#depositListenerNotice button{border:0;padding:0;background:none;color:inherit;text-decoration:underline;cursor:pointer;font:inherit}[data-theme="light"] #txModal #depositListenerNotice{background:#ecfdf5;border-color:#a7d8c5;color:#134e4a}</style>
+</head>
 <body>
 <!-- HTML 01 | GLOBAL OVERLAYS & TOASTS | START -->
 <div id="toast"><i class="fas fa-check-circle"></i> Action Successful!</div>
@@ -5274,14 +5275,13 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 [data-theme="light"] #txModal .deposit-method-tabs,.light-mode #txModal .deposit-method-tabs{background:#f1f5f9;border-color:#cbd5e1}
 [data-theme="light"] #txModal .deposit-method-tabs button,.light-mode #txModal .deposit-method-tabs button{color:#475569}
 [data-theme="light"] #txModal .deposit-method-tabs button[aria-pressed="true"],.light-mode #txModal .deposit-method-tabs button[aria-pressed="true"]{background:#059669;color:white}
-#txModal.deposit-auto :is(#txAmt,#txHash,#subBtn){display:block !important;visibility:hidden;pointer-events:none}
+#txModal.deposit-auto :is(#txAmt,#txHash,#subBtn){display:none !important}
 @media(hover:hover){#txModal .deposit-method-tabs button[aria-pressed="false"]:hover{background:rgba(148,163,184,.12)}}
 @media(prefers-reduced-motion:reduce){#txModal .deposit-method-tabs button{transition:none}}
 </style><div class="deposit-method-tabs" role="group" aria-label="Deposit method">
                 <button type="button" id="depositAutoTab" aria-pressed="false" onclick="window.setDepositEntryMode('auto')">Auto Detect</button>
                 <button type="button" id="depositManualTab" aria-pressed="true" onclick="window.setDepositEntryMode('manual')">Enter TxHash</button>
             </div>
-            <p id="depositListenerNotice" role="status" hidden></p>
             <div class="qr-container" style="padding: 10px; margin-bottom: 15px;">
                 <img id="qrImg" src="" style="width: 140px; height: 140px; display: block; background: #fff; padding: 5px; border-radius: 8px;">
             </div>
@@ -5289,6 +5289,7 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                 <span class="addr-text" id="walletAddrText">Loading...</span>
                 <i id="depositCopyIcon" class="far fa-copy copy-trigger" aria-disabled="true" onclick="if (this.getAttribute('aria-disabled') !== 'true') window.copyToClipboardVisual(document.getElementById('walletAddrText').innerText, this)"></i>
             </div>
+            <div id="depositListenerNotice" role="status" hidden></div>
         </div>
 
         <div id="wdDisplayArea" style="display:none;">
@@ -13856,8 +13857,13 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
      if (depositNoticesSeen.size > 128) depositNoticesSeen.delete(depositNoticesSeen.values().next().value);
      const notice = document.getElementById('depositListenerNotice');
      if (event.status === 'CREDITED') {
-         notice.textContent = 'Deposit received: ' + event.amount + ' USDT credited in full. View History for your receipt.';
-         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) window.showSuccessOverlay(notice.textContent);
+         const amount=event.amount.replace(/(\.\d*?[1-9])0+$|\.0+$/, '$1');
+         notice.replaceChildren();
+         const title=document.createElement('strong');title.textContent=amount+' USDT received';
+         const detail=document.createElement('span');detail.textContent='Credited in full to your balance.';
+         const link=document.createElement('button');link.type='button';link.textContent='View transaction history';link.onclick=()=>{window.closeTx();window.switchPageView('my',document.querySelector('.nav-link:last-child'));document.getElementById('txHistoryBox')?.scrollIntoView({behavior:'smooth',block:'start'});};
+         notice.append(title,detail,link);
+         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) window.showSuccessOverlay('Deposit received: '+amount+' USDT');
          // The existing post-commit dashboard_invalidated event refreshes the balance.
      } else {
          notice.textContent = 'On-chain transfer confirmed: ' + event.amount + ' USDT. Shadow mode: no balance credit.';
