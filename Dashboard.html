@@ -1914,6 +1914,38 @@
             color-scheme: dark;
             box-shadow: inset 3px 3px 7px rgba(0, 0, 0, 0.9), inset -1px -1px 3px rgba(255, 255, 255, 0.04);
         }
+        .history-month-heading {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .history-month-heading > span {
+            white-space: nowrap;
+            font-size: clamp(0.92rem, 3.8vw, 1.05rem);
+            font-weight: 700;
+        }
+        .history-month-heading > .tx-filter-input {
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            width: auto !important;
+            min-width: auto !important;
+            max-width: 100%;
+            margin-inline-start: auto;
+            font-size: 0.82rem !important;
+            white-space: nowrap;
+            padding: 6px 10px 6px 12px !important;
+        }
+        .history-month-heading > .tx-filter-input::-webkit-calendar-picker-indicator {
+            margin: 0;
+            padding: 0;
+        }
+        .history-month-heading > input::-webkit-date-and-time-value {
+            white-space: nowrap;
+            text-align: left;
+        }
         .tx-scroll-box { max-height: 380px; overflow-y: auto; padding-right: 5px; scrollbar-width: none; }
         #txHistoryBox, #ordersContentBox, #teamBonusHistoryBox, #p2pHistoryBox {
             scroll-behavior: smooth;
@@ -2755,9 +2787,76 @@
         .settings-active .item-1 { transition-delay: 0.05s; }
         .settings-active .item-2 { transition-delay: 0.1s; }
         .settings-active .item-3 { transition-delay: 0.15s; }
-        .horiz-inner { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: var(--text-sub); padding: 5px 0; cursor: pointer; transition: color 0.2s; }
-        .horiz-inner:hover { color: var(--primary); }
-        .horiz-logout .horiz-inner { color: var(--error); }
+        #settingsWipeArea .settings-pill { touch-action: manipulation; }
+        #settingsWipeArea .settings-toggle {
+            display: flex;
+            align-items: center;
+            flex: 1 1 auto;
+            min-width: 0;
+            min-height: 44px;
+            border: 0;
+            background: transparent;
+            cursor: pointer;
+            touch-action: manipulation;
+        }
+        #settingsWipeArea .settings-active .settings-toggle { flex: 0 0 auto; }
+        #settingsWipeArea #settingsHorizontalMenu {
+            right: 6px;
+            justify-content: space-between;
+            gap: clamp(2px, 1vw, 10px);
+            visibility: hidden;
+        }
+        #settingsWipeArea .settings-active #settingsHorizontalMenu { visibility: visible; }
+        #settingsWipeArea .horiz-inner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(3px, 1vw, 6px);
+            min-height: 44px;
+            padding: 5px 2px;
+            border: 0;
+            border-radius: .55rem;
+            background: transparent;
+            color: var(--text-sub);
+            font: inherit;
+            font-size: clamp(.66rem, 2.9vw, .85rem);
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            touch-action: manipulation;
+            transition: transform .15s ease, background .15s ease, opacity .15s ease;
+        }
+        #settingsWipeArea .horiz-logout .horiz-inner { color: var(--error); }
+        #settingsWipeArea :is(.settings-toggle, .horiz-inner):focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: -2px;
+        }
+        #settingsWipeArea .horiz-inner:active {
+            transform: scale(.94);
+            opacity: .85;
+            background: var(--bg-main);
+        }
+        #settingsWipeArea :is(.item-1, .item-2) .horiz-inner:active i {
+            animation: settings-action-bounce .24s ease-out;
+        }
+        #settingsWipeArea .horiz-logout .horiz-inner:active i {
+            filter: drop-shadow(0 0 4px rgba(239, 68, 68, .4));
+            animation: settings-action-bounce .24s ease-out;
+        }
+        @keyframes settings-action-bounce {
+            50% { transform: translateY(-2px) scale(1.08); }
+        }
+        @media (hover: hover) and (pointer: fine) {
+            #settingsWipeArea .horiz-inner:hover { background: var(--bg-main); }
+            #settingsWipeArea .horiz-logout .horiz-inner:hover i {
+                filter: drop-shadow(0 0 4px rgba(239, 68, 68, .4));
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            #settingsWipeArea .horiz-inner { transition: none; }
+            #settingsWipeArea .horiz-inner:active { transform: none; }
+            #settingsWipeArea .horiz-inner:active i { animation: none !important; }
+        }
 
         .social-icons-bar { position: absolute; right: 5px; display: flex; gap: 15px; align-items: center; transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); z-index: 10; }
         .settings-active .social-icons-bar { opacity: 0; transform: scale(0.8); pointer-events: none; }
@@ -3907,13 +4006,16 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
     }
 
     #view-rewards .rx-summary {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 14px;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 12px !important;
+        width: 100% !important;
         margin-bottom: 18px;
     }
 
     #view-rewards .rx-summary-cell {
+        min-width: 0;
+        overflow-wrap: anywhere;
         padding: 16px;
         border: 1px solid rgba(226, 232, 240, 0.9);
         border-radius: 20px;
@@ -3960,11 +4062,126 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
         display: flex;
         align-items: center;
         justify-content: space-between;
+        flex-wrap: nowrap;
+        gap: 0.35rem;
+        min-width: 0;
         margin-bottom: 8px;
-        font-size: 0.78rem;
+        font-size: clamp(0.68rem, 2.9vw, 0.78rem);
         font-weight: 700;
         color: #1e293b;
+        white-space: nowrap;
     }
+
+    #view-rewards .rx-progress-heading > :first-child {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    #view-rewards :is(#aHandCount, #bcHandCount) {
+        flex: 0 0 auto;
+        font-variant-numeric: tabular-nums;
+    }
+
+    #view-rewards .rx-salary-info {
+        min-width: 2rem;
+        min-height: 2rem;
+        border: 1px solid var(--border);
+        border-radius: 50%;
+        background: var(--bg-main);
+        color: var(--text-main);
+        cursor: pointer;
+    }
+
+    #salaryEligibilityInfo {
+        --rx-dialog-top: max(20px, env(safe-area-inset-top));
+        --rx-dialog-bottom: max(20px, env(safe-area-inset-bottom));
+        position: fixed;
+        inset: 0;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        max-width: none;
+        max-height: none;
+        margin: 0;
+        padding: var(--rx-dialog-top) max(16px, env(safe-area-inset-right))
+            var(--rx-dialog-bottom) max(16px, env(safe-area-inset-left));
+        border: 0;
+        background: transparent;
+        color: var(--text-main);
+        overflow: hidden;
+    }
+
+    #salaryEligibilityInfo[open] { display: flex; align-items: center; justify-content: center; }
+    #salaryEligibilityInfo::backdrop { background: rgba(0, 0, 0, .55); }
+    #salaryEligibilityInfo .rx-info-panel {
+        width: min(100%, 34rem);
+        min-width: 0;
+        max-height: calc(100vh - 40px);
+        max-height: min(100%, calc(100dvh - 40px));
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        padding: clamp(.75rem, 4vw, 1.5rem);
+        border: 1px solid var(--border);
+        border-radius: 1.25rem;
+        background: var(--bg-card);
+        color: var(--text-main);
+        box-shadow: 0 22px 64px var(--shadow);
+    }
+
+    #salaryEligibilityInfo header { display: flex; justify-content: space-between; align-items: center; gap: .65rem; margin-bottom: .9rem; }
+    #salaryEligibilityInfo header h2 { margin: 0; font-size: clamp(1rem, 4.5vw, 1.35rem); line-height: 1.2; }
+    #salaryEligibilityInfo header form { flex: 0 0 auto; margin: 0; }
+    #salaryEligibilityInfo .rx-info-close {
+        min-width: 44px;
+        min-height: 44px;
+        border: 1px solid var(--border);
+        border-radius: .75rem;
+        background: var(--bg-main);
+        color: var(--text-main);
+        font-size: 1.35rem;
+        cursor: pointer;
+    }
+    #salaryEligibilityInfo .rx-info-close:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+    #salaryEligibilityInfo .rx-info-table { overflow-x: auto; }
+    #salaryEligibilityInfo table { width: 100%; border-collapse: collapse; font-size: clamp(.68rem, 2.8vw, .85rem); font-variant-numeric: tabular-nums; }
+    #salaryEligibilityInfo :is(th, td) { padding: .55rem .22rem; text-align: right; border-bottom: 1px solid var(--border); }
+    #salaryEligibilityInfo thead th { color: var(--text-main); line-height: 1.25; }
+    #salaryEligibilityInfo :is(th, td):first-child { text-align: left; }
+    #salaryEligibilityInfo .rx-info-footnote { margin: .85rem 0 0; color: var(--text-sub); font-size: .78rem; line-height: 1.45; }
+    #view-rewards .rx-referral-contracts { list-style: none; padding: 0; margin: .65rem 0; }
+    #view-rewards .rx-referral-contracts li { display: grid; gap: .35rem; margin-bottom: .5rem; padding: .75rem; border: 1px solid var(--border); border-radius: .75rem; background: var(--bg-card); overflow-wrap: anywhere; font-size: .78rem; }
+    #view-rewards .rx-referral-clock { font-variant-numeric: tabular-nums; font-weight: 700; }
+    #view-rewards .rx-referral-state small { display: block; margin-top: .35rem; }
+
+    #view-rewards .rx-referral-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        align-items: stretch;
+        gap: .4rem;
+        margin: .8rem 0;
+    }
+    #view-rewards .rx-referral-metrics > div {
+        box-sizing: border-box;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: space-between !important;
+        min-height: 62px !important;
+        text-align: left !important;
+        min-width: 0;
+        padding: .55rem .4rem;
+        border: 1px solid var(--border);
+        border-radius: .75rem;
+        background: var(--bg-main);
+    }
+    #view-rewards .rx-referral-metrics dt { color: var(--text-sub); font-size: .68rem; line-height: 1.25; }
+    #view-rewards .rx-referral-metrics dd { margin: .35rem 0 0; font-size: clamp(.67rem, 2.65vw, .85rem); font-weight: 700; overflow-wrap: anywhere; }
+    #view-rewards .rx-referral-state { padding: .7rem; border: 1px dashed var(--border); border-radius: .75rem; color: var(--text-sub); text-align: center; font-size: .78rem; }
+    #view-rewards .rx-referral-rules { margin-top: .8rem; border-top: 1px solid var(--border); padding-top: .6rem; }
+    #view-rewards .rx-referral-rules summary { cursor: pointer; font-size: .8rem; font-weight: 700; }
+    #view-rewards .rx-referral-rules ul { margin: .65rem 0 0; padding-inline-start: 1.25rem; color: var(--text-sub); font-size: .76rem; line-height: 1.55; }
 
     #view-rewards .rx-progress--direct i,
     #view-rewards #aHandCount {
@@ -4205,6 +4422,46 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
         color: #8292a8;
     }
 
+    [data-theme="dark"] #view-rewards #salaryMembershipReadControls > button:is(#salaryMembershipResume, #salaryMembershipRestart) {
+        background: rgba(255, 255, 255, 0.08) !important;
+        backdrop-filter: blur(8px) !important;
+        -webkit-backdrop-filter: blur(8px) !important;
+        border: 1px solid rgba(0, 242, 254, 0.25) !important;
+        color: #e2e8f0 !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.15) !important;
+        transition: background-color .2s ease, border-color .2s ease, box-shadow .2s ease, transform .2s ease !important;
+    }
+
+    @media (hover: hover) {
+        [data-theme="dark"] #view-rewards #salaryMembershipReadControls > button:is(#salaryMembershipResume, #salaryMembershipRestart):enabled:hover {
+            background: rgba(0, 242, 254, 0.15) !important;
+            border-color: rgba(0, 242, 254, 0.6) !important;
+            box-shadow: 0 0 12px rgba(0, 242, 254, 0.3) !important;
+        }
+    }
+
+    [data-theme="dark"] #view-rewards #salaryMembershipReadControls > button:is(#salaryMembershipResume, #salaryMembershipRestart):enabled:is(:active, :focus-visible) {
+        background: rgba(0, 242, 254, 0.15) !important;
+        border-color: rgba(0, 242, 254, 0.6) !important;
+        box-shadow: 0 0 12px rgba(0, 242, 254, 0.3) !important;
+    }
+
+    [data-theme="dark"] #view-rewards #salaryMembershipReadControls > button:disabled {
+        opacity: .55;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        [data-theme="dark"] #view-rewards #salaryMembershipReadControls > button:is(#salaryMembershipResume, #salaryMembershipRestart) {
+            transition: none !important;
+            transform: none !important;
+        }
+        [data-theme="dark"] #view-rewards #salaryMembershipReadControls > button::after {
+            animation: none;
+        }
+    }
+
     [data-theme="dark"] #view-rewards #salaryReceiptButton {
         border-color: rgba(255, 255, 255, 0.14);
         background: linear-gradient(145deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
@@ -4247,10 +4504,6 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
     }
 
     @media (max-width: 430px) {
-        #view-rewards .rx-summary {
-            grid-template-columns: minmax(0, 1fr);
-        }
-
         #view-rewards .rx-card {
             padding: 18px 14px;
             border-radius: 22px;
@@ -4622,6 +4875,28 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
     </div>
 </div>
 
+<dialog id="salaryEligibilityInfo" aria-labelledby="salaryEligibilityInfoTitle">
+    <div class="rx-info-panel">
+        <header>
+            <h2 id="salaryEligibilityInfoTitle">Monthly salary eligibility</h2>
+            <form method="dialog"><button type="submit" class="rx-info-close" aria-label="Close salary information" autofocus>×</button></form>
+        </header>
+        <div class="rx-info-table" tabindex="0" role="region" aria-label="Salary requirements table">
+            <table>
+                <thead><tr><th scope="col">Level</th><th scope="col">Monthly Cap<br>(USDT)</th><th scope="col">Asset Threshold<br>(USDT)</th><th scope="col">A-Hand</th><th scope="col">B+C Hand</th></tr></thead>
+                <tbody>
+                    <tr><th scope="row">L2</th><td>100</td><td>500</td><td>5</td><td>26</td></tr>
+                    <tr><th scope="row">L3</th><td>250</td><td>2,000</td><td>9</td><td>68</td></tr>
+                    <tr><th scope="row">L4</th><td>500</td><td>5,000</td><td>16</td><td>148</td></tr>
+                    <tr><th scope="row">L5</th><td>1,000</td><td>10,000</td><td>28</td><td>325</td></tr>
+                    <tr><th scope="row">L6</th><td>2,500</td><td>20,000</td><td>45</td><td>550</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="rx-info-footnote">L1 is the onboarding milestone. Monthly salary eligibility starts at L2.</p>
+    </div>
+</dialog>
+
 <div id="stakingSpeedInfoModal" class="modal">
     <div class="modal-box" style="position: relative; overflow: hidden; text-align: left; border-color: var(--success); width: 100%; max-width: 380px; padding: 25px 20px;">
         <div onclick="window.closeModal('stakingSpeedInfoModal')" style="position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); cursor: pointer; z-index: 10;">
@@ -4927,6 +5202,14 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
 <!-- HTML 06 | TRANSACTIONS MODAL | END
 
      HTML 07 | FINANCE & TRANSACTION MODAL | START -->
+<style>
+    #txModal.deposit-auto :is(#txAmt, #txHash, #subBtn) { display: none !important; }
+    #depositListenerNotice { color: var(--success); margin: .6rem 0; }
+    @keyframes deposit-notice-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: no-preference) {
+        #depositListenerNotice:not([hidden]) { animation: deposit-notice-in .25s ease-out; }
+    }
+</style>
 <div id="txModal" class="modal">
     <div class="modal-box" style="position: relative; padding: 20px; max-height: 90vh; overflow-y: auto; scrollbar-width: none;">
         <div class="univ-close-btn" onclick="window.closeTx()"><i class="fas fa-times"></i></div>
@@ -4983,6 +5266,22 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
         </div>
 
         <div id="depArea" style="display:none;">
+            <style id="deposit-pill-tabs-style">
+#txModal .deposit-method-tabs{display:flex;width:100%;box-sizing:border-box;gap:4px;margin:14px 0 18px;padding:4px;border-radius:12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1)}
+#txModal .deposit-method-tabs button{flex:1 1 0;min-width:0;min-height:40px;border:0;border-radius:9px;background:transparent;color:#94a3b8;font:600 13px/1.3 system-ui,sans-serif;letter-spacing:.3px;cursor:pointer;touch-action:manipulation;transition:background .25s ease,color .25s ease,box-shadow .25s ease}
+#txModal .deposit-method-tabs button[aria-pressed="true"]{background:linear-gradient(135deg,#10b981,#059669);color:white;box-shadow:0 2px 10px rgba(16,185,129,.24)}
+#txModal .deposit-method-tabs button:focus-visible{outline:2px solid #10b981;outline-offset:2px}
+[data-theme="light"] #txModal .deposit-method-tabs,.light-mode #txModal .deposit-method-tabs{background:#f1f5f9;border-color:#cbd5e1}
+[data-theme="light"] #txModal .deposit-method-tabs button,.light-mode #txModal .deposit-method-tabs button{color:#475569}
+[data-theme="light"] #txModal .deposit-method-tabs button[aria-pressed="true"],.light-mode #txModal .deposit-method-tabs button[aria-pressed="true"]{background:#059669;color:white}
+#txModal.deposit-auto :is(#txAmt,#txHash,#subBtn){display:block !important;visibility:hidden;pointer-events:none}
+@media(hover:hover){#txModal .deposit-method-tabs button[aria-pressed="false"]:hover{background:rgba(148,163,184,.12)}}
+@media(prefers-reduced-motion:reduce){#txModal .deposit-method-tabs button{transition:none}}
+</style><div class="deposit-method-tabs" role="group" aria-label="Deposit method">
+                <button type="button" id="depositAutoTab" aria-pressed="false" onclick="window.setDepositEntryMode('auto')">Auto Detect</button>
+                <button type="button" id="depositManualTab" aria-pressed="true" onclick="window.setDepositEntryMode('manual')">Enter TxHash</button>
+            </div>
+            <p id="depositListenerNotice" role="status" hidden></p>
             <div class="qr-container" style="padding: 10px; margin-bottom: 15px;">
                 <img id="qrImg" src="" style="width: 140px; height: 140px; display: block; background: #fff; padding: 5px; border-radius: 8px;">
             </div>
@@ -5686,9 +5985,9 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                 </div>
 
                 <div class="history-panel">
-                    <div class="sec-title">
+                    <div class="sec-title history-month-heading">
                         <span><i class="fas fa-history" style="color:var(--primary); margin-right:5px;"></i> Recent History</span>
-                        <input type="month" id="txMonthYear" class="tx-filter-input" onchange="applyTxFilter()">
+                        <input type="month" id="txMonthYear" aria-label="Recent history month" class="tx-filter-input" onchange="applyTxFilter()">
                     </div>
                     <div id="txHistoryBox" class="tx-scroll-box">
                         <div style="text-align:center; padding: 20px; font-size: 0.8rem; color: var(--text-sub);">
@@ -5703,18 +6002,27 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                         <span class="unread-banner-icon" aria-hidden="true">✉</span><span>You have <strong id="unreadMessagesTotal">0</strong> unread messages</span><span aria-hidden="true">›</span>
                     </button>
                     <div class="settings-wrapper">
-                        <div class="settings-pill" onclick="toggleSettings(event)">
-                            <i class="fas fa-cog" id="settingsIcon"></i>
-                            <span class="settings-label">Settings</span>
+                        <div class="settings-pill">
+                            <button type="button" class="settings-toggle" aria-label="Toggle system options"
+                                aria-controls="settingsHorizontalMenu" onclick="window.toggleSettings(event)">
+                                <i class="fas fa-cog" id="settingsIcon" aria-hidden="true"></i>
+                                <span class="settings-label">Settings</span>
+                            </button>
                             <div id="settingsHorizontalMenu">
-                                <div class="horiz-item item-1" onclick="event.stopPropagation(); window.openAccountSettingsModal()">
-                                    <div class="horiz-inner"><i class="fas fa-user-shield"></i> Account Info</div>
+                                <div class="horiz-item item-1">
+                                    <button type="button" class="horiz-inner" onclick="window.openAccountSettingsModal()">
+                                        <i class="fas fa-user-shield" aria-hidden="true"></i> Account Info
+                                    </button>
                                 </div>
-                                <div class="horiz-item item-2" onclick="event.stopPropagation(); showToast('Mint coming soon!')">
-                                    <div class="horiz-inner"><i class="fas fa-hammer"></i> Mint</div>
+                                <div class="horiz-item item-2">
+                                    <button type="button" class="horiz-inner" onclick="window.showToast('Mint coming soon!')">
+                                        <i class="fas fa-hammer" aria-hidden="true"></i> Mint
+                                    </button>
                                 </div>
-                                <div class="horiz-item item-3 horiz-logout" onclick="event.stopPropagation(); logout()">
-                                    <div class="horiz-inner"><i class="fas fa-power-off"></i> Logout</div>
+                                <div class="horiz-item item-3 horiz-logout">
+                                    <button type="button" class="horiz-inner" onclick="window.logout()">
+                                        <i class="fas fa-power-off" aria-hidden="true"></i> Logout
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -6008,6 +6316,9 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
                 <span class="ph-title rx-title">
                     <i class="fas fa-crown" aria-hidden="true"></i>
                     Monthly Leader Salary
+                    <button type="button" class="rx-salary-info" aria-label="Salary eligibility information"
+                        aria-haspopup="dialog" aria-controls="salaryEligibilityInfo"
+                        onclick="document.getElementById('salaryEligibilityInfo').showModal()">ℹ️</button>
                 </span>
                 <span class="badge glow-locked" id="salaryStatusBadge" role="status" aria-live="polite">Authoritative data unavailable</span>
             </div>
@@ -6059,19 +6370,46 @@ html::-webkit-scrollbar,body::-webkit-scrollbar,.main-container::-webkit-scrollb
             <div class="rx-header">
                 <span class="rx-title">
                     <i class="fas fa-share-nodes" aria-hidden="true"></i>
-                    Referral Bonus Staking ($3–$12)
+                    Referral Bonus Staking
                 </span>
             </div>
 
             <div class="rx-booster-body">
                 <div class="rx-booster-heading">
                     <strong>Referral Staking Booster</strong>
-                    <span class="rx-rate">1.20% daily simple rate</span>
+                    <span class="rx-rate">Policy range: $3–$12</span>
                 </div>
-                <p class="rx-note">The referral cycle requires 168 active hours and verified qualifying reservations on three distinct IST days. Eligibility loss can suspend the active clock. The displayed daily rate does not mean a daily Main Balance credit. Maturity does not pay automatically: verified eligibility, reservation proof and a manual Claim Bonus are required before any credit. Personal deposit funds are not automatically locked into referral staking.</p>
+                <dl class="rx-referral-metrics" aria-label="Referral staking summary">
+                    <div><dt>Total Referral Staked</dt><dd id="referralStakedTotal">—</dd></div>
+                    <div><dt>Daily Yield Rate</dt><dd>+1.20% / day</dd></div>
+                    <div><dt>Estimated Active Yield</dt><dd id="referralEstimatedYield">—</dd></div>
+                </dl>
+                <p id="referralStakingState" class="rx-referral-state" role="status">Referral contracts have not been verified.</p>
+                <ul id="referralStakingContracts" class="rx-referral-contracts" aria-label="Active referral staking contracts" hidden></ul>
                 <button type="button" class="act-btn btn-dep rx-invite" onclick="window.openReferralModal()">
                     <i class="fas fa-qrcode" aria-hidden="true"></i> Invite &amp; View Referral
                 </button>
+                <details class="rx-referral-rules">
+                    <summary>How the referral booster works</summary>
+                    <ul>
+                        <li>Complete 168 active hours and verified reservations on three distinct IST days.</li>
+                        <li>If the downline loses eligibility, the active clock pauses and the 72-hour grace period starts.</li>
+                        <li>After verification, claim the bonus and yield manually.</li>
+                    </ul>
+                </details>
+            </div>
+        </div>
+
+        <!-- 📜 Salary Payout Ledger History (Exact Recent History Style & Filter) -->
+        <div class="history-panel" id="salaryHistoryPanel" style="margin-top: 18px;">
+            <div class="sec-title history-month-heading">
+                <span><i class="fas fa-file-invoice-dollar" style="color:var(--primary); margin-right:5px;"></i> Salary History</span>
+                <input type="month" id="salaryMonthYear" aria-label="Salary payout history month" class="tx-filter-input" onchange="window.applySalaryHistoryFilter()">
+            </div>
+            <div id="salaryHistoryBox" class="tx-scroll-box">
+                <div style="text-align:center; padding: 20px; font-size: 0.8rem; color: var(--text-sub);">
+                    <i class="fas fa-spinner fa-spin"></i> Loading...
+                </div>
             </div>
         </div>
     </div>
@@ -7935,7 +8273,139 @@ window.dashboardSync = {
     rankSnapshot: null
 };
 
+// Referral display reads the authenticated wallet snapshot. It makes no network requests.
+const referralStakingTracker = (() => {
+    const termSeconds = 604800;
+    const dailyRateBps = 120n;
+    const snapshotLifetimeMs = 300000; // Match the wallet snapshot cache lifetime.
+    const uidPattern = /^[A-Za-z0-9_-]{1,100}$/;
+    let timer = null;
+
+    function money(micro) {
+        const fraction = String(micro % 1000000n).padStart(6, '0').replace(/0{1,4}$/, '');
+        return String(micro / 1000000n) + '.' + fraction + ' USDT';
+    }
+
+    function draw(data) {
+        clearTimeout(timer);
+        timer = null;
+        const list = document.getElementById('referralStakingContracts');
+        const status = document.getElementById('referralStakingState');
+        const staked = document.getElementById('referralStakedTotal');
+        const yieldTotal = document.getElementById('referralEstimatedYield');
+        if (!list || !status || !staked || !yieldTotal) return;
+        list.replaceChildren();
+        list.hidden = true;
+        status.hidden = false;
+        status.textContent = 'Referral contracts have not been verified.';
+        staked.textContent = '—';
+        yieldTotal.textContent = '—';
+
+        const uid = localStorage.getItem('uid');
+        const rewards = data?.phase3Rewards;
+        const stakes = data?.wallet?.Active_Stakes;
+        if (!uid || data?.user?.UID !== uid || rewards?.uid !== uid ||
+            rewards.disabled !== false || !Array.isArray(stakes)) return;
+        const observedAt = data.serverTime;
+        const age = Date.now() - observedAt;
+        if (rewards.freshness !== 'fresh' || !Number.isSafeInteger(observedAt) ||
+            age < 0 || age >= snapshotLifetimeMs) return;
+        const validForMs = snapshotLifetimeMs - age;
+        const asOf = Math.floor(observedAt / 1000);
+
+        // Amount is a validity check only after origin and beneficiary are proven.
+        const tagged = stakes.filter(item => item?.Origin === 'Referral_Bonus');
+        const seen = new Set();
+        const rows = [];
+        for (const item of tagged) {
+            if (item.UID !== uid || item.beneficiaryUid !== uid ||
+                typeof item.order !== 'string' || !uidPattern.test(item.order) ||
+                seen.has(item.order) ||
+                typeof item.downlineUid !== 'string' || !uidPattern.test(item.downlineUid) ||
+                item.downlineUid === uid) return;
+            seen.add(item.order);
+            if (item.state !== 'ACTIVE') continue;
+            if (typeof item.principal !== 'string' || !/^\d{1,8}$/.test(item.principal) ||
+                !Number.isSafeInteger(item.elapsed) || item.elapsed < 0 || item.elapsed > termSeconds ||
+                !Number.isSafeInteger(item.activeSince) || item.activeSince < 0 ||
+                item.activeSince > asOf) return;
+            const principal = BigInt(item.principal);
+            if (principal < 3000000n || principal > 12000000n) return;
+            const elapsed = Math.min(termSeconds, item.elapsed + asOf - item.activeSince);
+            rows.push({ item, principal, elapsed });
+        }
+
+        if (!rows.length) {
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-seedling';
+            icon.setAttribute('aria-hidden', 'true');
+            const hint = document.createElement('small');
+            hint.textContent = 'Invite new members to activate your $3–$12 staking booster.';
+            status.replaceChildren(icon, ' No active referral staking contracts', hint);
+            staked.textContent = '0.00 USDT';
+            yieldTotal.textContent = '0.00 USDT';
+            timer = setTimeout(() => draw(null), validForMs);
+            return;
+        }
+
+        status.hidden = true;
+        list.hidden = false;
+        staked.textContent = money(rows.reduce((sum, row) => sum + row.principal, 0n));
+        for (const row of rows) {
+            const card = document.createElement('li');
+            const heading = document.createElement('strong');
+            heading.textContent = 'Downline ' + row.item.downlineUid;
+            const principal = document.createElement('span');
+            principal.textContent = row.item.order + ' · ' + money(row.principal);
+            row.clock = document.createElement('span');
+            row.clock.className = 'rx-referral-clock';
+            row.yield = document.createElement('span');
+            card.append(heading, principal, row.clock, row.yield);
+            list.append(card);
+        }
+
+        const start = performance.now();
+        const session = window.dashboardSession;
+        const epoch = session?.epoch;
+        function tick() {
+            if (localStorage.getItem('uid') !== uid || session !== window.dashboardSession ||
+                session?.closed || session?.blocked || session?.epoch !== epoch ||
+                performance.now() - start >= validForMs ||
+                Date.now() - observedAt >= snapshotLifetimeMs) {
+                draw(null);
+                return;
+            }
+            const passed = performance.now() - start;
+            const added = Math.max(0, Math.floor((age + passed) / 1000));
+            let total = 0n;
+            let ticking = false;
+            for (const row of rows) {
+                const elapsed = Math.min(termSeconds, row.elapsed + added);
+                const remaining = termSeconds - elapsed;
+                const parts = [Math.floor(remaining / 3600), Math.floor(remaining % 3600 / 60), remaining % 60];
+                const estimate = row.principal * dailyRateBps * BigInt(elapsed) / (10000n * 86400n);
+                total += estimate;
+                row.clock.textContent = remaining ? 'Active at last sync · ' + parts.map(x => String(x).padStart(2, '0')).join(':') :
+                    'Cycle complete · verification pending';
+                row.yield.textContent = 'Estimated yield: ' + money(estimate);
+                ticking ||= remaining > 0;
+            }
+            yieldTotal.textContent = money(total);
+            timer = setTimeout(tick, Math.max(1, Math.min(validForMs - passed,
+                ticking ? 1000 : validForMs)));
+        }
+        tick();
+    }
+
+    window.addEventListener('pagehide', () => draw(null));
+    window.addEventListener('storage', event => {
+        if (event.key === null || event.key === 'uid' || event.key === 'token') draw(null);
+    });
+    return { draw };
+})();
+
 window.clearDashboardSession = () => {
+    referralStakingTracker.draw(null);
     window.clearGeneralOTP?.();
     window.clearTwoFASetup?.();
     window.TCMAnnouncements?.dispose();
@@ -8710,6 +9180,7 @@ window.applyDashboardSnapshot = data => {
         window.hasMoreTxInDB = typeof data.historyHasMore === 'boolean' ? data.historyHasMore : (data.transactions || []).length >= 20;
     }
     window.dashboardSession.verified = true;
+    referralStakingTracker.draw(data);
     window.dispatchEvent(new Event('tcm:dashboard-ready'));
     window.renderWalletData(wallet);
     if (window.refreshStakingOverview) window.refreshStakingOverview(wallet);
@@ -13152,6 +13623,10 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
      }
      window.invalidateHealthPreview();
      window.txMode = type;
+     const notice = document.getElementById('depositListenerNotice');
+     notice.hidden = true;
+     notice.textContent = '';
+     window.setDepositEntryMode(type === 'Deposit' ? 'auto' : 'manual');
      document.getElementById('healthPreviewPanel').hidden = type !== 'Withdraw';
      window.updateWithdrawalFeePreview();
      if (type === 'Withdraw') void window.syncSystemFees();
@@ -13358,6 +13833,36 @@ window.TCM2FAQR=Object.freeze({render(canvas,uri){
          boundText.innerText = `No ${net} Address Bound! Check Security Center.`;
          boundText.style.color = "var(--error)";
      }
+ };
+
+ const depositNoticesSeen = new Set();
+ window.setDepositEntryMode = mode => {
+     const auto = window.txMode === 'Deposit' && mode === 'auto';
+     document.getElementById('txModal').classList.toggle('deposit-auto', auto);
+     document.getElementById('depositAutoTab').setAttribute('aria-pressed', String(auto));
+     document.getElementById('depositManualTab').setAttribute('aria-pressed', String(!auto));
+ };
+
+ window.handleDetectedDeposit = event => {
+     if (!event || document.hidden || window.dashboardSession.closed || window.dashboardSession.blocked ||
+         event.userUid !== localStorage.getItem('uid') || !/^(BEP20|TRC20)$/.test(event.network) ||
+         !/^(?:0x)?[a-f0-9]{64}$/.test(event.txHash) || !/^\d{1,12}\.\d{6}$/.test(event.amount) ||
+         !['CONFIRMED', 'CREDITED'].includes(event.status)) return;
+     const modal = document.getElementById('txModal');
+     if (window.txMode !== 'Deposit' || modal.style.display !== 'flex') return;
+     const key = [event.userUid, event.network, event.txHash, event.status].join(':');
+     if (depositNoticesSeen.has(key)) return;
+     depositNoticesSeen.add(key);
+     if (depositNoticesSeen.size > 128) depositNoticesSeen.delete(depositNoticesSeen.values().next().value);
+     const notice = document.getElementById('depositListenerNotice');
+     if (event.status === 'CREDITED') {
+         notice.textContent = 'Deposit received: ' + event.amount + ' USDT credited in full. View History for your receipt.';
+         if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) window.showSuccessOverlay(notice.textContent);
+         // The existing post-commit dashboard_invalidated event refreshes the balance.
+     } else {
+         notice.textContent = 'On-chain transfer confirmed: ' + event.amount + ' USDT. Shadow mode: no balance credit.';
+     }
+     notice.hidden = false;
  };
 
  window.closeTx = () => {
@@ -14759,7 +15264,8 @@ window.withdrawalLimits = createWithdrawalLimits();
         }
 
         window.teamBonusData = window.allTransactions.filter(tx => {
-            if (!tx.Type || !tx.Type.includes('Team Bonus')) return false;
+            if (tx.Type !== 'Team Reservation Bonus' &&
+                !/^Team Bonus \([ABC]-Hand\)$/.test(tx.Type || '')) return false;
 
             if (selectedMonthValue) {
                 const [targetYear, targetMonth] = selectedMonthValue.split('-');
@@ -14815,6 +15321,7 @@ window.withdrawalLimits = createWithdrawalLimits();
 
     window.teamBonusSourceIdentity = function(row) {
     const valid = value => typeof value === 'string' && /^[A-Za-z0-9_-]{1,128}$/.test(value) ? value : '';
+    if (row?.Type === 'Team Reservation Bonus') return {uid:valid(row.Source_UID),name:''};
     if (!row || !/^Team Bonus \([ABC]-Hand\)$/.test(row.Type || '')) return {uid:'',name:''};
     const remarks = typeof row.Admin_Remarks === 'string' ? row.Admin_Remarks : '';
     const old = /^From: ([\s\S]*?) \(UID: ([A-Za-z0-9_-]{1,128})\)$/.exec(remarks);
@@ -14838,7 +15345,11 @@ window.withdrawalLimits = createWithdrawalLimits();
             const namePart = escape(source.name || 'Name not recorded');
             const uidPart = escape(source.uid || 'Not recorded');
 
-            let handInfo = (tx.Type || "Team Bonus").replace("Team Bonus ", "").replace(/[()]/g, '');
+            const hand = /^Team Bonus \(([ABC])-Hand\)$/.exec(tx.Type || '')?.[1];
+            const trigger = tx.Type === 'Team Reservation Bonus'
+                ? 'Reservation bonus'
+                : tx.NFT_Policy_Version === 2 ? 'NFT sale fee share' : 'Team bonus';
+            const handInfo = trigger + (hand ? ' · ' + hand + '-Hand' : ' · Hand not recorded');
             let displayDate = window.formatTxDate(tx.Date || tx.timestamp);
 
             html += `
@@ -15770,7 +16281,7 @@ window.withdrawalLimits = createWithdrawalLimits();
         });
 
         window.socket.on('withdrawal_payout_updated', row => window.applyWithdrawalPayoutRecord(row));
-        window.socket.on('dashboard_invalidated', hint => {
+        const queueDashboardInvalidation = hint => {
             if (!hint || hint.uid !== localStorage.getItem('uid') ||
                 window.dashboardSession.closed || window.dashboardSession.blocked) return;
             window.dashboardSync.invalidationVersion = (window.dashboardSync.invalidationVersion || 0) + 1;
@@ -15787,6 +16298,11 @@ window.withdrawalLimits = createWithdrawalLimits();
                     window.syncDashboardState();
                 }
             }, 250);
+        };
+        window.socket.on('dashboard_invalidated', queueDashboardInvalidation);
+        window.socket.on('deposit_detected', event => {
+            if (event?.status === 'CREDITED') queueDashboardInvalidation({ uid: event.userUid });
+            window.handleDetectedDeposit(event);
         });
 
         window.socket.on('fee_config_updated', data => window.applySystemFees(data));
@@ -20311,6 +20827,195 @@ window.TCMSupportPending = function(validate) {
 })();
 /* PERFORMANCE VISIBILITY END */
 </script>
-<div id="g2-rules-modal" class="modal g2-modal" role="dialog" aria-modal="true" aria-labelledby="g2-rules-modal-title"><div class="modal-box"><h2 id="g2-rules-modal-title"></h2><div data-g2-content></div><button type="button" class="g2-button">Close</button></div></div><div id="g2-receipt-modal" class="modal g2-modal" role="dialog" aria-modal="true" aria-labelledby="g2-receipt-modal-title"><div class="modal-box"><h2 id="g2-receipt-modal-title"></h2><div data-g2-content></div><button type="button" class="g2-button">Close</button></div></div></body>
+<div id="g2-rules-modal" class="modal g2-modal" role="dialog" aria-modal="true" aria-labelledby="g2-rules-modal-title"><div class="modal-box"><h2 id="g2-rules-modal-title"></h2><div data-g2-content></div><button type="button" class="g2-button">Close</button></div></div><div id="g2-receipt-modal" class="modal g2-modal" role="dialog" aria-modal="true" aria-labelledby="g2-receipt-modal-title"><div class="modal-box"><h2 id="g2-receipt-modal-title"></h2><div data-g2-content></div><button type="button" class="g2-button">Close</button></div></div>
+<!-- 🌐 Salary Claim Network Selection Modal -->
+<div id="salaryClaimNetworkModal" class="modal g2-modal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="modal-box" style="max-width:420px;">
+        <h2 style="font-size:1.15rem; margin-bottom:12px;"><i class="fas fa-wallet" style="color:var(--primary);"></i> Select Payout Network</h2>
+        <p style="font-size:0.8rem; color:var(--text-sub); line-height:1.5; margin-bottom:16px;">
+            Choose your preferred blockchain network. Any applicable account debt will be automatically settled first, and the net USDT will be sent directly to your bound wallet address.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;">
+            <label style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid var(--border); border-radius:14px; cursor:pointer;">
+                <input type="radio" name="salaryChainSelect" value="BEP20" checked>
+                <div>
+                    <strong style="color:var(--text-main); font-size:0.9rem;">USDT (BEP20 · BNB Smart Chain)</strong>
+                    <div id="salaryBoundBep20" style="font-size:0.7rem; color:var(--text-sub); font-family:monospace;">Checking bound wallet...</div>
+                </div>
+            </label>
+            <label style="display:flex; align-items:center; gap:10px; padding:12px; border:1px solid var(--border); border-radius:14px; cursor:pointer;">
+                <input type="radio" name="salaryChainSelect" value="TRC20">
+                <div>
+                    <strong style="color:var(--text-main); font-size:0.9rem;">USDT (TRC20 · Tron Network)</strong>
+                    <div id="salaryBoundTrc20" style="font-size:0.7rem; color:var(--text-sub); font-family:monospace;">Checking bound wallet...</div>
+                </div>
+            </label>
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button type="button" class="act-btn btn-dep" id="confirmSalaryClaimBtn" onclick="window.submitFinalSalaryClaim()" style="flex:1;">
+                <i class="fas fa-check-circle"></i> Confirm &amp; Claim
+            </button>
+            <button type="button" class="act-btn" onclick="document.getElementById('salaryClaimNetworkModal').style.display='none'" style="flex:1;">
+                Cancel
+            </button>
+        </div>
+    </div>
+</div>
+<script>
+(() => {
+    'use strict';
+    window.allSalaryClaims = [];
+
+    window.scrollToSalaryHistory = () => {
+        const panel = document.getElementById('salaryHistoryPanel');
+        if (panel) panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        window.fetchSalaryHistory();
+    };
+
+    window.openSalaryClaimDialog = (salaryData) => {
+        const modal = document.getElementById('salaryClaimNetworkModal');
+        if (!modal) return;
+        const user = window.RAM_STATE?.user || {};
+        const bep = user.BEP20_Address || user.Wallet_BEP20 || 'Not bound in profile';
+        const trc = user.TRC20_Address || user.Wallet_TRC20 || 'Not bound in profile';
+        const bepEl = document.getElementById('salaryBoundBep20');
+        const trcEl = document.getElementById('salaryBoundTrc20');
+        if (bepEl) bepEl.textContent = bep;
+        if (trcEl) trcEl.textContent = trc;
+        modal.dataset.period = salaryData?.period || '';
+        modal.style.display = 'flex';
+    };
+
+    window.submitFinalSalaryClaim = async () => {
+        const modal = document.getElementById('salaryClaimNetworkModal');
+        const btn = document.getElementById('confirmSalaryClaimBtn');
+        const chainInput = document.querySelector('input[name="salaryChainSelect"]:checked');
+        const payoutChain = chainInput ? chainInput.value : 'BEP20';
+        const period = modal?.dataset?.period || new Date().toISOString().slice(0, 7);
+        if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...'; }
+        try {
+            const res = await window.dashboardRequest('/phase3/salary/claim', 'POST', {
+                period,
+                payoutChain,
+                forceWindow: window.RAM_STATE?.user?.Role === 'Admin'
+            });
+            if (modal) modal.style.display = 'none';
+            if (res && res.success) {
+                if (typeof window.showToast === 'function') {
+                    window.showToast(res.alreadyClaimed ? 'Salary already claimed for this period!' : 'Salary Claimed Successfully!');
+                }
+                await window.fetchSalaryHistory();
+                window.scrollToSalaryHistory();
+            } else {
+                alert(res?.message || 'Could not complete salary claim.');
+            }
+        } catch (e) {
+            alert(e?.message || 'Error processing salary claim.');
+        } finally {
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-check-circle"></i> Confirm & Claim'; }
+        }
+    };
+
+    window.fetchSalaryHistory = async () => {
+        try {
+            const res = await window.dashboardRequest('/phase3/salary/history', 'GET');
+            if (res && res.success && Array.isArray(res.records)) {
+                window.allSalaryClaims = res.records;
+            }
+        } catch {}
+        window.applySalaryHistoryFilter();
+    };
+
+    window.applySalaryHistoryFilter = () => {
+        const box = document.getElementById('salaryHistoryBox');
+        if (!box) return;
+        const selectedMonthValue = document.getElementById('salaryMonthYear')?.value || '';
+        const list = (window.allSalaryClaims || []).filter(row => {
+            if (!selectedMonthValue) return true;
+            const ts = window.parseSafeTimestamp ? window.parseSafeTimestamp(row.timestamp || row.Date || row.committedAt) : Date.parse(row.committedAt || row.Date);
+            const d = new Date(ts);
+            const mKey = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+            return mKey === selectedMonthValue || row.period === selectedMonthValue;
+        });
+
+        if (list.length === 0) {
+            let monthName = "this month";
+            if (selectedMonthValue) {
+                const [y, m] = selectedMonthValue.split('-');
+                const dateObj = new Date(y, m - 1);
+                monthName = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            } else {
+                const now = new Date();
+                monthName = now.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+            }
+            box.innerHTML = `
+            <div style="text-align: center; padding: 40px 20px;">
+                <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.05); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 15px; border: 1px dashed rgba(255,255,255,0.1);">
+                    <i class="fas fa-folder-open" style="font-size: 1.6rem; color: var(--text-sub); opacity: 0.7;"></i>
+                </div>
+                <h3 style="color: var(--text-main); margin-bottom: 5px; font-size: 1.05rem;">No Records Found</h3>
+                <p style="color: var(--text-sub); font-size: 0.8rem; max-width: 250px; margin: 0 auto; line-height: 1.4;">There are no transactions available for <strong style="color: var(--primary);">${monthName}</strong>.</p>
+            </div>`;
+            return;
+        }
+
+        const escapeText = window.escapeDashboardLedgerText || (s => String(s || ''));
+        box.innerHTML = list.map(row => {
+            const displayDate = window.formatTxDate ? window.formatTxDate(row.Date || row.committedAt || row.timestamp) : (row.committedAt || 'N/A');
+            const orderId = row.Order_ID || row.claimId || 'N/A';
+            const encodedId = encodeURIComponent(orderId).replace(/'/g, '%27');
+            const gross = Number(row.grossUSDT || 0).toFixed(2);
+            const deducted = Number(row.deductionUSDT || 0).toFixed(2);
+            const net = Number(row.netUSDT || 0).toFixed(2);
+            const st = row.payoutStatus || 'PROCESSING';
+            let stClr = '#f59e0b';
+            let stLabel = 'Processing';
+            if (st === 'CONFIRMED') { stClr = '#10b981'; stLabel = 'Confirmed'; }
+            else if (st === 'DEBT_SETTLED' || Number(row.netUSDT) === 0) { stClr = '#3b82f6'; stLabel = 'Debt Settled'; }
+            else if (st === 'QUARANTINE_REVIEW') { stClr = '#ef4444'; stLabel = 'Review Required'; }
+
+            const explorerUrl = row.txHash
+                ? (row.payoutChain === 'TRC20' ? `https://tronscan.org/#/transaction/${row.txHash}` : `https://bscscan.com/tx/${row.txHash}`)
+                : '';
+
+            return `
+            <div class="tx-item tx-item-animated show" style="display:flex; flex-direction:column; padding:15px 0; border-bottom:1px solid var(--border);">
+                <div class="tx-card-main-row" style="display:flex; justify-content:space-between; align-items:flex-start; width:100%;">
+                    <div style="display:flex; gap:12px; flex:1; min-width:0;">
+                        <div class="tx-icon dep" style="flex-shrink:0; margin-top:2px;">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:2px; min-width:0; flex:1;">
+                            <h4 style="font-size:0.95rem; font-weight:700; color:var(--text-main); margin:0;">Monthly Leader Salary (${escapeText(row.level || 'Leader')})</h4>
+                            <span style="font-size:0.7rem; color:var(--text-sub);">Gross: ${gross} USDT | Debt Debited: -${deducted} USDT</span>
+                            <span style="font-size:0.65rem; color:var(--text-sub); font-family:monospace; margin-top:2px;">${escapeText(displayDate)}</span>
+                            <div class="tx-order-id-box" style="display:inline-flex; align-items:center; gap:6px; background:#0f172a; color:#fff; padding:3px 8px; border-radius:6px; border:1px solid #1e293b; font-family:monospace; font-size:0.65rem; max-width:100%; margin-top:6px; overflow:hidden;">
+                                <span style="white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:130px;">${escapeText(orderId)}</span>
+                                <i class="far fa-copy" style="cursor:pointer; color:var(--success); flex-shrink:0;" onclick="window.copyText(decodeURIComponent('${encodedId}'), this)" title="Copy ID"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; padding-left:10px;">
+                        <span style="font-size:0.65rem; font-weight:600; color:var(--text-sub);">${escapeText(row.payoutChain || 'BEP20')}</span>
+                        ${explorerUrl ? `<a href="${explorerUrl}" target="_blank" rel="noopener noreferrer" style="font-size:0.65rem; color:var(--primary); text-decoration:none;">Blockchain Tx ↗</a>` : ''}
+                        <div style="color:var(--success); font-size:1rem; font-weight:700; margin-bottom:2px;">+${net} ₮</div>
+                        <span class="badge" style="color:${stClr}; border:1px solid ${stClr}; background:transparent;">${stLabel}</span>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    };
+
+    window.addEventListener('tcm:dashboard-ready', () => {
+        const monthInput = document.getElementById('salaryMonthYear');
+        if (monthInput && !monthInput.value) {
+            const now = new Date();
+            monthInput.value = now.getFullYear() + '-' + String(now.getMonth() + 1).padStart(2, '0');
+        }
+        window.fetchSalaryHistory();
+    });
+})();
+</script>
+</body>
 </html>
 
